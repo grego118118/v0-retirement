@@ -4,12 +4,11 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { ModeToggle } from "@/components/mode-toggle"
-import { useSession, signOut } from "next-auth/react"
+import { useSimpleAuth } from "@/components/auth/simple-auth-context"
 
-export function Header() {
+export function SimpleHeader() {
   const pathname = usePathname()
-  const { data: session, status } = useSession()
-  const isLoading = status === "loading"
+  const { user, isLoading, isAuthenticated, loginWithGoogle, logout } = useSimpleAuth()
 
   const isActive = (path: string) => {
     return pathname === path
@@ -32,28 +31,12 @@ export function Header() {
               Calculator
             </Link>
             <Link
-              href="/resources"
-              className={`transition-colors hover:text-foreground/80 ${
-                isActive("/resources") ? "text-foreground" : "text-foreground/60"
-              }`}
-            >
-              Resources
-            </Link>
-            <Link
               href="/blog"
               className={`transition-colors hover:text-foreground/80 ${
                 isActive("/blog") ? "text-foreground" : "text-foreground/60"
               }`}
             >
               Blog
-            </Link>
-            <Link
-              href="/faq"
-              className={`transition-colors hover:text-foreground/80 ${
-                isActive("/faq") ? "text-foreground" : "text-foreground/60"
-              }`}
-            >
-              FAQ
             </Link>
             <Link
               href="/about"
@@ -63,14 +46,6 @@ export function Header() {
             >
               About
             </Link>
-            <Link
-              href="/contact"
-              className={`transition-colors hover:text-foreground/80 ${
-                isActive("/contact") ? "text-foreground" : "text-foreground/60"
-              }`}
-            >
-              Contact
-            </Link>
           </nav>
         </div>
         <div className="ml-auto flex items-center space-x-4">
@@ -79,21 +54,17 @@ export function Header() {
             <Button variant="ghost" size="sm" disabled>
               Loading...
             </Button>
-          ) : session ? (
+          ) : isAuthenticated ? (
             <>
-              <Link href="/profile">
-                <Button variant="ghost" size="sm">
-                  Profile
-                </Button>
-              </Link>
-              <Button variant="ghost" size="sm" onClick={() => signOut({ callbackUrl: "/" })}>
+              <span className="text-sm">Hello, {user?.name || user?.email?.split("@")[0] || "User"}</span>
+              <Button variant="ghost" size="sm" onClick={() => logout()}>
                 Sign Out
               </Button>
             </>
           ) : (
-            <Link href="/auth/signin">
-              <Button size="sm">Sign In</Button>
-            </Link>
+            <Button size="sm" onClick={() => loginWithGoogle()}>
+              Sign In
+            </Button>
           )}
         </div>
       </div>

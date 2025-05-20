@@ -8,10 +8,9 @@ import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
-import { useAuth } from "@/components/auth/auth-context"
+import { useSession } from "next-auth/react"
 
 const profileFormSchema = z.object({
   fullName: z.string().min(2, {
@@ -37,8 +36,7 @@ interface ProfileFormProps {
 export function ProfileForm({ initialData, onUpdate }: ProfileFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
-  const { user } = useAuth()
-  const supabase = getSupabaseBrowserClient()
+  const { data: session } = useSession()
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -49,7 +47,7 @@ export function ProfileForm({ initialData, onUpdate }: ProfileFormProps) {
   })
 
   async function onSubmit(data: ProfileFormValues) {
-    if (!user) {
+    if (!session?.user?.id) {
       toast({
         title: "Error",
         description: "You must be logged in to update your profile",
@@ -61,17 +59,20 @@ export function ProfileForm({ initialData, onUpdate }: ProfileFormProps) {
     setIsLoading(true)
 
     try {
-      const { error } = await supabase.from("users_metadata").upsert(
-        {
-          id: user.id,
+      const response = await fetch("/api/profile", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
           full_name: data.fullName,
           retirement_date: data.retirementDate,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "id" },
-      )
+        }),
+      })
 
-      if (error) throw error
+      if (!response.ok) {
+        throw new Error("Failed to update profile")
+      }
 
       toast({
         title: "Profile updated",

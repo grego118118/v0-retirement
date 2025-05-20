@@ -4,10 +4,9 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Loader2, Trash2, Calculator } from "lucide-react"
-import { getSupabaseBrowserClient } from "@/lib/supabase/client"
-import { useAuth } from "@/components/auth/auth-context"
 import { useToast } from "@/hooks/use-toast"
 import Link from "next/link"
+import { useSession } from "next-auth/react"
 
 interface Calculation {
   id: string
@@ -24,23 +23,21 @@ export function SavedCalculations() {
   const [calculations, setCalculations] = useState<Calculation[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [deletingId, setDeletingId] = useState<string | null>(null)
-  const { user } = useAuth()
+  const { data: session } = useSession()
   const { toast } = useToast()
-  const supabase = getSupabaseBrowserClient()
 
   const fetchCalculations = async () => {
-    if (!user) return
+    if (!session?.user?.id) return
 
     try {
       setIsLoading(true)
-      const { data, error } = await supabase
-        .from("pension_calculations")
-        .select("id, name, created_at, group_type, salary1, salary2, salary3, retirement_option")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
+      const response = await fetch("/api/calculations")
 
-      if (error) throw error
+      if (!response.ok) {
+        throw new Error("Failed to fetch calculations")
+      }
 
+      const data = await response.json()
       setCalculations(data || [])
     } catch (error) {
       console.error("Error fetching calculations:", error)
@@ -55,15 +52,23 @@ export function SavedCalculations() {
   }
 
   useEffect(() => {
-    fetchCalculations()
-  }, [user])
+    if (session?.user?.id) {
+      fetchCalculations()
+    } else {
+      setIsLoading(false)
+    }
+  }, [session])
 
   const handleDelete = async (id: string) => {
     try {
       setDeletingId(id)
-      const { error } = await supabase.from("pension_calculations").delete().eq("id", id)
+      const response = await fetch(`/api/calculations/${id}`, {
+        method: "DELETE",
+      })
 
-      if (error) throw error
+      if (!response.ok) {
+        throw new Error("Failed to delete calculation")
+      }
 
       setCalculations((prev) => prev.filter((calc) => calc.id !== id))
       toast({

@@ -1,0 +1,165 @@
+import type { Adapter } from "next-auth/adapters"
+import { query } from "../db/postgres"
+import { v4 as uuidv4 } from "uuid"
+
+export function PostgresAdapter(): Adapter {
+  return {
+    async createUser(user) {
+      const id = uuidv4()
+      const result = await query(
+        `INSERT INTO users (id, email, created_at, updated_at)
+         VALUES ($1, $2, NOW(), NOW())
+         RETURNING id, email, created_at, updated_at`,
+        [id, user.email],
+      )
+
+      return {
+        id: result.rows[0].id,
+        email: result.rows[0].email,
+        emailVerified: null,
+        ...user,
+      }
+    },
+
+    async getUser(id) {
+      const result = await query("SELECT * FROM users WHERE id = $1", [id])
+
+      return result.rows[0] || null
+    },
+
+    async getUserByEmail(email) {
+      const result = await query("SELECT * FROM users WHERE email = $1", [email])
+
+      return result.rows[0] || null
+    },
+
+    async getUserByAccount({ providerAccountId, provider }) {
+      const result = await query(
+        `SELECT u.* FROM users u
+         JOIN accounts a ON u.id = a.user_id
+         WHERE a.provider_id = $1 AND a.provider_account_id = $2`,
+        [provider, providerAccountId],
+      )
+
+      return result.rows[0] || null
+    },
+
+    async updateUser(user) {
+      const result = await query(
+        `UPDATE users
+         SET email = $2, updated_at = NOW()
+         WHERE id = $1
+         RETURNING *`,
+        [user.id, user.email],
+      )
+
+      return result.rows[0]
+    },
+
+    async deleteUser(userId) {
+      await query("DELETE FROM users WHERE id = $1", [userId])
+      return null
+    },
+
+    async linkAccount(account) {
+      await query(
+        `INSERT INTO accounts (
+          user_id, provider_id, provider_type, provider_account_id,
+          refresh_token, access_token, expires_at, token_type, scope, id_token
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+        [
+          account.userId,
+          account.provider,
+          account.type,
+          account.providerAccountId,
+          account.refresh_token,
+          account.access_token,
+          account.expires_at,
+          account.token_type,
+          account.scope,
+          account.id_token,
+        ],
+      )
+
+      return account
+    },
+
+    async unlinkAccount({ providerAccountId, provider }) {
+      await query(
+        `DELETE FROM accounts
+         WHERE provider_id = $1 AND provider_account_id = $2`,
+        [provider, providerAccountId],
+      )
+    },
+
+    async createSession({ sessionToken, userId, expires }) {
+      const result = await query(
+        `INSERT INTO sessions (session_token, user_id, expires)
+         VALUES ($1, $2, $3)
+         RETURNING *`,
+        [sessionToken, userId, expires],
+      )
+
+      return result.rows[0]
+    },
+
+    async getSessionAndUser(sessionToken) {
+      const result = await query(
+        `SELECT s.*, u.* FROM sessions s
+         JOIN users u ON s.user_id = u.id
+         WHERE s.session_token = $1`,
+        [sessionToken],
+      )
+
+      if (result.rows.length === 0) {
+        return null
+      }
+
+      const { id, email, ...session } = result.rows[0]
+
+      return {
+        session,
+        user: { id, email },
+      }
+    },
+
+    async updateSession({ sessionToken, expires }) {
+      const result = await query(
+        `UPDATE sessions
+         SET expires = $2
+         WHERE session_token = $1
+         RETURNING *`,
+        [sessionToken, expires],
+      )
+
+      return result.rows[0] || null
+    },
+
+    async deleteSession(sessionToken) {
+      await query("DELETE FROM sessions WHERE session_token = $1", [sessionToken])
+    },
+
+    async createVerificationToken({ identifier, expires, token }) {
+      const result = await query(
+        `INSERT INTO verification_tokens (identifier, token, expires)
+         VALUES ($1, $2, $3)
+         RETURNING *`,
+        [identifier, token, expires],
+      )
+
+      return result.rows[0]
+    },
+
+    async useVerificationToken({ identifier, token }) {
+      const result = await query(
+        `DELETE FROM verification_tokens
+         WHERE identifier = $1 AND token = $2
+         RETURNING *`,
+        [identifier, token],
+      )
+
+      return result.rows[0] || null
+    },
+  }
+}

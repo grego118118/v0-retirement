@@ -1,36 +1,35 @@
-import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs"
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
-import type { Database } from "@/types/supabase"
+import { getToken } from "next-auth/jwt"
 
-export async function middleware(req: NextRequest) {
-  const res = NextResponse.next()
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
 
-  try {
-    // Create a Supabase client configured to use cookies
-    const supabase = createMiddlewareClient<Database>({ req, res })
+  // Check if the path is protected
+  const isProtected = ["/profile"].some((path) => pathname.startsWith(path))
 
-    // Refresh session if expired - required for Server Components
-    await supabase.auth.getSession()
+  if (isProtected) {
+    try {
+      const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
 
-    return res
-  } catch (e) {
-    // If there's an error, just continue without blocking the request
-    console.error("Auth middleware error:", e)
-    return res
+      // Redirect to login if not authenticated
+      if (!token) {
+        const url = new URL("/auth/signin", request.url)
+        url.searchParams.set("callbackUrl", encodeURI(pathname))
+        return NextResponse.redirect(url)
+      }
+    } catch (error) {
+      console.error("Authentication middleware error:", error)
+      // Redirect to error page on authentication error
+      const url = new URL("/auth/error", request.url)
+      url.searchParams.set("error", "unknown")
+      return NextResponse.redirect(url)
+    }
   }
+
+  return NextResponse.next()
 }
 
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder
-     * - public files
-     */
-    "/((?!_next/static|_next/image|favicon.ico|public/|sitemap.xml|robots.txt).*)",
-  ],
+  matcher: ["/profile/:path*"],
 }
