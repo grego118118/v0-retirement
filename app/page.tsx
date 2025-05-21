@@ -348,48 +348,6 @@ export default function Home() {
             </div>
           </div>
         </section>
-
-        {/* Updated Section */}
-        <section className="py-12 md:py-16">
-          <div className="container px-4 md:px-6">
-            <div className="flex flex-col items-center justify-center text-center max-w-3xl mx-auto space-y-4">
-              <h1 className="text-4xl font-bold tracking-tight mb-4">Massachusetts Pension Estimator</h1>
-              <p className="text-xl text-muted-foreground mb-8 max-w-2xl">
-                Plan your retirement with confidence using our state employee pension calculator.
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button asChild size="lg">
-                  <Link href="/calculator">Start Calculation</Link>
-                </Button>
-                <Button variant="outline" asChild size="lg">
-                  <Link href="/blog">Read Our Blog</Link>
-                </Button>
-              </div>
-
-              <div className="mt-16 grid gap-8 md:grid-cols-3 max-w-5xl">
-                <div className="flex flex-col items-center p-6 bg-card rounded-lg shadow-sm">
-                  <h2 className="text-xl font-semibold mb-2">Accurate Estimates</h2>
-                  <p className="text-muted-foreground text-center">
-                    Get precise pension estimates based on your years of service, age, and salary history.
-                  </p>
-                </div>
-                <div className="flex flex-col items-center p-6 bg-card rounded-lg shadow-sm">
-                  <h2 className="text-xl font-semibold mb-2">Retirement Planning</h2>
-                  <p className="text-muted-foreground text-center">
-                    Explore different retirement scenarios to find your optimal retirement date.
-                  </p>
-                </div>
-                <div className="flex flex-col items-center p-6 bg-card rounded-lg shadow-sm">
-                  <h2 className="text-xl font-semibold mb-2">Expert Resources</h2>
-                  <p className="text-muted-foreground text-center">
-                    Access articles and guides about Massachusetts pension benefits and retirement planning.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
       </div>
     </>
   )

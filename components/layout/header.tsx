@@ -81,19 +81,17 @@ export function Header() {
             </Button>
           ) : session ? (
             <>
-              <Link href="/profile">
-                <Button variant="ghost" size="sm">
-                  Profile
-                </Button>
-              </Link>
+              <Button variant="ghost" size="sm" asChild>
+                <Link href="/profile">Profile</Link>
+              </Button>
               <Button variant="ghost" size="sm" onClick={() => signOut({ callbackUrl: "/" })}>
                 Sign Out
               </Button>
             </>
           ) : (
-            <Link href="/auth/signin">
-              <Button size="sm">Sign In</Button>
-            </Link>
+            <Button size="sm" asChild>
+              <Link href="/auth/signin">Sign In</Link>
+            </Button>
           )}
         </div>
       </div>

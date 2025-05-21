@@ -1,98 +1,79 @@
 "use client"
 
-import type React from "react"
-
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { signIn } from "next-auth/react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { useSimpleAuth } from "@/components/auth/simple-auth-context"
+import { useSearchParams } from "next/navigation"
+import { useState } from "react"
+import Link from "next/link"
 
 export default function SignIn() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
-  const { login, loginWithGoogle, isLoading } = useSimpleAuth()
-  const router = useRouter()
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
-
-    try {
-      await login(email, password)
-      router.push("/")
-    } catch (err) {
-      setError("Failed to sign in. Please check your credentials.")
-    }
-  }
+  const [isLoading, setIsLoading] = useState(false)
+  const searchParams = useSearchParams()
+  const callbackUrl = searchParams.get("callbackUrl") || "/"
+  const error = searchParams.get("error")
 
   const handleGoogleSignIn = async () => {
+    setIsLoading(true)
     try {
-      await loginWithGoogle()
-      router.push("/")
-    } catch (err) {
-      setError("Failed to sign in with Google.")
+      await signIn("google", { callbackUrl })
+    } catch (error) {
+      console.error("Sign in error:", error)
     }
   }
 
   return (
-    <div className="container flex items-center justify-center min-h-[80vh]">
+    <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
       <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Sign in</CardTitle>
-          <CardDescription>Enter your email and password to sign in to your account</CardDescription>
+        <CardHeader>
+          <CardTitle>Sign In</CardTitle>
+          <CardDescription>Sign in to your account to access your pension calculator data</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           {error && (
-            <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4 text-sm">
-              {error}
+            <div className="p-3 bg-red-50 border border-red-200 rounded-md text-red-600 text-sm mb-4">
+              {error === "OAuthSignin" && "Error starting the OAuth sign-in flow."}
+              {error === "OAuthCallback" && "Error completing the OAuth sign-in flow."}
+              {error === "OAuthCreateAccount" && "Error creating the OAuth user in the database."}
+              {error === "EmailCreateAccount" && "Error creating the email user in the database."}
+              {error === "Callback" && "Error during the OAuth callback."}
+              {error === "OAuthAccountNotLinked" &&
+                "This email is already associated with another account. Please sign in using a different method."}
+              {error === "EmailSignin" && "Error sending the email for sign-in."}
+              {error === "CredentialsSignin" && "Invalid credentials."}
+              {error === "SessionRequired" && "You must be signed in to access this page."}
+              {!error.match(/^(OAuth|Email|Credentials|Session)/) && "An unknown error occurred."}
             </div>
           )}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="your.email@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Signing in..." : "Sign In"}
-            </Button>
-          </form>
-          <div className="relative my-4">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t"></div>
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
-            </div>
-          </div>
-          <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading}>
-            {isLoading ? "Signing in..." : "Google"}
+
+          <Button
+            variant="outline"
+            onClick={handleGoogleSignIn}
+            className="w-full flex items-center justify-center"
+            disabled={isLoading}
+          >
+            <svg
+              className="mr-2 h-4 w-4"
+              aria-hidden="true"
+              focusable="false"
+              data-prefix="fab"
+              data-icon="google"
+              role="img"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 488 512"
+            >
+              <path
+                fill="currentColor"
+                d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"
+              ></path>
+            </svg>
+            {isLoading ? "Signing in..." : "Continue with Google"}
           </Button>
         </CardContent>
         <CardFooter className="flex justify-center">
-          <p className="text-sm text-muted-foreground">
-            Don't have an account? Any email and password will work for this demo.
-          </p>
+          <Button variant="link" asChild>
+            <Link href="/">Return to Home</Link>
+          </Button>
         </CardFooter>
       </Card>
     </div>

@@ -56,17 +56,6 @@ export default function AuthError() {
           <Link href="/">Return Home</Link>
         </Button>
       </div>
-
-      <div className="mt-8 p-4 bg-muted rounded-lg max-w-lg">
-        <h2 className="font-semibold mb-2">Troubleshooting Tips</h2>
-        <ul className="text-sm text-muted-foreground text-left list-disc pl-5 space-y-1">
-          <li>Clear your browser cookies and try again</li>
-          <li>Make sure you're using the correct email address</li>
-          <li>Check if you already have an account with a different sign-in method</li>
-          <li>If using Google sign-in, ensure pop-ups are allowed</li>
-          <li>If problems persist, please contact support</li>
-        </ul>
-      </div>
     </div>
   )
 }

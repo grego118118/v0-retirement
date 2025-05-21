@@ -1,54 +1,67 @@
-// This is a mock implementation that doesn't use actual PostgreSQL
-// It's designed to prevent build errors while maintaining the same API
+import { Pool } from "pg"
 
-export interface QueryResult {
-  rows: any[]
-  rowCount: number
-}
+// Create a singleton pool instance that's compatible with serverless environments
+let pool: Pool | null = null
 
-// Mock query function that returns empty results
-export async function query(text: string, params: any[] = []): Promise<QueryResult> {
-  console.log("Mock PostgreSQL query:", { text, params })
-
-  // Return empty result set
-  return {
-    rows: [],
-    rowCount: 0,
-  }
-}
-
-// Mock transaction function
-export async function withTransaction<T>(callback: (client: any) => Promise<T>): Promise<T> {
-  console.log("Mock PostgreSQL transaction")
-
-  // Create a mock client with a query method
-  const mockClient = {
-    query: async (text: string, params: any[] = []) => {
-      console.log("Mock transaction query:", { text, params })
-      return { rows: [], rowCount: 0 }
-    },
-  }
-
-  // Execute the callback with the mock client
-  return await callback(mockClient)
-}
-
-// Mock pool for direct access if needed
 export function getPool() {
-  return {
-    connect: async () => {
-      return {
-        query: async (text: string, params: any[] = []) => {
-          console.log("Mock pool query:", { text, params })
-          return { rows: [], rowCount: 0 }
-        },
-        release: () => {
-          console.log("Mock client released")
-        },
-      }
-    },
-    on: (event: string, callback: (err: Error) => void) => {
-      // Do nothing
-    },
+  if (!pool) {
+    // For serverless environments, we want to limit the pool size
+    pool = new Pool({
+      connectionString: process.env.POSTGRES_URL,
+      ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
+      max: 1, // Limit connections for serverless environment
+      idleTimeoutMillis: 120000, // 2 minutes
+      connectionTimeoutMillis: 10000, // 10 seconds
+    })
+
+    // Log pool errors but don't crash the app
+    pool.on("error", (err) => {
+      console.error("Unexpected database pool error", err)
+    })
+  }
+
+  return pool
+}
+
+// Query helper function optimized for serverless
+export async function query(text: string, params: any[] = []) {
+  const client = await getPool().connect()
+
+  try {
+    const start = Date.now()
+    const result = await client.query(text, params)
+    const duration = Date.now() - start
+
+    if (process.env.NODE_ENV !== "production") {
+      console.log("Executed query", {
+        text,
+        duration,
+        rows: result.rowCount,
+      })
+    }
+
+    return result
+  } catch (error) {
+    console.error("Error executing query", { text, error })
+    throw error
+  } finally {
+    client.release()
+  }
+}
+
+// Transaction helper optimized for serverless
+export async function withTransaction<T>(callback: (client: any) => Promise<T>): Promise<T> {
+  const client = await getPool().connect()
+
+  try {
+    await client.query("BEGIN")
+    const result = await callback(client)
+    await client.query("COMMIT")
+    return result
+  } catch (error) {
+    await client.query("ROLLBACK")
+    throw error
+  } finally {
+    client.release()
   }
 }

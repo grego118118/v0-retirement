@@ -2,45 +2,25 @@
 
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { useSession } from "next-auth/react"
 
 export default function AuthDebug() {
   const { data: session, status } = useSession()
-  const [envCheck, setEnvCheck] = useState<Record<string, boolean>>({})
-  const [apiCheck, setApiCheck] = useState<{ status: string; message: string }>({
-    status: "pending",
-    message: "Not checked yet",
-  })
+  const [envCheck, setEnvCheck] = useState<Record<string, any>>({})
 
   useEffect(() => {
     // Check for environment variables indirectly
     const checks = {
       isSecureContext: window.isSecureContext,
-      protocol: window.location.protocol === "https:",
+      protocol: window.location.protocol,
       host: window.location.hostname,
+      pathname: window.location.pathname,
+      search: window.location.search,
+      href: window.location.href,
+      nextAuthUrl: process.env.NEXT_PUBLIC_NEXTAUTH_URL || "Not set as public env var",
     }
-    setEnvCheck(checks as any)
+    setEnvCheck(checks)
   }, [])
-
-  const checkApiEndpoint = async () => {
-    setApiCheck({ status: "checking", message: "Checking API endpoint..." })
-    try {
-      const res = await fetch("/api/auth/check", {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      })
-
-      if (res.ok) {
-        const data = await res.json()
-        setApiCheck({ status: "success", message: "API endpoint is working correctly" })
-      } else {
-        setApiCheck({ status: "error", message: `API error: ${res.status} ${res.statusText}` })
-      }
-    } catch (error) {
-      setApiCheck({ status: "error", message: `Failed to reach API: ${(error as Error).message}` })
-    }
-  }
 
   return (
     <div className="container py-10">
@@ -64,7 +44,9 @@ export default function AuthDebug() {
               ) : (
                 <div className="text-yellow-500">No active session</div>
               )}
-              <pre className="bg-muted p-4 rounded-md overflow-auto text-xs">{JSON.stringify(session, null, 2)}</pre>
+              <pre className="bg-muted p-4 rounded-md overflow-auto text-xs max-h-60">
+                {JSON.stringify(session, null, 2)}
+              </pre>
             </div>
           </CardContent>
         </Card>
@@ -86,7 +68,7 @@ export default function AuthDebug() {
               </div>
               <div>
                 <strong>Protocol:</strong>{" "}
-                {envCheck.protocol ? (
+                {envCheck.protocol === "https:" ? (
                   <span className="text-green-500">HTTPS</span>
                 ) : (
                   <span className="text-yellow-500">HTTP (only use for localhost development)</span>
@@ -96,18 +78,14 @@ export default function AuthDebug() {
                 <strong>Host:</strong> {envCheck.host}
               </div>
               <div>
-                <strong>API Check:</strong>{" "}
-                {apiCheck.status === "success" ? (
-                  <span className="text-green-500">{apiCheck.message}</span>
-                ) : apiCheck.status === "error" ? (
-                  <span className="text-red-500">{apiCheck.message}</span>
-                ) : (
-                  <span className="text-yellow-500">{apiCheck.message}</span>
-                )}
+                <strong>Current URL:</strong> {envCheck.href}
               </div>
-              <Button onClick={checkApiEndpoint} disabled={apiCheck.status === "checking"}>
-                {apiCheck.status === "checking" ? "Checking..." : "Check API Endpoint"}
-              </Button>
+              <div>
+                <strong>NEXT_PUBLIC_NEXTAUTH_URL:</strong> {envCheck.nextAuthUrl}
+              </div>
+              <pre className="bg-muted p-4 rounded-md overflow-auto text-xs max-h-60">
+                {JSON.stringify(envCheck, null, 2)}
+              </pre>
             </div>
           </CardContent>
         </Card>
@@ -126,14 +104,15 @@ export default function AuthDebug() {
                 variables
               </li>
               <li>
-                Verify <code className="bg-muted px-1 rounded">NEXTAUTH_URL</code> matches your deployment URL
+                Verify <code className="bg-muted px-1 rounded">NEXTAUTH_URL</code> matches your deployment URL exactly
+                (including https:// and no trailing slash)
               </li>
               <li>
                 Check that Google OAuth credentials are correctly configured in both Google Cloud Console and your
                 environment variables
               </li>
               <li>Clear browser cookies and try again</li>
-              <li>Ensure your database connection is working (if using a database adapter)</li>
+              <li>Try using a different browser or incognito mode</li>
               <li>Check server logs for more detailed error messages</li>
             </ol>
           </CardContent>
