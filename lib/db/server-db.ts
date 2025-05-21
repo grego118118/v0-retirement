@@ -1,6 +1,6 @@
 import { query } from "./postgres"
 import { v4 as uuidv4 } from "uuid"
-import bcrypt from "bcrypt"
+import bcrypt from "bcryptjs" // Changed from bcrypt to bcryptjs
 
 // User management
 export async function createUser(email: string, password: string) {

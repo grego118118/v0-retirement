@@ -1,7 +1,7 @@
 import type { NextAuthOptions } from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
 import CredentialsProvider from "next-auth/providers/credentials"
-import bcrypt from "bcrypt"
+import bcrypt from "bcryptjs" // Changed from bcrypt to bcryptjs
 import { query } from "../db/postgres"
 
 export const authOptions: NextAuthOptions = {
