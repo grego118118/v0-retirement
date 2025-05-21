@@ -4,12 +4,9 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { ModeToggle } from "@/components/mode-toggle"
-import { useSession, signOut } from "next-auth/react"
 
 export function Header() {
   const pathname = usePathname()
-  const { data: session, status } = useSession()
-  const isLoading = status === "loading"
 
   const isActive = (path: string) => {
     return pathname === path
@@ -75,24 +72,9 @@ export function Header() {
         </div>
         <div className="ml-auto flex items-center space-x-4">
           <ModeToggle />
-          {isLoading ? (
-            <Button variant="ghost" size="sm" disabled>
-              Loading...
-            </Button>
-          ) : session ? (
-            <>
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/profile">Profile</Link>
-              </Button>
-              <Button variant="ghost" size="sm" onClick={() => signOut({ callbackUrl: "/" })}>
-                Sign Out
-              </Button>
-            </>
-          ) : (
-            <Button size="sm" asChild>
-              <Link href="/auth/signin">Sign In</Link>
-            </Button>
-          )}
+          <Button size="sm" asChild>
+            <Link href="/calculator">Start Calculation</Link>
+          </Button>
         </div>
       </div>
     </header>
