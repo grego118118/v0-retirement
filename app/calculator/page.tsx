@@ -3,6 +3,7 @@ import { generateSEOMetadata } from "@/components/seo/metadata"
 import Script from "next/script"
 import PensionCalculatorWrapper from "@/components/pension-calculator-wrapper"
 import { Skeleton } from "@/components/ui/skeleton"
+import { AuthDisabledNotice } from "@/components/auth-disabled-notice"
 
 export const metadata = generateSEOMetadata({
   title: "Pension Calculator | Massachusetts Pension Estimator",
@@ -52,6 +53,7 @@ export default function CalculatorPage() {
               Our calculator uses the official Massachusetts retirement system formulas.
             </p>
           </div>
+          <AuthDisabledNotice className="mb-6" />
           <Suspense fallback={<CalculatorSkeleton />}>
             <PensionCalculatorWrapper />
           </Suspense>

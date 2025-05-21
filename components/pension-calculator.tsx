@@ -11,7 +11,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ArrowLeft, ArrowRight, Calculator, HelpCircle, Info, Loader2 } from "lucide-react"
+import { ArrowLeft, ArrowRight, Calculator, HelpCircle, Info } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import {
   calculatePensionWithOption,
@@ -25,8 +25,6 @@ import ProjectionTable from "./projection-table"
 import { Progress } from "@/components/ui/progress"
 import { motion, AnimatePresence } from "framer-motion"
 import { ToastNotification } from "@/components/ui/toast-notification"
-import { useAuth } from "@/components/auth/auth-context"
-import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { useSearchParams, useRouter } from "next/navigation"
 
 const steps = [
@@ -54,13 +52,13 @@ export default function PensionCalculator() {
 
   const [showNotification, setShowNotification] = useState(false)
 
-  const { user } = useAuth()
   const searchParams = useSearchParams()
   const router = useRouter()
   const [calculationName, setCalculationName] = useState("")
   const [isSaving, setIsSaving] = useState(false)
   const [showSaveForm, setShowSaveForm] = useState(false)
   const [savedMessage, setSavedMessage] = useState("")
+  const [isLoggedIn, setIsLoggedIn] = useState(false) // Default to not logged in
 
   useEffect(() => {
     try {
@@ -77,10 +75,12 @@ export default function PensionCalculator() {
 
   useEffect(() => {
     const calculationId = searchParams.get("id")
-    if (calculationId && user) {
-      loadSavedCalculation(calculationId)
+    if (calculationId && isLoggedIn) {
+      // This would normally load a saved calculation, but we've disabled authentication
+      // So we'll just show a message that this feature is disabled
+      setSavedMessage("Saved calculations are currently disabled.")
     }
-  }, [user, searchParams])
+  }, [isLoggedIn, searchParams])
 
   const [errors, setErrors] = useState<string[]>([])
   const [eligibilityWarning, setEligibilityWarning] = useState("")
@@ -183,87 +183,10 @@ export default function PensionCalculator() {
     }
   }
 
-  const loadSavedCalculation = async (id: string) => {
-    try {
-      setIsCalculating(true)
-      const supabase = getSupabaseBrowserClient()
-
-      const { data, error } = await supabase
-        .from("pension_calculations")
-        .select("*")
-        .eq("id", id)
-        .eq("user_id", user?.id)
-        .single()
-
-      if (error) {
-        throw error
-      }
-
-      if (data) {
-        setFormData({
-          serviceEntryDate: data.service_entry_date,
-          age: data.age,
-          yearsOfService: data.years_of_service,
-          group: data.group_type,
-          salary1: data.salary1,
-          salary2: data.salary2,
-          salary3: data.salary3,
-          retirementOption: data.retirement_option,
-          beneficiaryAge: data.beneficiary_age || "",
-        })
-
-        setCalculationName(data.name)
-
-        if (data.result) {
-          setCalculationResult(data.result)
-          setShowResults(true)
-          setCurrentStep(3)
-        }
-      }
-    } catch (error) {
-      console.error("Error loading saved calculation:", error)
-      setErrors(["Failed to load the saved calculation. Please try again."])
-    } finally {
-      setIsCalculating(false)
-    }
-  }
-
   const saveCalculation = async () => {
-    if (!user || !calculationResult) return
-
-    try {
-      setIsSaving(true)
-      const supabase = getSupabaseBrowserClient()
-
-      const calculationData = {
-        user_id: user.id,
-        name: calculationName || `Calculation ${new Date().toLocaleDateString()}`,
-        service_entry_date: formData.serviceEntryDate,
-        age: formData.age,
-        years_of_service: formData.yearsOfService,
-        group_type: formData.group,
-        salary1: formData.salary1,
-        salary2: formData.salary2,
-        salary3: formData.salary3,
-        retirement_option: formData.retirementOption,
-        beneficiary_age: formData.beneficiaryAge,
-        result: calculationResult,
-      }
-
-      const { error } = await supabase.from("pension_calculations").insert(calculationData)
-
-      if (error) {
-        throw error
-      }
-
-      setSavedMessage("Calculation saved successfully!")
-      setShowSaveForm(false)
-    } catch (error) {
-      console.error("Error saving calculation:", error)
-      setErrors(["Failed to save the calculation. Please try again."])
-    } finally {
-      setIsSaving(false)
-    }
+    // Since authentication is disabled, we'll just show a message
+    setSavedMessage("Saving calculations is currently disabled. Your data is saved locally in your browser.")
+    setShowSaveForm(false)
   }
 
   const calculatePension = () => {
@@ -637,29 +560,22 @@ export default function PensionCalculator() {
             ) : showResults && calculationResult ? (
               <>
                 <PensionResults result={calculationResult} />
-                {user && (
-                  <div className="mt-4 flex justify-end">
-                    {showSaveForm ? (
-                      <div className="flex items-center gap-2">
-                        <Input
-                          placeholder="Name this calculation"
-                          value={calculationName}
-                          onChange={(e) => setCalculationName(e.target.value)}
-                          className="max-w-xs"
-                        />
-                        <Button onClick={saveCalculation} disabled={isSaving}>
-                          {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                          Save
-                        </Button>
-                        <Button variant="outline" onClick={() => setShowSaveForm(false)}>
-                          Cancel
-                        </Button>
+                <div className="mt-4">
+                  <Alert className="bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-900/20 dark:border-blue-900/30 dark:text-blue-400">
+                    <AlertDescription>
+                      <div className="flex items-start gap-2">
+                        <Info className="h-5 w-5 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <p className="font-medium">Authentication is currently disabled</p>
+                          <p className="text-sm mt-1">
+                            Saving calculations requires authentication, which is currently disabled. Your calculation
+                            is saved locally in your browser.
+                          </p>
+                        </div>
                       </div>
-                    ) : (
-                      <Button onClick={() => setShowSaveForm(true)}>Save Calculation</Button>
-                    )}
-                  </div>
-                )}
+                    </AlertDescription>
+                  </Alert>
+                </div>
 
                 <div className="mt-8">
                   <Tabs defaultValue="projection" className="w-full">
