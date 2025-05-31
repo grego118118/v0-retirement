@@ -1,0 +1,125 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// User model for authentication
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  image         String?
+  emailVerified DateTime?
+  
+  // OAuth accounts
+  accounts      Account[]
+  sessions      Session[]
+  
+  // Retirement data
+  profile       RetirementProfile?
+  calculations  RetirementCalculation[]
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+// OAuth account model
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+// Session model for NextAuth
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+}
+
+// Retirement profile - stores user's basic retirement information
+model RetirementProfile {
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Personal information
+  dateOfBirth         DateTime
+  membershipDate      DateTime  // When they joined the retirement system
+  retirementGroup     String    // Group 1, 2, 3, or 4
+  benefitPercentage   Float     // e.g., 2.5 for Group 1
+  
+  // Employment information
+  currentSalary       Float
+  averageHighest3Years Float?   // Can be calculated or manually entered
+  yearsOfService      Float?    // Can be calculated from membershipDate
+  
+  // Settings
+  plannedRetirementAge Int?
+  retirementOption    String?   // Option A, B, or C
+  
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+}
+
+// Retirement calculation - stores each calculation run by the user
+model RetirementCalculation {
+  id                  String   @id @default(cuid())
+  userId              String
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Input parameters
+  calculationName     String?  // User can name their scenarios
+  retirementDate      DateTime
+  retirementAge       Int
+  yearsOfService      Float
+  averageSalary       Float
+  retirementGroup     String
+  benefitPercentage   Float
+  retirementOption    String   // Option A, B, or C
+  
+  // Calculated results
+  monthlyBenefit      Float
+  annualBenefit       Float
+  benefitReduction    Float?   // If retiring early
+  survivorBenefit     Float?   // For Option B or C
+  
+  // Social Security data (stored as JSON)
+  socialSecurityData  String?  // JSON string containing SS calculation data
+  
+  // Additional data
+  notes               String?
+  isFavorite          Boolean  @default(false)
+  
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([createdAt])
+}

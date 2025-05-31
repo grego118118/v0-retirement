@@ -315,3 +315,48 @@ export function generateProjectionTable(
     title: `${groupToProject.replace("_", " ")} Pension Projection (From Age ${projectionStartAgeForm} up to 80% Max)`,
   }
 }
+
+/**
+ * Calculates the pension percentage based on age and years of service
+ * This is a simplified version - you'll want to replace this with the actual MA state pension formula
+ */
+export function calculatePensionPercentage(age: number, yearsOfService: number): number {
+  // Base percentage calculation
+  let percentage = yearsOfService * 2.5 // 2.5% per year of service
+
+  // Age factor adjustment
+  if (age < 60) {
+    // Reduce percentage for early retirement
+    percentage *= (1 - (60 - age) * 0.01)
+  } else if (age > 65) {
+    // Increase percentage for delayed retirement
+    percentage *= (1 + (age - 65) * 0.01)
+  }
+
+  // Cap at 80%
+  return Math.min(percentage, 80)
+}
+
+/**
+ * Calculates the estimated annual pension amount
+ */
+export function calculateAnnualPension(
+  averageSalary: number,
+  age: number,
+  yearsOfService: number,
+  option: "A" | "B" | "C" = "A"
+): number {
+  let percentage = calculatePensionPercentage(age, yearsOfService)
+  
+  // Apply option reduction factors
+  switch (option) {
+    case "B":
+      percentage *= 0.91 // 9% reduction for Option B
+      break
+    case "C":
+      percentage *= 0.86 // 14% reduction for Option C
+      break
+  }
+
+  return (averageSalary * percentage) / 100
+}

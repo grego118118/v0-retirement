@@ -1,61 +1,66 @@
 "use client"
 
-import { useSearchParams } from "next/navigation"
-import { Button } from "@/components/ui/button"
+import React from "react"
 import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { AlertCircle, Home, ArrowLeft } from "lucide-react"
+import { useSearchParams } from "next/navigation"
 
-export default function AuthError() {
+export default function AuthErrorPage() {
   const searchParams = useSearchParams()
   const error = searchParams.get("error")
 
-  let errorMessage = "An unknown authentication error occurred."
-  let errorDescription = "Please try again or contact support if the problem persists."
-
-  if (error === "Configuration") {
-    errorMessage = "Server Configuration Error"
-    errorDescription = "There is a problem with the server configuration. Please contact support."
-  } else if (error === "AccessDenied") {
-    errorMessage = "Access Denied"
-    errorDescription = "You do not have permission to sign in."
-  } else if (error === "Verification") {
-    errorMessage = "Verification Failed"
-    errorDescription = "The verification link is invalid or has expired."
-  } else if (error === "OAuthSignin" || error === "OAuthCallback" || error === "OAuthCreateAccount") {
-    errorMessage = "OAuth Authentication Error"
-    errorDescription = "There was a problem with the OAuth authentication process."
-  } else if (error === "EmailCreateAccount") {
-    errorMessage = "Account Creation Failed"
-    errorDescription = "There was a problem creating your account."
-  } else if (error === "Callback") {
-    errorMessage = "Authentication Callback Error"
-    errorDescription = "There was a problem with the authentication callback."
-  } else if (error === "OAuthAccountNotLinked") {
-    errorMessage = "Account Not Linked"
-    errorDescription = "This email is already associated with another account."
-  } else if (error === "EmailSignin") {
-    errorMessage = "Email Sign-in Failed"
-    errorDescription = "There was a problem sending the email."
-  } else if (error === "CredentialsSignin") {
-    errorMessage = "Invalid Credentials"
-    errorDescription = "The email or password you entered is incorrect."
-  } else if (error === "SessionRequired") {
-    errorMessage = "Authentication Required"
-    errorDescription = "You must be signed in to access this page."
+  const getErrorMessage = (error: string | null) => {
+    switch (error) {
+      case "Configuration":
+        return "There is a problem with the server configuration."
+      case "AccessDenied":
+        return "Access was denied. You may have cancelled the sign-in process."
+      case "Verification":
+        return "The verification token has expired or has already been used."
+      case "Default":
+      default:
+        return "An unexpected error occurred during sign-in."
+    }
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-8rem)] text-center px-4">
-      <h1 className="text-3xl font-bold tracking-tight mb-2">{errorMessage}</h1>
-      <p className="text-muted-foreground mb-6 max-w-md">{errorDescription}</p>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-indigo-50 to-white dark:from-indigo-950 dark:to-background p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20">
+            <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
+          </div>
+          <CardTitle className="text-2xl font-bold">Authentication Error</CardTitle>
+          <CardDescription>
+            {getErrorMessage(error)}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="text-center text-sm text-muted-foreground">
+            <p>
+              If this problem persists, please contact support or try a different sign-in method.
+            </p>
+          </div>
 
-      <div className="flex flex-col sm:flex-row gap-4">
-        <Button asChild>
-          <Link href="/auth/signin">Try Again</Link>
-        </Button>
-        <Button variant="outline" asChild>
-          <Link href="/">Return Home</Link>
-        </Button>
-      </div>
+          <div className="flex flex-col gap-3">
+            <Button asChild>
+              <Link href="/auth/signin">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Try Again
+              </Link>
+            </Button>
+            
+            <Button variant="outline" asChild>
+              <Link href="/">
+                <Home className="mr-2 h-4 w-4" />
+                Back to Home
+              </Link>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

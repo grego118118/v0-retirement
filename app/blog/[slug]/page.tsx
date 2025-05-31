@@ -16,19 +16,20 @@ export const dynamic = "force-dynamic"
 export const fetchCache = "force-no-store"
 
 interface PageProps {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const post = blogPosts.find((post) => post.id === params.slug)
+  const { slug } = await params
+  const post = blogPosts.find((post) => post.id === slug)
 
   if (!post) {
     return generateSEOMetadata({
       title: "Blog Post Not Found",
       description: "The requested blog post could not be found.",
-      path: `/blog/${params.slug}`,
+      path: `/blog/${slug}`,
     })
   }
 
@@ -37,21 +38,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     description: post.description,
     path: `/blog/${post.id}`,
     keywords: post.tags,
-    openGraph: {
-      images: [
-        {
-          url: post.image,
-          width: 1200,
-          height: 630,
-          alt: post.title,
-        },
-      ],
-    },
   })
 }
 
-export default function BlogPostPage({ params }: PageProps) {
-  const post = blogPosts.find((post) => post.id === params.slug)
+export default async function BlogPostPage({ params }: PageProps) {
+  const { slug } = await params
+  const post = blogPosts.find((post) => post.id === slug)
 
   if (!post) {
     notFound()
@@ -198,32 +190,22 @@ export default function BlogPostPage({ params }: PageProps) {
                       <Badge variant="outline" className="mb-2 w-fit">
                         {relatedPost.category}
                       </Badge>
-                      <h3 className="font-semibold mb-2 line-clamp-2">
+                      <h3 className="font-semibold mb-2 text-sm leading-tight">
                         <Link
                           href={`/blog/${relatedPost.id}`}
-                          className="hover:text-primary transition-colors no-underline"
+                          className="hover:text-primary transition-colors"
                           prefetch={true}
-                          scroll={false}
                         >
                           {relatedPost.title}
                         </Link>
                       </h3>
-                      <div className="flex items-center text-xs text-muted-foreground mb-2">
+                      <p className="text-xs text-muted-foreground line-clamp-2 flex-grow">
+                        {relatedPost.description}
+                      </p>
+                      <div className="flex items-center text-xs text-muted-foreground mt-2 pt-2 border-t">
                         <CalendarIcon className="mr-1 h-3 w-3" /> {relatedPost.date}
-                        <span className="mx-1">•</span>
+                        <span className="mx-2">•</span>
                         <Clock className="mr-1 h-3 w-3" /> {relatedPost.readTime}
-                      </div>
-                      <div className="mt-auto pt-2">
-                        <Button variant="ghost" size="sm" asChild className="p-0 h-auto">
-                          <Link
-                            href={`/blog/${relatedPost.id}`}
-                            scroll={false}
-                            prefetch={true}
-                            className="no-underline"
-                          >
-                            Read article
-                          </Link>
-                        </Button>
                       </div>
                     </div>
                   </div>
@@ -232,52 +214,40 @@ export default function BlogPostPage({ params }: PageProps) {
             </div>
           )}
 
-          {/* Post Navigation */}
-          <div className="flex justify-between items-center border-t pt-8 mb-12">
-            {post.id !== blogPosts[0].id ? (
-              <Button variant="outline" asChild>
-                <Link
-                  href={`/blog/${blogPosts[blogPosts.findIndex((p) => p.id === post.id) - 1].id}`}
-                  className="flex items-center gap-2 no-underline"
-                  prefetch={true}
-                  scroll={false}
-                >
-                  <ArrowLeft className="h-4 w-4" /> Previous Post
-                </Link>
-              </Button>
-            ) : (
-              <div></div>
-            )}
-
-            {post.id !== blogPosts[blogPosts.length - 1].id ? (
-              <Button variant="outline" asChild>
-                <Link
-                  href={`/blog/${blogPosts[blogPosts.findIndex((p) => p.id === post.id) + 1].id}`}
-                  className="flex items-center gap-2 no-underline"
-                  prefetch={true}
-                  scroll={false}
-                >
-                  Next Post <ArrowLeft className="h-4 w-4 rotate-180" />
-                </Link>
-              </Button>
-            ) : (
-              <div></div>
-            )}
+          {/* Comments Section */}
+          <div className="mb-12">
+            <h2 className="text-2xl font-semibold mb-6">Comments</h2>
+            <div className="space-y-6">
+              <div className="border rounded-lg p-6 bg-muted/30">
+                <p className="text-muted-foreground text-center">
+                  Comments are currently disabled. For questions about your Massachusetts state pension, please{" "}
+                  <Link href="/contact" className="text-primary hover:underline">
+                    contact us
+                  </Link>{" "}
+                  or use our{" "}
+                  <Link href="/calculator" className="text-primary hover:underline">
+                    pension calculator
+                  </Link>
+                  .
+                </p>
+              </div>
+            </div>
           </div>
 
           {/* Newsletter Signup */}
-          <div className="bg-primary/5 p-6 rounded-lg border border-primary/10">
-            <div className="text-center">
-              <h2 className="text-xl font-semibold mb-2">Get More Retirement Planning Tips</h2>
-              <p className="text-muted-foreground mb-4 max-w-2xl mx-auto">
-                Subscribe to our newsletter to receive the latest retirement planning tips, pension updates, and
-                resources for Massachusetts state employees.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
-                <Input placeholder="Your email address" type="email" className="sm:flex-1" />
-                <Button>Subscribe</Button>
-              </div>
+          <div className="bg-primary/5 border border-primary/20 rounded-lg p-6">
+            <h3 className="text-xl font-semibold mb-2">Stay Updated on Massachusetts Pension News</h3>
+            <p className="text-muted-foreground mb-4">
+              Get the latest updates on Massachusetts state pension benefits, policy changes, and retirement planning
+              tips delivered to your inbox.
+            </p>
+            <div className="flex gap-2">
+              <Input type="email" placeholder="Enter your email" className="flex-1" />
+              <Button>Subscribe</Button>
             </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              We respect your privacy. Unsubscribe at any time.
+            </p>
           </div>
         </div>
       </div>

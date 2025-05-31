@@ -41,6 +41,32 @@ export default function FAQPage() {
                   </AccordionContent>
                 </AccordionItem>
 
+                <AccordionItem value="item-1-5">
+                  <AccordionTrigger>Where can I find my salary history for the pension calculation?</AccordionTrigger>
+                  <AccordionContent>
+                    <p className="mb-3">
+                      Massachusetts state employees can look up their base pay for the past 3 years using the official state payroll system:
+                    </p>
+                    <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                      <p className="font-medium mb-2">Massachusetts State Payroll System</p>
+                      <a 
+                        href="https://cthrupayroll.mass.gov/" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline font-medium inline-flex items-center gap-1"
+                      >
+                        Visit cthrupayroll.mass.gov →
+                      </a>
+                      <p className="text-sm text-muted-foreground mt-2">
+                        This official system allows you to access your pay history and find the three highest consecutive years of regular compensation needed for your pension calculation.
+                      </p>
+                    </div>
+                    <p className="mt-3 text-sm text-muted-foreground">
+                      <strong>Remember:</strong> Only include your base salary (regular compensation) and exclude bonuses, overtime, severance pay, and other supplemental payments.
+                    </p>
+                  </AccordionContent>
+                </AccordionItem>
+
                 <AccordionItem value="item-2">
                   <AccordionTrigger>When am I eligible to retire?</AccordionTrigger>
                   <AccordionContent>

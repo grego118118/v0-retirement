@@ -1,8 +1,10 @@
+import React from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowRight, Calculator, Clock, DollarSign, HelpCircle, TrendingUp } from "lucide-react"
 import { generateSEOMetadata } from "@/components/seo/metadata"
+import { PricingSection } from "@/components/pricing/pricing-section"
 import Script from "next/script"
 
 export const metadata = generateSEOMetadata({
@@ -189,6 +191,105 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {/* Social Security Integration Section */}
+        <section className="py-12 md:py-16">
+          <div className="container px-4 md:px-6">
+            <div className="text-center mb-10">
+              <div className="inline-flex items-center rounded-lg bg-amber-100 dark:bg-amber-900 px-3 py-1 text-sm text-amber-700 dark:text-amber-300 mb-4">
+                <svg className="mr-1 h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732L14.146 12.8l-1.179 4.456a1 1 0 01-1.934 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732L9.854 7.2l1.179-4.456A1 1 0 0112 2z" clipRule="evenodd" />
+                </svg>
+                Premium Feature
+              </div>
+              <h2 className="text-3xl font-bold tracking-tighter">Complete Retirement Income Planning</h2>
+              <p className="text-muted-foreground mt-2 md:text-lg">
+                Get the full picture by combining your Massachusetts pension with Social Security benefits
+              </p>
+            </div>
+            <div className="grid md:grid-cols-2 gap-8 items-center max-w-6xl mx-auto">
+              <div className="space-y-6">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                      <DollarSign className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">Social Security Estimator</h3>
+                      <p className="text-sm text-muted-foreground">Calculate benefits at different claiming ages</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
+                      <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">Combined Analysis</h3>
+                      <p className="text-sm text-muted-foreground">See your total retirement income potential</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
+                      <Calculator className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">Optimal Timing</h3>
+                      <p className="text-sm text-muted-foreground">Find the best strategy for claiming benefits</p>
+                    </div>
+                  </div>
+                  <div className="mt-4 p-3 bg-muted/50 rounded-lg">
+                    <p className="text-xs text-muted-foreground">
+                      <strong>Need your salary history?</strong> Massachusetts state employees can find their pay data at{" "}
+                      <a 
+                        href="https://cthrupayroll.mass.gov/" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline"
+                      >
+                        cthrupayroll.mass.gov
+                      </a>
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <Button asChild>
+                    <Link href="/social-security">
+                      Explore Social Security Integration <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                  <Button variant="outline" asChild>
+                    <Link href="/pricing">View Pricing</Link>
+                  </Button>
+                </div>
+              </div>
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950/20 dark:to-indigo-950/30 rounded-2xl p-6">
+                <h3 className="font-semibold text-lg mb-4 text-center">Example: Combined Monthly Income</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center p-3 bg-white dark:bg-gray-900 rounded-lg shadow-sm">
+                    <span className="text-sm font-medium">MA State Pension</span>
+                    <span className="font-bold text-blue-600">$4,465</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-white dark:bg-gray-900 rounded-lg shadow-sm">
+                    <span className="text-sm font-medium">Social Security (FRA)</span>
+                    <span className="font-bold text-green-600">$2,800</span>
+                  </div>
+                  <div className="flex justify-between items-center p-4 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-lg">
+                    <span className="font-bold">Total Monthly Income</span>
+                    <span className="font-bold text-xl">$7,265</span>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm text-muted-foreground">
+                      <span className="font-medium">85%</span> income replacement ratio
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Pricing Section */}
+        <PricingSection />
 
         {/* FAQ Preview Section */}
         <section className="py-12 md:py-16" id="faq-preview">

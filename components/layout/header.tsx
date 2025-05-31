@@ -3,10 +3,15 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { ModeToggle } from "@/components/mode-toggle"
+import { UserMenu } from "@/components/auth/user-menu"
+import { useSession } from "next-auth/react"
+import { Crown } from "lucide-react"
 
 export function Header() {
   const pathname = usePathname()
+  const { data: session } = useSession()
 
   const isActive = (path: string) => {
     return pathname === path
@@ -28,6 +33,28 @@ export function Header() {
             >
               Calculator
             </Link>
+            <Link
+              href="/social-security"
+              className={`transition-colors hover:text-foreground/80 flex items-center gap-1 ${
+                isActive("/social-security") ? "text-foreground" : "text-foreground/60"
+              }`}
+            >
+              Social Security
+              <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200 text-xs">
+                <Crown className="mr-1 h-2 w-2" />
+                Premium
+              </Badge>
+            </Link>
+            {session && (
+              <Link
+                href="/dashboard"
+                className={`transition-colors hover:text-foreground/80 ${
+                  isActive("/dashboard") ? "text-foreground" : "text-foreground/60"
+                }`}
+              >
+                Dashboard
+              </Link>
+            )}
             <Link
               href="/resources"
               className={`transition-colors hover:text-foreground/80 ${
@@ -72,9 +99,7 @@ export function Header() {
         </div>
         <div className="ml-auto flex items-center space-x-4">
           <ModeToggle />
-          <Button size="sm" asChild>
-            <Link href="/calculator">Start Calculation</Link>
-          </Button>
+          <UserMenu />
         </div>
       </div>
     </header>
