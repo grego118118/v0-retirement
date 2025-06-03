@@ -65,8 +65,8 @@ export function GoogleAuthGuide() {
                     </a>
                   </li>
                   <li>Create a new project or select an existing one</li>
-                  <li>Navigate to "APIs & Services" > "Credentials"</li>
-                  <li>Click "Create Credentials" > "OAuth client ID"</li>
+                  <li>Navigate to "APIs & Services" &gt; "Credentials"</li>
+                  <li>Click "Create Credentials" &gt; "OAuth client ID"</li>
                   <li>Set the application type to "Web application"</li>
                   <li>Add your domain to "Authorized JavaScript origins"</li>
                   <li>Add your Supabase callback URL to "Authorized redirect URIs"</li>

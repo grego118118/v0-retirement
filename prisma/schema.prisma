@@ -18,15 +18,36 @@ model User {
   name          String?
   image         String?
   emailVerified DateTime?
-  
+
   // OAuth accounts
   accounts      Account[]
   sessions      Session[]
-  
+
   // Retirement data
   profile       RetirementProfile?
   calculations  RetirementCalculation[]
-  
+  pdfGenerations PdfGeneration[]
+  emailLogs     EmailLog[]
+  pdfShares     PdfShare[]
+
+  // Subscription data
+  stripeCustomerId    String?   // Stripe customer ID
+  subscriptionId      String?   // Current subscription ID
+  subscriptionStatus  String?   // active, canceled, past_due, etc.
+  subscriptionPlan    String?   // free, monthly, annual
+  currentPeriodEnd    DateTime? // When current subscription period ends
+  cancelAtPeriodEnd   Boolean   @default(false)
+  trialEnd           DateTime? // Trial end date if applicable
+
+  // Usage tracking
+  socialSecurityCalculations Int @default(0)
+  wizardUses                 Int @default(0)
+  pdfReports                 Int @default(0)
+  lastUsageReset            DateTime? // For monthly usage limits
+
+  // Email preferences
+  emailPreferences          String? // JSON string of email preferences
+
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -122,4 +143,50 @@ model RetirementCalculation {
   
   @@index([userId])
   @@index([createdAt])
+}
+
+// PDF Generation tracking - stores PDF generation history and usage
+model PdfGeneration {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type        String   // 'pension', 'tax', 'wizard', 'combined'
+  size        Int      // File size in bytes
+  filename    String?  // Generated filename
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([type])
+}
+
+// Email Log - tracks email sending for rate limiting and analytics
+model EmailLog {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type        String   // 'welcome', 'password-reset', 'subscription-change', etc.
+  recipients  String   // Comma-separated email addresses
+  success     Boolean  // Whether the email was sent successfully
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([type])
+}
+
+// PDF Share - tracks PDF sharing via email
+model PdfShare {
+  id                String   @id @default(cuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pdfType           String   // 'pension', 'tax', 'wizard', 'combined'
+  recipients        String   // Comma-separated email addresses
+  recipientCount    Int      // Number of recipients
+  successfulShares  Int      // Number of successful email sends
+  createdAt         DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([pdfType])
 }

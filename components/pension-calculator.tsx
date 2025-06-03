@@ -464,6 +464,8 @@ export default function PensionCalculator() {
                         <br />
                         Group 2: Certain hazardous positions
                         <br />
+                        Group 3: State police
+                        <br />
                         Group 4: Police officers, firefighters
                       </p>
                     </TooltipContent>
@@ -477,6 +479,7 @@ export default function PensionCalculator() {
                 <SelectContent>
                   <SelectItem value="GROUP_1">Group I (General Employees)</SelectItem>
                   <SelectItem value="GROUP_2">Group II (Certain Hazardous Positions)</SelectItem>
+                  <SelectItem value="GROUP_3">Group III (State Police)</SelectItem>
                   <SelectItem value="GROUP_4">Group IV (Police Officers and Firefighters)</SelectItem>
                 </SelectContent>
               </Select>

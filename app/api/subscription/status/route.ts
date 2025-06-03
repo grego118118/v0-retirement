@@ -1,84 +1,190 @@
-import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"
+import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth/auth-config'
+import { prisma } from '@/lib/prisma'
+import { StripeService } from '@/lib/stripe/service'
+import { isSubscriptionActive, FREE_TIER_LIMITS } from '@/lib/stripe/config'
+import type { SubscriptionStatus, SubscriptionPlan } from '@/lib/stripe/config'
 
-// Simple in-memory store for demo premium users
-// In production, this would be in a database
-let premiumUsers = new Set<string>([
+// Fallback premium users for development (when Stripe is not configured)
+const FALLBACK_PREMIUM_USERS = [
   'premium@example.com',
   'test@premium.com',
-  'grego118@gmail.com' // Added the user's email manually to ensure premium access
-])
+  'grego118@gmail.com'
+]
 
-// Simple in-memory store for canceled users (for demo)
-let canceledUsers = new Set<string>()
-
-// Function to add a user to premium (used by checkout)
-export function addPremiumUser(email: string) {
-  console.log('Adding premium user:', email)
-  premiumUsers.add(email)
-  // Remove from canceled list if they were previously canceled
-  canceledUsers.delete(email)
-  console.log('Current premium users:', Array.from(premiumUsers))
+interface SubscriptionResponse {
+  isPremium: boolean
+  subscriptionStatus: SubscriptionStatus | 'inactive'
+  subscriptionPlan: SubscriptionPlan
+  savedCalculationsCount: number
+  currentPeriodEnd?: string
+  cancelAtPeriodEnd?: boolean
+  trialEnd?: string
+  customerId?: string
+  subscriptionId?: string
+  usageLimits: {
+    maxSavedCalculations: number
+    maxSocialSecurityCalculations: number
+    maxWizardUses: number
+    maxPdfReports: number
+  }
+  currentUsage: {
+    savedCalculations: number
+    socialSecurityCalculations: number
+    wizardUses: number
+    pdfReports: number
+  }
 }
 
-// Function to remove a user from premium (used by cancellation)
-export function removePremiumUser(email: string) {
-  console.log('Removing premium user:', email)
-  premiumUsers.delete(email)
-  canceledUsers.add(email)
-  console.log('Current premium users:', Array.from(premiumUsers))
-  console.log('Current canceled users:', Array.from(canceledUsers))
-}
-
-// Function to check if user is premium
-export function isPremiumUser(email: string) {
-  const isUserPremium = premiumUsers.has(email) && !canceledUsers.has(email)
-  console.log(`Checking if ${email} is premium:`, isUserPremium)
-  console.log('All premium users:', Array.from(premiumUsers))
-  console.log('All canceled users:', Array.from(canceledUsers))
-  return isUserPremium
-}
-
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    
+
     if (!session?.user?.email) {
-      console.log('No session or email found')
-      return NextResponse.json({ 
-        isPremium: false, 
-        savedCalculationsCount: 0 
-      })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    console.log('Checking subscription status for:', session.user.email)
-    
-    // Check if user is premium (either in initial list or added via checkout)
-    const isPremium = isPremiumUser(session.user.email)
-    
-    console.log(`User ${session.user.email} isPremium:`, isPremium)
-    
-    // Simulate saved calculations count
-    // In production, you would query your database
-    const savedCalculationsCount = Math.floor(Math.random() * 5) // Random 0-4 for demo
-    
-    const response = {
-      isPremium,
-      savedCalculationsCount,
-      subscriptionType: isPremium ? 'premium' : 'free',
-      subscriptionStatus: isPremium ? 'active' : 'none'
+    const userEmail = session.user.email
+    console.log('Checking subscription status for:', userEmail)
+
+    // Get user from database
+    const user = await prisma.user.findUnique({
+      where: { email: userEmail },
+      include: {
+        calculations: {
+          where: {
+            calculationName: {
+              not: {
+                startsWith: 'Auto-saved'
+              }
+            }
+          }
+        }
+      }
+    })
+
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
-    
-    console.log('Returning subscription response:', response)
-    
-    return NextResponse.json(response)
-    
+
+    let subscriptionData: SubscriptionResponse
+
+    // Try to get Stripe subscription data
+    if (process.env.STRIPE_SECRET_KEY && user.stripeCustomerId) {
+      try {
+        const customer = await StripeService.getCustomerWithSubscriptions(user.stripeCustomerId)
+
+        if (customer && customer.subscriptions.length > 0) {
+          const activeSubscription = customer.subscriptions.find(sub =>
+            isSubscriptionActive(sub.status)
+          ) || customer.subscriptions[0]
+
+          subscriptionData = {
+            isPremium: isSubscriptionActive(activeSubscription.status),
+            subscriptionStatus: activeSubscription.status,
+            subscriptionPlan: activeSubscription.plan,
+            savedCalculationsCount: user.calculations?.length || 0,
+            currentPeriodEnd: activeSubscription.currentPeriodEnd.toISOString(),
+            cancelAtPeriodEnd: activeSubscription.cancelAtPeriodEnd,
+            trialEnd: activeSubscription.trialEnd?.toISOString(),
+            customerId: customer.id,
+            subscriptionId: activeSubscription.id,
+            usageLimits: getUsageLimits(activeSubscription.plan),
+            currentUsage: await getCurrentUsage(user.id)
+          }
+        } else {
+          // No active subscription found
+          subscriptionData = getFreeUserData(user)
+        }
+      } catch (error) {
+        console.error('Error fetching Stripe subscription:', error)
+        // Fallback to development mode
+        subscriptionData = getDevelopmentSubscriptionData(userEmail, user)
+      }
+    } else {
+      // Development mode or no Stripe configuration
+      subscriptionData = getDevelopmentSubscriptionData(userEmail, user)
+    }
+
+    console.log('Returning subscription response:', subscriptionData)
+    return NextResponse.json(subscriptionData)
   } catch (error) {
     console.error('Error checking subscription status:', error)
     return NextResponse.json(
-      { error: 'Failed to check subscription status' },
+      { error: 'Internal server error' },
       { status: 500 }
     )
   }
-} 
+}
+
+function getFreeUserData(user: any): SubscriptionResponse {
+  return {
+    isPremium: false,
+    subscriptionStatus: 'inactive',
+    subscriptionPlan: 'free',
+    savedCalculationsCount: user.calculations?.length || 0,
+    usageLimits: getUsageLimits('free'),
+    currentUsage: {
+      savedCalculations: user.calculations?.length || 0,
+      socialSecurityCalculations: 0, // TODO: Track this
+      wizardUses: 0, // TODO: Track this
+      pdfReports: 0, // TODO: Track this
+    }
+  }
+}
+
+function getDevelopmentSubscriptionData(userEmail: string, user: any): SubscriptionResponse {
+  const isPremium = FALLBACK_PREMIUM_USERS.includes(userEmail)
+
+  return {
+    isPremium,
+    subscriptionStatus: isPremium ? 'active' : 'inactive',
+    subscriptionPlan: isPremium ? 'monthly' : 'free',
+    savedCalculationsCount: user.calculations?.length || 0,
+    usageLimits: getUsageLimits(isPremium ? 'monthly' : 'free'),
+    currentUsage: {
+      savedCalculations: user.calculations?.length || 0,
+      socialSecurityCalculations: 0,
+      wizardUses: 0,
+      pdfReports: 0,
+    }
+  }
+}
+
+function getUsageLimits(plan: SubscriptionPlan) {
+  if (plan === 'free') {
+    return {
+      maxSavedCalculations: FREE_TIER_LIMITS.maxSavedCalculations,
+      maxSocialSecurityCalculations: FREE_TIER_LIMITS.maxSocialSecurityCalculations,
+      maxWizardUses: FREE_TIER_LIMITS.maxWizardUses,
+      maxPdfReports: FREE_TIER_LIMITS.maxPdfReports,
+    }
+  }
+
+  // Premium plans have unlimited access
+  return {
+    maxSavedCalculations: -1, // -1 indicates unlimited
+    maxSocialSecurityCalculations: -1,
+    maxWizardUses: -1,
+    maxPdfReports: -1,
+  }
+}
+
+async function getCurrentUsage(userId: string) {
+  // TODO: Implement proper usage tracking
+  // For now, return basic data
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: {
+      calculations: true
+    }
+  })
+
+  return {
+    savedCalculations: user?.calculations?.length || 0,
+    socialSecurityCalculations: 0, // TODO: Track SS calculations
+    wizardUses: 0, // TODO: Track wizard uses
+    pdfReports: 0, // TODO: Track PDF reports
+  }
+}

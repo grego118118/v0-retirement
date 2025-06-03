@@ -1,7 +1,7 @@
 "use client"
 
 import { useSearchParams, useRouter } from "next/navigation"
-import { useState } from "react"
+import { useState, Suspense } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge"
 import { CreditCard, Lock, ArrowLeft, CheckCircle } from "lucide-react"
 import Link from "next/link"
 
-export default function DemoCheckoutPage() {
+function DemoCheckoutContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const [isProcessing, setIsProcessing] = useState(false)
@@ -216,4 +216,20 @@ export default function DemoCheckoutPage() {
       </Card>
     </div>
   )
-} 
+}
+
+export default function DemoCheckoutPage() {
+  return (
+    <Suspense fallback={
+      <div className="container mx-auto py-8 px-4 max-w-md">
+        <Card>
+          <CardContent className="pt-6 text-center">
+            <p>Loading...</p>
+          </CardContent>
+        </Card>
+      </div>
+    }>
+      <DemoCheckoutContent />
+    </Suspense>
+  )
+}

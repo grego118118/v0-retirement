@@ -124,13 +124,25 @@ export function SavedCalculations() {
 
               <div className="grid grid-cols-2 gap-3 mb-3">
                 <div className="bg-muted/50 rounded-md p-2">
-                  <div className="text-xs text-muted-foreground mb-1">Monthly Benefit</div>
-                  <div className="font-semibold text-sm text-green-600">
-                    {formatCurrency(calc.monthlyBenefit)}
+                  <div className="text-xs text-muted-foreground mb-1">
+                    {calc.monthlyBenefit > 0 ? "Monthly Pension" : "Social Security Only"}
                   </div>
-                  {calc.socialSecurityData?.selectedMonthlyBenefit && (
+                  <div className="font-semibold text-sm text-green-600">
+                    {calc.monthlyBenefit > 0
+                      ? formatCurrency(calc.monthlyBenefit)
+                      : calc.socialSecurityData?.selectedMonthlyBenefit
+                        ? formatCurrency(calc.socialSecurityData.selectedMonthlyBenefit)
+                        : "No data"
+                    }
+                  </div>
+                  {calc.socialSecurityData?.selectedMonthlyBenefit && calc.monthlyBenefit > 0 && (
                     <div className="text-xs text-muted-foreground">
                       Pension only
+                    </div>
+                  )}
+                  {calc.monthlyBenefit === 0 && calc.socialSecurityData?.selectedMonthlyBenefit && (
+                    <div className="text-xs text-muted-foreground">
+                      SS analysis only
                     </div>
                   )}
                 </div>

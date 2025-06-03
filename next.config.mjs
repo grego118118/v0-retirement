@@ -1,13 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false,
   },
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   images: {
-    unoptimized: true,
+    unoptimized: process.env.NODE_ENV === 'development',
+    domains: ['localhost'],
   },
   // Webpack configuration to handle eval issues in development
   webpack: (config, { dev, isServer }) => {

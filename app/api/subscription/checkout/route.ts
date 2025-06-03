@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"
-import { addPremiumUser } from "@/app/api/subscription/status/route"
+import { authOptions } from "@/lib/auth/auth-config"
+import { addPremiumUser } from "@/lib/subscription-utils"
 
 export async function POST(request: Request) {
   try {

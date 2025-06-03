@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"
+import { authOptions } from "@/lib/auth/auth-config"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
@@ -10,7 +10,7 @@ const calculationSchema = z.object({
   retirementDate: z.string().datetime(),
   retirementAge: z.number().min(50).max(80),
   yearsOfService: z.number().min(0),
-  averageSalary: z.number().positive(),
+  averageSalary: z.number().min(0),
   retirementGroup: z.enum(["1", "2", "3", "4"]),
   benefitPercentage: z.number().min(0).max(5),
   retirementOption: z.enum(["A", "B", "C"]),
@@ -223,13 +223,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const validatedData = calculationSchema.parse(body)
 
-    console.log('Saving calculation with data:', {
-      userId: session.user.id,
-      calculationName: validatedData.calculationName,
-      hasSocialSecurityData: !!validatedData.socialSecurityData,
-      socialSecurityData: validatedData.socialSecurityData
-    })
-
     const calculation = await prisma.retirementCalculation.create({
       data: {
         userId: session.user.id,
@@ -256,6 +249,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ calculation }, { status: 201 })
   } catch (error) {
     if (error instanceof z.ZodError) {
+      console.error("Validation error:", error.errors)
       return NextResponse.json(
         { error: "Invalid data", details: error.errors },
         { status: 400 }

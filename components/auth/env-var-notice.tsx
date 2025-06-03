@@ -2,10 +2,12 @@
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
-import { useAuth } from "./auth-context"
 
 export function EnvVarNotice() {
-  const { isSupabaseConfigured } = useAuth()
+  // Check if Supabase environment variables are configured
+  const isSupabaseConfigured = typeof window !== 'undefined' &&
+    process.env.NEXT_PUBLIC_SUPABASE_URL &&
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   if (isSupabaseConfigured) {
     return null

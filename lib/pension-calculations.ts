@@ -14,6 +14,7 @@ const PENSION_FACTORS_DEFAULT = {
     65: 0.025,
   },
   GROUP_2: { 55: 0.02, 56: 0.021, 57: 0.022, 58: 0.023, 59: 0.024, 60: 0.025 },
+  GROUP_3: { 55: 0.025, 56: 0.025, 57: 0.025, 58: 0.025, 59: 0.025, 60: 0.025 },
   GROUP_4: { 50: 0.02, 51: 0.021, 52: 0.022, 53: 0.023, 54: 0.024, 55: 0.025 },
 }
 
@@ -44,6 +45,22 @@ const PENSION_FACTORS_POST_2012_LT_30YOS = {
     57: 0.0175,
     56: 0.016,
     55: 0.0145,
+    // Ages below 55 are N/A
+  },
+  GROUP_3: {
+    67: 0.025,
+    66: 0.025,
+    65: 0.025,
+    64: 0.025,
+    63: 0.025,
+    62: 0.025,
+    61: 0.025,
+    60: 0.025,
+    59: 0.025,
+    58: 0.025,
+    57: 0.025,
+    56: 0.025,
+    55: 0.025,
     // Ages below 55 are N/A
   },
   GROUP_4: {
@@ -162,7 +179,7 @@ export function calculatePensionWithOption(
         finalPension = basePension * specificPercentage
         optionDescription = `Option C: Joint Survivor (approx. ${((1 - specificPercentage) * 100).toFixed(0)}% less for ages ${roundedMemberAge}/${roundedBeneficiaryAge})`
       } else {
-        let closestMemberAge = null
+        let closestMemberAge: number | null = null
         let minDiff = Number.POSITIVE_INFINITY
 
         Object.keys(OPTION_C_PERCENTAGES_OF_A).forEach((k) => {
@@ -227,6 +244,12 @@ export function checkEligibility(age: number, yos: number, group: string, servic
         message: "Not eligible: Group 2 requires min age 55 for service on/after 04/02/2012.",
       }
     }
+    if (group === "GROUP_3" && age < 55) {
+      return {
+        eligible: false,
+        message: "Not eligible: Group 3 requires min age 55 for service on/after 04/02/2012.",
+      }
+    }
     if (group === "GROUP_4" && age < 50) {
       return {
         eligible: false,
@@ -252,6 +275,7 @@ export function generateProjectionTable(
   const groupMaxAgeLimits: Record<string, number> = {
     GROUP_1: 70,
     GROUP_2: 68,
+    GROUP_3: 68,
     GROUP_4: 65,
   }
   const maxIterations = 30

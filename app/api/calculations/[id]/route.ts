@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth/auth-options"
 import { query } from "@/lib/db/postgres"
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions)
 
@@ -11,10 +11,11 @@ export async function GET(request: Request, { params }: { params: { id: string }
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
     }
 
+    const { id } = await params
     const result = await query(
-      `SELECT * FROM pension_calculations 
+      `SELECT * FROM pension_calculations
        WHERE id = $1 AND user_id = $2`,
-      [params.id, session.user.id],
+      [id, session.user.id],
     )
 
     if (result.rows.length === 0) {
@@ -28,7 +29,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions)
 
@@ -36,8 +37,9 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
     }
 
+    const { id } = await params
     const result = await query("DELETE FROM pension_calculations WHERE id = $1 AND user_id = $2 RETURNING id", [
-      params.id,
+      id,
       session.user.id,
     ])
 

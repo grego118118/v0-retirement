@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Download, Printer, Crown } from "lucide-react"
 import { motion } from "framer-motion"
 import { PremiumBadge } from "@/components/premium/premium-gate"
+import { PensionPDFButton } from "@/components/pdf/pdf-generation-button"
+import { PDFShareDialog } from "@/components/email/pdf-share-dialog"
 import { useSubscriptionStatus } from "@/hooks/use-subscription"
 import Link from "next/link"
 
@@ -32,18 +34,8 @@ interface PensionResultsProps {
 export default function PensionResults({ result }: PensionResultsProps) {
   const { upgradeRequired } = useSubscriptionStatus()
 
-  const handlePrintOrExport = (type: 'print' | 'pdf') => {
-    if (upgradeRequired('pdf_export')) {
-      // Handle premium upgrade redirect
-      return
-    }
-    
-    if (type === 'print') {
-      window.print()
-    } else {
-      // Handle PDF export functionality here
-      console.log('PDF export functionality')
-    }
+  const handlePrint = () => {
+    window.print()
   }
 
   const showSurvivorBenefit = result.survivorAnnualPension && result.survivorAnnualPension > 0
@@ -59,43 +51,29 @@ export default function PensionResults({ result }: PensionResultsProps) {
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-center">Your Estimated Pension</h2>
         <div className="flex gap-2">
-          <PremiumBadge feature="pdf_export">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => handlePrintOrExport('print')}
-              disabled={upgradeRequired('pdf_export')}
-            >
-              <Printer className="h-4 w-4 mr-2" />
-              Print
-            </Button>
-          </PremiumBadge>
-          
-          <PremiumBadge feature="pdf_export">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => handlePrintOrExport('pdf')}
-              disabled={upgradeRequired('pdf_export')}
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Download PDF
-            </Button>
-          </PremiumBadge>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handlePrint}
+          >
+            <Printer className="h-4 w-4 mr-2" />
+            Print
+          </Button>
+
+          <PensionPDFButton
+            pensionData={result}
+            variant="outline"
+            size="sm"
+            showStatus={false}
+          />
+
+          <PDFShareDialog
+            pdfData={result}
+            pdfType="pension"
+            reportTitle="Massachusetts Pension Calculation Report"
+          />
         </div>
       </div>
-
-      {upgradeRequired('pdf_export') && (
-        <Alert className="bg-amber-50 border-amber-200 text-amber-800 dark:bg-amber-900/20 dark:border-amber-900/30 dark:text-amber-600">
-          <Crown className="h-4 w-4" />
-          <AlertDescription>
-            <span className="font-medium">Premium Feature:</span> PDF export and enhanced printing are available with a Premium subscription.{" "}
-            <Link href="/subscribe" className="underline font-medium">
-              Upgrade now
-            </Link>
-          </AlertDescription>
-        </Alert>
-      )}
 
       <div className="text-center mb-4">
         <motion.div

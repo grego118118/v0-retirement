@@ -45,6 +45,18 @@ export function Header() {
                 Premium
               </Badge>
             </Link>
+            <Link
+              href="/wizard"
+              className={`transition-colors hover:text-foreground/80 flex items-center gap-1 ${
+                isActive("/wizard") ? "text-foreground" : "text-foreground/60"
+              }`}
+            >
+              Combined Wizard
+              <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs">
+                <Crown className="mr-1 h-2 w-2" />
+                Premium
+              </Badge>
+            </Link>
             {session && (
               <Link
                 href="/dashboard"
