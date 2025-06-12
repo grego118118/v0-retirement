@@ -11,6 +11,7 @@ import BlogPostClient from "./page-client"
 import { TableOfContents } from "@/components/blog/table-of-contents"
 import { WepGpoTimeline } from "@/components/blog/wep-gpo-timeline"
 import { generateSEOMetadata } from "@/components/seo/metadata"
+import { BlogHeroImage, RelatedPostImage } from "@/components/blog/blog-image"
 import "../blog.css"
 
 export const dynamic = "force-dynamic"
@@ -120,13 +121,11 @@ export default async function BlogPost({ params }: PageProps) {
               </div>
 
               <div className="relative h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] mb-12 rounded-xl overflow-hidden shadow-2xl">
-                <img
-                  src={post.image || "/images/blog/healthcare-retirement-default.svg"}
+                <BlogHeroImage
+                  src={post.image || "/images/blog/default-blog-image.svg"}
                   alt={`${post.title} - ${post.description}`}
-                  className="object-cover w-full h-full transition-transform duration-300 hover:scale-105"
-                  loading="eager"
-                  fetchPriority="high"
-                  sizes="(max-width: 640px) 100vw, (max-width: 768px) 100vw, (max-width: 1024px) 100vw, 1200px"
+                  title={post.title}
+                  priority={true}
                 />
               </div>
 
@@ -204,14 +203,11 @@ export default async function BlogPost({ params }: PageProps) {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {relatedPosts.map((relatedPost) => (
                   <div key={relatedPost.id} className="border border-border/50 rounded-xl overflow-hidden h-full flex flex-col hover:shadow-lg transition-all duration-300 hover:border-primary/20">
-                    <div className="relative h-48 bg-muted">
-                      <img
-                        src={relatedPost.image || "/placeholder.svg?height=200&width=400"}
-                        alt={relatedPost.title}
-                        className="object-cover w-full h-full transition-transform duration-300 hover:scale-105"
-                        loading="lazy"
-                      />
-                    </div>
+                    <RelatedPostImage
+                      src={relatedPost.image || "/images/blog/default-blog-image.svg"}
+                      alt={relatedPost.title}
+                      title={relatedPost.title}
+                    />
                     <div className="p-6 flex flex-col flex-grow">
                       <Badge variant="outline" className="mb-3 w-fit">
                         {relatedPost.category}

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Calendar, Clock, ArrowRight, TrendingUp, Calculator, Users } from "lucide-react"
 import Link from "next/link"
 import { blogPosts } from "@/lib/blog-data"
+import { ResponsiveBlogImage } from "@/components/blog/blog-image"
 
 export const metadata: Metadata = {
   title: "Blog | MA Pension Estimator",
@@ -50,11 +51,12 @@ export default function BlogPage() {
           <h2 className="text-2xl font-bold mb-6">Featured Article</h2>
           <Card className="border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 overflow-hidden">
             <div className="relative h-64 md:h-80 bg-muted">
-              <img
-                src={featuredPost.image || "/placeholder.svg"}
+              <ResponsiveBlogImage
+                src={featuredPost.image || "/images/blog/default-blog-image.svg"}
                 alt={featuredPost.title}
-                className="object-cover w-full h-full"
-                loading="eager"
+                title={featuredPost.title}
+                aspectRatio="16/9"
+                priority={true}
               />
             </div>
             <CardHeader>
@@ -111,14 +113,13 @@ export default function BlogPage() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {regularPosts.map((post) => (
             <Card key={post.id} className="hover:shadow-lg transition-shadow overflow-hidden flex flex-col h-full">
-              <div className="relative h-48 bg-muted">
-                <img
-                  src={post.image || "/placeholder.svg"}
-                  alt={post.title}
-                  className="object-cover w-full h-full"
-                  loading="lazy"
-                />
-              </div>
+              <ResponsiveBlogImage
+                src={post.image || "/images/blog/default-blog-image.svg"}
+                alt={post.title}
+                title={post.title}
+                aspectRatio="16/9"
+                priority={false}
+              />
               <CardHeader className="pb-2">
                 <div className="flex items-center gap-2 mb-2">
                   <Badge variant="outline">{post.category}</Badge>
