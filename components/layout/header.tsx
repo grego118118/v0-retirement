@@ -18,98 +18,149 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 items-center">
-        <div className="mr-4 flex">
-          <Link href="/" className="mr-6 flex items-center space-x-2">
-            <span className="font-bold">MA Pension Estimator</span>
+    <header
+      className="sticky top-0 z-50 w-full mrs-glass shadow-lg"
+      role="banner"
+      aria-label="Site header"
+      style={{ borderBottom: '1px solid var(--mrs-navy-200)' }}
+    >
+      <div className="container flex h-16 items-center max-w-full overflow-x-hidden">
+        <div className="mr-2 md:mr-4 flex min-w-0 flex-shrink-0">
+          <Link
+            href="/"
+            className="mr-2 md:mr-6 flex items-center space-x-2 flex-shrink-0 group"
+            aria-label="Massachusetts Pension Calculator - Home"
+          >
+            <div className="p-2 rounded-lg transition-all duration-300 group-hover:scale-110" style={{ background: 'var(--mrs-gradient-primary)' }}>
+              <Crown className="h-5 w-5 text-white" />
+            </div>
+            <span className="mrs-heading-3 text-sm md:text-base truncate">MA Pension</span>
           </Link>
-          <nav className="flex items-center space-x-6 text-sm font-medium">
+          {/* Desktop Navigation */}
+          <nav
+            className="hidden lg:flex items-center space-x-4 xl:space-x-6 text-sm font-medium"
+            role="navigation"
+            aria-label="Main navigation"
+          >
             <Link
               href="/calculator"
-              className={`transition-colors hover:text-foreground/80 ${
-                isActive("/calculator") ? "text-foreground" : "text-foreground/60"
+              className={`px-3 py-2 rounded-md font-medium transition-all duration-300 whitespace-nowrap ${
+                isActive("/calculator")
+                  ? "text-white shadow-md"
+                  : "text-gray-700 hover:text-white hover:shadow-md"
               }`}
+              style={isActive("/calculator") ? { background: 'var(--mrs-gradient-primary)' } : {}}
             >
               Calculator
             </Link>
             <Link
               href="/social-security"
-              className={`transition-colors hover:text-foreground/80 flex items-center gap-1 ${
-                isActive("/social-security") ? "text-foreground" : "text-foreground/60"
+              className={`px-3 py-2 rounded-md font-medium transition-all duration-300 whitespace-nowrap ${
+                isActive("/social-security")
+                  ? "text-white shadow-md"
+                  : "text-gray-700 hover:text-white hover:shadow-md"
               }`}
+              style={isActive("/social-security") ? { background: 'var(--mrs-gradient-primary)' } : {}}
             >
               Social Security
-              <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200 text-xs">
-                <Crown className="mr-1 h-2 w-2" />
-                Premium
-              </Badge>
+            </Link>
+            <Link
+              href="/tax-calculator"
+              className={`px-3 py-2 rounded-md font-medium transition-all duration-300 whitespace-nowrap ${
+                isActive("/tax-calculator")
+                  ? "text-white shadow-md"
+                  : "text-gray-700 hover:text-white hover:shadow-md"
+              }`}
+              style={isActive("/tax-calculator") ? { background: 'var(--mrs-gradient-primary)' } : {}}
+            >
+              Tax Calculator
             </Link>
             <Link
               href="/wizard"
-              className={`transition-colors hover:text-foreground/80 flex items-center gap-1 ${
-                isActive("/wizard") ? "text-foreground" : "text-foreground/60"
+              className={`px-3 py-2 rounded-md font-medium transition-all duration-300 whitespace-nowrap ${
+                isActive("/wizard")
+                  ? "text-white shadow-md"
+                  : "text-gray-700 hover:text-white hover:shadow-md"
               }`}
+              style={isActive("/wizard") ? { background: 'var(--mrs-gradient-primary)' } : {}}
             >
-              Combined Wizard
-              <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs">
-                <Crown className="mr-1 h-2 w-2" />
-                Premium
-              </Badge>
+              Wizard
             </Link>
             {session && (
-              <Link
-                href="/dashboard"
-                className={`transition-colors hover:text-foreground/80 ${
-                  isActive("/dashboard") ? "text-foreground" : "text-foreground/60"
-                }`}
-              >
-                Dashboard
-              </Link>
+              <>
+                <Link
+                  href="/scenarios"
+                  className={`transition-colors hover:text-foreground/80 whitespace-nowrap ${
+                    isActive("/scenarios") ? "text-foreground" : "text-foreground/60"
+                  }`}
+                >
+                  Scenarios
+                </Link>
+                <Link
+                  href="/dashboard"
+                  className={`transition-colors hover:text-foreground/80 whitespace-nowrap ${
+                    isActive("/dashboard") ? "text-foreground" : "text-foreground/60"
+                  }`}
+                >
+                  Dashboard
+                </Link>
+              </>
             )}
             <Link
-              href="/resources"
-              className={`transition-colors hover:text-foreground/80 ${
-                isActive("/resources") ? "text-foreground" : "text-foreground/60"
-              }`}
-            >
-              Resources
-            </Link>
-            <Link
               href="/blog"
-              className={`transition-colors hover:text-foreground/80 ${
+              className={`transition-colors hover:text-foreground/80 whitespace-nowrap ${
                 isActive("/blog") ? "text-foreground" : "text-foreground/60"
               }`}
             >
               Blog
             </Link>
+          </nav>
+
+          {/* Mobile Navigation - Essential Links Only */}
+          <nav
+            className="flex lg:hidden items-center space-x-2 text-xs font-medium"
+            role="navigation"
+            aria-label="Mobile navigation"
+          >
             <Link
-              href="/faq"
-              className={`transition-colors hover:text-foreground/80 ${
-                isActive("/faq") ? "text-foreground" : "text-foreground/60"
+              href="/calculator"
+              className={`transition-colors hover:text-foreground/80 whitespace-nowrap ${
+                isActive("/calculator") ? "text-foreground" : "text-foreground/60"
               }`}
             >
-              FAQ
+              Calc
             </Link>
             <Link
-              href="/about"
-              className={`transition-colors hover:text-foreground/80 ${
-                isActive("/about") ? "text-foreground" : "text-foreground/60"
+              href="/wizard"
+              className={`transition-colors hover:text-foreground/80 whitespace-nowrap ${
+                isActive("/wizard") ? "text-foreground" : "text-foreground/60"
               }`}
             >
-              About
+              Wizard
             </Link>
-            <Link
-              href="/contact"
-              className={`transition-colors hover:text-foreground/80 ${
-                isActive("/contact") ? "text-foreground" : "text-foreground/60"
-              }`}
-            >
-              Contact
-            </Link>
+            {session && (
+              <>
+                <Link
+                  href="/scenarios"
+                  className={`transition-colors hover:text-foreground/80 whitespace-nowrap ${
+                    isActive("/scenarios") ? "text-foreground" : "text-foreground/60"
+                  }`}
+                >
+                  Scenarios
+                </Link>
+                <Link
+                  href="/dashboard"
+                  className={`transition-colors hover:text-foreground/80 whitespace-nowrap ${
+                    isActive("/dashboard") ? "text-foreground" : "text-foreground/60"
+                  }`}
+                >
+                  Dashboard
+                </Link>
+              </>
+            )}
           </nav>
         </div>
-        <div className="ml-auto flex items-center space-x-4">
+        <div className="ml-auto flex items-center space-x-2 md:space-x-4 flex-shrink-0">
           <ModeToggle />
           <UserMenu />
         </div>

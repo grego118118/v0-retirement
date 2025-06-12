@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Retirement Group Selection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        .success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        .test-item {
+            margin: 10px 0;
+            padding: 10px;
+            border-left: 4px solid #007bff;
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <h1>Retirement Group Selection Test Results</h1>
+    
+    <div class="test-section success">
+        <h2>✅ Fixed Issues</h2>
+        <div class="test-item">
+            <strong>1. Added Placeholder Text</strong>
+            <p>The retirement group dropdown now shows "Select your retirement group" placeholder text when no option is selected.</p>
+        </div>
+        <div class="test-item">
+            <strong>2. Improved Initial State</strong>
+            <p>The dropdown now starts with an empty value, forcing users to make a conscious selection.</p>
+        </div>
+        <div class="test-item">
+            <strong>3. Added Validation</strong>
+            <p>Form validation now requires retirement group selection before proceeding.</p>
+        </div>
+        <div class="test-item">
+            <strong>4. Error Display</strong>
+            <p>Red border and error message appear when retirement group is not selected.</p>
+        </div>
+        <div class="test-item">
+            <strong>5. Consistent UX</strong>
+            <p>Both retirement group and retirement option dropdowns now have consistent behavior.</p>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔧 Technical Changes Made</h2>
+        <ul>
+            <li>Updated <code>SelectValue</code> components to include placeholder text</li>
+            <li>Modified type definitions to allow empty string values initially</li>
+            <li>Enhanced form validation to check for empty selections</li>
+            <li>Added error styling and messages for dropdown fields</li>
+            <li>Updated wizard initialization to start with empty values</li>
+            <li>Improved helper functions to handle empty string cases</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h2>📋 Test Instructions</h2>
+        <ol>
+            <li>Navigate to <a href="http://localhost:3000/wizard" target="_blank">http://localhost:3000/wizard</a></li>
+            <li>Click "Start New Analysis" to begin the wizard</li>
+            <li>Fill in the personal information step and proceed</li>
+            <li>On the pension details step, observe the retirement group dropdown</li>
+            <li>Verify that it shows "Select your retirement group" placeholder</li>
+            <li>Click on the dropdown to see all 4 group options</li>
+            <li>Select a group and verify the description updates</li>
+            <li>Try to proceed without selecting a group to see validation</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h2>🎯 Expected Behavior</h2>
+        <ul>
+            <li>Dropdown shows clear placeholder text when empty</li>
+            <li>All 4 retirement groups (1-4) are selectable</li>
+            <li>Selection updates the description text below</li>
+            <li>Form validation prevents proceeding without selection</li>
+            <li>Error styling appears for invalid states</li>
+            <li>Benefit percentage auto-calculates after group selection</li>
+        </ul>
+    </div>
+
+    <script>
+        // Simple test to verify the page loaded
+        console.log('Retirement Group Selection Test Page Loaded');
+        console.log('Navigate to the wizard to test the fixes');
+    </script>
+</body>
+</html>

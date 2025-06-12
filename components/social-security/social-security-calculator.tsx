@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Calendar, DollarSign, Info, ExternalLink, Crown, CheckCircle, Save, Loader2, TrendingUp, Users, Heart } from "lucide-react"
+import { Calendar, DollarSign, Info, ExternalLink, Crown, CheckCircle, Save, Loader2, TrendingUp, Users, Heart, Calculator } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useSession } from "next-auth/react"
 import { useRetirementData } from "@/hooks/use-retirement-data"
@@ -286,8 +286,454 @@ export function SocialSecurityCalculator() {
     }
   ]
 
+  // Calculate derived data for summary
+  const getSummaryData = () => {
+    const earlyBenefit = formData.earlyRetirementBenefit ? parseFloat(formData.earlyRetirementBenefit) : null
+    const fullBenefit = formData.fullRetirementBenefit ? parseFloat(formData.fullRetirementBenefit) : null
+    const delayedBenefit = formData.delayedRetirementBenefit ? parseFloat(formData.delayedRetirementBenefit) : null
+    const fullAge = formData.fullRetirementAge ? parseInt(formData.fullRetirementAge) : null
+    const annualIncome = formData.annualIncome ? parseFloat(formData.annualIncome) : null
+    const spouseBenefit = formData.spouseFullRetirementBenefit ? parseFloat(formData.spouseFullRetirementBenefit) : null
+
+    // Calculate optimal claiming strategy
+    let optimalStrategy = null
+    if (fullBenefit && delayedBenefit && earlyBenefit) {
+      const strategies = [
+        { age: 62, benefit: earlyBenefit, label: 'Early Retirement' },
+        { age: fullAge || 67, benefit: fullBenefit, label: 'Full Retirement' },
+        { age: 70, benefit: delayedBenefit, label: 'Delayed Retirement' }
+      ]
+      optimalStrategy = strategies.reduce((best, current) =>
+        current.benefit > best.benefit ? current : best
+      )
+    }
+
+    return {
+      earlyBenefit,
+      fullBenefit,
+      delayedBenefit,
+      fullAge,
+      annualIncome,
+      spouseBenefit,
+      optimalStrategy,
+      completionPercentage: calculateCompletionPercentage(),
+      hasCalculatedResults: showResults && benefits !== null
+    }
+  }
+
+  const calculateCompletionPercentage = () => {
+    const basicFields = [
+      formData.fullRetirementAge,
+      formData.fullRetirementBenefit,
+      formData.earlyRetirementBenefit,
+      formData.delayedRetirementBenefit
+    ]
+
+    const advancedFields = [
+      formData.annualIncome,
+      formData.filingStatus
+    ]
+
+    const spousalFields = formData.isMarried ? [
+      formData.spouseFullRetirementBenefit,
+      formData.spouseFullRetirementAge,
+      formData.spouseBirthYear
+    ] : []
+
+    const allFields = [...basicFields, ...advancedFields, ...spousalFields]
+    const completedFields = allFields.filter(field => field && field.toString().trim() !== '').length
+    return Math.round((completedFields / allFields.length) * 100)
+  }
+
+  const formatCurrency = (amount: number | null) => {
+    if (amount === null || amount === undefined) return 'N/A'
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount)
+  }
+
+  const formatAge = (age: number | null) => {
+    if (age === null || age === undefined) return 'N/A'
+    return `${age} years`
+  }
+
+  const summaryData = getSummaryData()
+
   return (
     <div className="space-y-6">
+      {/* Comprehensive Data Summary Section */}
+      <div className="space-y-6 mb-8">
+        {/* Header Card with Progress */}
+        <Card className="border-0 shadow-lg bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-900/20">
+          <CardContent className="p-6">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-bold text-green-900 dark:text-green-100 mb-2">
+                  Social Security Summary
+                </h2>
+                <p className="text-green-700 dark:text-green-300 text-sm">
+                  Review your Social Security inputs and benefit estimates below
+                </p>
+              </div>
+              <div className="flex flex-col items-end gap-2">
+                <div className="text-right">
+                  <div className="text-sm text-green-600 dark:text-green-400 font-medium">
+                    Form Completion
+                  </div>
+                  <div className="text-2xl font-bold text-green-900 dark:text-green-100">
+                    {summaryData.completionPercentage}%
+                  </div>
+                </div>
+                <div className="w-32 h-2 bg-green-200 dark:bg-green-800 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-green-600 dark:bg-green-400 transition-all duration-300"
+                    style={{ width: `${summaryData.completionPercentage}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Quick Actions Bar */}
+        {summaryData.completionPercentage > 0 && (
+          <Card className="border-0 shadow-lg bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-900/20">
+            <CardContent className="p-4">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
+                    <CheckCircle className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-emerald-900 dark:text-emerald-100">
+                      {summaryData.completionPercentage === 100 ? 'Ready to Calculate!' : 'Keep Going!'}
+                    </h4>
+                    <p className="text-sm text-emerald-700 dark:text-emerald-300">
+                      {summaryData.completionPercentage === 100
+                        ? 'All fields completed - proceed to calculate your Social Security benefits'
+                        : `Continue filling out the form to complete your analysis`
+                      }
+                    </p>
+                  </div>
+                </div>
+                {summaryData.completionPercentage >= 25 && (
+                  <Button
+                    onClick={calculateBenefits}
+                    disabled={!isFormValid()}
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                  >
+                    <Calculator className="h-4 w-4 mr-2" />
+                    Calculate Benefits
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Data Summary Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Basic Benefits Card */}
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-900/20">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                    <DollarSign className="h-5 w-5 text-green-600 dark:text-green-400" />
+                  </div>
+                  <h3 className="font-semibold text-green-900 dark:text-green-100">Basic Benefits</h3>
+                </div>
+                <div className={`w-3 h-3 rounded-full ${
+                  summaryData.fullBenefit && summaryData.fullAge
+                    ? 'bg-green-500' : 'bg-gray-300'
+                }`} title={
+                  summaryData.fullBenefit && summaryData.fullAge
+                    ? 'Complete' : 'Incomplete'
+                } />
+              </div>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-green-700 dark:text-green-300">Full Retirement Age:</span>
+                  <span className="font-medium text-green-900 dark:text-green-100">
+                    {formatAge(summaryData.fullAge)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-green-700 dark:text-green-300">Early (Age 62):</span>
+                  <span className="font-medium text-green-900 dark:text-green-100">
+                    {formatCurrency(summaryData.earlyBenefit)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-green-700 dark:text-green-300">Full Retirement:</span>
+                  <span className="font-medium text-green-900 dark:text-green-100">
+                    {formatCurrency(summaryData.fullBenefit)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-green-700 dark:text-green-300">Delayed (Age 70):</span>
+                  <span className="font-medium text-green-900 dark:text-green-100">
+                    {formatCurrency(summaryData.delayedBenefit)}
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Advanced Options Card */}
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-900/20">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                    <TrendingUp className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <h3 className="font-semibold text-blue-900 dark:text-blue-100">Advanced Options</h3>
+                </div>
+                <div className={`w-3 h-3 rounded-full ${
+                  formData.annualIncome && formData.filingStatus
+                    ? 'bg-green-500' : 'bg-gray-300'
+                }`} title={
+                  formData.annualIncome && formData.filingStatus
+                    ? 'Complete' : 'Incomplete'
+                } />
+              </div>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-blue-700 dark:text-blue-300">Annual Income:</span>
+                  <span className="font-medium text-blue-900 dark:text-blue-100">
+                    {formatCurrency(summaryData.annualIncome)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-blue-700 dark:text-blue-300">Filing Status:</span>
+                  <span className="font-medium text-blue-900 dark:text-blue-100">
+                    {formData.filingStatus === 'single' ? 'Single' :
+                     formData.filingStatus === 'married' ? 'Married Filing Jointly' :
+                     formData.filingStatus === 'marriedSeparate' ? 'Married Filing Separately' : 'Not set'}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-blue-700 dark:text-blue-300">COLA Adjustments:</span>
+                  <span className={`font-medium text-sm px-2 py-1 rounded-full ${
+                    formData.includeInflation
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                      : 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300'
+                  }`}>
+                    {formData.includeInflation ? 'Enabled' : 'Disabled'}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-blue-700 dark:text-blue-300">Inflation Scenario:</span>
+                  <span className="font-medium text-blue-900 dark:text-blue-100">
+                    {formData.includeInflation ?
+                      (formData.inflationScenario === 'conservative' ? 'Conservative (2.0%)' :
+                       formData.inflationScenario === 'moderate' ? 'Moderate (2.5%)' :
+                       formData.inflationScenario === 'optimistic' ? 'Higher (3.0%)' : 'Not set') : 'N/A'}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-blue-700 dark:text-blue-300">Medicare Premiums:</span>
+                  <span className={`font-medium text-sm px-2 py-1 rounded-full ${
+                    formData.includeMedicare
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                      : 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300'
+                  }`}>
+                    {formData.includeMedicare ? 'Included' : 'Not Included'}
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Spousal Benefits Card */}
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-950/20 dark:to-violet-900/20">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                    <Heart className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <h3 className="font-semibold text-purple-900 dark:text-purple-100">Spousal Benefits</h3>
+                </div>
+                <div className={`w-3 h-3 rounded-full ${
+                  !formData.isMarried ? 'bg-gray-300' :
+                  formData.isMarried && summaryData.spouseBenefit && formData.spouseFullRetirementAge
+                    ? 'bg-green-500' : 'bg-orange-400'
+                }`} title={
+                  !formData.isMarried ? 'Not applicable' :
+                  formData.isMarried && summaryData.spouseBenefit && formData.spouseFullRetirementAge
+                    ? 'Complete' : 'Incomplete'
+                } />
+              </div>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-purple-700 dark:text-purple-300">Marital Status:</span>
+                  <span className={`font-medium text-sm px-2 py-1 rounded-full ${
+                    formData.isMarried
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                      : 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300'
+                  }`}>
+                    {formData.isMarried ? 'Married' : 'Single'}
+                  </span>
+                </div>
+                {formData.isMarried ? (
+                  <>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-purple-700 dark:text-purple-300">Spouse's Benefit:</span>
+                      <span className="font-medium text-purple-900 dark:text-purple-100">
+                        {formatCurrency(summaryData.spouseBenefit)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-purple-700 dark:text-purple-300">Spouse's FRA:</span>
+                      <span className="font-medium text-purple-900 dark:text-purple-100">
+                        {formatAge(formData.spouseFullRetirementAge ? parseInt(formData.spouseFullRetirementAge) : null)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-purple-700 dark:text-purple-300">Spouse Birth Year:</span>
+                      <span className="font-medium text-purple-900 dark:text-purple-100">
+                        {formData.spouseBirthYear || 'Not set'}
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center py-4">
+                    <p className="text-sm text-purple-600 dark:text-purple-400">
+                      Enable spousal benefits analysis by checking "I am married" in the Spousal Benefits tab
+                    </p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Calculation Results Card - Only show if calculations have been performed */}
+        {summaryData.hasCalculatedResults && (
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-900/20">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+                    <Calculator className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                  </div>
+                  <h3 className="font-semibold text-orange-900 dark:text-orange-100">Calculation Results</h3>
+                </div>
+                <div className="w-3 h-3 rounded-full bg-green-500" title="Calculations complete" />
+              </div>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <h4 className="font-medium text-orange-800 dark:text-orange-200 mb-2">Optimal Strategy:</h4>
+                  {summaryData.optimalStrategy && (
+                    <div className="p-3 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-sm font-medium text-orange-700 dark:text-orange-300">
+                          {summaryData.optimalStrategy.label}
+                        </span>
+                        <span className="text-sm text-orange-600 dark:text-orange-400">
+                          Age {summaryData.optimalStrategy.age}
+                        </span>
+                      </div>
+                      <div className="text-lg font-bold text-orange-900 dark:text-orange-100">
+                        {formatCurrency(summaryData.optimalStrategy.benefit)}/month
+                      </div>
+                    </div>
+                  )}
+                  {medicareResults && (
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-orange-700 dark:text-orange-300">Medicare Premium:</span>
+                        <span className="font-medium text-orange-900 dark:text-orange-100">
+                          {formatCurrency(medicareResults.medicarePremium)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-orange-700 dark:text-orange-300">Net SS Benefit:</span>
+                        <span className="font-medium text-orange-900 dark:text-orange-100">
+                          {formatCurrency(medicareResults.netBenefit)}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-3">
+                  <h4 className="font-medium text-orange-800 dark:text-orange-200 mb-2">Additional Analysis:</h4>
+                  {colaProjections.length > 0 && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-orange-700 dark:text-orange-300">COLA Projections:</span>
+                      <span className="font-medium text-orange-900 dark:text-orange-100">
+                        {colaProjections.length} years calculated
+                      </span>
+                    </div>
+                  )}
+                  {spousalResults && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-orange-700 dark:text-orange-300">Spousal Analysis:</span>
+                      <span className="font-medium text-orange-900 dark:text-orange-100">
+                        Available
+                      </span>
+                    </div>
+                  )}
+                  {coupleOptimization && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-orange-700 dark:text-orange-300">Couple Strategy:</span>
+                      <span className="font-medium text-orange-900 dark:text-orange-100">
+                        Optimized
+                      </span>
+                    </div>
+                  )}
+                  {survivorResults && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-orange-700 dark:text-orange-300">Survivor Benefits:</span>
+                      <span className="font-medium text-orange-900 dark:text-orange-100">
+                        Calculated
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Methodology & Assumptions Card */}
+        <Card className="border-0 shadow-lg bg-gradient-to-br from-slate-50 to-gray-50 dark:from-slate-950/20 dark:to-gray-900/20">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-slate-100 dark:bg-slate-900/30 rounded-lg">
+                <Info className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+              </div>
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100">Calculation Methodology</h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h4 className="font-medium text-slate-800 dark:text-slate-200 mb-2">Key Assumptions:</h4>
+                <ul className="text-sm text-slate-600 dark:text-slate-400 space-y-1">
+                  <li>• Benefits based on official SSA estimates from your account</li>
+                  <li>• COLA adjustments use historical averages (2.0%-3.0% annually)</li>
+                  <li>• Medicare Part B premium: $174.70/month (2024 rate)</li>
+                  <li>• Tax calculations use current federal and MA state rates</li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-medium text-slate-800 dark:text-slate-200 mb-2">Important Notes:</h4>
+                <ul className="text-sm text-slate-600 dark:text-slate-400 space-y-1">
+                  <li>• Estimates are for planning purposes only</li>
+                  <li>• Actual benefits may vary based on future policy changes</li>
+                  <li>• Consult SSA.gov for official benefit calculations</li>
+                  <li>• Consider professional financial advice for complex situations</li>
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">

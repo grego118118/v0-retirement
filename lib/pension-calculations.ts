@@ -1,88 +1,147 @@
 // Default factors (for members hired BEFORE April 2, 2012, OR those hired ON/AFTER April 2, 2012 with 30+ YOS)
+// Based on official Massachusetts Retirement System benefit multiplier chart
 const PENSION_FACTORS_DEFAULT = {
   GROUP_1: {
-    55: 0.015,
-    56: 0.016,
-    57: 0.017,
-    58: 0.018,
-    59: 0.019,
-    60: 0.02,
-    61: 0.021,
-    62: 0.022,
-    63: 0.023,
-    64: 0.024,
-    65: 0.025,
+    60: 0.02,   // 2.0% at age 60 (minimum retirement age for Group 1 post-2012)
+    61: 0.021,  // 2.1% at age 61
+    62: 0.022,  // 2.2% at age 62
+    63: 0.023,  // 2.3% at age 63
+    64: 0.024,  // 2.4% at age 64
+    65: 0.025,  // 2.5% at age 65
+    66: 0.025,  // 2.5% at age 66 and older
+    67: 0.025,  // 2.5% at age 67 and older (max)
   },
-  GROUP_2: { 55: 0.02, 56: 0.021, 57: 0.022, 58: 0.023, 59: 0.024, 60: 0.025 },
-  GROUP_3: { 55: 0.025, 56: 0.025, 57: 0.025, 58: 0.025, 59: 0.025, 60: 0.025 },
-  GROUP_4: { 50: 0.02, 51: 0.021, 52: 0.022, 53: 0.023, 54: 0.024, 55: 0.025 },
+  GROUP_2: {
+    55: 0.02,   // 2.0% at age 55 (minimum retirement age for Group 2)
+    56: 0.021,  // 2.1% at age 56
+    57: 0.022,  // 2.2% at age 57
+    58: 0.023,  // 2.3% at age 58
+    59: 0.024,  // 2.4% at age 59
+    60: 0.025,  // 2.5% at age 60 and older (max)
+    61: 0.025,  // 2.5% at age 61 and older
+    62: 0.025,  // 2.5% at age 62 and older
+    63: 0.025,  // 2.5% at age 63 and older
+    64: 0.025,  // 2.5% at age 64 and older
+    65: 0.025,  // 2.5% at age 65 and older
+    66: 0.025,  // 2.5% at age 66 and older
+    67: 0.025,  // 2.5% at age 67 and older
+  },
+  GROUP_3: {
+    // State Police - can retire at any age with 20+ years or age 55 with 20+ years
+    // 2.5% per year regardless of age (special provisions for State Police)
+    50: 0.025,  // 2.5% at any age with sufficient service
+    51: 0.025,  // 2.5% at any age with sufficient service
+    52: 0.025,  // 2.5% at any age with sufficient service
+    53: 0.025,  // 2.5% at any age with sufficient service
+    54: 0.025,  // 2.5% at any age with sufficient service
+    55: 0.025,  // 2.5% at age 55 and older
+    56: 0.025,  // 2.5% at age 56 and older
+    57: 0.025,  // 2.5% at age 57 and older
+    58: 0.025,  // 2.5% at age 58 and older
+    59: 0.025,  // 2.5% at age 59 and older
+    60: 0.025,  // 2.5% at age 60 and older
+    61: 0.025,  // 2.5% at age 61 and older
+    62: 0.025,  // 2.5% at age 62 and older
+    63: 0.025,  // 2.5% at age 63 and older
+    64: 0.025,  // 2.5% at age 64 and older
+    65: 0.025,  // 2.5% at age 65 and older
+    66: 0.025,  // 2.5% at age 66 and older
+    67: 0.025,  // 2.5% at age 67 and older
+  },
+  GROUP_4: {
+    50: 0.02,   // 2.0% at age 50 (minimum retirement age for Group 4)
+    51: 0.021,  // 2.1% at age 51
+    52: 0.022,  // 2.2% at age 52
+    53: 0.023,  // 2.3% at age 53
+    54: 0.024,  // 2.4% at age 54
+    55: 0.025,  // 2.5% at age 55 and older (max)
+    56: 0.025,  // 2.5% at age 56 and older
+    57: 0.025,  // 2.5% at age 57 and older
+    58: 0.025,  // 2.5% at age 58 and older
+    59: 0.025,  // 2.5% at age 59 and older
+    60: 0.025,  // 2.5% at age 60 and older
+    61: 0.025,  // 2.5% at age 61 and older
+    62: 0.025,  // 2.5% at age 62 and older
+    63: 0.025,  // 2.5% at age 63 and older
+    64: 0.025,  // 2.5% at age 64 and older
+    65: 0.025,  // 2.5% at age 65 and older
+    66: 0.025,  // 2.5% at age 66 and older
+    67: 0.025,  // 2.5% at age 67 and older
+  },
 }
 
 // Factors for members hired ON OR AFTER April 2, 2012 AND with LESS THAN 30 years of service
+// Based on official Massachusetts Retirement System chart for post-2012 hires with <30 years
 const PENSION_FACTORS_POST_2012_LT_30YOS = {
   GROUP_1: {
-    67: 0.025,
-    66: 0.0235,
-    65: 0.022,
-    64: 0.0205,
-    63: 0.019,
-    62: 0.0175,
-    61: 0.016,
-    60: 0.0145,
-    // Ages below 60 are N/A (will result in factor 0)
+    67: 0.025,   // 2.5% at age 67 and older
+    66: 0.0235,  // 2.35% at age 66
+    65: 0.022,   // 2.20% at age 65
+    64: 0.0205,  // 2.05% at age 64
+    63: 0.019,   // 1.90% at age 63
+    62: 0.0175,  // 1.75% at age 62
+    61: 0.016,   // 1.60% at age 61
+    60: 0.0145,  // 1.45% at age 60
+    // Ages below 60 are N/A for Group 1 post-2012 <30 YOS
   },
   GROUP_2: {
-    67: 0.025,
-    66: 0.025,
-    65: 0.025,
-    64: 0.025,
-    63: 0.025,
-    62: 0.025,
-    61: 0.0235,
-    60: 0.022,
-    59: 0.0205,
-    58: 0.019,
-    57: 0.0175,
-    56: 0.016,
-    55: 0.0145,
-    // Ages below 55 are N/A
+    67: 0.025,   // 2.5% at age 67 and older
+    66: 0.025,   // 2.5% at age 66
+    65: 0.025,   // 2.5% at age 65
+    64: 0.025,   // 2.5% at age 64
+    63: 0.025,   // 2.5% at age 63
+    62: 0.025,   // 2.5% at age 62
+    61: 0.0235,  // 2.35% at age 61
+    60: 0.022,   // 2.20% at age 60
+    59: 0.0205,  // 2.05% at age 59
+    58: 0.019,   // 1.90% at age 58
+    57: 0.0175,  // 1.75% at age 57
+    56: 0.016,   // 1.60% at age 56
+    55: 0.0145,  // 1.45% at age 55
+    // Ages below 55 are N/A for Group 2 post-2012 <30 YOS
   },
   GROUP_3: {
-    67: 0.025,
-    66: 0.025,
-    65: 0.025,
-    64: 0.025,
-    63: 0.025,
-    62: 0.025,
-    61: 0.025,
-    60: 0.025,
-    59: 0.025,
-    58: 0.025,
-    57: 0.025,
-    56: 0.025,
-    55: 0.025,
-    // Ages below 55 are N/A
+    // Group 3 (State Police) maintains 2.5% regardless of hire date or years of service
+    67: 0.025,   // 2.5% at age 67 and older
+    66: 0.025,   // 2.5% at age 66
+    65: 0.025,   // 2.5% at age 65
+    64: 0.025,   // 2.5% at age 64
+    63: 0.025,   // 2.5% at age 63
+    62: 0.025,   // 2.5% at age 62
+    61: 0.025,   // 2.5% at age 61
+    60: 0.025,   // 2.5% at age 60
+    59: 0.025,   // 2.5% at age 59
+    58: 0.025,   // 2.5% at age 58
+    57: 0.025,   // 2.5% at age 57
+    56: 0.025,   // 2.5% at age 56
+    55: 0.025,   // 2.5% at age 55
+    54: 0.025,   // 2.5% at age 54
+    53: 0.025,   // 2.5% at age 53
+    52: 0.025,   // 2.5% at age 52
+    51: 0.025,   // 2.5% at age 51
+    50: 0.025,   // 2.5% at age 50
+    // State Police can retire at any age with 20+ years
   },
   GROUP_4: {
-    67: 0.025,
-    66: 0.025,
-    65: 0.025,
-    64: 0.025,
-    63: 0.025,
-    62: 0.025,
-    61: 0.025,
-    60: 0.025,
-    59: 0.025,
-    58: 0.025,
-    57: 0.025,
-    56: 0.0235,
-    55: 0.022,
-    54: 0.0205,
-    53: 0.019,
-    52: 0.0175,
-    51: 0.016,
-    50: 0.0145,
-    // Ages below 50 are N/A
+    67: 0.025,   // 2.5% at age 67 and older
+    66: 0.025,   // 2.5% at age 66
+    65: 0.025,   // 2.5% at age 65
+    64: 0.025,   // 2.5% at age 64
+    63: 0.025,   // 2.5% at age 63
+    62: 0.025,   // 2.5% at age 62
+    61: 0.025,   // 2.5% at age 61
+    60: 0.025,   // 2.5% at age 60
+    59: 0.025,   // 2.5% at age 59
+    58: 0.025,   // 2.5% at age 58
+    57: 0.025,   // 2.5% at age 57
+    56: 0.0235,  // 2.35% at age 56
+    55: 0.022,   // 2.20% at age 55
+    54: 0.0205,  // 2.05% at age 54
+    53: 0.019,   // 1.90% at age 53
+    52: 0.0175,  // 1.75% at age 52
+    51: 0.016,   // 1.60% at age 51
+    50: 0.0145,  // 1.45% at age 50
+    // Ages below 50 are N/A for Group 4 post-2012 <30 YOS
   },
 }
 
@@ -91,6 +150,32 @@ const OPTION_B_REDUCTIONS = { 50: 0.01, 60: 0.03, 70: 0.05 }
 const OPTION_C_PERCENTAGES_OF_A = { "55-55": 0.94, "65-55": 0.84, "65-65": 0.89, "70-65": 0.83, "70-70": 0.86 }
 const OPTION_C_GENERAL_REDUCTION_APPROX = 0.88
 const OPTION_C_SURVIVOR_PERCENTAGE = 2 / 3
+
+// Massachusetts Pension COLA Configuration (FY2025)
+export const MA_PENSION_COLA_CONFIG = {
+  // Current FY2025 COLA structure
+  currentRate: 0.03, // 3% COLA rate for FY2025
+  baseAmount: 13000, // COLA applied to first $13,000 of annual retirement allowance
+  maxAnnualIncrease: 390, // Maximum annual COLA increase ($13,000 × 3%)
+  maxMonthlyIncrease: 32.50, // Maximum monthly COLA increase ($390 ÷ 12)
+
+  // Historical context
+  baseAmountHistory: [
+    { year: 2025, baseAmount: 13000, rate: 0.03 },
+    { year: 2024, baseAmount: 13000, rate: 0.03 },
+    { year: 2023, baseAmount: 13000, rate: 0.03 },
+    // Base amount has been $13,000 for many years
+  ],
+
+  // Policy information
+  isGuaranteed: false, // COLA is not guaranteed/automatic
+  requiresLegislativeApproval: true, // Subject to annual legislative approval
+  specialCommissionReviewing: true, // Special COLA Commission reviewing potential base increases
+
+  // Application rules
+  appliesTo: 'first_portion_only', // Only applies to first $13,000 of benefit
+  effectiveDate: 'july_1', // Typically effective July 1st each fiscal year
+}
 
 export function getBenefitFactor(age: number, group: string, serviceEntry: string, yearsOfService: number): number {
   let factorsToUse
@@ -383,4 +468,131 @@ export function calculateAnnualPension(
   }
 
   return (averageSalary * percentage) / 100
+}
+
+/**
+ * Calculate Massachusetts Pension COLA adjustment for a given year
+ * @param annualPension - The annual pension amount
+ * @param colaRate - The COLA rate for the year (defaults to current FY2025 rate)
+ * @param baseAmount - The base amount COLA applies to (defaults to current $13,000)
+ * @returns Object with COLA calculation details
+ */
+export function calculateMAPensionCOLA(
+  annualPension: number,
+  colaRate: number = MA_PENSION_COLA_CONFIG.currentRate,
+  baseAmount: number = MA_PENSION_COLA_CONFIG.baseAmount
+): {
+  originalPension: number
+  colaEligibleAmount: number
+  colaIncrease: number
+  adjustedPension: number
+  maxPossibleIncrease: number
+  isAtMaximum: boolean
+} {
+  // Ensure inputs are valid
+  if (annualPension < 0) annualPension = 0
+  if (colaRate < 0) colaRate = 0
+  if (baseAmount < 0) baseAmount = 0
+
+  // Calculate COLA eligible amount (first $13,000 or pension amount, whichever is less)
+  const colaEligibleAmount = Math.min(annualPension, baseAmount)
+
+  // Calculate COLA increase
+  const colaIncrease = colaEligibleAmount * colaRate
+
+  // Calculate maximum possible increase for this base amount and rate
+  const maxPossibleIncrease = baseAmount * colaRate
+
+  // Determine if at maximum
+  const isAtMaximum = colaIncrease >= maxPossibleIncrease
+
+  // Calculate adjusted pension
+  const adjustedPension = annualPension + colaIncrease
+
+  return {
+    originalPension: Math.round(annualPension),
+    colaEligibleAmount: Math.round(colaEligibleAmount),
+    colaIncrease: Math.round(colaIncrease),
+    adjustedPension: Math.round(adjustedPension),
+    maxPossibleIncrease: Math.round(maxPossibleIncrease),
+    isAtMaximum
+  }
+}
+
+/**
+ * Calculate COLA projections over multiple years for MA pension
+ * @param initialPension - Starting annual pension amount
+ * @param years - Number of years to project
+ * @param assumedColaRate - Assumed annual COLA rate (defaults to current rate)
+ * @param baseAmount - COLA base amount (defaults to current $13,000)
+ * @returns Array of yearly COLA projections
+ */
+export function calculateMAPensionCOLAProjections(
+  initialPension: number,
+  years: number,
+  assumedColaRate: number = MA_PENSION_COLA_CONFIG.currentRate,
+  baseAmount: number = MA_PENSION_COLA_CONFIG.baseAmount
+): Array<{
+  year: number
+  startingPension: number
+  colaIncrease: number
+  endingPension: number
+  cumulativeIncrease: number
+  isAtMaximum: boolean
+}> {
+  const projections = []
+  let currentPension = initialPension
+  let cumulativeIncrease = 0
+
+  for (let year = 1; year <= years; year++) {
+    const colaResult = calculateMAPensionCOLA(currentPension, assumedColaRate, baseAmount)
+
+    cumulativeIncrease += colaResult.colaIncrease
+    currentPension = colaResult.adjustedPension
+
+    projections.push({
+      year,
+      startingPension: colaResult.originalPension,
+      colaIncrease: colaResult.colaIncrease,
+      endingPension: colaResult.adjustedPension,
+      cumulativeIncrease: Math.round(cumulativeIncrease),
+      isAtMaximum: colaResult.isAtMaximum
+    })
+  }
+
+  return projections
+}
+
+/**
+ * Get COLA information and warnings for display
+ * @returns Object with COLA policy information and user warnings
+ */
+export function getMAPensionCOLAInfo(): {
+  currentRate: string
+  baseAmount: string
+  maxAnnualIncrease: string
+  maxMonthlyIncrease: string
+  warnings: string[]
+  policyNotes: string[]
+} {
+  const config = MA_PENSION_COLA_CONFIG
+
+  return {
+    currentRate: `${(config.currentRate * 100).toFixed(1)}%`,
+    baseAmount: `$${config.baseAmount.toLocaleString()}`,
+    maxAnnualIncrease: `$${config.maxAnnualIncrease.toLocaleString()}`,
+    maxMonthlyIncrease: `$${config.maxMonthlyIncrease.toFixed(2)}`,
+    warnings: [
+      'COLA is not guaranteed and is subject to annual legislative approval',
+      'COLA only applies to the first $13,000 of your annual retirement allowance',
+      'Actual COLA rates may vary from year to year based on economic conditions',
+      'These projections are estimates and should not be considered guaranteed benefits'
+    ],
+    policyNotes: [
+      'The COLA base amount of $13,000 has remained unchanged for many years',
+      'A Special COLA Commission is currently reviewing potential increases to the base amount',
+      'COLA adjustments typically become effective on July 1st of each fiscal year',
+      'Massachusetts pension COLA structure differs from Social Security COLA calculations'
+    ]
+  }
 }

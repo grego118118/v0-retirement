@@ -9,18 +9,22 @@ import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { 
-  FileText, 
-  Save, 
-  CheckCircle, 
-  DollarSign, 
-  Calendar, 
+import {
+  FileText,
+  Save,
+  CheckCircle,
+  DollarSign,
+  Calendar,
   TrendingUp,
   Shield,
   Building,
-  Download
+  Download,
+  Clock
 } from "lucide-react"
 import { CombinedCalculationData, OptimizationResult } from "@/lib/wizard/wizard-types"
+import { usePDFGeneration } from "@/hooks/use-pdf-generation"
+import { useSession } from "next-auth/react"
+import { toast } from "sonner"
 
 interface ReviewSaveStepProps {
   data: CombinedCalculationData
@@ -30,18 +34,66 @@ interface ReviewSaveStepProps {
 }
 
 export function ReviewSaveStep({ data, results, onComplete, isSaving }: ReviewSaveStepProps) {
+  const { data: session } = useSession()
   const [calculationName, setCalculationName] = useState(
     `Combined Analysis - ${new Date().toLocaleDateString()}`
   )
   const [notes, setNotes] = useState('')
 
+  // PDF generation hook
+  const {
+    isGenerating: isGeneratingPDF,
+    generatePDF,
+    canGenerate,
+    missingRequirements,
+    warnings,
+  } = usePDFGeneration()
+
   const handleSave = () => {
     onComplete()
   }
 
-  const generatePDFReport = () => {
-    // This would generate a PDF report of the analysis
-    console.log('Generating PDF report...')
+  const generatePDFReport = async () => {
+    if (!session?.user) {
+      toast.error('Please sign in to generate PDF reports')
+      return
+    }
+
+    if (!canGenerate) {
+      toast.error('Cannot generate PDF', {
+        description: missingRequirements.join(', '),
+      })
+      return
+    }
+
+    try {
+      const result = await generatePDF({
+        reportType: 'comprehensive',
+        includeCharts: true,
+        includeActionItems: true,
+        includeSocialSecurity: true,
+      })
+
+      if (result.success && result.data) {
+        // Trigger browser print dialog for PDF generation
+        setTimeout(() => {
+          window.print()
+        }, 500)
+
+        toast.success('PDF report generated successfully!', {
+          description: `Generated in ${result.generationTime}ms`,
+        })
+      } else {
+        toast.error('Failed to generate PDF', {
+          description: result.error,
+        })
+      }
+    } catch (error) {
+      console.error('PDF generation error:', error)
+      toast.error('PDF generation failed', {
+        description: error instanceof Error ? error.message : 'Unknown error',
+      })
+    }
   }
 
   return (
@@ -305,12 +357,56 @@ export function ReviewSaveStep({ data, results, onComplete, isSaving }: ReviewSa
             <Button
               variant="outline"
               onClick={generatePDFReport}
-              disabled={isSaving}
+              disabled={isSaving || isGeneratingPDF || !canGenerate}
             >
-              <Download className="mr-2 h-4 w-4" />
-              Generate PDF
+              {isGeneratingPDF ? (
+                <>
+                  <Clock className="mr-2 h-4 w-4 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Download className="mr-2 h-4 w-4" />
+                  Generate PDF
+                </>
+              )}
             </Button>
           </div>
+
+          {/* PDF Generation Status */}
+          {!session?.user && (
+            <Alert className="bg-blue-50 border-blue-200 text-blue-800">
+              <CheckCircle className="h-4 w-4" />
+              <AlertDescription>
+                <span className="font-medium">Sign In Required:</span> PDF report generation requires authentication.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {session?.user && missingRequirements.length > 0 && (
+            <Alert variant="destructive">
+              <CheckCircle className="h-4 w-4" />
+              <AlertDescription>
+                <span className="font-medium">Required:</span> {missingRequirements.join(', ')}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {session?.user && warnings.length > 0 && (
+            <Alert className="bg-yellow-50 border-yellow-200 text-yellow-800">
+              <CheckCircle className="h-4 w-4" />
+              <AlertDescription>
+                <span className="font-medium">Warnings:</span> {warnings.join(', ')}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {session?.user && canGenerate && (
+            <div className="text-sm text-muted-foreground flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <span>Ready to generate comprehensive PDF report</span>
+            </div>
+          )}
         </CardContent>
       </Card>
 

@@ -30,6 +30,7 @@ import { IncomeAssetsStep } from "./steps/income-assets-step"
 import { PreferencesStep } from "./steps/preferences-step"
 import { OptimizationStep } from "./steps/optimization-step"
 import { ReviewSaveStep } from "./steps/review-save-step"
+import { WizardDebug } from "../debug/wizard-debug"
 
 // Import types and utilities
 import { WizardState, CombinedCalculationData, WIZARD_STEPS, WizardProgress } from "@/lib/wizard/wizard-types"
@@ -64,6 +65,55 @@ export function CombinedCalculationWizard({
   const [optimizationResults, setOptimizationResults] = useState<any>(null)
   const [isSaving, setIsSaving] = useState(false)
 
+  // Validate if current step can be progressed from
+  const canProgressFromCurrentStep = (): boolean => {
+    const currentStepData = wizardState.steps[wizardState.currentStep]
+
+    // If step is already marked complete, allow progression
+    if (currentStepData?.isComplete) return true
+
+    // Check step-specific validation
+    switch (currentStepData?.id) {
+      case 'personal-info':
+        return wizardState.data.personalInfo.birthYear > 0 &&
+               wizardState.data.personalInfo.retirementGoalAge >= 55
+
+      case 'pension-details':
+        return wizardState.data.pensionData.yearsOfService > 0 &&
+               wizardState.data.pensionData.averageSalary > 0 &&
+               wizardState.data.pensionData.retirementGroup !== '' &&
+               wizardState.data.pensionData.retirementOption !== '' &&
+               wizardState.data.pensionData.retirementDate !== '' &&
+               wizardState.data.pensionData.retirementDate.length >= 10 // Valid date format YYYY-MM-DD
+
+      case 'social-security':
+        return wizardState.data.socialSecurityData.fullRetirementBenefit > 0
+
+      case 'income-assets':
+        return true // Optional step
+
+      case 'preferences':
+        return true // Has defaults
+
+      case 'optimization':
+        return optimizationResults !== null // Allow progression if optimization is complete
+
+      case 'review-save':
+        // Final step - allow completion if all required data is present and optimization is complete
+        return optimizationResults !== null &&
+               wizardState.data.pensionData.retirementGroup !== '' &&
+               wizardState.data.pensionData.retirementOption !== '' &&
+               wizardState.data.pensionData.yearsOfService > 0 &&
+               wizardState.data.pensionData.averageSalary > 0 &&
+               wizardState.data.pensionData.retirementDate !== '' &&
+               wizardState.data.pensionData.retirementDate.length >= 10 &&
+               wizardState.data.socialSecurityData.fullRetirementBenefit > 0
+
+      default:
+        return false
+    }
+  }
+
   // Calculate wizard progress
   const progress: WizardProgress = {
     stepNumber: wizardState.currentStep + 1,
@@ -71,7 +121,7 @@ export function CombinedCalculationWizard({
     percentComplete: ((wizardState.currentStep + 1) / wizardState.steps.length) * 100,
     estimatedTimeRemaining: Math.max(0, (wizardState.steps.length - wizardState.currentStep - 1) * 2),
     canGoBack: wizardState.currentStep > 0,
-    canGoForward: wizardState.steps[wizardState.currentStep]?.isComplete || false,
+    canGoForward: canProgressFromCurrentStep(),
     canSave: wizardState.currentStep > 0
   }
 
@@ -93,6 +143,51 @@ export function CombinedCalculationWizard({
     return () => clearInterval(interval)
   }, [wizardState, session])
 
+  // Auto-run optimization when reaching optimization step
+  useEffect(() => {
+    const currentStepData = wizardState.steps[wizardState.currentStep]
+    if (currentStepData?.id === 'optimization' && !optimizationResults && !isCalculating) {
+      // Check if we have enough data to run optimization
+      const hasRequiredData = wizardState.data.pensionData.retirementGroup !== '' &&
+                             wizardState.data.pensionData.retirementOption !== '' &&
+                             wizardState.data.pensionData.yearsOfService > 0 &&
+                             wizardState.data.pensionData.averageSalary > 0 &&
+                             wizardState.data.pensionData.retirementDate !== '' &&
+                             wizardState.data.pensionData.retirementDate.length >= 10 &&
+                             wizardState.data.socialSecurityData.fullRetirementBenefit > 0
+
+      if (hasRequiredData) {
+        runOptimization()
+      }
+    }
+  }, [wizardState.currentStep, optimizationResults, isCalculating])
+
+  // Auto-mark final step as ready when all requirements are met
+  useEffect(() => {
+    const currentStepData = wizardState.steps[wizardState.currentStep]
+    if (currentStepData?.id === 'review-save' && !currentStepData.isComplete) {
+      const canComplete = optimizationResults !== null &&
+                         wizardState.data.pensionData.retirementGroup !== '' &&
+                         wizardState.data.pensionData.retirementOption !== '' &&
+                         wizardState.data.pensionData.yearsOfService > 0 &&
+                         wizardState.data.pensionData.averageSalary > 0 &&
+                         wizardState.data.pensionData.retirementDate !== '' &&
+                         wizardState.data.pensionData.retirementDate.length >= 10 &&
+                         wizardState.data.socialSecurityData.fullRetirementBenefit > 0
+
+      if (canComplete) {
+        setWizardState(prev => {
+          const newSteps = [...prev.steps]
+          const reviewStepIndex = newSteps.findIndex(step => step.id === 'review-save')
+          if (reviewStepIndex >= 0) {
+            newSteps[reviewStepIndex].isComplete = true
+          }
+          return { ...prev, steps: newSteps }
+        })
+      }
+    }
+  }, [wizardState.currentStep, optimizationResults, wizardState.data])
+
   const handleStepComplete = useCallback((stepData: any) => {
     setWizardState(prev => {
       const newSteps = [...prev.steps]
@@ -112,8 +207,8 @@ export function CombinedCalculationWizard({
   const currentStep = wizardState.steps[wizardState.currentStep]
 
   const handleNext = async () => {
-    if (wizardState.currentStep === wizardState.steps.length - 2) {
-      // Before final step, run optimization
+    // Run optimization when entering the optimization step
+    if (wizardState.currentStep + 1 === wizardState.steps.findIndex(step => step.id === 'optimization')) {
       await runOptimization()
     }
 
@@ -130,8 +225,13 @@ export function CombinedCalculationWizard({
     }))
   }
 
-  const handleJumpToStep = (stepIndex: number) => {
+  const handleJumpToStep = async (stepIndex: number) => {
     if (stepIndex <= wizardState.currentStep || wizardState.steps[stepIndex - 1]?.isComplete) {
+      // Run optimization if jumping to optimization step and it hasn't been run yet
+      if (wizardState.steps[stepIndex]?.id === 'optimization' && !optimizationResults) {
+        await runOptimization()
+      }
+
       setWizardState(prev => ({
         ...prev,
         currentStep: stepIndex
@@ -207,10 +307,25 @@ export function CombinedCalculationWizard({
   const handleCompleteWizard = async () => {
     setIsSaving(true)
     try {
+      // Convert retirement date to ISO datetime format for API validation
+      const retirementDateString = wizardState.data.pensionData.retirementDate
+
+      // Ensure we have a valid date string and convert to ISO datetime
+      let retirementDateISO: string
+      if (retirementDateString && retirementDateString.length >= 10) {
+        // Create date at noon UTC to avoid timezone issues
+        const dateObj = new Date(retirementDateString + 'T12:00:00.000Z')
+        retirementDateISO = dateObj.toISOString()
+      } else {
+        // Fallback to a default date if no valid date provided
+        const defaultDate = new Date(new Date().getFullYear() + 10, 0, 1, 12, 0, 0, 0)
+        retirementDateISO = defaultDate.toISOString()
+      }
+
       // Create final calculation object
       const finalCalculation = {
         calculationName: `Combined Analysis - ${new Date().toLocaleDateString()}`,
-        retirementDate: wizardState.data.pensionData.retirementDate,
+        retirementDate: retirementDateISO,
         retirementAge: wizardState.data.personalInfo.retirementGoalAge,
         yearsOfService: wizardState.data.pensionData.yearsOfService,
         averageSalary: wizardState.data.pensionData.averageSalary,
@@ -388,6 +503,16 @@ export function CombinedCalculationWizard({
         </CardContent>
       </Card>
 
+      {/* Debug Panel - Only in development */}
+      {process.env.NODE_ENV === 'development' && (
+        <WizardDebug
+          wizardState={wizardState}
+          optimizationResults={optimizationResults}
+          progress={progress}
+          canProgressFromCurrentStep={canProgressFromCurrentStep}
+        />
+      )}
+
       {/* Current Step Content */}
       <Card>
         <CardHeader>
@@ -466,10 +591,10 @@ function initializeWizardData(initialData?: Partial<CombinedCalculationData>): C
     pensionData: {
       yearsOfService: 0,
       averageSalary: 0,
-      retirementGroup: '1',
+      retirementGroup: '', // Start with empty to force user selection
       benefitPercentage: 0,
-      retirementOption: 'A',
-      retirementDate: '',
+      retirementOption: '', // Start with empty to force user selection
+      retirementDate: new Date(new Date().getFullYear() + 10, 0, 1).toISOString().split('T')[0], // Default to 10 years from now
       monthlyBenefit: 0,
       annualBenefit: 0,
       ...initialData?.pensionData

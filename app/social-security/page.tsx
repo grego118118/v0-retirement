@@ -1,327 +1,217 @@
-import { generateSEOMetadata } from "@/components/seo/metadata"
+"use client"
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Crown, DollarSign, TrendingUp, Calculator, Check, Users, ExternalLink, Info } from "lucide-react"
+import { useSession } from "next-auth/react"
+import { Crown, Lock, TrendingUp, Calculator, DollarSign, Calendar } from "lucide-react"
 import Link from "next/link"
 import { SocialSecurityCalculator } from "@/components/social-security/social-security-calculator"
-import { PremiumGate } from "@/components/premium/premium-gate"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-
-export const metadata = generateSEOMetadata({
-  title: "Social Security Integration | Massachusetts Pension Estimator",
-  description: "Combine your Massachusetts state pension with official Social Security benefits from SSA.gov for complete retirement income planning.",
-  path: "/social-security",
-  keywords: [
-    "Social Security calculator",
-    "Massachusetts pension Social Security",
-    "retirement income planning",
-    "combined benefits calculator",
-    "Social Security timing",
-    "SSA.gov benefits",
-  ],
-})
-
-const benefits = [
-  "Use official SSA.gov benefit estimates for maximum accuracy",
-  "Calculate combined pension and Social Security income",
-  "Income replacement ratio analysis with real data",
-  "Optimal claiming strategy recommendations",
-  "Scenario comparison tools for different claiming ages",
-  "Comprehensive retirement income breakdown and projections"
-]
-
-const strategies = [
-  {
-    title: "Early Claiming (Age 62)",
-    description: "Reduced benefits but earlier access to income",
-    pros: ["Immediate income", "Guaranteed benefits", "Good if poor health", "Bridge gap to pension"],
-    cons: ["25-30% reduction", "Lower lifetime value", "Earnings test applies", "Permanent reduction"]
-  },
-  {
-    title: "Full Retirement Age",
-    description: "100% of calculated benefits",
-    pros: ["Full benefit amount", "No earnings test", "Break-even point", "Standard claiming age"],
-    cons: ["Delayed income", "Opportunity cost", "No delayed credits", "Miss maximum benefits"]
-  },
-  {
-    title: "Delayed Claiming (Age 70)",
-    description: "Maximum benefits with delayed retirement credits",
-    pros: ["8% annual increase", "Maximum lifetime value", "Inflation protection", "Highest monthly amount"],
-    cons: ["Delayed income", "Longevity risk", "Complex planning", "Forgone years of benefits"]
-  }
-]
-
-const ssaResources = [
-  {
-    title: "my Social Security Account",
-    url: "https://www.ssa.gov/myaccount/",
-    description: "Create an account to view your official Social Security Statement with benefit estimates"
-  },
-  {
-    title: "Retirement Estimator",
-    url: "https://www.ssa.gov/benefits/retirement/estimator.html",
-    description: "Quick estimator tool if you don't have a my Social Security account yet"
-  },
-  {
-    title: "When to Start Receiving Benefits",
-    url: "https://www.ssa.gov/benefits/retirement/planner/agereduction.html",
-    description: "Official SSA guide on the impact of claiming at different ages"
-  },
-  {
-    title: "Benefit Calculation Examples",
-    url: "https://www.ssa.gov/OACT/quickcalc/",
-    description: "SSA's quick benefit calculator for rough estimates"
-  }
-]
 
 export default function SocialSecurityPage() {
+  const { data: session } = useSession()
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="text-center mb-12">
-        <Badge className="mb-4 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-          <DollarSign className="mr-1 h-3 w-3" />
-          Premium Feature
-        </Badge>
-        <h1 className="text-4xl font-bold tracking-tight mb-4">
-          Social Security Integration
-        </h1>
-        <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-          Get the complete picture of your retirement income by combining your Massachusetts state pension 
-          with <strong>official Social Security benefits from SSA.gov</strong> for optimal retirement planning.
-        </p>
-      </div>
-
-      {/* Important Notice */}
-      <Alert className="mb-8 border-blue-200 bg-blue-50 dark:bg-blue-950/20">
-        <Info className="h-4 w-4 text-blue-600" />
-        <AlertDescription className="text-blue-800 dark:text-blue-200">
-          <strong>Why Use Official SSA.gov Data?</strong> Your actual Social Security benefits depend on your complete earnings history, 
-          cost-of-living adjustments, and current law. Only SSA.gov has access to your official records to provide accurate estimates.
-        </AlertDescription>
-      </Alert>
-
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
       {/* Hero Section */}
-      <Card className="mb-12 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20">
-        <CardContent className="pt-8">
-          <div className="grid md:grid-cols-2 gap-8 items-center">
-            <div>
-              <h2 className="text-2xl font-bold mb-4">Why Integrate Social Security?</h2>
-              <p className="text-muted-foreground mb-6">
-                Your Massachusetts state pension is just one part of your retirement income. 
-                Understanding how it works with Social Security helps you make informed decisions 
-                about when to retire and when to claim benefits for maximum lifetime value.
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-blue-500"></div>
-                  <span className="text-sm">Complete income picture</span>
+      <section className="bg-gradient-to-br from-blue-600 via-indigo-700 to-purple-800 text-white py-12 md:py-16 relative overflow-hidden">
+        {/* Background Elements */}
+        <div className="absolute inset-0 bg-black/20"></div>
+        <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-white/10 to-transparent"></div>
+
+        <div className="container px-4 md:px-6 relative z-10">
+          <div className="text-center max-w-4xl mx-auto">
+            <div className="mb-6">
+              <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl text-center">
+                Social Security
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-400">
+                  Calculator
+                </span>
+              </h1>
+              {session && (
+                <div className="flex justify-center mt-4">
+                  <Badge className="bg-green-500/20 text-green-100 border-green-400/30 px-3 lg:px-4 py-1 lg:py-2 text-sm lg:text-base">
+                    <Crown className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4" />
+                    Premium Access
+                  </Badge>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-green-500"></div>
-                  <span className="text-sm">Optimal timing strategies</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-purple-500"></div>
-                  <span className="text-sm">Income replacement analysis</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-orange-500"></div>
-                  <span className="text-sm">Official SSA.gov accuracy</span>
-                </div>
-              </div>
+              )}
             </div>
-            <div className="bg-white dark:bg-gray-900 rounded-lg p-6 shadow-lg">
-              <div className="text-center mb-4">
-                <h3 className="font-semibold text-lg">Example: Combined Monthly Income</h3>
-                <p className="text-sm text-muted-foreground">Based on official SSA.gov estimates</p>
-              </div>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center p-3 bg-blue-50 dark:bg-blue-950/30 rounded">
-                  <span className="text-sm">MA State Pension</span>
-                  <span className="font-bold text-blue-600">$4,465</span>
-                </div>
-                <div className="flex justify-between items-center p-3 bg-green-50 dark:bg-green-950/30 rounded">
-                  <span className="text-sm">Social Security (FRA)</span>
-                  <span className="font-bold text-green-600">$2,800</span>
-                </div>
-                <div className="flex justify-between items-center p-3 bg-purple-50 dark:bg-purple-950/30 rounded border-2 border-purple-200">
-                  <span className="font-bold">Total Monthly</span>
-                  <span className="font-bold text-purple-600 text-lg">$7,265</span>
-                </div>
-                <div className="text-center pt-2">
-                  <span className="text-sm text-muted-foreground">85% income replacement ratio</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* SSA.gov Resources */}
-      <Card className="mb-12">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl flex items-center justify-center gap-2">
-            <ExternalLink className="h-6 w-6 text-blue-600" />
-            Official Social Security Resources
-          </CardTitle>
-          <CardDescription>
-            Get your official benefit estimates directly from the Social Security Administration
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid md:grid-cols-2 gap-6">
-            {ssaResources.map((resource, index) => (
-              <Card key={index} className="hover:shadow-md transition-shadow">
-                <CardContent className="pt-4">
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-semibold text-sm">{resource.title}</h3>
-                    <Button size="sm" variant="outline" asChild>
-                      <a href={resource.url} target="_blank" rel="noopener noreferrer">
-                        <ExternalLink className="h-3 w-3" />
-                      </a>
-                    </Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground">{resource.description}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-          
-          <Alert className="mt-6 bg-green-50 border-green-200">
-            <Check className="h-4 w-4 text-green-600" />
-            <AlertDescription className="text-green-800">
-              <strong>Recommended:</strong> Start with "my Social Security Account" for the most accurate and detailed benefit information based on your actual earnings record.
-            </AlertDescription>
-          </Alert>
-        </CardContent>
-      </Card>
-
-      {/* Social Security Calculator */}
-      <div className="mb-12">
-        <PremiumGate
-          feature="social_security"
-          title="Social Security Benefit Integration"
-          description="Enter your official SSA.gov benefit estimates and combine them with your pension for comprehensive retirement planning"
-          showPreview={false}
-        >
-          <SocialSecurityCalculator />
-        </PremiumGate>
-      </div>
-
-      {/* Benefits Section */}
-      <Card className="mb-12">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl">What You Get with Social Security Integration</CardTitle>
-          <CardDescription>
-            Comprehensive tools to optimize your retirement income strategy using official data
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid md:grid-cols-2 gap-6">
-            {benefits.map((benefit, index) => (
-              <div key={index} className="flex items-start gap-3">
-                <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                <span className="text-sm">{benefit}</span>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Claiming Strategies */}
-      <div className="mb-12">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold tracking-tight mb-4">
-            Social Security Claiming Strategies
-          </h2>
-          <p className="text-lg text-muted-foreground">
-            Understanding the impact of different claiming ages on your lifetime benefits
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-6">
-          {strategies.map((strategy, index) => (
-            <Card key={index} className="relative">
-              <CardHeader>
-                <CardTitle className="text-lg">{strategy.title}</CardTitle>
-                <CardDescription>{strategy.description}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="font-medium text-green-600 mb-2">Advantages:</h4>
-                    <ul className="space-y-1">
-                      {strategy.pros.map((pro, i) => (
-                        <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                          <div className="h-1.5 w-1.5 rounded-full bg-green-500 mt-2 flex-shrink-0"></div>
-                          {pro}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-orange-600 mb-2">Considerations:</h4>
-                    <ul className="space-y-1">
-                      {strategy.cons.map((con, i) => (
-                        <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                          <div className="h-1.5 w-1.5 rounded-full bg-orange-500 mt-2 flex-shrink-0"></div>
-                          {con}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        <Alert className="mt-8 border-amber-200 bg-amber-50 dark:bg-amber-950/20">
-          <Info className="h-4 w-4 text-amber-600" />
-          <AlertDescription className="text-amber-800 dark:text-amber-200">
-            <strong>Remember:</strong> The optimal claiming strategy depends on your individual circumstances, including health, financial needs, 
-            spouse's benefits, and other retirement income sources like your MA state pension.
-          </AlertDescription>
-        </Alert>
-      </div>
-
-      {/* CTA Section */}
-      <Card className="text-center bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/20 dark:to-purple-950/20">
-        <CardContent className="pt-8">
-          <Crown className="h-12 w-12 text-amber-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold mb-4">Ready to Optimize Your Retirement Income?</h2>
-          <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-            Upgrade to Premium to access Social Security integration with official SSA.gov data and get the complete picture 
-            of your retirement income potential with maximum accuracy.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Button size="lg" asChild>
-              <Link href="/subscribe">
-                <Crown className="mr-2 h-4 w-4" />
-                Upgrade to Premium
-              </Link>
-            </Button>
-            <Button size="lg" variant="outline" asChild>
-              <Link href="/calculator">
-                <Calculator className="mr-2 h-4 w-4" />
-                Try Pension Calculator
-              </Link>
-            </Button>
-          </div>
-          
-          <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-            <p className="text-sm text-muted-foreground">
-              Don't have your SSA.gov estimates yet? 
-              <Button variant="link" className="p-0 h-auto font-normal text-sm ml-1" asChild>
-                <a href="https://www.ssa.gov/myaccount/" target="_blank" rel="noopener noreferrer">
-                  Get them here first <ExternalLink className="ml-1 h-3 w-3 inline" />
-                </a>
-              </Button>
+            <p className="text-xl md:text-2xl text-blue-100 leading-relaxed max-w-3xl mx-auto">
+              Calculate your Social Security benefits with COLA adjustments, spousal benefits, and tax optimization strategies.
             </p>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
+
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-6">
+
+        {/* Premium Features Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 mb-12">
+          <Card className="group hover:shadow-lg transition-all duration-300 border-0 shadow-md bg-gradient-to-br from-white to-green-50/50 dark:from-slate-900 dark:to-green-950/20">
+            <CardHeader className="pb-3 lg:pb-4 xl:pb-6 px-4 lg:px-6 xl:px-8 pt-4 lg:pt-6 xl:pt-8">
+              <CardTitle className="flex items-center gap-3 lg:gap-4 text-lg lg:text-xl xl:text-2xl">
+                <div className="p-2 lg:p-3 xl:p-4 rounded-lg bg-green-100 dark:bg-green-900/30 group-hover:scale-110 transition-transform duration-300">
+                  <TrendingUp className="h-5 w-5 lg:h-6 lg:w-6 xl:h-7 xl:w-7 text-green-600 dark:text-green-400" />
+                </div>
+                COLA Adjustments
+              </CardTitle>
+              <CardDescription className="text-sm lg:text-base xl:text-lg">
+                Automatic cost-of-living adjustments with 2-3% annual inflation modeling
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          <Card className="group hover:shadow-lg transition-all duration-300 border-0 shadow-md bg-gradient-to-br from-white to-blue-50/50 dark:from-slate-900 dark:to-blue-950/20">
+            <CardHeader className="pb-3 lg:pb-4 xl:pb-6 px-4 lg:px-6 xl:px-8 pt-4 lg:pt-6 xl:pt-8">
+              <CardTitle className="flex items-center gap-3 lg:gap-4 text-lg lg:text-xl xl:text-2xl">
+                <div className="p-2 lg:p-3 xl:p-4 rounded-lg bg-blue-100 dark:bg-blue-900/30 group-hover:scale-110 transition-transform duration-300">
+                  <DollarSign className="h-5 w-5 lg:h-6 lg:w-6 xl:h-7 xl:w-7 text-blue-600 dark:text-blue-400" />
+                </div>
+                Spousal Benefits
+              </CardTitle>
+              <CardDescription className="text-sm lg:text-base xl:text-lg">
+                Calculate spousal benefits up to 50% of higher earner's benefit amount
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          <Card className="group hover:shadow-lg transition-all duration-300 border-0 shadow-md bg-gradient-to-br from-white to-purple-50/50 dark:from-slate-900 dark:to-purple-950/20">
+            <CardHeader className="pb-3 lg:pb-4 xl:pb-6 px-4 lg:px-6 xl:px-8 pt-4 lg:pt-6 xl:pt-8">
+              <CardTitle className="flex items-center gap-3 lg:gap-4 text-lg lg:text-xl xl:text-2xl">
+                <div className="p-2 lg:p-3 xl:p-4 rounded-lg bg-purple-100 dark:bg-purple-900/30 group-hover:scale-110 transition-transform duration-300">
+                  <Calculator className="h-5 w-5 lg:h-6 lg:w-6 xl:h-7 xl:w-7 text-purple-600 dark:text-purple-400" />
+                </div>
+                Tax Implications
+              </CardTitle>
+              <CardDescription className="text-sm lg:text-base xl:text-lg">
+                Federal and Massachusetts state tax calculations on Social Security income
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          <Card className="group hover:shadow-lg transition-all duration-300 border-0 shadow-md bg-gradient-to-br from-white to-orange-50/50 dark:from-slate-900 dark:to-orange-950/20">
+            <CardHeader className="pb-3 lg:pb-4 xl:pb-6 px-4 lg:px-6 xl:px-8 pt-4 lg:pt-6 xl:pt-8">
+              <CardTitle className="flex items-center gap-3 lg:gap-4 text-lg lg:text-xl xl:text-2xl">
+                <div className="p-2 lg:p-3 xl:p-4 rounded-lg bg-orange-100 dark:bg-orange-900/30 group-hover:scale-110 transition-transform duration-300">
+                  <Calendar className="h-5 w-5 lg:h-6 lg:w-6 xl:h-7 xl:w-7 text-orange-600 dark:text-orange-400" />
+                </div>
+                Claiming Strategies
+              </CardTitle>
+              <CardDescription className="text-sm lg:text-base xl:text-lg">
+                Optimize when to claim benefits for maximum lifetime income
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          <Card className="group hover:shadow-lg transition-all duration-300 border-0 shadow-md bg-gradient-to-br from-white to-red-50/50 dark:from-slate-900 dark:to-red-950/20">
+            <CardHeader className="pb-3 lg:pb-4 xl:pb-6 px-4 lg:px-6 xl:px-8 pt-4 lg:pt-6 xl:pt-8">
+              <CardTitle className="flex items-center gap-3 lg:gap-4 text-lg lg:text-xl xl:text-2xl">
+                <div className="p-2 lg:p-3 xl:p-4 rounded-lg bg-red-100 dark:bg-red-900/30 group-hover:scale-110 transition-transform duration-300">
+                  <TrendingUp className="h-5 w-5 lg:h-6 lg:w-6 xl:h-7 xl:w-7 text-red-600 dark:text-red-400" />
+                </div>
+                Medicare Deductions
+              </CardTitle>
+              <CardDescription className="text-sm lg:text-base xl:text-lg">
+                Account for Medicare premiums ($174.70/month) in benefit calculations
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          <Card className="group hover:shadow-lg transition-all duration-300 border-0 shadow-md bg-gradient-to-br from-white to-indigo-50/50 dark:from-slate-900 dark:to-indigo-950/20">
+            <CardHeader className="pb-3 lg:pb-4 xl:pb-6 px-4 lg:px-6 xl:px-8 pt-4 lg:pt-6 xl:pt-8">
+              <CardTitle className="flex items-center gap-3 lg:gap-4 text-lg lg:text-xl xl:text-2xl">
+                <div className="p-2 lg:p-3 xl:p-4 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 group-hover:scale-110 transition-transform duration-300">
+                  <Calculator className="h-5 w-5 lg:h-6 lg:w-6 xl:h-7 xl:w-7 text-indigo-600 dark:text-indigo-400" />
+                </div>
+                Combined Analysis
+              </CardTitle>
+              <CardDescription className="text-sm lg:text-base xl:text-lg">
+                Integrate with MA pension calculations for complete retirement planning
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        </div>
+
+        {/* Sign In Section - Only show for non-authenticated users */}
+        {!session && (
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 via-indigo-50/50 to-purple-50/30 dark:from-blue-950/20 dark:via-indigo-950/20 dark:to-purple-950/20">
+            <CardHeader className="text-center pb-4 lg:pb-6 xl:pb-8 px-4 lg:px-6 xl:px-8 pt-4 lg:pt-6 xl:pt-8">
+              <CardTitle className="flex items-center justify-center gap-3 lg:gap-4 text-2xl lg:text-3xl xl:text-4xl text-slate-800 dark:text-slate-200">
+                <div className="p-2 lg:p-3 xl:p-4 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md">
+                  <Lock className="h-6 w-6 lg:h-7 lg:w-7 xl:h-8 xl:w-8" />
+                </div>
+                Access Social Security Calculator
+              </CardTitle>
+              <CardDescription className="text-lg lg:text-xl xl:text-2xl">
+                Sign in to access advanced Social Security optimization tools and maximize your retirement income
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center px-4 lg:px-6 xl:px-8 pb-4 lg:pb-6 xl:pb-8">
+              <div className="mb-6 lg:mb-8">
+                <div className="text-2xl lg:text-3xl xl:text-4xl font-bold mb-2 lg:mb-3 text-slate-800 dark:text-slate-200">Free with Account</div>
+                <div className="text-muted-foreground text-sm lg:text-base xl:text-lg">All premium features included</div>
+              </div>
+              <Button size="lg" asChild className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-200 h-12 lg:h-14 px-6 lg:px-8 text-sm lg:text-base">
+                <Link href="/auth/signin">
+                  <Crown className="mr-2 h-4 w-4 lg:h-5 lg:w-5" />
+                  Sign In to Access
+                </Link>
+              </Button>
+              <p className="text-sm lg:text-base text-muted-foreground mt-4 lg:mt-6">
+                Free account • No subscription required
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Calculator Access Section - Only show for authenticated users */}
+        {session && (
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-green-50 via-emerald-50/50 to-teal-50/30 dark:from-green-950/20 dark:via-emerald-950/20 dark:to-teal-950/20">
+            <CardHeader className="text-center pb-4 lg:pb-6 xl:pb-8 px-4 lg:px-6 xl:px-8 pt-4 lg:pt-6 xl:pt-8">
+              <CardTitle className="flex items-center justify-center gap-3 lg:gap-4 text-2xl lg:text-3xl xl:text-4xl text-slate-800 dark:text-slate-200">
+                <div className="p-2 lg:p-3 xl:p-4 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-md">
+                  <Calculator className="h-6 w-6 lg:h-7 lg:w-7 xl:h-8 xl:w-8" />
+                </div>
+                Social Security Calculator Ready
+              </CardTitle>
+              <CardDescription className="text-lg lg:text-xl xl:text-2xl">
+                Start optimizing your Social Security benefits with our advanced calculator tools
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center px-4 lg:px-6 xl:px-8 pb-4 lg:pb-6 xl:pb-8">
+              <div className="mb-6 lg:mb-8">
+                <div className="text-2xl lg:text-3xl xl:text-4xl font-bold mb-2 lg:mb-3 text-green-700 dark:text-green-400">Premium Access Active</div>
+                <div className="text-muted-foreground text-sm lg:text-base xl:text-lg">All features unlocked and ready to use</div>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button size="lg" asChild className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg hover:shadow-xl transition-all duration-200 h-12 lg:h-14 px-6 lg:px-8 text-sm lg:text-base">
+                  <Link href="/social-security#calculator">
+                    <Calculator className="mr-2 h-4 w-4 lg:h-5 lg:w-5" />
+                    Start Calculator
+                  </Link>
+                </Button>
+                <Button size="lg" variant="outline" asChild className="h-12 lg:h-14 px-6 lg:px-8 text-sm lg:text-base">
+                  <Link href="/wizard">
+                    <TrendingUp className="mr-2 h-4 w-4 lg:h-5 lg:w-5" />
+                    Combined Analysis
+                  </Link>
+                </Button>
+              </div>
+              <p className="text-sm lg:text-base text-muted-foreground mt-4 lg:mt-6">
+                Access all Social Security optimization features • No limits
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Social Security Calculator - Only show for authenticated users */}
+        {session && (
+          <div id="calculator" className="mt-12">
+            <SocialSecurityCalculator />
+          </div>
+        )}
+      </div>
     </div>
   )
-} 
+}

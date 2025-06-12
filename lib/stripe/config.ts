@@ -7,7 +7,7 @@ import Stripe from 'stripe'
 // Initialize Stripe with secret key (only if available)
 export const stripe = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY, {
-      apiVersion: '2025-05-28.basil',
+      apiVersion: '2024-12-18.acacia',
       typescript: true,
     })
   : null
@@ -26,33 +26,34 @@ export const SUBSCRIPTION_PLANS = {
   monthly: {
     priceId: process.env.STRIPE_MONTHLY_PRICE_ID || 'price_monthly_placeholder',
     name: 'Premium Monthly',
-    price: 19.99,
+    price: 9.99,
     interval: 'month' as const,
     features: [
       'Unlimited pension calculations',
       'Advanced Social Security optimization',
       'Combined retirement planning wizard',
-      'Tax optimization strategies',
-      'Monte Carlo risk analysis',
-      'PDF report generation',
+      'Tax implications calculator',
+      'Professional PDF report generation',
+      'Advanced retirement planning tools',
       'Priority customer support',
-      'Early access to new features'
+      'Email notifications and alerts'
     ]
   },
   annual: {
     priceId: process.env.STRIPE_ANNUAL_PRICE_ID || 'price_annual_placeholder',
     name: 'Premium Annual',
-    price: 199.99,
+    price: 99.99,
     interval: 'year' as const,
-    savings: 'Save $39.89 (17% off)',
+    monthlyEquivalent: 8.33,
+    savings: 'Save $19.89 (17% off)',
     features: [
       'All monthly features included',
-      'Annual savings of $39.89',
+      'Annual savings of $19.89',
       'Extended calculation history',
       'Advanced portfolio analysis',
-      'Dedicated account manager',
+      'Priority feature requests',
       'Custom retirement scenarios',
-      'Priority feature requests'
+      'Dedicated account support'
     ]
   }
 } as const

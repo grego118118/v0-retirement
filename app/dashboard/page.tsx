@@ -1,278 +1,452 @@
 "use client"
 
 import { Suspense, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { SavedCalculations } from "@/components/dashboard/saved-calculations"
 import { RetirementChart } from "@/components/dashboard/retirement-chart"
 import { RetirementCountdown } from "@/components/countdown/retirement-countdown"
+import { QuickActions } from "@/components/dashboard/quick-actions"
+import { HealthcareBenefits } from "@/components/dashboard/healthcare-benefits"
+import { ScenarioDashboardCards } from "@/components/scenario-modeling/scenario-dashboard-cards"
+import {
+  calculateQuickPensionEstimate,
+  calculateCurrentAge,
+  calculateYearsOfService as calculateStandardizedYearsOfService,
+  formatPensionCurrency,
+  type RetirementGroup
+} from "@/lib/standardized-pension-calculator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Download, Printer, Crown, DollarSign, TrendingUp, Calculator, ArrowRight, Lock, RefreshCw, CheckCircle } from "lucide-react"
+import { Download, Printer, Crown, DollarSign, TrendingUp, Calculator, ArrowRight, Lock, RefreshCw, CheckCircle, Calendar, Shield, AlertCircle, User } from "lucide-react"
 import { useSubscriptionStatus } from "@/hooks/use-subscription"
 import { useRetirementData } from "@/hooks/use-retirement-data"
+import { useProfile } from "@/contexts/profile-context"
 import { formatCurrency } from "@/lib/utils"
 import Link from "next/link"
 
 export default function DashboardPage() {
+  const router = useRouter()
   const { isPremium, subscriptionStatus } = useSubscriptionStatus()
-  const { profile, calculations, fetchProfile, fetchCalculations, loading } = useRetirementData()
+  const { profile, loading: profileLoading } = useProfile()
+  const { calculations, fetchCalculations, loading: calculationsLoading } = useRetirementData()
 
-  // Calculate retirement date from profile data
-  const getRetirementDate = () => {
-    if (!profile?.dateOfBirth) return null
-    
-    try {
-      const birthDate = new Date(profile.dateOfBirth)
-      // Use planned retirement age from profile, or default to 65
-      const retirementAge = profile.plannedRetirementAge || 65
-      const retirementDate = new Date(birthDate)
-      retirementDate.setFullYear(birthDate.getFullYear() + retirementAge)
-      
-      return retirementDate
-    } catch (error) {
-      console.error('Error calculating retirement date:', error)
-      return null
+  const loading = profileLoading || calculationsLoading
+
+  useEffect(() => {
+    // Fetch calculations on component mount
+    const loadData = async () => {
+      try {
+        await fetchCalculations()
+      } catch (error) {
+        console.error('Error loading dashboard data:', error)
+      }
     }
+
+    loadData()
+  }, [fetchCalculations])
+
+  // Calculate retirement date based on profile
+  const getRetirementDate = () => {
+    if (!profile?.dateOfBirth || !profile?.yearsOfService) {
+      // Default to 65 years old if no profile data
+      const defaultDate = new Date()
+      defaultDate.setFullYear(defaultDate.getFullYear() + 5)
+      return defaultDate
+    }
+
+    const birthDate = new Date(profile.dateOfBirth)
+    const currentDate = new Date()
+    const currentAge = currentDate.getFullYear() - birthDate.getFullYear()
+    
+    // Calculate retirement eligibility (simplified)
+    const retirementAge = Math.max(55, 65 - profile.yearsOfService)
+    const yearsToRetirement = Math.max(0, retirementAge - currentAge)
+    
+    const retirementDate = new Date()
+    retirementDate.setFullYear(retirementDate.getFullYear() + yearsToRetirement)
+    
+    return retirementDate
   }
 
   // Get latest calculation data for dashboard metrics
   const getLatestCalculation = () => {
-    console.log('Dashboard getLatestCalculation - calculations:', calculations)
-    
     if (!calculations || calculations.length === 0) {
-      console.log('No calculations found, returning default values')
-      // Return default values if no calculations exist
-      return {
-        monthlyBenefit: 4465,
-        annualBenefit: 53580,
-        retirementOption: 'A',
-        socialSecurityData: null
-      }
+      // Return null for no calculations - we'll handle this in the UI
+      return null
     }
-    
-    // Return the most recent calculation
-    const latest = calculations[0]
-    console.log('Latest calculation:', latest)
-    console.log('Latest calculation socialSecurityData:', latest.socialSecurityData)
-    
-    return {
-      monthlyBenefit: latest.monthlyBenefit,
-      annualBenefit: latest.annualBenefit,
-      retirementOption: latest.retirementOption,
-      socialSecurityData: latest.socialSecurityData
-    }
+
+    return calculations[0]
   }
 
+  // Generate personalized action items based on user data
+  const getPersonalizedActionItems = () => {
+    const items = []
+
+    if (!profile?.hasProfile) {
+      items.push({
+        title: 'Complete Your Profile',
+        description: 'Add your employment details to get accurate calculations',
+        priority: 'high',
+        action: '/profile'
+      })
+    }
+
+    if (!calculations || calculations.length === 0) {
+      items.push({
+        title: 'Run Your First Calculation',
+        description: 'Calculate your pension benefits to see your retirement outlook',
+        priority: 'high',
+        action: '/calculator'
+      })
+    }
+
+    if (profile?.currentSalary && profile?.yearsOfService && profile?.yearsOfService < 20) {
+      items.push({
+        title: 'Explore Service Purchase Options',
+        description: 'Consider purchasing additional creditable service',
+        priority: 'medium',
+        action: '/service-purchase'
+      })
+    }
+
+    if (calculations && calculations.length > 0 && !calculations[0]?.socialSecurityData) {
+      items.push({
+        title: 'Add Social Security Analysis',
+        description: 'Include Social Security in your retirement planning',
+        priority: 'medium',
+        action: '/social-security'
+      })
+    }
+
+    return items
+  }
+
+
+
   const refreshData = async () => {
-    await Promise.all([fetchProfile(), fetchCalculations()])
+    await fetchCalculations()
   }
 
   const latestCalc = getLatestCalculation()
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="flex justify-between items-center mb-6">
-        <div className="flex items-center gap-3">
-          <h1 className="text-3xl font-bold tracking-tight">Your Retirement Dashboard</h1>
-          {isPremium && (
-            <Badge className="bg-amber-100 text-amber-800">
-              <Crown className="mr-1 h-3 w-3" />
-              Premium
-            </Badge>
-          )}
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={refreshData} disabled={loading}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
-          <Button variant="outline" size="sm">
-            <Printer className="h-4 w-4 mr-2" />
-            Print
-          </Button>
-          <Button variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
-            Download PDF
-          </Button>
-        </div>
-      </div>
-
-      {/* Retirement Countdown */}
-      <div className="mb-8">
-        <Suspense fallback={<Skeleton className="h-64 w-full" />}>
-          <RetirementCountdown retirementDate={getRetirementDate()} />
-        </Suspense>
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-2 mb-8">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle>Annual Pension</CardTitle>
-            <CardDescription>Latest calculation</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-green-600">{formatCurrency(latestCalc.annualBenefit)}</div>
-            <div className="text-sm text-muted-foreground">per year</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle>Monthly Pension</CardTitle>
-            <CardDescription>Latest calculation</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-blue-600">{formatCurrency(latestCalc.monthlyBenefit)}</div>
-            <div className="text-sm text-muted-foreground">per month</div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Social Security Integration - Premium Only */}
-      {isPremium ? (
-        <Card className="mb-8 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <DollarSign className="h-5 w-5 text-blue-600" />
-              Complete Retirement Income Analysis
-              <Badge className="bg-blue-100 text-blue-800">
-                <Crown className="mr-1 h-3 w-3" />
-                Premium
-              </Badge>
-              {latestCalc.socialSecurityData?.selectedMonthlyBenefit && (
-                <Badge className="bg-green-100 text-green-800">
-                  <CheckCircle className="mr-1 h-3 w-3" />
-                  Includes SS Data
-                </Badge>
-              )}
-            </CardTitle>
-            <CardDescription>
-              {latestCalc.socialSecurityData?.selectedMonthlyBenefit 
-                ? "Based on your saved combined calculation with actual Social Security benefits"
-                : "Combined Massachusetts pension and estimated Social Security benefits"
-              }
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-3 gap-6 mb-6">
-              <div className="text-center p-4 bg-white dark:bg-gray-900 rounded-lg shadow-sm">
-                <div className="text-sm text-muted-foreground mb-1">MA State Pension</div>
-                <div className="text-2xl font-bold text-blue-600">{formatCurrency(latestCalc.monthlyBenefit)}</div>
-                <div className="text-xs text-muted-foreground">per month</div>
-              </div>
-              <div className="text-center p-4 bg-white dark:bg-gray-900 rounded-lg shadow-sm">
-                <div className="text-sm text-muted-foreground mb-1">Social Security</div>
-                <div className="text-2xl font-bold text-green-600">
-                  {latestCalc.socialSecurityData?.selectedMonthlyBenefit 
-                    ? formatCurrency(latestCalc.socialSecurityData.selectedMonthlyBenefit)
-                    : "$2,800"
-                  }
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  {latestCalc.socialSecurityData?.selectedMonthlyBenefit ? "calculated" : "estimated"} per month
-                </div>
-              </div>
-              <div className="text-center p-4 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-lg">
-                <div className="text-sm opacity-90 mb-1">Total Monthly Income</div>
-                <div className="text-2xl font-bold">
-                  {formatCurrency(
-                    latestCalc.monthlyBenefit + 
-                    (latestCalc.socialSecurityData?.selectedMonthlyBenefit || 2800)
-                  )}
-                </div>
-                <div className="text-xs opacity-90">
-                  {latestCalc.socialSecurityData?.replacementRatio 
-                    ? `${Math.round(latestCalc.socialSecurityData.replacementRatio * 100)}% replacement ratio`
-                    : "85% replacement ratio"
-                  }
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Button asChild>
-                <Link href="/social-security">
-                  <TrendingUp className="mr-2 h-4 w-4" />
-                  Optimize Social Security Strategy
-                </Link>
-              </Button>
-              <Button variant="outline" asChild>
-                <Link href="/calculator">
-                  <Calculator className="mr-2 h-4 w-4" />
-                  Update Pension Calculation
-                </Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      ) : (
-        <Card className="mb-8 border-dashed border-2">
-          <CardContent className="pt-6">
-            <div className="text-center py-8">
-              <Lock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-xl font-semibold mb-2">Complete Retirement Income Analysis</h3>
-              <p className="text-muted-foreground mb-4 max-w-md mx-auto">
-                Combine your Massachusetts pension with Social Security benefits for comprehensive retirement planning.
+    <div className="min-h-screen" style={{ background: 'var(--mrs-gradient-hero)' }}>
+      <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8 max-w-7xl">
+        {/* Enhanced Header with Professional Design */}
+        <div className="mrs-fade-in flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 lg:gap-6 mb-8 lg:mb-12">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 lg:gap-4">
+            <div>
+              <h1 className="mrs-heading-1 text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-bold tracking-tight">
+                Your Retirement Dashboard
+              </h1>
+              <p className="mrs-body-large text-white/80 mt-1 lg:mt-2">
+                Track your Massachusetts pension benefits and retirement planning progress
               </p>
-              <Button asChild>
-                <Link href="/subscribe">
-                  <Crown className="mr-2 h-4 w-4" />
-                  Upgrade to Premium
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
             </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Show survivor benefits only for Option C */}
-      {latestCalc.retirementOption === 'C' && (
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Survivor Benefits (Option C)</CardTitle>
-            <CardDescription>Benefits for your beneficiary</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <div className="text-sm text-muted-foreground mb-1">Annual Benefit</div>
-                <div className="text-2xl font-bold text-purple-600">{formatCurrency(latestCalc.annualBenefit * 0.667)}</div>
-              </div>
-              <div>
-                <div className="text-sm text-muted-foreground mb-1">Monthly Benefit</div>
-                <div className="text-2xl font-bold text-purple-600">{formatCurrency(latestCalc.monthlyBenefit * 0.667)}</div>
-              </div>
+            <div className="mrs-badge-success flex items-center gap-2 px-4 py-2 rounded-full shadow-lg backdrop-blur-sm bg-white/10 border border-white/20">
+              <Crown className="h-4 w-4 text-yellow-300" />
+              <span className="text-white font-medium">Premium Access</span>
             </div>
-          </CardContent>
-        </Card>
-      )}
+          </div>
+          
+          <div className="flex flex-col sm:flex-row gap-2 lg:gap-3">
+            <button
+              onClick={refreshData}
+              disabled={loading}
+              className="mrs-btn-secondary"
+            >
+              <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              <span>Refresh Data</span>
+            </button>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Pension Growth Projection</CardTitle>
-            <CardDescription>From age 55 up to 80% maximum</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
-              <RetirementChart />
+            <button className="mrs-btn-primary">
+              <Download className="mr-2 h-4 w-4" />
+              <span>Export Report</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Retirement Countdown */}
+        <div className="mb-8">
+          <Suspense fallback={
+            <Card className="h-64">
+              <CardContent className="p-6">
+                <div className="animate-pulse space-y-4">
+                  <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded w-1/3"></div>
+                  <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+                    {Array.from({ length: 6 }).map((_, i) => (
+                      <div key={i} className="h-16 bg-slate-200 dark:bg-slate-700 rounded-lg"></div>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          }>
+            <RetirementCountdown retirementDate={getRetirementDate()} />
+          </Suspense>
+        </div>
+
+        {/* Enhanced Key Metrics Cards - Horizontal Stacking */}
+        <div className="flex flex-col sm:flex-row gap-4 lg:gap-6 xl:gap-8 mb-8 lg:mb-12">
+          {(() => {
+            // Calculate standardized pension estimate for dashboard cards
+            let pensionEstimate = null
+            let dataSource = 'No data'
+
+            if (profile?.dateOfBirth && profile?.currentSalary) {
+              const currentAge = calculateCurrentAge(profile.dateOfBirth)
+
+              // Prioritize saved yearsOfService over calculated value
+              const yearsOfService = profile.yearsOfService ||
+                (profile.membershipDate ? calculateStandardizedYearsOfService(profile.membershipDate) : 0)
+
+              pensionEstimate = calculateQuickPensionEstimate(
+                currentAge,
+                yearsOfService,
+                profile.averageHighest3Years || profile.currentSalary,
+                (profile.retirementGroup as RetirementGroup) || 'Group 1',
+                profile.plannedRetirementAge || 65,
+                profile.membershipDate
+              )
+              dataSource = 'Profile estimate'
+            } else if (latestCalc) {
+              pensionEstimate = {
+                annualPension: latestCalc.annualBenefit,
+                monthlyPension: latestCalc.monthlyBenefit,
+                benefitPercentage: latestCalc.benefitPercentage || 0
+              }
+              dataSource = 'Latest calculation'
+            }
+
+            return (
+              <>
+                <div className="mrs-card mrs-slide-up flex-1 min-w-0 min-h-[140px] lg:min-h-[160px] xl:min-h-[180px]" style={{ background: 'var(--mrs-gradient-surface)' }}>
+                  <div className="p-4 lg:p-6 xl:p-8">
+                    {/* Horizontal Layout: Icon beside text */}
+                    <div className="flex items-start gap-3 lg:gap-4 xl:gap-6 mb-4">
+                      <div className="p-3 rounded-xl shadow-lg flex-shrink-0" style={{ background: 'var(--mrs-gradient-accent)' }}>
+                        <DollarSign className="h-5 w-5 lg:h-6 lg:w-6 xl:h-7 xl:w-7 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="mrs-heading-3 text-sm lg:text-base xl:text-lg mb-1">
+                          Annual Pension
+                        </h3>
+                        <p className="mrs-body text-xs lg:text-sm opacity-70">
+                          {dataSource}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold mb-1" style={{ color: 'var(--mrs-green-600)' }}>
+                      {pensionEstimate ? formatPensionCurrency(pensionEstimate.annualPension) : '--'}
+                    </div>
+                    <div className="mrs-body text-xs lg:text-sm opacity-70">
+                      {pensionEstimate ? 'per year' : 'Complete profile to see estimates'}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mrs-card mrs-slide-up flex-1 min-w-0 min-h-[140px] lg:min-h-[160px] xl:min-h-[180px]" style={{ background: 'var(--mrs-gradient-surface)' }}>
+                  <div className="p-4 lg:p-6 xl:p-8">
+                    {/* Horizontal Layout: Icon beside text */}
+                    <div className="flex items-start gap-3 lg:gap-4 xl:gap-6 mb-4">
+                      <div className="p-3 rounded-xl shadow-lg flex-shrink-0" style={{ background: 'var(--mrs-gradient-primary)' }}>
+                        <Calendar className="h-5 w-5 lg:h-6 lg:w-6 xl:h-7 xl:w-7 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="mrs-heading-3 text-sm lg:text-base xl:text-lg mb-1">
+                          Monthly Pension
+                        </h3>
+                        <p className="mrs-body text-xs lg:text-sm opacity-70">
+                          {dataSource}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold mb-1" style={{ color: 'var(--mrs-blue-600)' }}>
+                      {pensionEstimate ? formatPensionCurrency(pensionEstimate.monthlyPension) : '--'}
+                    </div>
+                    <div className="mrs-body text-xs lg:text-sm opacity-70">
+                      {pensionEstimate ? 'per month' : 'Complete profile to see estimates'}
+                    </div>
+                  </div>
+                </div>
+              </>
+            )
+          })()}
+        </div>
+
+        {/* Comprehensive Healthcare Benefits */}
+        <div className="mb-8 lg:mb-12">
+          <Suspense fallback={
+            <Card className="h-[600px] border-0 shadow-lg bg-gradient-to-br from-rose-50 via-pink-50/50 to-purple-50/30 dark:from-rose-950/20 dark:via-pink-950/20 dark:to-purple-950/20">
+              <CardContent className="p-6 lg:p-8">
+                <div className="animate-pulse space-y-4">
+                  <div className="h-6 lg:h-8 bg-slate-200 dark:bg-slate-700 rounded w-1/3"></div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <div key={i} className="h-20 lg:h-24 bg-slate-200 dark:bg-slate-700 rounded-lg"></div>
+                    ))}
+                  </div>
+                  <div className="h-40 lg:h-48 bg-slate-200 dark:bg-slate-700 rounded-lg"></div>
+                </div>
+              </CardContent>
+            </Card>
+          }>
+            <HealthcareBenefits profile={profile} />
+          </Suspense>
+        </div>
+
+        {/* Scenario Modeling Dashboard Cards */}
+        <div className="mb-8">
+          <Suspense fallback={
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {[1, 2, 3].map((i) => (
+                <Card key={i} className="animate-pulse">
+                  <CardHeader>
+                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <div className="h-3 bg-gray-200 rounded"></div>
+                      <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          }>
+            <ScenarioDashboardCards
+              onCreateScenario={() => router.push('/scenarios')}
+              onViewScenarios={() => router.push('/scenarios')}
+            />
+          </Suspense>
+        </div>
+
+        {/* Enhanced Main Layout Grid */}
+        <div className="grid gap-6 lg:gap-8 xl:gap-10 2xl:gap-12 xl:grid-cols-12">
+          {/* Quick Actions Sidebar */}
+          <div className="xl:col-span-4">
+            <Suspense fallback={
+              <Card className="h-[600px] lg:h-[700px] xl:h-[800px]">
+                <CardContent className="p-6 lg:p-8 xl:p-10">
+                  <div className="animate-pulse space-y-4 lg:space-y-6">
+                    <div className="h-6 lg:h-8 bg-slate-200 dark:bg-slate-700 rounded w-1/2"></div>
+                    <div className="space-y-3 lg:space-y-4">
+                      {Array.from({ length: 6 }).map((_, i) => (
+                        <div key={i} className="h-16 lg:h-20 xl:h-24 bg-slate-200 dark:bg-slate-700 rounded-lg"></div>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            }>
+              <QuickActions
+                hasCalculations={calculations && calculations.length > 0}
+                latestCalculation={latestCalc}
+                onRefresh={refreshData}
+                isLoading={loading}
+                pensionProjection={(() => {
+                  if (!profile?.currentSalary || !profile?.dateOfBirth || !profile?.membershipDate) return undefined
+
+                  const currentAge = calculateCurrentAge(profile.dateOfBirth)
+                  const yearsOfService = calculateStandardizedYearsOfService(profile.membershipDate)
+                  const retirementAge = profile.plannedRetirementAge || 65
+
+                  // Prioritize saved yearsOfService over calculated value
+                  const currentYearsOfService = profile.yearsOfService ||
+                    (profile.membershipDate ? calculateStandardizedYearsOfService(profile.membershipDate) : 0)
+
+                  // Current pension estimate
+                  const currentPension = calculateQuickPensionEstimate(
+                    currentAge,
+                    currentYearsOfService,
+                    profile.averageHighest3Years || profile.currentSalary,
+                    (profile.retirementGroup as RetirementGroup) || 'Group 1',
+                    currentAge, // Current age for current pension
+                    profile.membershipDate
+                  )
+
+                  // Projected pension at retirement
+                  const projectedYearsOfService = currentYearsOfService + (retirementAge - currentAge)
+                  const projectedPension = calculateQuickPensionEstimate(
+                    retirementAge,
+                    projectedYearsOfService,
+                    profile.averageHighest3Years || profile.currentSalary,
+                    (profile.retirementGroup as RetirementGroup) || 'Group 1',
+                    retirementAge,
+                    profile.membershipDate
+                  )
+
+                  return {
+                    currentAge,
+                    retirementAge,
+                    currentPension: currentPension.annualPension,
+                    projectedPension: projectedPension.annualPension,
+                    yearsOfService,
+                    maxBenefit: Math.round((profile.averageHighest3Years || profile.currentSalary) * 0.8)
+                  }
+                })()}
+                calculationStats={{
+                  totalCalculations: calculations?.length || 0,
+                  lastCalculationDate: calculations && calculations.length > 0 ? calculations[0].createdAt : undefined,
+                  retirementReadiness: calculations && calculations.length > 0 ? 'on-track' : 'needs-attention'
+                }}
+              />
             </Suspense>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Saved Calculations</CardTitle>
-            <CardDescription>Your previous pension estimates</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
-              <SavedCalculations />
-            </Suspense>
-          </CardContent>
-        </Card>
+          </div>
+
+          {/* Main Content */}
+          <div className="xl:col-span-8 space-y-6 lg:space-y-8 xl:space-y-10">
+            <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-slate-50/50 dark:from-slate-900 dark:to-slate-800/50">
+              <CardHeader className="pb-4 lg:pb-6 xl:pb-8 px-4 lg:px-6 xl:px-8 pt-4 lg:pt-6 xl:pt-8">
+                <CardTitle className="card-title flex items-center gap-2 lg:gap-3 text-lg sm:text-xl lg:text-2xl xl:text-3xl">
+                  <div className="p-2 lg:p-3 xl:p-4 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md">
+                    <TrendingUp className="h-5 w-5 lg:h-6 lg:w-6 xl:h-7 xl:w-7" />
+                  </div>
+                  Pension Growth Projection
+                </CardTitle>
+                <CardDescription className="card-description text-sm lg:text-base xl:text-lg leading-relaxed">
+                  Visualize how your pension benefits grow over time based on your service years and retirement age
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="px-4 lg:px-6 xl:px-8 pb-4 lg:pb-6 xl:pb-8">
+                <Suspense fallback={
+                  <div className="h-[300px] lg:h-[400px] xl:h-[500px] animate-pulse bg-slate-100 dark:bg-slate-800 rounded-lg"></div>
+                }>
+                  <RetirementChart />
+                </Suspense>
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-slate-50/50 dark:from-slate-900 dark:to-slate-800/50">
+              <CardHeader className="pb-4 lg:pb-6 xl:pb-8 px-4 lg:px-6 xl:px-8 pt-4 lg:pt-6 xl:pt-8">
+                <CardTitle className="card-title flex items-center gap-2 lg:gap-3 text-lg sm:text-xl lg:text-2xl xl:text-3xl">
+                  <div className="p-2 lg:p-3 xl:p-4 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md">
+                    <Calculator className="h-5 w-5 lg:h-6 lg:w-6 xl:h-7 xl:w-7" />
+                  </div>
+                  Saved Calculations
+                </CardTitle>
+                <CardDescription className="card-description text-sm lg:text-base xl:text-lg leading-relaxed">
+                  Your retirement analysis history and saved scenarios
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="px-4 lg:px-6 xl:px-8 pb-4 lg:pb-6 xl:pb-8">
+                <Suspense fallback={
+                  <div className="space-y-4">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <div key={i} className="h-32 lg:h-40 xl:h-48 animate-pulse bg-slate-100 dark:bg-slate-800 rounded-lg"></div>
+                    ))}
+                  </div>
+                }>
+                  <SavedCalculations />
+                </Suspense>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   )
-} 
+}

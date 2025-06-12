@@ -1,260 +1,238 @@
-/**
- * PDF Generation Hook
- * Provides functionality for generating and downloading PDF reports
- */
+"use client"
 
 import { useState, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
-import { toast } from 'sonner'
-
-export interface PDFGenerationStatus {
-  canGenerate: boolean
-  subscriptionActive: boolean
-  limits: {
-    monthly: number
-    current: number
-    remaining: number
-  }
-  supportedTypes: string[]
-}
+import { PDFReportData } from '@/components/pdf/pdf-report'
+import { recordUserAction, monitorAsyncOperation } from '@/components/error-boundary/error-monitoring'
 
 export interface PDFGenerationOptions {
-  type: 'pension' | 'tax' | 'wizard' | 'combined'
-  data: any
-  filename?: string
-  branding?: {
-    organizationName?: string
-    disclaimer?: string
+  reportType?: 'comprehensive' | 'summary' | 'calculations-only'
+  includeCharts?: boolean
+  includeActionItems?: boolean
+  includeSocialSecurity?: boolean
+  maxCalculations?: number
+}
+
+export interface PDFGenerationResult {
+  success: boolean
+  data?: PDFReportData
+  error?: string
+  generationTime?: number
+  warnings?: string[]
+  metadata?: {
+    reportType: string
+    generatedAt: string
+    userId: string
   }
 }
 
-export interface PDFGenerationState {
-  isGenerating: boolean
-  error: string | null
-  status: PDFGenerationStatus | null
-  lastGenerated: Date | null
+export interface PDFStats {
+  totalGenerated: number
+  averageGenerationTime: number
+  lastGenerated?: Date
+  recentGenerations: Array<{
+    pdfType: string
+    generationTime: number
+    createdAt: Date
+    success: boolean
+  }>
+}
+
+export interface PDFValidation {
+  canGenerate: boolean
+  missingRequirements: string[]
+  warnings: string[]
 }
 
 export function usePDFGeneration() {
   const { data: session } = useSession()
-  const [state, setState] = useState<PDFGenerationState>({
-    isGenerating: false,
-    error: null,
-    status: null,
-    lastGenerated: null
-  })
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [isLoadingStats, setIsLoadingStats] = useState(false)
+  const [lastResult, setLastResult] = useState<PDFGenerationResult | null>(null)
+  const [stats, setStats] = useState<PDFStats | null>(null)
+  const [validation, setValidation] = useState<PDFValidation | null>(null)
 
-  /**
-   * Check PDF generation status and limits
-   */
-  const checkStatus = useCallback(async (): Promise<PDFGenerationStatus | null> => {
-    if (!session?.user) {
-      return null
-    }
-
-    try {
-      const response = await fetch('/api/pdf/generate', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to check PDF generation status')
+  // Generate PDF report data
+  const generatePDF = useCallback(async (options: PDFGenerationOptions = {}): Promise<PDFGenerationResult> => {
+    return monitorAsyncOperation(async () => {
+      if (!session?.user?.id) {
+        throw new Error('Authentication required')
       }
 
-      const status = await response.json()
-      setState(prev => ({ ...prev, status, error: null }))
-      return status
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      setState(prev => ({ ...prev, error: errorMessage }))
-      return null
-    }
-  }, [session])
+      setIsGenerating(true)
 
-  /**
-   * Generate and download PDF
-   */
-  const generatePDF = useCallback(async (options: PDFGenerationOptions): Promise<boolean> => {
-    if (!session?.user) {
-      toast.error('Please sign in to generate PDF reports')
-      return false
-    }
+      try {
+        recordUserAction('initiate_pdf_generation', 'pdf-generation', {
+          userId: session.user.id,
+          options,
+        })
 
-    setState(prev => ({ ...prev, isGenerating: true, error: null }))
+        const response = await fetch('/api/pdf/generate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(options),
+        })
 
-    try {
-      // Check status first
-      const status = await checkStatus()
-      if (!status?.canGenerate) {
-        if (!status?.subscriptionActive) {
-          toast.error('Premium subscription required for PDF generation', {
-            action: {
-              label: 'Upgrade',
-              onClick: () => window.open('/subscribe', '_blank')
-            }
-          })
-        } else {
-          toast.error('PDF generation limit reached for this month')
+        const result: PDFGenerationResult = await response.json()
+
+        if (!response.ok) {
+          throw new Error(result.error || 'Failed to generate PDF')
         }
-        setState(prev => ({ ...prev, isGenerating: false }))
-        return false
+
+        setLastResult(result)
+
+        // Refresh stats after successful generation
+        if (result.success) {
+          await loadStats()
+        }
+
+        return result
+
+      } catch (error) {
+        const errorResult: PDFGenerationResult = {
+          success: false,
+          error: error instanceof Error ? error.message : 'Unknown error',
+        }
+
+        setLastResult(errorResult)
+        return errorResult
+      } finally {
+        setIsGenerating(false)
+      }
+    }, 'pdf_generation_hook')
+  }, [session?.user?.id])
+
+  // Load PDF generation statistics
+  const loadStats = useCallback(async () => {
+    return monitorAsyncOperation(async () => {
+      if (!session?.user?.id) {
+        return
       }
 
-      // Generate PDF
-      const response = await fetch('/api/pdf/generate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(options)
-      })
+      setIsLoadingStats(true)
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        
-        if (response.status === 403) {
-          toast.error('Premium subscription required for PDF generation', {
-            action: {
-              label: 'Upgrade',
-              onClick: () => window.open('/subscribe', '_blank')
-            }
-          })
-        } else if (response.status === 408) {
-          toast.error('PDF generation timed out. Please try again.')
-        } else {
-          toast.error(errorData.error || 'Failed to generate PDF')
+      try {
+        const response = await fetch('/api/pdf/generate', {
+          method: 'GET',
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to load PDF statistics')
         }
-        
-        setState(prev => ({ ...prev, isGenerating: false, error: errorData.error }))
-        return false
+
+        const data = await response.json()
+        setStats(data.stats)
+        setValidation(data.validation)
+
+      } catch (error) {
+        console.error('Failed to load PDF stats:', error)
+      } finally {
+        setIsLoadingStats(false)
       }
+    }, 'pdf_stats_loading')
+  }, [session?.user?.id])
 
-      // Download PDF
-      const blob = await response.blob()
-      const url = window.URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      
-      // Get filename from response headers or use provided filename
-      const contentDisposition = response.headers.get('Content-Disposition')
-      const filename = contentDisposition
-        ? contentDisposition.split('filename=')[1]?.replace(/"/g, '')
-        : options.filename || `retirement-report-${Date.now()}.pdf`
-      
-      link.download = filename
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      window.URL.revokeObjectURL(url)
+  // Generate filename for PDF download
+  const generateFilename = useCallback((reportType: string = 'comprehensive', userName?: string) => {
+    const date = new Date().toISOString().split('T')[0]
+    const userPart = userName ? `-${userName.replace(/\s+/g, '-')}` : ''
+    const typePart = reportType === 'comprehensive' ? 'Complete' :
+                     reportType === 'summary' ? 'Summary' : 'Calculations'
 
-      setState(prev => ({ 
-        ...prev, 
-        isGenerating: false, 
-        lastGenerated: new Date(),
-        error: null 
-      }))
+    return `MA-Retirement-${typePart}${userPart}-${date}.pdf`
+  }, [])
 
-      toast.success('PDF report generated successfully!')
-      
-      // Refresh status to update usage counts
-      await checkStatus()
-      
-      return true
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      setState(prev => ({ ...prev, isGenerating: false, error: errorMessage }))
-      toast.error('Failed to generate PDF. Please try again.')
-      return false
+  // Check if user can generate PDFs
+  const canGeneratePDF = useCallback(() => {
+    return validation?.canGenerate ?? false
+  }, [validation])
+
+  // Get missing requirements for PDF generation
+  const getMissingRequirements = useCallback(() => {
+    return validation?.missingRequirements ?? []
+  }, [validation])
+
+  // Get warnings for PDF generation
+  const getWarnings = useCallback(() => {
+    return validation?.warnings ?? []
+  }, [validation])
+
+  // Get generation time statistics
+  const getGenerationTimeStats = useCallback(() => {
+    if (!stats) return null
+
+    return {
+      average: stats.averageGenerationTime,
+      total: stats.totalGenerated,
+      lastGenerated: stats.lastGenerated,
+      recentAverage: stats.recentGenerations.length > 0
+        ? stats.recentGenerations.reduce((sum, gen) => sum + gen.generationTime, 0) / stats.recentGenerations.length
+        : 0,
     }
-  }, [session, checkStatus])
+  }, [stats])
 
-  /**
-   * Generate pension calculation PDF
-   */
-  const generatePensionPDF = useCallback(async (pensionData: any): Promise<boolean> => {
-    return generatePDF({
-      type: 'pension',
-      data: pensionData,
-      filename: `MA_Pension_Report_${new Date().toISOString().split('T')[0]}.pdf`
-    })
-  }, [generatePDF])
+  // Check if performance is within acceptable limits (sub-2-second requirement)
+  const isPerformanceAcceptable = useCallback(() => {
+    const timeStats = getGenerationTimeStats()
+    if (!timeStats) return true
 
-  /**
-   * Generate tax implications PDF
-   */
-  const generateTaxPDF = useCallback(async (taxData: any): Promise<boolean> => {
-    return generatePDF({
-      type: 'tax',
-      data: taxData,
-      filename: `MA_Tax_Report_${new Date().toISOString().split('T')[0]}.pdf`
-    })
-  }, [generatePDF])
+    return timeStats.average < 2000 && timeStats.recentAverage < 2000
+  }, [getGenerationTimeStats])
 
-  /**
-   * Generate wizard results PDF
-   */
-  const generateWizardPDF = useCallback(async (wizardData: any): Promise<boolean> => {
-    return generatePDF({
-      type: 'wizard',
-      data: wizardData,
-      filename: `MA_Retirement_Plan_${new Date().toISOString().split('T')[0]}.pdf`
-    })
-  }, [generatePDF])
+  // Get performance status
+  const getPerformanceStatus = useCallback(() => {
+    const timeStats = getGenerationTimeStats()
+    if (!timeStats) return 'unknown'
 
-  /**
-   * Generate combined comprehensive PDF
-   */
-  const generateCombinedPDF = useCallback(async (combinedData: any): Promise<boolean> => {
-    return generatePDF({
-      type: 'combined',
-      data: combinedData,
-      filename: `MA_Comprehensive_Report_${new Date().toISOString().split('T')[0]}.pdf`
-    })
-  }, [generatePDF])
+    const avgTime = timeStats.recentAverage || timeStats.average
 
-  /**
-   * Check if user can generate PDFs
-   */
-  const canGeneratePDF = useCallback((): boolean => {
-    return Boolean(session?.user && state.status?.canGenerate)
-  }, [session, state.status])
+    if (avgTime < 1000) return 'excellent'
+    if (avgTime < 1500) return 'good'
+    if (avgTime < 2000) return 'acceptable'
+    return 'poor'
+  }, [getGenerationTimeStats])
 
-  /**
-   * Get remaining PDF generation count
-   */
-  const getRemainingCount = useCallback((): number => {
-    if (!state.status) return 0
-    return state.status.limits.remaining
-  }, [state.status])
+  // Clear last result
+  const clearLastResult = useCallback(() => {
+    setLastResult(null)
+  }, [])
 
-  /**
-   * Check if user needs to upgrade for PDF generation
-   */
-  const needsUpgrade = useCallback((): boolean => {
-    return Boolean(session?.user && !state.status?.subscriptionActive)
-  }, [session, state.status])
+  // Refresh validation status
+  const refreshValidation = useCallback(async () => {
+    await loadStats()
+  }, [loadStats])
 
   return {
     // State
-    isGenerating: state.isGenerating,
-    error: state.error,
-    status: state.status,
-    lastGenerated: state.lastGenerated,
+    isGenerating,
+    isLoadingStats,
+    lastResult,
+    stats,
+    validation,
 
     // Actions
-    checkStatus,
     generatePDF,
-    generatePensionPDF,
-    generateTaxPDF,
-    generateWizardPDF,
-    generateCombinedPDF,
+    loadStats,
+    clearLastResult,
+    refreshValidation,
 
     // Utilities
+    generateFilename,
     canGeneratePDF,
-    getRemainingCount,
-    needsUpgrade
+    getMissingRequirements,
+    getWarnings,
+    getGenerationTimeStats,
+    isPerformanceAcceptable,
+    getPerformanceStatus,
+
+    // Computed values
+    hasStats: !!stats,
+    hasValidation: !!validation,
+    totalGenerated: stats?.totalGenerated ?? 0,
+    canGenerate: validation?.canGenerate ?? false,
+    missingRequirements: validation?.missingRequirements ?? [],
+    warnings: validation?.warnings ?? [],
   }
 }

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Error Handling Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
+        button { background: #007cba; color: white; padding: 10px 20px; border: none; cursor: pointer; margin: 5px; }
+        button:hover { background: #005a87; }
+        .result { background: #f0f0f0; padding: 15px; margin: 10px 0; border-radius: 5px; font-family: monospace; white-space: pre-wrap; }
+        .error { background: #f8d7da; color: #721c24; }
+        .success { background: #d4edda; color: #155724; }
+        .info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Error Handling Test</h1>
+        <p>This page tests the enhanced error handling in the saveProfile function.</p>
+        
+        <div class="test-section">
+            <h3>Test 1: Network Error Simulation</h3>
+            <button onclick="testNetworkError()">Simulate Network Error</button>
+            <div id="networkResult" class="result" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Test 2: Invalid JSON Response</h3>
+            <button onclick="testInvalidJSON()">Test Invalid JSON</button>
+            <div id="jsonResult" class="result" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Test 3: Server Error (500)</h3>
+            <button onclick="testServerError()">Test Server Error</button>
+            <div id="serverResult" class="result" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Test 4: API Endpoint Connectivity</h3>
+            <button onclick="testAPIConnectivity()">Test API Connectivity</button>
+            <div id="apiResult" class="result" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Test 5: Valid Profile Save</h3>
+            <button onclick="testValidSave()">Test Valid Save</button>
+            <div id="validResult" class="result" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Console Output</h3>
+            <p>Check the browser console (F12) for detailed error logging.</p>
+            <button onclick="clearConsole()">Clear Console</button>
+        </div>
+    </div>
+    
+    <script>
+        function showResult(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.className = `result ${type}`;
+            element.textContent = message;
+        }
+        
+        async function testNetworkError() {
+            console.log('🧪 Testing Network Error...');
+            try {
+                // Simulate network error by calling non-existent endpoint
+                const response = await fetch('/api/nonexistent-endpoint', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ test: true })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                showResult('networkResult', 'Unexpected success', 'success');
+            } catch (error) {
+                console.error('❌ Network test error:', JSON.stringify({
+                    errorType: typeof error,
+                    errorConstructor: error?.constructor?.name,
+                    message: error instanceof Error ? error.message : String(error),
+                    stack: error instanceof Error ? error.stack?.split('\\n').slice(0, 3).join('\\n') : undefined
+                }, null, 2));
+                
+                showResult('networkResult', `Network Error Caught: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testInvalidJSON() {
+            console.log('🧪 Testing Invalid JSON Response...');
+            try {
+                // This will likely return HTML instead of JSON
+                const response = await fetch('/invalid-json-endpoint');
+                const text = await response.text();
+                
+                console.log('📄 Raw response:', text);
+                
+                try {
+                    const json = JSON.parse(text);
+                    showResult('jsonResult', 'Unexpected valid JSON', 'success');
+                } catch (parseError) {
+                    console.error('❌ JSON parse error:', JSON.stringify({
+                        errorType: typeof parseError,
+                        message: parseError instanceof Error ? parseError.message : String(parseError),
+                        responseText: text.substring(0, 100)
+                    }, null, 2));
+                    
+                    showResult('jsonResult', `JSON Parse Error: ${parseError.message}`, 'error');
+                }
+            } catch (error) {
+                showResult('jsonResult', `Request Error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testServerError() {
+            console.log('🧪 Testing Server Error...');
+            try {
+                // Try to trigger a server error
+                const response = await fetch('/api/profile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ invalidData: 'test' })
+                });
+                
+                console.log('📥 Response received:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    ok: response.ok
+                });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.log('📄 Error response text:', errorText);
+                    
+                    let errorData = { message: null };
+                    try {
+                        errorData = JSON.parse(errorText);
+                    } catch (e) {
+                        errorData = { message: errorText };
+                    }
+                    
+                    showResult('serverResult', `Server Error ${response.status}: ${errorData.message || response.statusText}`, 'error');
+                } else {
+                    showResult('serverResult', 'Unexpected success', 'success');
+                }
+            } catch (error) {
+                showResult('serverResult', `Request Failed: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testAPIConnectivity() {
+            console.log('🧪 Testing API Connectivity...');
+            try {
+                const response = await fetch('/api/profile', { method: 'GET' });
+                
+                console.log('✅ API endpoint accessible:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    ok: response.ok
+                });
+                
+                showResult('apiResult', `API Connectivity: ${response.status} ${response.statusText}`, response.ok ? 'success' : 'error');
+            } catch (error) {
+                console.error('❌ API connectivity test failed:', JSON.stringify({
+                    errorType: typeof error,
+                    message: error instanceof Error ? error.message : String(error)
+                }, null, 2));
+                
+                showResult('apiResult', `API Not Accessible: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testValidSave() {
+            console.log('🧪 Testing Valid Profile Save...');
+            try {
+                const testData = {
+                    dateOfBirth: '1980-01-01',
+                    membershipDate: '2010-01-01',
+                    retirementGroup: 'Group 1',
+                    currentSalary: 75000
+                };
+                
+                const response = await fetch('/api/profile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testData)
+                });
+                
+                console.log('📥 Response received:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    ok: response.ok
+                });
+                
+                const responseText = await response.text();
+                console.log('📄 Raw response:', responseText);
+                
+                if (response.ok) {
+                    try {
+                        const data = JSON.parse(responseText);
+                        showResult('validResult', `Success: ${JSON.stringify(data, null, 2)}`, 'success');
+                    } catch (e) {
+                        showResult('validResult', `Success but invalid JSON: ${responseText}`, 'info');
+                    }
+                } else {
+                    showResult('validResult', `Failed: ${response.status} ${responseText}`, 'error');
+                }
+            } catch (error) {
+                showResult('validResult', `Request Failed: ${error.message}`, 'error');
+            }
+        }
+        
+        function clearConsole() {
+            console.clear();
+            console.log('🧹 Console cleared');
+        }
+        
+        // Auto-test on page load
+        window.addEventListener('load', () => {
+            console.log('🚀 Error Handling Test Page Loaded');
+            console.log('📋 Available tests: Network Error, Invalid JSON, Server Error, API Connectivity, Valid Save');
+        });
+    </script>
+</body>
+</html>

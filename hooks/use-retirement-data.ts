@@ -53,17 +53,40 @@ export function useRetirementData() {
   const [profile, setProfile] = useState<RetirementProfile | null>(null)
   const [calculations, setCalculations] = useState<RetirementCalculation[]>([])
 
-  // Fetch retirement profile
+  // Fetch retirement profile from the correct API endpoint
   const fetchProfile = useCallback(async () => {
     if (!session?.user) return
 
     setLoading(true)
     try {
-      const response = await fetch("/api/retirement/profile")
+      // Use the working profile API that queries users_metadata table
+      const response = await fetch("/api/profile")
       const data = await response.json()
-      
-      if (response.ok && data.profile) {
-        setProfile(data.profile)
+
+      if (response.ok) {
+        // Convert the profile data to match the expected format
+        const profileData = {
+          dateOfBirth: null, // Will need to be set via profile update
+          plannedRetirementAge: null, // Will calculate from retirement date
+          retirementDate: data.retirementDate,
+          fullName: data.fullName,
+          // Add other fields as needed
+        }
+
+        // If we have a retirement date, calculate the planned retirement age
+        if (data.retirementDate) {
+          try {
+            const retirementDate = new Date(data.retirementDate)
+            const currentDate = new Date()
+            const yearsToRetirement = retirementDate.getFullYear() - currentDate.getFullYear()
+            const currentAge = 50 // Default assumption, should be calculated from dateOfBirth when available
+            profileData.plannedRetirementAge = currentAge + yearsToRetirement
+          } catch (error) {
+            console.error("Error calculating retirement age:", error)
+          }
+        }
+
+        setProfile(profileData)
       }
     } catch (error) {
       console.error("Error fetching profile:", error)
@@ -98,19 +121,18 @@ export function useRetirementData() {
     }
   }, [session])
 
-  // Auto-fetch profile when session is available
+  // Auto-fetch data when session is available (combined to avoid race conditions)
   useEffect(() => {
     if (session?.user) {
-      fetchProfile()
+      // Fetch both profile and calculations together to avoid timing issues
+      Promise.all([
+        fetchProfile(),
+        fetchCalculations()
+      ]).catch(error => {
+        console.error('Error fetching dashboard data:', error)
+      })
     }
-  }, [session?.user, fetchProfile])
-
-  // Auto-fetch calculations when session is available
-  useEffect(() => {
-    if (session?.user) {
-      fetchCalculations()
-    }
-  }, [session?.user, fetchCalculations])
+  }, [session?.user?.id]) // Only depend on user ID to avoid unnecessary re-fetches
 
   // Save or update retirement profile
   const saveProfile = useCallback(async (profileData: RetirementProfile) => {
@@ -245,6 +267,14 @@ export function useRetirementData() {
     }
   }, [session])
 
+  // Toggle favorite status
+  const toggleFavorite = useCallback(async (id: string) => {
+    const calculation = calculations.find(calc => calc.id === id)
+    if (!calculation) return false
+
+    return await updateCalculation(id, { isFavorite: !calculation.isFavorite })
+  }, [calculations, updateCalculation])
+
   return {
     profile,
     calculations,
@@ -255,5 +285,6 @@ export function useRetirementData() {
     saveCalculation,
     updateCalculation,
     deleteCalculation,
+    toggleFavorite,
   }
 } 

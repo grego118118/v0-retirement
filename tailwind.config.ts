@@ -1,6 +1,6 @@
 import type { Config } from "tailwindcss"
 
-const config = {
+const config: Config = {
   darkMode: ["class"],
   content: [
     "./pages/**/*.{ts,tsx}",
@@ -19,6 +19,39 @@ const config = {
       },
     },
     extend: {
+      screens: {
+        'xl': '1280px',
+        '2xl': '1536px',
+        '3xl': '1920px',
+        '4xl': '2560px',
+      },
+      fontSize: {
+        'xs': ['0.75rem', { lineHeight: '1rem' }],
+        'sm': ['0.875rem', { lineHeight: '1.25rem' }],
+        'base': ['1rem', { lineHeight: '1.5rem' }],
+        'lg': ['1.125rem', { lineHeight: '1.75rem' }],
+        'xl': ['1.25rem', { lineHeight: '1.75rem' }],
+        '2xl': ['1.5rem', { lineHeight: '2rem' }],
+        '3xl': ['1.875rem', { lineHeight: '2.25rem' }],
+        '4xl': ['2.25rem', { lineHeight: '2.5rem' }],
+        '5xl': ['3rem', { lineHeight: '1' }],
+        '6xl': ['3.75rem', { lineHeight: '1' }],
+        // Desktop-optimized sizes
+        'desktop-xs': ['0.875rem', { lineHeight: '1.25rem' }],
+        'desktop-sm': ['1rem', { lineHeight: '1.5rem' }],
+        'desktop-base': ['1.125rem', { lineHeight: '1.75rem' }],
+        'desktop-lg': ['1.375rem', { lineHeight: '2rem' }],
+        'desktop-xl': ['1.625rem', { lineHeight: '2.25rem' }],
+        'desktop-2xl': ['1.875rem', { lineHeight: '2.5rem' }],
+        'desktop-3xl': ['2.25rem', { lineHeight: '2.75rem' }],
+        'desktop-4xl': ['2.75rem', { lineHeight: '3rem' }],
+      },
+      spacing: {
+        '18': '4.5rem',
+        '88': '22rem',
+        '128': '32rem',
+        '144': '36rem',
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -81,6 +114,6 @@ const config = {
     },
   },
   plugins: [require("tailwindcss-animate")],
-} satisfies Config
+}
 
 export default config

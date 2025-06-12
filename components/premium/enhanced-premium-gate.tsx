@@ -191,6 +191,11 @@ export function EnhancedPremiumGate({
     )
   }
 
+  // Authenticated users always get premium access
+  if (session?.user) {
+    return <>{children}</>
+  }
+
   // Check if feature requires premium and user doesn't have it
   const upgradeRequired = featureConfig.required && !subscriptionData.isPremium
 

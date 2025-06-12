@@ -4,26 +4,16 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Badge } from "@/components/ui/badge"
-import { 
-  Calculator, 
-  ArrowRight, 
-  CheckCircle, 
-  Clock, 
-  Users,
-  TrendingUp,
-  Shield,
-  DollarSign,
-  FileText
-} from "lucide-react"
+import { Crown, Lock, Zap, Target, BarChart3, FileText, Calculator, Users, ArrowRight, CheckCircle, Clock } from "lucide-react"
 import { CombinedCalculationWizard } from "@/components/wizard/combined-calculation-wizard"
-import { PremiumGate } from "@/components/premium/premium-gate"
 import { CombinedCalculationData } from "@/lib/wizard/wizard-types"
+import Link from "next/link"
 
 export default function WizardPage() {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const router = useRouter()
   const [showWizard, setShowWizard] = useState(false)
   const [resumeToken, setResumeToken] = useState<string>()
@@ -34,8 +24,8 @@ export default function WizardPage() {
 
   const handleResumeWizard = () => {
     // Load saved wizard state
-    if (typeof window !== 'undefined' && session?.user?.id) {
-      const savedToken = localStorage.getItem(`wizard-state-${session.user.id}`)
+    if (typeof window !== 'undefined' && session?.user?.email) {
+      const savedToken = localStorage.getItem(`wizard-state-${session.user.email}`)
       if (savedToken) {
         setResumeToken(savedToken)
         setShowWizard(true)
@@ -48,305 +38,296 @@ export default function WizardPage() {
     router.push('/dashboard?tab=calculations')
   }
 
-  if (showWizard) {
+  // Show loading state while checking authentication
+  if (status === "loading") {
     return (
-      <PremiumGate
-        feature="combined_wizard"
-        title="Combined Retirement Planning Wizard"
-        description="Advanced retirement optimization with pension and Social Security analysis"
-      >
-        <CombinedCalculationWizard
-          onComplete={handleWizardComplete}
-          resumeToken={resumeToken}
-        />
-      </PremiumGate>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
+        <div className="container mx-auto px-4 py-16 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show wizard if user is authenticated and wizard is started
+  if (session?.user && showWizard) {
+    return (
+      <CombinedCalculationWizard
+        onComplete={handleWizardComplete}
+        resumeToken={resumeToken}
+      />
     )
   }
 
   return (
-    <PremiumGate
-      feature="combined_wizard"
-      title="Combined Retirement Planning Wizard"
-      description="Advanced retirement optimization with pension and Social Security analysis"
-    >
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-4">
-            Combined Retirement Planning Wizard
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Get a comprehensive analysis of your Massachusetts pension and Social Security benefits 
-            with personalized optimization recommendations.
-          </p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
+      {/* Hero Section */}
+      <section className="bg-gradient-to-br from-blue-600 via-indigo-700 to-purple-800 text-white py-16 md:py-20 relative overflow-hidden">
+        {/* Background Elements */}
+        <div className="absolute inset-0 bg-black/20"></div>
+        <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-white/10 to-transparent"></div>
+
+        <div className="container px-4 md:px-6 relative z-10">
+          <div className="text-center max-w-4xl mx-auto">
+            <div className="flex items-center justify-center gap-3 lg:gap-4 mb-6">
+              <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
+                Combined Calculation
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-400">
+                  Wizard
+                </span>
+              </h1>
+              {session?.user && (
+                <Badge className="bg-green-500/20 text-green-100 border-green-400/30 px-3 lg:px-4 py-1 lg:py-2 text-sm lg:text-base">
+                  <CheckCircle className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4" />
+                  Available
+                </Badge>
+              )}
+            </div>
+            <p className="text-xl md:text-2xl text-blue-100 leading-relaxed max-w-3xl mx-auto">
+              Our step-by-step wizard guides you through combining your <strong>Massachusetts pension</strong>
+              and Social Security benefits for comprehensive retirement income planning.
+            </p>
+          </div>
         </div>
+      </section>
 
-        {/* Features Overview */}
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <Card className="border-blue-200 bg-blue-50">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calculator className="h-6 w-6 text-blue-600" />
-                Step-by-Step Guidance
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Guided workflow through pension details, Social Security benefits, 
-                and optimization preferences with built-in validation.
-              </p>
-            </CardContent>
-          </Card>
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-8">
+        {/* Authentication Check */}
+        {!session?.user && (
+          <Alert className="mb-8 border-blue-200 bg-blue-50 dark:bg-blue-950 dark:border-blue-800">
+            <Lock className="h-4 w-4" />
+            <AlertDescription className="text-lg">
+              Please <Link href="/auth/signin" className="font-semibold text-blue-600 hover:text-blue-700 underline">sign in with Google</Link> to access the Combined Calculation Wizard.
+              All logged-in users have full access to premium features.
+            </AlertDescription>
+          </Alert>
+        )}
 
-          <Card className="border-green-200 bg-green-50">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-6 w-6 text-green-600" />
-                Advanced Optimization
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                AI-powered analysis of optimal claiming strategies, break-even points, 
-                and lifetime benefit maximization.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-purple-200 bg-purple-50">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <DollarSign className="h-6 w-6 text-purple-600" />
-                Tax Optimization
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Federal and Massachusetts tax calculations with strategies 
-                to minimize your retirement tax burden.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* What's Included */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CheckCircle className="h-6 w-6 text-green-600" />
-              What's Included in Your Analysis
-            </CardTitle>
-            <CardDescription>
-              Comprehensive retirement planning with advanced features
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <h4 className="font-semibold mb-3 flex items-center gap-2">
-                  <Shield className="h-5 w-5 text-blue-600" />
-                  Core Analysis
-                </h4>
-                <ul className="space-y-2 text-sm">
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    Massachusetts pension benefit calculations
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    Social Security optimization (ages 62-70)
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    Combined income projections
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    Inflation adjustments (COLA)
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    Medicare premium impact
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    Break-even analysis
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-3 flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-purple-600" />
-                  Advanced Features
-                </h4>
-                <ul className="space-y-2 text-sm">
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    Spousal benefits optimization
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    Tax-efficient withdrawal strategies
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    Federal and state tax calculations
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    Monte Carlo risk analysis
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    Multiple scenario comparisons
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    Comprehensive PDF reports
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Process Overview */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="h-6 w-6 text-blue-600" />
-              7-Step Process (~10 minutes)
-            </CardTitle>
-            <CardDescription>
-              Complete analysis with save and resume functionality
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-4 gap-4">
-              {[
-                { step: 1, title: "Personal Info", desc: "Age, retirement timeline, filing status" },
-                { step: 2, title: "Pension Details", desc: "Service years, salary, retirement group" },
-                { step: 3, title: "Social Security", desc: "Benefits from SSA.gov statement" },
-                { step: 4, title: "Income & Assets", desc: "Additional retirement income sources" },
-                { step: 5, title: "Preferences", desc: "Goals, risk tolerance, analysis options" },
-                { step: 6, title: "Optimization", desc: "AI-powered strategy analysis" },
-                { step: 7, title: "Review & Save", desc: "Final results and PDF generation" }
-              ].slice(0, 4).map((item) => (
-                <div key={item.step} className="text-center p-4 border rounded-lg">
-                  <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-2 text-sm font-semibold">
-                    {item.step}
-                  </div>
-                  <h4 className="font-medium mb-1">{item.title}</h4>
-                  <p className="text-xs text-muted-foreground">{item.desc}</p>
-                </div>
-              ))}
-            </div>
-            <div className="grid md:grid-cols-3 gap-4 mt-4">
-              {[
-                { step: 5, title: "Preferences", desc: "Goals, risk tolerance, analysis options" },
-                { step: 6, title: "Optimization", desc: "AI-powered strategy analysis" },
-                { step: 7, title: "Review & Save", desc: "Final results and PDF generation" }
-              ].map((item) => (
-                <div key={item.step} className="text-center p-4 border rounded-lg">
-                  <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-2 text-sm font-semibold">
-                    {item.step}
-                  </div>
-                  <h4 className="font-medium mb-1">{item.title}</h4>
-                  <p className="text-xs text-muted-foreground">{item.desc}</p>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Benefits */}
-        <Card className="mb-8 border-green-200 bg-green-50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="h-6 w-6 text-green-600" />
-              Why Use the Combined Wizard?
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-3 gap-6">
-              <div>
-                <h4 className="font-semibold mb-2">Maximize Income</h4>
-                <p className="text-sm text-muted-foreground">
-                  Our optimization engine can increase your retirement income by 5-15% 
-                  through strategic claiming decisions.
-                </p>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-2">Minimize Taxes</h4>
-                <p className="text-sm text-muted-foreground">
-                  Advanced tax calculations help you keep more of your retirement income 
-                  through efficient withdrawal strategies.
-                </p>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-2">Peace of Mind</h4>
-                <p className="text-sm text-muted-foreground">
-                  Comprehensive analysis with multiple scenarios gives you confidence 
-                  in your retirement planning decisions.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Action Buttons */}
-        <div className="text-center space-y-4">
-          {session?.user && (
-            <div className="flex justify-center gap-4">
+        {/* Authenticated User Actions */}
+        {session?.user && (
+          <div className="mb-8 text-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Button
                 size="lg"
                 onClick={handleStartWizard}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg"
               >
-                <Calculator className="mr-2 h-5 w-5" />
-                Start New Analysis
-                <ArrowRight className="ml-2 h-5 w-5" />
+                <ArrowRight className="mr-2 h-5 w-5" />
+                Start New Calculation
               </Button>
 
-              {typeof window !== 'undefined' && session.user?.id && localStorage.getItem(`wizard-state-${session.user.id}`) && (
+              {typeof window !== 'undefined' && localStorage.getItem(`wizard-state-${session.user.email}`) && (
                 <Button
                   size="lg"
                   variant="outline"
                   onClick={handleResumeWizard}
+                  className="px-8 py-3 text-lg"
                 >
-                  <FileText className="mr-2 h-5 w-5" />
-                  Resume Saved Analysis
+                  <Clock className="mr-2 h-5 w-5" />
+                  Resume Previous Session
                 </Button>
               )}
             </div>
-          )}
+            <p className="text-sm text-muted-foreground mt-4">
+              Welcome back! You have full access to all premium features.
+            </p>
+          </div>
+        )}
 
-          <Alert className="max-w-2xl mx-auto">
-            <CheckCircle className="h-4 w-4" />
-            <AlertDescription>
-              <strong>Premium Feature:</strong> The Combined Retirement Planning Wizard is available 
-              to premium subscribers. Upgrade to access advanced optimization and tax analysis features.
-            </AlertDescription>
-          </Alert>
+        {/* Wizard Steps Preview */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <Card className="text-center">
+          <CardHeader>
+            <div className="mx-auto w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mb-4">
+              <span className="text-blue-600 dark:text-blue-300 font-bold">1</span>
+            </div>
+            <CardTitle className="text-lg">Personal Info</CardTitle>
+            <CardDescription>
+              Age, service years, salary history, and retirement goals
+            </CardDescription>
+          </CardHeader>
+        </Card>
+
+        <Card className="text-center">
+          <CardHeader>
+            <div className="mx-auto w-12 h-12 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mb-4">
+              <span className="text-green-600 dark:text-green-300 font-bold">2</span>
+            </div>
+            <CardTitle className="text-lg">Pension Details</CardTitle>
+            <CardDescription>
+              Group classification, final salary, and benefit calculations
+            </CardDescription>
+          </CardHeader>
+        </Card>
+
+        <Card className="text-center">
+          <CardHeader>
+            <div className="mx-auto w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mb-4">
+              <span className="text-purple-600 dark:text-purple-300 font-bold">3</span>
+            </div>
+            <CardTitle className="text-lg">Social Security</CardTitle>
+            <CardDescription>
+              Earnings record, claiming strategy, and spousal benefits
+            </CardDescription>
+          </CardHeader>
+        </Card>
+
+        <Card className="text-center">
+          <CardHeader>
+            <div className="mx-auto w-12 h-12 bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center mb-4">
+              <span className="text-orange-600 dark:text-orange-300 font-bold">4</span>
+            </div>
+            <CardTitle className="text-lg">Optimization</CardTitle>
+            <CardDescription>
+              Combined analysis with tax implications and recommendations
+            </CardDescription>
+          </CardHeader>
+        </Card>
         </div>
 
-        {/* Testimonial/Success Story */}
-        <Card className="mt-8 border-blue-200 bg-blue-50">
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <Badge variant="secondary" className="mb-4">Success Story</Badge>
-              <blockquote className="text-lg italic mb-4">
-                "The Combined Wizard helped me discover I could increase my retirement income by $847/month 
-                by adjusting my Social Security claiming strategy. The tax optimization alone will save me 
-                thousands per year!"
-              </blockquote>
-              <cite className="text-sm text-muted-foreground">
-                — Sarah M., Massachusetts Teacher (Group 2 Retirement)
-              </cite>
+        {/* Premium Features */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Zap className="h-5 w-5 text-yellow-600" />
+              Smart Optimization
+            </CardTitle>
+            <CardDescription>
+              AI-powered recommendations for optimal claiming strategies
+            </CardDescription>
+          </CardHeader>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Target className="h-5 w-5 text-red-600" />
+              Scenario Planning
+            </CardTitle>
+            <CardDescription>
+              Compare multiple retirement scenarios and timing options
+            </CardDescription>
+          </CardHeader>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-blue-600" />
+              Visual Analytics
+            </CardTitle>
+            <CardDescription>
+              Interactive charts showing income projections over time
+            </CardDescription>
+          </CardHeader>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-green-600" />
+              Detailed Reports
+            </CardTitle>
+            <CardDescription>
+              Comprehensive PDF reports with all calculations and recommendations
+            </CardDescription>
+          </CardHeader>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calculator className="h-5 w-5 text-purple-600" />
+              Tax Planning
+            </CardTitle>
+            <CardDescription>
+              Federal and Massachusetts state tax implications analysis
+            </CardDescription>
+          </CardHeader>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-indigo-600" />
+              Spousal Analysis
+            </CardTitle>
+            <CardDescription>
+              Coordinate benefits for married couples to maximize household income
+            </CardDescription>
+          </CardHeader>
+        </Card>
+        </div>
+
+        {/* Feature Access Information */}
+        <Card className="border-green-200 bg-green-50 dark:bg-green-950 dark:border-green-800">
+        <CardHeader className="text-center">
+          <CardTitle className="flex items-center justify-center gap-2 text-2xl">
+            {session?.user ? (
+              <>
+                <CheckCircle className="h-6 w-6 text-green-600" />
+                Combined Calculation Wizard Available
+              </>
+            ) : (
+              <>
+                <Lock className="h-6 w-6" />
+                Sign In to Access Wizard
+              </>
+            )}
+          </CardTitle>
+          <CardDescription className="text-lg">
+            {session?.user ? (
+              "You have full access to all premium features including the step-by-step wizard"
+            ) : (
+              "Sign in with Google to get immediate access to all premium features"
+            )}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="text-center">
+          {session?.user ? (
+            <div className="space-y-4">
+              <div className="text-lg font-semibold text-green-700 dark:text-green-300">
+                ✓ Full Premium Access Included
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
+                <div>✓ Unlimited calculations</div>
+                <div>✓ PDF reports</div>
+                <div>✓ Social Security optimization</div>
+                <div>✓ Tax analysis</div>
+                <div>✓ Scenario comparisons</div>
+                <div>✓ Spousal benefits</div>
+              </div>
+              <Button
+                size="lg"
+                onClick={handleStartWizard}
+                className="bg-green-600 hover:bg-green-700 mt-4"
+              >
+                <ArrowRight className="mr-2 h-4 w-4" />
+                Start Wizard Now
+              </Button>
             </div>
-          </CardContent>
+          ) : (
+            <div className="space-y-4">
+              <div className="text-lg font-semibold">
+                Free Access with Google Sign-In
+              </div>
+              <Button size="lg" asChild className="bg-blue-600 hover:bg-blue-700">
+                <Link href="/auth/signin">
+                  <Crown className="mr-2 h-4 w-4" />
+                  Sign In with Google
+                </Link>
+              </Button>
+              <p className="text-sm text-muted-foreground">
+                No subscription required • All features included
+              </p>
+            </div>
+          )}
+        </CardContent>
         </Card>
       </div>
-    </PremiumGate>
+    </div>
   )
 }

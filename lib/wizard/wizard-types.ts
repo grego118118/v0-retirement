@@ -43,9 +43,9 @@ export interface CombinedCalculationData {
   pensionData: {
     yearsOfService: number
     averageSalary: number
-    retirementGroup: '1' | '2' | '3' | '4'
+    retirementGroup: '1' | '2' | '3' | '4' | ''
     benefitPercentage: number
-    retirementOption: 'A' | 'B' | 'C' | 'D'
+    retirementOption: 'A' | 'B' | 'C' | 'D' | ''
     retirementDate: string
     monthlyBenefit: number
     annualBenefit: number

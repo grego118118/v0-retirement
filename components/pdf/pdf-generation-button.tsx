@@ -1,96 +1,117 @@
 /**
  * PDF Generation Button Component
- * Provides a reusable button for generating PDF reports with premium gating
+ * Massachusetts Retirement System - Browser-native PDF generation
  */
 
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { 
-  Download, 
-  FileText, 
-  Crown, 
-  Loader2, 
+import {
+  Download,
+  FileText,
+  Printer,
+  Loader2,
   AlertTriangle,
-  CheckCircle 
+  CheckCircle2,
+  Clock
 } from 'lucide-react'
-import { usePDFGeneration } from '@/hooks/use-pdf-generation'
-import { useSubscriptionStatus } from '@/hooks/use-subscription'
-import Link from 'next/link'
+import { usePDFGeneration, PDFGenerationOptions } from '@/hooks/use-pdf-generation'
+import { useSession } from 'next-auth/react'
+import { toast } from 'sonner'
+import React from 'react'
 
 export interface PDFGenerationButtonProps {
-  type: 'pension' | 'tax' | 'wizard' | 'combined'
-  data: any
   variant?: 'default' | 'outline' | 'secondary' | 'ghost'
   size?: 'default' | 'sm' | 'lg'
   className?: string
   children?: React.ReactNode
   showStatus?: boolean
   disabled?: boolean
+  options?: PDFGenerationOptions
 }
 
 export function PDFGenerationButton({
-  type,
-  data,
   variant = 'outline',
   size = 'default',
   className,
   children,
   showStatus = true,
-  disabled = false
+  disabled = false,
+  options = {}
 }: PDFGenerationButtonProps) {
-  const { upgradeRequired } = useSubscriptionStatus()
+  const { data: session } = useSession()
+  const [showPreview, setShowPreview] = useState(false)
+  const pdfReportRef = useRef<HTMLDivElement>(null)
+
   const {
     isGenerating,
-    error,
-    status,
+    lastResult,
     generatePDF,
-    checkStatus,
-    canGeneratePDF,
-    needsUpgrade,
-    getRemainingCount
+    canGenerate,
+    missingRequirements,
+    warnings,
   } = usePDFGeneration()
 
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-    checkStatus()
-  }, [checkStatus])
-
-  if (!mounted) {
-    return (
-      <Button variant={variant} size={size} className={className} disabled>
-        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-        Loading...
-      </Button>
-    )
-  }
+  // Load stats on mount
+  React.useEffect(() => {
+    if (session?.user?.id) {
+      // Auto-load validation status
+    }
+  }, [session?.user?.id])
 
   const handleGeneratePDF = async () => {
-    if (!data) {
-      console.error('No data provided for PDF generation')
+    if (!canGenerate) {
+      toast.error('Cannot generate PDF', {
+        description: missingRequirements.join(', '),
+      })
       return
     }
 
-    await generatePDF({
-      type,
-      data
-    })
+    try {
+      const result = await generatePDF(options)
+
+      if (result.success && result.data) {
+        // Show preview first
+        setShowPreview(true)
+
+        // Small delay to ensure the preview is rendered
+        setTimeout(() => {
+          // Trigger browser print
+          window.print()
+        }, 500)
+
+        toast.success('PDF report generated successfully!', {
+          description: `Generated in ${result.generationTime}ms`,
+        })
+      } else {
+        toast.error('Failed to generate PDF', {
+          description: result.error,
+        })
+      }
+    } catch (error) {
+      toast.error('PDF generation failed', {
+        description: error instanceof Error ? error.message : 'Unknown error',
+      })
+    }
   }
 
-  const isPremiumRequired = upgradeRequired('pdf_reports') || needsUpgrade()
-  const isDisabled = disabled || isGenerating || !data || (isPremiumRequired && !canGeneratePDF())
+  const handlePrint = () => {
+    if (showPreview) {
+      window.print()
+    } else {
+      toast.error('Please generate the PDF first')
+    }
+  }
 
   const getButtonContent = () => {
     if (isGenerating) {
       return (
         <>
-          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          Generating PDF...
+          <Clock className="h-4 w-4 mr-2 animate-spin" />
+          Generating...
         </>
       )
     }
@@ -107,20 +128,7 @@ export function PDFGenerationButton({
     )
   }
 
-  const getTypeLabel = () => {
-    switch (type) {
-      case 'pension':
-        return 'Pension Calculation'
-      case 'tax':
-        return 'Tax Implications'
-      case 'wizard':
-        return 'Retirement Plan'
-      case 'combined':
-        return 'Comprehensive Report'
-      default:
-        return 'Report'
-    }
-  }
+  const isDisabled = disabled || isGenerating || !canGenerate
 
   return (
     <div className="space-y-3">
@@ -135,63 +143,57 @@ export function PDFGenerationButton({
           {getButtonContent()}
         </Button>
 
-        {isPremiumRequired && (
-          <Badge variant="secondary" className="flex items-center gap-1">
-            <Crown className="h-3 w-3" />
-            Premium
-          </Badge>
+        {showPreview && (
+          <Button
+            onClick={handlePrint}
+            variant="outline"
+            size={size}
+            className="gap-2"
+          >
+            <Printer className="h-4 w-4" />
+            Print
+          </Button>
         )}
       </div>
 
       {showStatus && (
         <div className="space-y-2">
-          {/* Premium upgrade notice */}
-          {isPremiumRequired && (
-            <Alert className="bg-amber-50 border-amber-200 text-amber-800 dark:bg-amber-900/20 dark:border-amber-900/30 dark:text-amber-600">
-              <Crown className="h-4 w-4" />
+          {/* Authentication required notice */}
+          {!session?.user && (
+            <Alert className="bg-blue-50 border-blue-200 text-blue-800">
+              <AlertTriangle className="h-4 w-4" />
               <AlertDescription>
-                <span className="font-medium">Premium Feature:</span> PDF report generation is available with a Premium subscription.{" "}
-                <Link href="/subscribe" className="underline font-medium hover:text-amber-900">
-                  Upgrade now
-                </Link>
+                <span className="font-medium">Sign In Required:</span> PDF report generation requires authentication.
               </AlertDescription>
             </Alert>
           )}
 
-          {/* Error message */}
-          {error && (
+          {/* Missing requirements */}
+          {missingRequirements.length > 0 && (
             <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>
-                <span className="font-medium">Error:</span> {error}
+                <span className="font-medium">Required:</span> {missingRequirements.join(', ')}
               </AlertDescription>
             </Alert>
           )}
 
-          {/* Success message with usage info */}
-          {!isPremiumRequired && status && (
-            <div className="text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <FileText className="h-4 w-4" />
-                <span>
-                  {getTypeLabel()} PDF Report
-                  {status.limits.monthly === -1 
-                    ? ' (Unlimited)' 
-                    : ` (${getRemainingCount()} remaining this month)`
-                  }
-                </span>
-              </div>
-            </div>
-          )}
-
-          {/* Data validation warning */}
-          {!data && (
-            <Alert>
+          {/* Warnings */}
+          {warnings.length > 0 && (
+            <Alert className="bg-yellow-50 border-yellow-200 text-yellow-800">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>
-                Complete the calculation to generate a PDF report.
+                <span className="font-medium">Warnings:</span> {warnings.join(', ')}
               </AlertDescription>
             </Alert>
+          )}
+
+          {/* Success status */}
+          {canGenerate && (
+            <div className="text-sm text-muted-foreground flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-green-600" />
+              <span>Ready to generate {options.reportType || 'comprehensive'} report</span>
+            </div>
           )}
         </div>
       )}
@@ -200,77 +202,61 @@ export function PDFGenerationButton({
 }
 
 /**
- * Specialized PDF button for pension calculations
+ * Specialized PDF button for comprehensive reports
  */
-export function PensionPDFButton({ 
-  pensionData, 
-  ...props 
-}: Omit<PDFGenerationButtonProps, 'type' | 'data'> & { pensionData: any }) {
+export function ComprehensivePDFButton(props: Omit<PDFGenerationButtonProps, 'options'>) {
   return (
     <PDFGenerationButton
-      type="pension"
-      data={pensionData}
-      {...props}
-    >
-      <Download className="h-4 w-4 mr-2" />
-      Download Pension Report
-    </PDFGenerationButton>
-  )
-}
-
-/**
- * Specialized PDF button for tax calculations
- */
-export function TaxPDFButton({ 
-  taxData, 
-  ...props 
-}: Omit<PDFGenerationButtonProps, 'type' | 'data'> & { taxData: any }) {
-  return (
-    <PDFGenerationButton
-      type="tax"
-      data={taxData}
-      {...props}
-    >
-      <Download className="h-4 w-4 mr-2" />
-      Download Tax Report
-    </PDFGenerationButton>
-  )
-}
-
-/**
- * Specialized PDF button for wizard results
- */
-export function WizardPDFButton({ 
-  wizardData, 
-  ...props 
-}: Omit<PDFGenerationButtonProps, 'type' | 'data'> & { wizardData: any }) {
-  return (
-    <PDFGenerationButton
-      type="wizard"
-      data={wizardData}
-      {...props}
-    >
-      <Download className="h-4 w-4 mr-2" />
-      Download Retirement Plan
-    </PDFGenerationButton>
-  )
-}
-
-/**
- * Specialized PDF button for combined reports
- */
-export function CombinedPDFButton({ 
-  combinedData, 
-  ...props 
-}: Omit<PDFGenerationButtonProps, 'type' | 'data'> & { combinedData: any }) {
-  return (
-    <PDFGenerationButton
-      type="combined"
-      data={combinedData}
+      options={{ reportType: 'comprehensive' }}
       {...props}
     >
       <Download className="h-4 w-4 mr-2" />
       Download Comprehensive Report
+    </PDFGenerationButton>
+  )
+}
+
+/**
+ * Specialized PDF button for summary reports
+ */
+export function SummaryPDFButton(props: Omit<PDFGenerationButtonProps, 'options'>) {
+  return (
+    <PDFGenerationButton
+      options={{ reportType: 'summary' }}
+      {...props}
+    >
+      <Download className="h-4 w-4 mr-2" />
+      Download Summary Report
+    </PDFGenerationButton>
+  )
+}
+
+/**
+ * Specialized PDF button for calculations only
+ */
+export function CalculationsPDFButton(props: Omit<PDFGenerationButtonProps, 'options'>) {
+  return (
+    <PDFGenerationButton
+      options={{ reportType: 'calculations-only' }}
+      {...props}
+    >
+      <Download className="h-4 w-4 mr-2" />
+      Download Calculations Report
+    </PDFGenerationButton>
+  )
+}
+
+/**
+ * Specialized PDF button for pension calculations (legacy compatibility)
+ */
+export function PensionPDFButton(props: Omit<PDFGenerationButtonProps, 'options'>) {
+  return (
+    <PDFGenerationButton
+      options={{ reportType: 'comprehensive' }}
+      {...props}
+    >
+      <Download className="h-4 w-4 mr-2" />
+      Download Pension Report
     </PDFGenerationButton>
   )
 }

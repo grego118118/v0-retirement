@@ -4,6 +4,24 @@ import GitHubProvider from "next-auth/providers/github"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import { prisma } from "@/lib/prisma"
 
+// Dynamic NEXTAUTH_URL detection
+const getNextAuthUrl = () => {
+  // In production, use the environment variable
+  if (process.env.NODE_ENV === 'production') {
+    return process.env.NEXTAUTH_URL
+  }
+  
+  // In development, try to detect the host
+  if (process.env.NEXTAUTH_URL) {
+    return process.env.NEXTAUTH_URL
+  }
+  
+  // Fallback for development
+  const host = process.env.HOST || 'localhost'
+  const port = process.env.PORT || '3001'
+  return `http://${host}:${port}`
+}
+
 // Extend the built-in session types
 declare module "next-auth" {
   interface Session {
@@ -40,6 +58,19 @@ export const authOptions: NextAuthOptions = {
         session.user.id = user.id
       }
       return session
+    },
+    async redirect({ url, baseUrl }) {
+      // Handle dynamic base URL
+      const nextAuthUrl = getNextAuthUrl()
+      if (nextAuthUrl) {
+        baseUrl = nextAuthUrl
+      }
+      
+      // Allows relative callback URLs
+      if (url.startsWith("/")) return `${baseUrl}${url}`
+      // Allows callback URLs on the same origin
+      else if (new URL(url).origin === baseUrl) return url
+      return baseUrl
     },
   },
   session: {

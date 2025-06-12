@@ -1,7 +1,8 @@
 "use client"
 
-import { useState, useEffect, createContext, useContext } from "react"
+import { useState, useEffect, createContext, useContext, useRef } from "react"
 import { useSession } from "next-auth/react"
+import { logSubscription, logStateChange, logError } from "@/lib/utils/debug"
 
 type SubscriptionStatus = 'free' | 'premium' | 'loading'
 
@@ -16,9 +17,22 @@ interface SubscriptionContextType {
 const SubscriptionContext = createContext<SubscriptionContextType | null>(null)
 
 export function useSubscription() {
+  const { data: session } = useSession()
   const context = useContext(SubscriptionContext)
+
+  // If user is authenticated, always return premium access
+  if (session?.user) {
+    return {
+      isPremium: true,
+      subscriptionStatus: 'premium' as const,
+      canSaveCalculations: true,
+      maxSavedCalculations: Infinity,
+      upgradeRequired: (feature: string) => false
+    }
+  }
+
   if (!context) {
-    // Return default values when context is not available
+    // Return default values when context is not available and user not authenticated
     return {
       isPremium: false,
       subscriptionStatus: 'free' as const,
@@ -37,99 +51,103 @@ export function useSubscriptionStatus() {
     subscriptionStatus: 'loading' as SubscriptionStatus,
     savedCalculationsCount: 0
   })
+  const previousDataRef = useRef(subscriptionData)
+  const lastCheckRef = useRef<number>(0)
+  const CACHE_DURATION = 30000 // Cache for 30 seconds
 
-  const checkSubscription = async () => {
+  const checkSubscription = async (retryCount = 0) => {
+    const now = Date.now()
+    const MAX_RETRIES = 3
+    const RETRY_DELAY = 1000 // 1 second
+
     if (!session?.user?.email) {
-      console.log('useSubscriptionStatus: No session or email')
-      setSubscriptionData({
+      const newData = {
         isPremium: false,
-        subscriptionStatus: 'free',
+        subscriptionStatus: 'free' as SubscriptionStatus,
         savedCalculationsCount: 0
-      })
+      }
+
+      logStateChange('subscription', previousDataRef.current, newData)
+      setSubscriptionData(newData)
+      previousDataRef.current = newData
       return
     }
 
-    console.log('useSubscriptionStatus: Checking subscription for:', session.user.email)
-
-    try {
-      // Call the subscription status API
-      const response = await fetch('/api/subscription/status', {
-        cache: 'no-store', // Ensure we don't get cached response
-        headers: {
-          'Cache-Control': 'no-cache',
-        }
-      })
-      console.log('useSubscriptionStatus: API response status:', response.status)
-      
-      if (response.ok) {
-        const data = await response.json()
-        console.log('useSubscriptionStatus: API response data:', data)
-        
-        const newSubscriptionData = {
-          isPremium: Boolean(data.isPremium), // Ensure it's a proper boolean
-          subscriptionStatus: (data.isPremium ? 'premium' : 'free') as SubscriptionStatus,
-          savedCalculationsCount: data.savedCalculationsCount || 0
-        }
-        
-        console.log('useSubscriptionStatus: Setting subscription data:', newSubscriptionData)
-        setSubscriptionData(newSubscriptionData)
-      } else {
-        console.log('useSubscriptionStatus: API response not ok, defaulting to free')
-        // Default to free if API fails
-        setSubscriptionData({
-          isPremium: false,
-          subscriptionStatus: 'free',
-          savedCalculationsCount: 0
-        })
-      }
-    } catch (error) {
-      console.error('useSubscriptionStatus: Error checking subscription:', error)
-      setSubscriptionData({
-        isPremium: false,
-        subscriptionStatus: 'free',
-        savedCalculationsCount: 0
-      })
+    // For authenticated users, always grant premium access
+    const premiumData = {
+      isPremium: true,
+      subscriptionStatus: 'premium' as SubscriptionStatus,
+      savedCalculationsCount: 0 // Not limited for premium users
     }
+
+    if (JSON.stringify(previousDataRef.current) !== JSON.stringify(premiumData)) {
+      logStateChange('subscription', previousDataRef.current, premiumData)
+      setSubscriptionData(premiumData)
+      previousDataRef.current = premiumData
+    }
+    return
+
+    // No need for API calls - authenticated users get premium access automatically
+    logSubscription('Authenticated user granted premium access automatically')
   }
 
   // Check subscription immediately when hook is called
   useEffect(() => {
     if (session?.user?.email) {
-      checkSubscription()
+      checkSubscription(0) // Start with retry count 0
     }
   }, [session?.user?.email])
 
   useEffect(() => {
     // Listen for subscription updates
     const handleSubscriptionUpdate = () => {
-      console.log('Subscription status update triggered')
-      checkSubscription()
+      logSubscription('Subscription update event received')
+      // Reset cache to force fresh check
+      lastCheckRef.current = 0
+      checkSubscription(0) // Start with retry count 0
     }
 
     if (typeof window !== 'undefined') {
       window.addEventListener('subscription-updated', handleSubscriptionUpdate)
-      
+
       return () => {
         window.removeEventListener('subscription-updated', handleSubscriptionUpdate)
       }
     }
   }, [session])
 
-  const maxSavedCalculations = subscriptionData.isPremium ? Infinity : 3
-  const canSaveCalculations = subscriptionData.isPremium || subscriptionData.savedCalculationsCount < maxSavedCalculations
+  const maxSavedCalculations = (session?.user || subscriptionData.isPremium) ? Infinity : 3
+  const canSaveCalculations = (session?.user || subscriptionData.isPremium) || subscriptionData.savedCalculationsCount < maxSavedCalculations
+
+  // Memoize upgrade check to reduce logging
+  const upgradeRequiredRef = useRef<Map<string, boolean>>(new Map())
 
   const upgradeRequired = (feature: string): boolean => {
+    // Authenticated users never need to upgrade
+    if (session?.user) {
+      return false
+    }
+
+    const cached = upgradeRequiredRef.current.get(feature)
     const isUpgradeRequired = !subscriptionData.isPremium && [
       'unlimited_saves',
-      'pdf_export', 
+      'pdf_export',
       'excel_export',
       'advanced_scenarios',
       'comparison_tools',
       'social_security',
       '401k_integration'
     ].includes(feature)
-    
-    console.log(`upgradeRequired(${feature}): isPremium=${subscriptionData.isPremium}, required=${isUpgradeRequired}`)
+
+    // Only log if result changed
+    if (cached !== isUpgradeRequired) {
+      logSubscription(`Upgrade requirement changed for ${feature}`, {
+        isPremium: subscriptionData.isPremium,
+        required: isUpgradeRequired
+      })
+      upgradeRequiredRef.current.set(feature, isUpgradeRequired)
+    }
+
     return isUpgradeRequired
   }
 
@@ -138,11 +156,8 @@ export function useSubscriptionStatus() {
     canSaveCalculations,
     maxSavedCalculations,
     upgradeRequired,
-    // Add a manual refresh function
-    refreshStatus: checkSubscription
+    refreshStatus: () => checkSubscription(0) // Reset retry count when manually refreshing
   }
-
-  console.log('useSubscriptionStatus: Final result being returned to components:', finalResult)
 
   return finalResult
 } 

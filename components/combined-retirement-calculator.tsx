@@ -23,6 +23,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { TaxImplicationsCalculator } from "@/components/tax-implications-calculator"
 
 interface SocialSecurityData {
   fullRetirementAge: number
@@ -219,9 +220,10 @@ export function CombinedRetirementCalculator({ pensionResult, formData }: Combin
         </CardHeader>
         <CardContent className="space-y-6">
           <Tabs defaultValue="social-security" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="social-security">Social Security Setup</TabsTrigger>
               <TabsTrigger value="combined-results">Combined Results</TabsTrigger>
+              <TabsTrigger value="tax-implications">Tax Implications</TabsTrigger>
             </TabsList>
             
             <TabsContent value="social-security" className="space-y-4">
@@ -477,6 +479,14 @@ export function CombinedRetirementCalculator({ pensionResult, formData }: Combin
                   </AlertDescription>
                 </Alert>
               )}
+            </TabsContent>
+
+            <TabsContent value="tax-implications" className="space-y-4">
+              <TaxImplicationsCalculator
+                initialPensionIncome={pensionResult?.annualPension || 0}
+                initialSocialSecurity={socialSecurityData.selectedMonthlyBenefit * 12 || 0}
+                className="mt-4"
+              />
             </TabsContent>
           </Tabs>
         </CardContent>

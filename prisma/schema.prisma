@@ -26,9 +26,15 @@ model User {
   // Retirement data
   profile       RetirementProfile?
   calculations  RetirementCalculation[]
+  actionItems   ActionItem[]
   pdfGenerations PdfGeneration[]
   emailLogs     EmailLog[]
   pdfShares     PdfShare[]
+
+  // Scenario modeling
+  retirementScenarios RetirementScenario[]
+  scenarioComparisons ScenarioComparison[]
+  scenarioShares      ScenarioShare[]
 
   // Subscription data
   stripeCustomerId    String?   // Stripe customer ID
@@ -137,27 +143,33 @@ model RetirementCalculation {
   // Additional data
   notes               String?
   isFavorite          Boolean  @default(false)
-  
+
+  // Relationships
+  actionItems         ActionItem[]
+
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
-  
+
   @@index([userId])
   @@index([createdAt])
 }
 
 // PDF Generation tracking - stores PDF generation history and usage
 model PdfGeneration {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type        String   // 'pension', 'tax', 'wizard', 'combined'
-  size        Int      // File size in bytes
-  filename    String?  // Generated filename
-  createdAt   DateTime @default(now())
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pdfType         String   // 'comprehensive', 'summary', 'calculations-only'
+  generationTime  Int      // Generation time in milliseconds
+  fileSize        Int      @default(0) // File size in bytes (for future use)
+  success         Boolean  @default(true) // Whether generation was successful
+  errorMessage    String?  // Error message if generation failed
+  createdAt       DateTime @default(now())
 
   @@index([userId])
   @@index([createdAt])
-  @@index([type])
+  @@index([pdfType])
+  @@index([success])
 }
 
 // Email Log - tracks email sending for rate limiting and analytics
@@ -189,4 +201,194 @@ model PdfShare {
   @@index([userId])
   @@index([createdAt])
   @@index([pdfType])
+}
+
+// Action items and recommendations - stores personalized guidance for users
+model ActionItem {
+  id                  String   @id @default(cuid())
+  userId              String
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Action item details
+  title               String
+  description         String
+  category            String   // 'profile', 'calculation', 'planning', 'optimization', 'education'
+  priority            String   // 'high', 'medium', 'low'
+  status              String   @default("pending") // 'pending', 'in-progress', 'completed', 'dismissed'
+
+  // Context and targeting
+  triggerCondition    String?  // JSON string describing what triggered this action item
+  targetGroup         String?  // Specific retirement group this applies to
+  targetAgeRange      String?  // Age range this applies to (e.g., "55-65")
+  targetServiceRange  String?  // Years of service range (e.g., "20-30")
+
+  // Action details
+  actionType          String   // 'navigate', 'calculate', 'review', 'contact', 'learn'
+  actionUrl           String?  // URL to navigate to for this action
+  actionData          String?  // JSON string with additional action data
+
+  // Completion tracking
+  completedAt         DateTime?
+  dismissedAt         DateTime?
+  dismissalReason     String?
+
+  // Relationships
+  relatedCalculationId String?
+  relatedCalculation   RetirementCalculation? @relation(fields: [relatedCalculationId], references: [id], onDelete: SetNull)
+
+  // Metadata
+  displayOrder        Int      @default(0)
+  expiresAt           DateTime? // Optional expiration for time-sensitive items
+  isSystemGenerated   Boolean  @default(true)
+  generationReason    String?  // Why this action item was generated
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([priority])
+  @@index([category])
+  @@index([createdAt])
+}
+
+// Retirement Scenario - stores different retirement scenarios for comparison
+model RetirementScenario {
+  id                    String   @id @default(cuid())
+  userId                String
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Scenario metadata
+  name                  String
+  description           String?
+  isBaseline            Boolean  @default(false)
+
+  // Scenario parameters stored as JSON for flexibility
+  personalParameters    String   // JSON: retirement age, life expectancy, etc.
+  pensionParameters     String   // JSON: retirement group, years of service, etc.
+  socialSecurityParameters String // JSON: claiming age, benefits, etc.
+  financialParameters   String   // JSON: investments, withdrawal strategy, etc.
+  taxParameters         String   // JSON: filing status, optimization strategy, etc.
+  colaParameters        String   // JSON: COLA assumptions and schedules
+
+  // Relationships
+  results               ScenarioResult?
+  comparisons           ScenarioComparison[]
+  shares                ScenarioShare[]
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([userId])
+  @@index([isBaseline])
+  @@index([createdAt])
+}
+
+// Scenario Results - calculated outcomes for a scenario
+model ScenarioResult {
+  id                    String   @id @default(cuid())
+  scenarioId            String   @unique
+  scenario              RetirementScenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+
+  // Core benefit calculations
+  pensionMonthlyBenefit Float
+  pensionAnnualBenefit  Float
+  pensionLifetimeBenefits Float
+  pensionBenefitReduction Float @default(0)
+  pensionSurvivorBenefit Float?
+
+  ssMonthlyBenefit      Float
+  ssAnnualBenefit       Float
+  ssLifetimeBenefits    Float
+  ssSpousalBenefit      Float?
+  ssSurvivorBenefit     Float?
+
+  // Combined income
+  totalMonthlyIncome    Float
+  totalAnnualIncome     Float
+  netAfterTaxIncome     Float
+  replacementRatio      Float
+
+  // Tax analysis
+  annualTaxBurden       Float
+  effectiveTaxRate      Float
+  marginalTaxRate       Float
+  federalTax            Float
+  stateTax              Float
+  socialSecurityTax     Float
+
+  // Portfolio analysis (optional)
+  initialPortfolioBalance Float?
+  finalPortfolioBalance Float?
+  totalWithdrawals      Float?
+  portfolioLongevity    Float?
+  probabilityOfSuccess  Float?
+
+  // Key metrics
+  totalLifetimeIncome   Float
+  breakEvenAge          Float?
+  riskScore             Float
+  flexibilityScore      Float
+  optimizationScore     Float
+
+  // Detailed projections stored as JSON
+  yearlyProjections     String?  // JSON array of yearly data
+
+  calculatedAt          DateTime @default(now())
+
+  @@index([calculatedAt])
+}
+
+// Scenario Comparison - stores saved comparisons between scenarios
+model ScenarioComparison {
+  id                    String   @id @default(cuid())
+  userId                String
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name                  String
+  description           String?
+
+  // Scenarios included in this comparison (many-to-many relationship)
+  scenarios             RetirementScenario[]
+
+  // Comparison results stored as JSON
+  comparisonMetrics     String   // JSON: comparison metrics
+  recommendations       String   // JSON: array of recommendations
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// Scenario Share - for sharing scenarios with advisors/family
+model ScenarioShare {
+  id                    String   @id @default(cuid())
+  scenarioId            String
+  scenario              RetirementScenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  userId                String
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  shareToken            String   @unique
+  recipientEmail        String?
+  recipientName         String?
+
+  // Access control
+  expiresAt             DateTime?
+  isActive              Boolean  @default(true)
+  viewCount             Int      @default(0)
+  lastViewedAt          DateTime?
+
+  // Permissions
+  canViewDetails        Boolean  @default(true)
+  canDownloadPdf        Boolean  @default(false)
+  canDuplicate          Boolean  @default(false)
+
+  createdAt             DateTime @default(now())
+
+  @@index([scenarioId])
+  @@index([userId])
+  @@index([shareToken])
+  @@index([expiresAt])
 }

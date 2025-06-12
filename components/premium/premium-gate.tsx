@@ -1,12 +1,13 @@
 "use client"
 
-import { ReactNode } from "react"
+import { ReactNode, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Crown, Lock } from "lucide-react"
 import Link from "next/link"
 import { useSubscriptionStatus } from "@/hooks/use-subscription"
+import { logPremium } from "@/lib/utils/debug"
 
 interface PremiumGateProps {
   feature: string
@@ -17,24 +18,33 @@ interface PremiumGateProps {
   showPreview?: boolean
 }
 
-export function PremiumGate({ 
-  feature, 
-  title, 
-  description, 
-  children, 
+export function PremiumGate({
+  feature,
+  title,
+  description,
+  children,
   fallback,
-  showPreview = false 
+  showPreview = false
 }: PremiumGateProps) {
   const { upgradeRequired, isPremium, subscriptionStatus } = useSubscriptionStatus()
+  const lastDecisionRef = useRef<boolean | null>(null)
 
-  console.log(`PremiumGate [${feature}]: isPremium=${isPremium}, subscriptionStatus=${subscriptionStatus}, upgradeRequired=${upgradeRequired(feature)}`)
+  const isUpgradeRequired = upgradeRequired(feature)
 
-  if (!upgradeRequired(feature)) {
-    console.log(`PremiumGate [${feature}]: Showing premium content`)
-    return <>{children}</>
+  // Only log when decision changes
+  if (lastDecisionRef.current !== isUpgradeRequired) {
+    logPremium(`Access decision for ${feature}`, {
+      isPremium,
+      subscriptionStatus,
+      upgradeRequired: isUpgradeRequired,
+      action: isUpgradeRequired ? 'showing_upgrade_prompt' : 'showing_premium_content'
+    })
+    lastDecisionRef.current = isUpgradeRequired
   }
 
-  console.log(`PremiumGate [${feature}]: Showing upgrade prompt`)
+  if (!isUpgradeRequired) {
+    return <>{children}</>
+  }
 
   if (fallback) {
     return <>{fallback}</>
@@ -91,15 +101,24 @@ interface PremiumBadgeProps {
 
 export function PremiumBadge({ feature, children }: PremiumBadgeProps) {
   const { upgradeRequired, isPremium, subscriptionStatus } = useSubscriptionStatus()
+  const lastDecisionRef = useRef<boolean | null>(null)
 
-  console.log(`PremiumBadge [${feature}]: isPremium=${isPremium}, subscriptionStatus=${subscriptionStatus}, upgradeRequired=${upgradeRequired(feature)}`)
+  const isUpgradeRequired = upgradeRequired(feature)
 
-  if (!upgradeRequired(feature)) {
-    console.log(`PremiumBadge [${feature}]: Showing premium content`)
-    return <>{children}</>
+  // Only log when decision changes
+  if (lastDecisionRef.current !== isUpgradeRequired) {
+    logPremium(`Badge decision for ${feature}`, {
+      isPremium,
+      subscriptionStatus,
+      upgradeRequired: isUpgradeRequired,
+      action: isUpgradeRequired ? 'showing_premium_badge' : 'showing_premium_content'
+    })
+    lastDecisionRef.current = isUpgradeRequired
   }
 
-  console.log(`PremiumBadge [${feature}]: Showing premium badge`)
+  if (!isUpgradeRequired) {
+    return <>{children}</>
+  }
 
   return (
     <div className="relative">

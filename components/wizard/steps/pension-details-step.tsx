@@ -1,21 +1,22 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { SimpleSelect } from "@/components/ui/simple-select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Building, DollarSign, Calendar, Info, Calculator } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { logPension, logStateChange, isDebugEnabled } from "@/lib/utils/debug"
 
 interface PensionData {
   yearsOfService: number
   averageSalary: number
-  retirementGroup: '1' | '2' | '3' | '4'
+  retirementGroup: '1' | '2' | '3' | '4' | ''
   benefitPercentage: number
-  retirementOption: 'A' | 'B' | 'C' | 'D'
+  retirementOption: 'A' | 'B' | 'C' | 'D' | ''
   retirementDate: string
   monthlyBenefit: number
   annualBenefit: number
@@ -30,6 +31,18 @@ export function PensionDetailsStep({ data, onComplete }: PensionDetailsStepProps
   const [formData, setFormData] = useState<PensionData>(data)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [calculatedBenefit, setCalculatedBenefit] = useState<number>(0)
+  const previousFormDataRef = useRef<PensionData>(data)
+  const renderCountRef = useRef(0)
+
+  // Only log on meaningful changes, not every render
+  renderCountRef.current++
+  if (isDebugEnabled('pension') && renderCountRef.current % 10 === 1) {
+    logPension('Component rendered', {
+      renderCount: renderCountRef.current,
+      hasErrors: Object.keys(errors).length > 0,
+      calculatedBenefit
+    })
+  }
 
   // Calculate pension benefit when relevant fields change
   useEffect(() => {
@@ -57,10 +70,35 @@ export function PensionDetailsStep({ data, onComplete }: PensionDetailsStepProps
   }, [formData.yearsOfService, formData.averageSalary, formData.retirementGroup, formData.benefitPercentage, formData.retirementOption, formData.retirementDate, formData.monthlyBenefit, formData.annualBenefit])
 
   const handleInputChange = (field: keyof PensionData, value: string | number) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: typeof value === 'string' ? (isNaN(Number(value)) ? value : Number(value)) : value
-    }))
+    setFormData(prev => {
+      // Keep retirement group and option as strings, convert others to numbers if numeric
+      let processedValue: string | number = value
+      if (typeof value === 'string') {
+        if (field === 'retirementGroup' || field === 'retirementOption' || field === 'retirementDate') {
+          // Keep these fields as strings
+          processedValue = value
+        } else if (!isNaN(Number(value)) && value !== '') {
+          // Convert numeric strings to numbers for other fields
+          processedValue = Number(value)
+        } else {
+          // Keep as string if not numeric
+          processedValue = value
+        }
+      }
+
+      const newData = {
+        ...prev,
+        [field]: processedValue
+      }
+
+      // Only log significant changes
+      if (JSON.stringify(previousFormDataRef.current) !== JSON.stringify(newData)) {
+        logStateChange('pension', previousFormDataRef.current, newData)
+        previousFormDataRef.current = newData
+      }
+
+      return newData
+    })
   }
 
   const validateForm = (data: PensionData): Record<string, string> => {
@@ -82,6 +120,14 @@ export function PensionDetailsStep({ data, onComplete }: PensionDetailsStepProps
       errors.averageSalary = 'Please verify salary amount (seems unusually high)'
     }
 
+    if (!data.retirementGroup || data.retirementGroup === '') {
+      errors.retirementGroup = 'Please select your retirement group'
+    }
+
+    if (!data.retirementOption || data.retirementOption === '') {
+      errors.retirementOption = 'Please select a retirement option'
+    }
+
     if (!data.retirementDate) {
       errors.retirementDate = 'Retirement date is required'
     }
@@ -89,24 +135,26 @@ export function PensionDetailsStep({ data, onComplete }: PensionDetailsStepProps
     return errors
   }
 
-  const getBenefitPercentage = (retirementGroup: string, yearsOfService: number): number => {
-    // Massachusetts pension benefit calculation
+  const getBenefitPercentage = (retirementGroup: string, yearsOfService: number, age: number = 65): number => {
+    // Use standardized Massachusetts pension benefit calculation
+    // This is a simplified version - the actual calculation should use the standardized calculator
     switch (retirementGroup) {
-      case '1': // General employees
-        if (yearsOfService >= 20) return 2.5
-        if (yearsOfService >= 10) return 2.0
-        return 1.5
-      case '2': // Teachers, police, firefighters
-        if (yearsOfService >= 20) return 2.5
-        if (yearsOfService >= 10) return 2.0
-        return 1.5
-      case '3': // State police
-        if (yearsOfService >= 20) return 2.5
-        return 2.0
-      case '4': // Police officers and firefighters
-        if (yearsOfService >= 20) return 2.5
-        if (yearsOfService >= 10) return 2.0
-        return 1.5
+      case '1': // Group 1 - General employees
+        if (age >= 65) return 2.5
+        if (age >= 60) return 2.0 + (age - 60) * 0.1 // Graduated from 2.0% to 2.5%
+        return 0 // Not eligible before age 60 for post-2012 hires
+      case '2': // Group 2 - Teachers, certain public safety
+        if (age >= 60) return 2.5
+        if (age >= 55) return 2.0 + (age - 55) * 0.1 // Graduated from 2.0% to 2.5%
+        return 0 // Not eligible before age 55
+      case '3': // Group 3 - State Police
+        return 2.5 // Always 2.5% regardless of age (special provisions)
+      case '4': // Group 4 - Public safety, corrections
+        if (age >= 55) return 2.5
+        if (age >= 50) return 2.0 + (age - 50) * 0.1 // Graduated from 2.0% to 2.5%
+        return 0 // Not eligible before age 50
+      case '':
+        return 0 // Return 0 for empty selection
       default:
         return 2.0
     }
@@ -118,6 +166,7 @@ export function PensionDetailsStep({ data, onComplete }: PensionDetailsStepProps
       case '2': return 'Teachers, police officers, firefighters'
       case '3': return 'State police and certain hazardous duty positions'
       case '4': return 'Police officers and firefighters'
+      case '': return ''
       default: return ''
     }
   }
@@ -128,13 +177,14 @@ export function PensionDetailsStep({ data, onComplete }: PensionDetailsStepProps
       case 'B': return 'Reduced benefit with 100% survivor benefit'
       case 'C': return 'Reduced benefit with 66⅔% survivor benefit'
       case 'D': return 'Reduced benefit with 50% survivor benefit'
+      case '': return ''
       default: return ''
     }
   }
 
   // Auto-calculate benefit percentage based on group and years
   useEffect(() => {
-    if (formData.retirementGroup && formData.yearsOfService > 0) {
+    if (formData.retirementGroup && formData.retirementGroup !== '' && formData.yearsOfService > 0) {
       const suggestedPercentage = getBenefitPercentage(formData.retirementGroup, formData.yearsOfService)
       if (formData.benefitPercentage === 0) {
         setFormData(prev => ({ ...prev, benefitPercentage: suggestedPercentage }))
@@ -152,9 +202,9 @@ export function PensionDetailsStep({ data, onComplete }: PensionDetailsStepProps
         </AlertDescription>
       </Alert>
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid md:grid-cols-2 gap-6 overflow-visible">
         {/* Service Information */}
-        <Card>
+        <Card className="overflow-visible">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-blue-600" />
@@ -164,7 +214,7 @@ export function PensionDetailsStep({ data, onComplete }: PensionDetailsStepProps
               Your employment history and retirement timeline
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 overflow-visible">
             <div className="space-y-2">
               <Label htmlFor="yearsOfService">Years of Creditable Service</Label>
               <Input
@@ -182,22 +232,23 @@ export function PensionDetailsStep({ data, onComplete }: PensionDetailsStepProps
 
             <div className="space-y-2">
               <Label htmlFor="retirementGroup">Retirement Group</Label>
-              <Select
-                value={formData.retirementGroup}
-                onValueChange={(value: '1' | '2' | '3' | '4') => handleInputChange('retirementGroup', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">Group 1 - General Employees</SelectItem>
-                  <SelectItem value="2">Group 2 - Teachers/Public Safety</SelectItem>
-                  <SelectItem value="3">Group 3 - State Police</SelectItem>
-                  <SelectItem value="4">Group 4 - Police/Firefighters</SelectItem>
-                </SelectContent>
-              </Select>
+              <SimpleSelect
+                value={formData.retirementGroup || ''}
+                onValueChange={(value: string) => handleInputChange('retirementGroup', value)}
+                placeholder="Select your retirement group"
+                options={[
+                  { value: "1", label: "Group 1 - General Employees" },
+                  { value: "2", label: "Group 2 - Teachers/Public Safety" },
+                  { value: "3", label: "Group 3 - State Police" },
+                  { value: "4", label: "Group 4 - Police/Firefighters" }
+                ]}
+                className={errors.retirementGroup ? 'border-red-500' : ''}
+              />
+              {errors.retirementGroup && (
+                <p className="text-sm text-red-500">{errors.retirementGroup}</p>
+              )}
               <p className="text-sm text-muted-foreground">
-                {getRetirementGroupDescription(formData.retirementGroup)}
+                {formData.retirementGroup ? getRetirementGroupDescription(formData.retirementGroup) : 'Please select your retirement group to see description'}
               </p>
             </div>
 
@@ -218,7 +269,7 @@ export function PensionDetailsStep({ data, onComplete }: PensionDetailsStepProps
         </Card>
 
         {/* Salary and Benefits */}
-        <Card>
+        <Card className="overflow-visible">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <DollarSign className="h-5 w-5 text-green-600" />
@@ -228,7 +279,7 @@ export function PensionDetailsStep({ data, onComplete }: PensionDetailsStepProps
               Salary information for benefit calculation
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 overflow-visible">
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Label htmlFor="averageSalary">Average Salary (Highest 3 Years)</Label>
@@ -281,9 +332,9 @@ export function PensionDetailsStep({ data, onComplete }: PensionDetailsStepProps
                 />
                 <span className="flex items-center text-sm text-muted-foreground">%</span>
               </div>
-              {formData.retirementGroup && formData.yearsOfService > 0 && (
+              {formData.retirementGroup && formData.retirementGroup !== '' && formData.yearsOfService > 0 && (
                 <p className="text-sm text-muted-foreground">
-                  Suggested: {getBenefitPercentage(formData.retirementGroup, formData.yearsOfService)}% 
+                  Suggested: {getBenefitPercentage(formData.retirementGroup, formData.yearsOfService)}%
                   (based on Group {formData.retirementGroup}, {formData.yearsOfService} years)
                 </p>
               )}
@@ -291,22 +342,23 @@ export function PensionDetailsStep({ data, onComplete }: PensionDetailsStepProps
 
             <div className="space-y-2">
               <Label htmlFor="retirementOption">Retirement Option</Label>
-              <Select
-                value={formData.retirementOption}
-                onValueChange={(value: 'A' | 'B' | 'C' | 'D') => handleInputChange('retirementOption', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="A">Option A - Maximum Benefit</SelectItem>
-                  <SelectItem value="B">Option B - 100% Survivor</SelectItem>
-                  <SelectItem value="C">Option C - 66⅔% Survivor</SelectItem>
-                  <SelectItem value="D">Option D - 50% Survivor</SelectItem>
-                </SelectContent>
-              </Select>
+              <SimpleSelect
+                value={formData.retirementOption || ''}
+                onValueChange={(value: string) => handleInputChange('retirementOption', value)}
+                placeholder="Select retirement option"
+                options={[
+                  { value: "A", label: "Option A - Maximum Benefit" },
+                  { value: "B", label: "Option B - 100% Survivor" },
+                  { value: "C", label: "Option C - 66⅔% Survivor" },
+                  { value: "D", label: "Option D - 50% Survivor" }
+                ]}
+                className={errors.retirementOption ? 'border-red-500' : ''}
+              />
+              {errors.retirementOption && (
+                <p className="text-sm text-red-500">{errors.retirementOption}</p>
+              )}
               <p className="text-sm text-muted-foreground">
-                {getRetirementOptionDescription(formData.retirementOption)}
+                {formData.retirementOption ? getRetirementOptionDescription(formData.retirementOption) : 'Please select a retirement option to see description'}
               </p>
             </div>
           </CardContent>
