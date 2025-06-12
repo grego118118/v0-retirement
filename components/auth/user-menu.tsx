@@ -69,12 +69,6 @@ export function UserMenu() {
             <span>Profile</span>
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href="/billing" className="cursor-pointer">
-            <CreditCard className="mr-2 h-4 w-4" />
-            <span>Billing</span>
-          </Link>
-        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
           <LogOut className="mr-2 h-4 w-4" />

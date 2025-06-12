@@ -15,12 +15,28 @@ export function ToastNotification({ message, duration = 5000, onClose }: ToastNo
   const [isVisible, setIsVisible] = useState(true)
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsVisible(false)
-      if (onClose) onClose()
-    }, duration)
+    // Use requestAnimationFrame for CSP compliance
+    let frameCount = 0
+    const targetFrames = Math.floor(duration / 16.67) // Convert ms to frames (60fps)
+    let animationId: number
 
-    return () => clearTimeout(timer)
+    const animate = () => {
+      frameCount++
+      if (frameCount >= targetFrames) {
+        setIsVisible(false)
+        if (onClose) onClose()
+      } else {
+        animationId = requestAnimationFrame(animate)
+      }
+    }
+
+    animationId = requestAnimationFrame(animate)
+
+    return () => {
+      if (animationId) {
+        cancelAnimationFrame(animationId)
+      }
+    }
   }, [duration, onClose])
 
   const handleClose = () => {
