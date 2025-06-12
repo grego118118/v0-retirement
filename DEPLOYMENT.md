@@ -1,17 +1,210 @@
 # Massachusetts Retirement System - Production Deployment Guide
 
-This guide covers the complete production deployment infrastructure for the Massachusetts Retirement System website.
+This comprehensive guide covers the complete production deployment infrastructure for the Massachusetts Retirement System website, optimized for DigitalOcean hosting with sub-2-second performance requirements.
 
 ## 🏗️ **Infrastructure Overview**
 
 ### Architecture Components
 - **Application**: Next.js 15 with TypeScript
-- **Database**: PostgreSQL 15 with connection pooling
-- **Cache**: Redis for session and data caching
-- **Reverse Proxy**: Nginx with SSL termination
-- **Monitoring**: Sentry for error tracking and performance
-- **Containerization**: Docker with multi-stage builds
+- **Database**: PostgreSQL 15 with connection pooling and optimized indexes
+- **Cache**: Redis for session and data caching with performance monitoring
+- **Reverse Proxy**: Nginx with SSL termination and security headers
+- **Monitoring**: Sentry for error tracking, performance monitoring, and observability
+- **Containerization**: Docker with multi-stage builds and security optimizations
 - **Orchestration**: Docker Compose for service management
+- **Security**: Enhanced security configuration for government/financial compliance
+- **Performance**: Query optimization and caching strategies for sub-2-second response times
+
+## 🎯 **Production Optimization Features**
+
+### Performance Enhancements
+- **Database Indexes**: Comprehensive PostgreSQL indexes for optimal query performance
+- **Query Optimization**: Optimized database queries with caching and timeout protection
+- **Performance Monitoring**: Real-time performance tracking with threshold alerts
+- **Cache Strategy**: Multi-level caching with Redis and application-level optimization
+
+### Security Hardening
+- **Enhanced Security Headers**: CSP, HSTS, and comprehensive security configuration
+- **Input Validation**: Comprehensive input sanitization and validation
+- **Rate Limiting**: Configurable rate limiting for different endpoint types
+- **Compliance**: Government/financial application security requirements
+
+### Monitoring & Observability
+- **Error Tracking**: Enhanced Sentry integration with contextual error reporting
+- **Performance Metrics**: Real-time performance monitoring and alerting
+- **Health Checks**: Comprehensive health monitoring with detailed diagnostics
+- **Activity Tracking**: User activity and system performance tracking
+
+---
+
+## 🚀 **DigitalOcean Production Deployment**
+
+### Prerequisites
+- DigitalOcean account with billing enabled
+- Domain name configured with DigitalOcean DNS
+- GitHub repository with the Massachusetts Retirement System code
+- Environment variables configured (see Environment Configuration section)
+
+### Step 1: Database Setup (PostgreSQL)
+
+1. **Create Managed PostgreSQL Database**
+   ```bash
+   # Via DigitalOcean CLI (optional)
+   doctl databases create ma-retirement-db \
+     --engine postgres \
+     --version 15 \
+     --size db-s-1vcpu-1gb \
+     --region nyc1
+   ```
+
+2. **Configure Database Connection**
+   - Note the connection string from DigitalOcean dashboard
+   - Add to environment variables as `DATABASE_URL`
+   - Enable SSL connections (required for production)
+
+3. **Apply Database Optimizations**
+   ```bash
+   # Connect to database and run optimization script
+   psql $DATABASE_URL -f prisma/migrations/20250611_production_indexes.sql
+   ```
+
+### Step 2: Redis Cache Setup
+
+1. **Create Managed Redis Instance**
+   ```bash
+   # Via DigitalOcean CLI (optional)
+   doctl databases create ma-retirement-redis \
+     --engine redis \
+     --version 7 \
+     --size db-s-1vcpu-1gb \
+     --region nyc1
+   ```
+
+2. **Configure Redis Connection**
+   - Note the connection string from DigitalOcean dashboard
+   - Add to environment variables as `REDIS_URL`
+
+### Step 3: App Platform Deployment
+
+1. **Connect GitHub Repository**
+   - Go to DigitalOcean App Platform
+   - Create new app from GitHub repository
+   - Select the Massachusetts Retirement System repository
+   - Choose the main branch for production deployment
+
+2. **Configure Build Settings**
+   ```yaml
+   # App Platform will auto-detect Next.js, but you can customize:
+   name: ma-retirement-system
+   services:
+   - name: web
+     source_dir: /
+     github:
+       repo: your-username/ma-retirement-system
+       branch: main
+     run_command: npm start
+     build_command: npm run build
+     environment_slug: node-js
+     instance_count: 1
+     instance_size_slug: basic-xxs
+     routes:
+     - path: /
+   ```
+
+3. **Environment Variables Configuration**
+   ```bash
+   # Required environment variables (set in App Platform dashboard)
+   NODE_ENV=production
+   NEXTAUTH_URL=https://your-domain.com
+   NEXTAUTH_SECRET=your-super-secure-secret
+   DATABASE_URL=postgresql://username:password@host:port/database
+   REDIS_URL=redis://username:password@host:port
+   GOOGLE_CLIENT_ID=your-google-oauth-client-id
+   GOOGLE_CLIENT_SECRET=your-google-oauth-secret
+   SENTRY_DSN=your-sentry-dsn
+   ```
+
+### Step 4: Domain and SSL Configuration
+
+1. **Configure Custom Domain**
+   - Add your domain in App Platform settings
+   - Update DNS records to point to App Platform
+   - SSL certificates are automatically provisioned
+
+2. **DNS Configuration**
+   ```
+   Type: CNAME
+   Name: @
+   Value: your-app.ondigitalocean.app
+   TTL: 3600
+
+   Type: CNAME
+   Name: www
+   Value: your-app.ondigitalocean.app
+   TTL: 3600
+   ```
+
+### Step 5: CDN and Static Assets
+
+1. **Create Spaces Bucket**
+   ```bash
+   # Create bucket for static assets
+   doctl spaces create ma-retirement-assets --region nyc3
+   ```
+
+2. **Configure CDN**
+   - Enable CDN for the Spaces bucket
+   - Update environment variables with CDN URL
+   - Configure Next.js to use CDN for static assets
+
+### Step 6: Monitoring Setup
+
+1. **Configure Sentry**
+   - Create Sentry project
+   - Add Sentry DSN to environment variables
+   - Configure error tracking and performance monitoring
+
+2. **Set Up Uptime Monitoring**
+   - Configure DigitalOcean monitoring for the app
+   - Set up alerts for downtime and performance issues
+   - Monitor database and Redis performance
+
+### Step 7: Deployment Verification
+
+1. **Run Health Checks**
+   ```bash
+   # Test application health
+   curl https://your-domain.com/api/health
+
+   # Expected response:
+   {
+     "status": "healthy",
+     "checks": {
+       "database": { "status": "healthy" },
+       "memory": { "status": "healthy" },
+       "performance": { "status": "healthy" }
+     }
+   }
+   ```
+
+2. **Performance Testing**
+   ```bash
+   # Test page load times
+   curl -w "@curl-format.txt" -o /dev/null -s https://your-domain.com/
+
+   # Should be under 2 seconds for sub-2-second requirement
+   ```
+
+3. **Security Verification**
+   ```bash
+   # Check security headers
+   curl -I https://your-domain.com/
+
+   # Should include:
+   # X-Frame-Options: DENY
+   # X-Content-Type-Options: nosniff
+   # Strict-Transport-Security: max-age=31536000
+   ```
 
 ### Deployment Environments
 - **Development**: Local development with SQLite

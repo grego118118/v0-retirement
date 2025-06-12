@@ -1,0 +1,201 @@
+# Massachusetts Retirement System - Product Requirements Document
+
+## Executive Summary
+The Massachusetts Retirement System is a comprehensive web application designed to help Massachusetts state employees calculate pension benefits, optimize retirement income, and plan their financial future. The application combines pension calculations with Social Security optimization to maximize retirement income by up to $50,000+ annually.
+
+## Product Vision
+Create the #1 Massachusetts pension planning tool that provides state employees with accurate, real-time retirement calculations, premium optimization features, and professional-grade financial planning capabilities while maintaining sub-2-second performance standards.
+
+## Target Users
+- Massachusetts state employees (Groups 1, 2, and 3)
+- Municipal employees
+- Teachers and education professionals
+- State police and firefighters
+- Retirement planning professionals
+
+## Core Features
+
+### 1. Pension Calculator System
+**Priority: Critical**
+- Support for all Massachusetts retirement groups (Group 1, 2, 3)
+- Real-time pension benefit calculations
+- Years of service tracking
+- Salary averaging calculations
+- Retirement age optimization
+- COLA (Cost of Living Adjustment) integration (3% on first $13,000)
+- Maximum benefit calculations (80% cap)
+
+### 2. Social Security Integration
+**Priority: High**
+- Social Security benefit estimation
+- Claiming age optimization (62-70)
+- Combined pension + SS income projections
+- Tax implications calculator
+- Medicare premium deductions ($174.70/month)
+- Spousal benefits calculator (50% of higher earner)
+
+### 3. Authentication & User Management
+**Priority: Critical**
+- NextAuth.js integration with Google OAuth
+- Secure user profiles
+- Data persistence and privacy
+- Session management
+- Profile settings and preferences
+
+### 4. Dashboard & Data Visualization
+**Priority: High**
+- Interactive retirement income charts
+- Benefit comparison tools
+- Retirement timeline visualization
+- Income projection graphs
+- Responsive design (mobile/tablet/desktop)
+- Card-based layout with consistent styling
+
+### 5. Premium Subscription Features
+**Priority: High**
+- Stripe payment integration
+- Monthly/annual subscription plans
+- PDF report generation (react-pdf/puppeteer)
+- Email notifications (SendGrid/AWS SES)
+- Advanced optimization algorithms
+- Tax-efficient withdrawal strategies
+
+### 6. Advanced Calculations
+**Priority: Medium**
+- Monte Carlo simulations for income projections
+- Inflation adjustment calculations
+- Healthcare cost projections
+- Tax optimization strategies
+- Retirement income optimization engine
+- What-if scenario modeling
+
+## Technical Requirements
+
+### Performance Standards
+- Sub-2-second page load times
+- Sub-2-second calculation response times
+- Responsive design across all devices
+- 99.9% uptime availability
+
+### Technology Stack
+- Next.js 15+ with TypeScript
+- React 19+ with modern hooks
+- Tailwind CSS for styling
+- Prisma with SQLite/PostgreSQL
+- NextAuth.js for authentication
+- Stripe for payments
+- Radix UI components
+
+### Security Requirements
+- Bank-level security standards
+- HTTPS encryption
+- Content Security Policy (CSP)
+- Input validation and sanitization
+- Secure API endpoints
+- Data privacy compliance
+
+### Database Schema
+- User profiles and preferences
+- Calculation history
+- Subscription management
+- Session storage
+- Audit logging
+
+## User Experience Requirements
+
+### Design Principles
+- Clean, professional interface
+- Intuitive navigation
+- Accessibility compliance (WCAG 2.1)
+- Mobile-first responsive design
+- Consistent visual hierarchy
+
+### Key User Flows
+1. **New User Onboarding**
+   - Landing page with value proposition
+   - Account creation/Google sign-in
+   - Profile setup with employment details
+   - First calculation walkthrough
+
+2. **Pension Calculation**
+   - Input employment details
+   - Select retirement group
+   - Enter years of service and salary
+   - View instant results
+   - Save calculations
+
+3. **Premium Upgrade**
+   - Feature comparison
+   - Subscription selection
+   - Stripe checkout
+   - Premium feature access
+
+4. **Dashboard Experience**
+   - Overview of saved calculations
+   - Quick access to tools
+   - Progress tracking
+   - Report generation
+
+## Success Metrics
+- User engagement: 80%+ return rate
+- Calculation accuracy: 99.9%
+- Performance: <2s response times
+- Conversion rate: 15%+ free to premium
+- User satisfaction: 4.8+ rating
+
+## Compliance & Legal
+- Massachusetts state pension regulations
+- GDPR/CCPA privacy compliance
+- Financial data security standards
+- Accessibility requirements (ADA)
+
+## Integration Requirements
+- Massachusetts Retirement Board data
+- Social Security Administration APIs
+- Tax calculation services
+- Email delivery services
+- Payment processing (Stripe)
+
+## Deployment & Infrastructure
+- Docker containerization
+- CI/CD pipeline with GitHub Actions
+- PostgreSQL production database
+- Sentry error monitoring
+- Performance optimization
+- CDN integration
+
+## Phase 1 Deliverables (Current)
+- ✅ Basic application structure
+- ✅ Next.js 15 setup and configuration
+- ✅ Component library restoration
+- ✅ Server error resolution
+- 🔄 Core pension calculator
+- 🔄 User authentication
+- 🔄 Basic dashboard
+
+## Phase 2 Deliverables
+- Social Security integration
+- Premium subscription system
+- PDF report generation
+- Email notifications
+- Advanced calculations
+
+## Phase 3 Deliverables
+- Production deployment
+- Performance optimization
+- Security hardening
+- Monitoring and analytics
+- User feedback integration
+
+## Risk Mitigation
+- Regular security audits
+- Performance monitoring
+- Backup and disaster recovery
+- Compliance validation
+- User testing and feedback
+
+## Timeline
+- Phase 1: 2-3 weeks (Foundation)
+- Phase 2: 3-4 weeks (Core Features)
+- Phase 3: 2-3 weeks (Production Ready)
+- Total: 7-10 weeks for full deployment

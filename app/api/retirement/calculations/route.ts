@@ -1,44 +1,21 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextResponse, NextRequest } from "next/server"
 import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth/auth-config"
+import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
-import { z } from "zod"
 
-// Schema for validating calculation data
-const calculationSchema = z.object({
-  calculationName: z.string().optional(),
-  retirementDate: z.string().datetime(),
-  retirementAge: z.number().min(50).max(80),
-  yearsOfService: z.number().min(0),
-  averageSalary: z.number().min(0),
-  retirementGroup: z.enum(["1", "2", "3", "4"]),
-  benefitPercentage: z.number().min(0).max(5),
-  retirementOption: z.enum(["A", "B", "C"]),
-  monthlyBenefit: z.number(),
-  annualBenefit: z.number(),
-  benefitReduction: z.number().optional(),
-  survivorBenefit: z.number().optional(),
-  notes: z.string().optional(),
-  isFavorite: z.boolean().optional(),
-  // Social Security fields
-  socialSecurityData: z.object({
-    fullRetirementAge: z.number().min(62).max(67).optional(),
-    earlyRetirementBenefit: z.number().min(0).optional(),
-    fullRetirementBenefit: z.number().min(0).optional(),
-    delayedRetirementBenefit: z.number().min(0).optional(),
-    selectedClaimingAge: z.number().min(62).max(70).optional(),
-    selectedMonthlyBenefit: z.number().min(0).optional(),
-    combinedMonthlyIncome: z.number().min(0).optional(),
-    replacementRatio: z.number().min(0).max(2).optional(),
-  }).optional(),
-})
-
-// GET - Retrieve all user's calculations
 export async function GET(request: NextRequest) {
   try {
+    console.log("Calculations GET request started")
     const session = await getServerSession(authOptions)
-    
+
+    console.log("Session in calculations GET:", {
+      hasSession: !!session,
+      userId: session?.user?.id,
+      userEmail: session?.user?.email
+    })
+
     if (!session?.user?.id) {
+      console.error("No session or user ID in calculations GET")
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -47,219 +24,116 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get("offset") || "0")
     const favorites = searchParams.get("favorites") === "true"
 
-    const where = {
-      userId: session.user.id,
-      ...(favorites && { isFavorite: true }),
+    console.log("Query parameters:", { limit, offset, favorites })
+
+    // Query the database for user's calculations
+    const whereClause: any = {
+      userId: session.user.id
     }
 
-    let [calculations, total] = await Promise.all([
-      prisma.retirementCalculation.findMany({
-        where,
-        orderBy: { createdAt: "desc" },
-        take: limit,
-        skip: offset,
-      }),
-      prisma.retirementCalculation.count({ where }),
-    ])
-
-    // If no calculations exist, provide mock data for demonstration
-    if (calculations.length === 0 && offset === 0) {
-      console.log(`No calculations found for user ${session.user.id}, returning mock data`)
-      const mockCalculations = [
-        {
-          id: "mock-1",
-          userId: session.user.id,
-          calculationName: "Current Plan - Age 65",
-          retirementDate: new Date("2029-06-15"),
-          retirementAge: 65,
-          yearsOfService: 30,
-          averageSalary: 75000,
-          retirementGroup: "1" as const,
-          benefitPercentage: 2.5,
-          retirementOption: "A" as const,
-          monthlyBenefit: 4465,
-          annualBenefit: 53580,
-          benefitReduction: null,
-          survivorBenefit: null,
-          notes: "Standard retirement plan at full retirement age",
-          isFavorite: true,
-          createdAt: new Date("2024-01-15T10:30:00Z"),
-          updatedAt: new Date("2024-01-15T10:30:00Z"),
-          socialSecurityData: null,
-        },
-        {
-          id: "mock-2", 
-          userId: session.user.id,
-          calculationName: "Early Retirement - Age 62",
-          retirementDate: new Date("2026-06-15"),
-          retirementAge: 62,
-          yearsOfService: 27,
-          averageSalary: 73000,
-          retirementGroup: "1" as const,
-          benefitPercentage: 2.5,
-          retirementOption: "A" as const,
-          monthlyBenefit: 3890,
-          annualBenefit: 46680,
-          benefitReduction: 0.13,
-          survivorBenefit: null,
-          notes: "Early retirement with reduced benefits",
-          isFavorite: false,
-          createdAt: new Date("2024-01-10T14:15:00Z"),
-          updatedAt: new Date("2024-01-10T14:15:00Z"),
-          socialSecurityData: null,
-        },
-        {
-          id: "mock-3",
-          userId: session.user.id,
-          calculationName: "Option C - With Survivor Benefits",
-          retirementDate: new Date("2029-06-15"),
-          retirementAge: 65,
-          yearsOfService: 30,
-          averageSalary: 75000,
-          retirementGroup: "1" as const,
-          benefitPercentage: 2.5,
-          retirementOption: "C" as const,
-          monthlyBenefit: 2977,
-          annualBenefit: 35720,
-          benefitReduction: null,
-          survivorBenefit: 2977,
-          notes: "Joint survivor allowance for spouse protection",
-          isFavorite: false,
-          createdAt: new Date("2024-01-08T09:45:00Z"),
-          updatedAt: new Date("2024-01-08T09:45:00Z"),
-          socialSecurityData: null,
-        },
-        {
-          id: "mock-4",
-          userId: session.user.id,
-          calculationName: "Maximum Service - Age 67",
-          retirementDate: new Date("2031-06-15"),
-          retirementAge: 67,
-          yearsOfService: 32,
-          averageSalary: 78000,
-          retirementGroup: "1" as const,
-          benefitPercentage: 2.5,
-          retirementOption: "A" as const,
-          monthlyBenefit: 5200,
-          annualBenefit: 62400,
-          benefitReduction: null,
-          survivorBenefit: null,
-          notes: "Maximum benefit with additional years of service",
-          isFavorite: true,
-          createdAt: new Date("2024-01-05T16:20:00Z"),
-          updatedAt: new Date("2024-01-05T16:20:00Z"),
-          socialSecurityData: null,
-        },
-        {
-          id: "mock-5",
-          userId: session.user.id,
-          calculationName: "Combined Retirement Plan - With Social Security",
-          retirementDate: new Date("2029-06-15"),
-          retirementAge: 65,
-          yearsOfService: 30,
-          averageSalary: 75000,
-          retirementGroup: "1" as const,
-          benefitPercentage: 2.5,
-          retirementOption: "A" as const,
-          monthlyBenefit: 4465,
-          annualBenefit: 53580,
-          benefitReduction: null,
-          survivorBenefit: null,
-          notes: "Combined calculation with Social Security benefits included",
-          isFavorite: true,
-          createdAt: new Date("2024-01-20T14:30:00Z"),
-          updatedAt: new Date("2024-01-20T14:30:00Z"),
-          socialSecurityData: JSON.stringify({
-            fullRetirementAge: 67,
-            earlyRetirementBenefit: 2100,
-            fullRetirementBenefit: 2800,
-            delayedRetirementBenefit: 3500,
-            selectedClaimingAge: 67,
-            selectedMonthlyBenefit: 2800,
-            combinedMonthlyIncome: 7265,
-            replacementRatio: 0.85,
-          }),
-        }
-      ]
-      
-      calculations = mockCalculations
-      total = mockCalculations.length
-    } else {
-      console.log(`Found ${calculations.length} real calculations for user ${session.user.id}`)
+    if (favorites) {
+      whereClause.isFavorite = true
     }
 
-    // Parse socialSecurityData JSON fields for real database records
+    const calculations = await prisma.retirementCalculation.findMany({
+      where: whereClause,
+      orderBy: {
+        createdAt: 'desc'
+      },
+      skip: offset,
+      take: limit
+    })
+
+    // Parse social security data from JSON strings
     const parsedCalculations = calculations.map(calc => ({
       ...calc,
-      socialSecurityData: typeof calc.socialSecurityData === 'string' 
-        ? JSON.parse(calc.socialSecurityData) 
-        : calc.socialSecurityData,
+      socialSecurityData: calc.socialSecurityData ? JSON.parse(calc.socialSecurityData) : null,
+      retirementDate: calc.retirementDate.toISOString().split('T')[0],
+      createdAt: calc.createdAt.toISOString(),
+      updatedAt: calc.updatedAt.toISOString()
     }))
 
-    return NextResponse.json({
-      calculations: parsedCalculations,
-      total,
-      limit,
-      offset,
+    // Get total count for pagination
+    const totalCount = await prisma.retirementCalculation.count({
+      where: whereClause
     })
+
+    const responseData = {
+      calculations: parsedCalculations,
+      total: totalCount,
+      limit,
+      offset
+    }
+
+    console.log("Returning calculations data:", {
+      count: parsedCalculations.length,
+      total: totalCount
+    })
+
+    return NextResponse.json(responseData)
   } catch (error) {
     console.error("Error fetching calculations:", error)
-    return NextResponse.json(
-      { error: "Failed to fetch calculations" },
-      { status: 500 }
-    )
+    return NextResponse.json({
+      error: "Failed to fetch calculations",
+      message: error instanceof Error ? error.message : "Unknown error"
+    }, { status: 500 })
   }
 }
 
-// POST - Create a new calculation
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
+    console.log("Calculations POST request started")
     const session = await getServerSession(authOptions)
-    
+
     if (!session?.user?.id) {
+      console.error("No session or user ID in calculations POST")
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const body = await request.json()
-    const validatedData = calculationSchema.parse(body)
+    const requestBody = await request.json()
+    console.log("Calculations POST request body:", requestBody)
 
-    const calculation = await prisma.retirementCalculation.create({
-      data: {
-        userId: session.user.id,
-        calculationName: validatedData.calculationName,
-        retirementDate: new Date(validatedData.retirementDate),
-        retirementAge: validatedData.retirementAge,
-        yearsOfService: validatedData.yearsOfService,
-        averageSalary: validatedData.averageSalary,
-        retirementGroup: validatedData.retirementGroup,
-        benefitPercentage: validatedData.benefitPercentage,
-        retirementOption: validatedData.retirementOption,
-        monthlyBenefit: validatedData.monthlyBenefit,
-        annualBenefit: validatedData.annualBenefit,
-        benefitReduction: validatedData.benefitReduction,
-        survivorBenefit: validatedData.survivorBenefit,
-        notes: validatedData.notes,
-        isFavorite: validatedData.isFavorite || false,
-        socialSecurityData: validatedData.socialSecurityData ? JSON.stringify(validatedData.socialSecurityData) : null,
-      },
+    // Validate and prepare data for database
+    const calculationData = {
+      userId: session.user.id,
+      calculationName: requestBody.calculationName || 'Retirement Analysis',
+      retirementDate: new Date(requestBody.retirementDate),
+      retirementAge: parseInt(requestBody.retirementAge),
+      yearsOfService: parseFloat(requestBody.yearsOfService),
+      averageSalary: parseFloat(requestBody.averageSalary),
+      retirementGroup: requestBody.retirementGroup || 'Group 1',
+      benefitPercentage: parseFloat(requestBody.benefitPercentage || 2.0),
+      retirementOption: requestBody.retirementOption || 'A',
+      monthlyBenefit: parseFloat(requestBody.monthlyBenefit),
+      annualBenefit: parseFloat(requestBody.annualBenefit),
+      benefitReduction: requestBody.benefitReduction ? parseFloat(requestBody.benefitReduction) : null,
+      survivorBenefit: requestBody.survivorBenefit ? parseFloat(requestBody.survivorBenefit) : null,
+      socialSecurityData: requestBody.socialSecurityData ? JSON.stringify(requestBody.socialSecurityData) : null,
+      notes: requestBody.notes || null,
+      isFavorite: requestBody.isFavorite || false
+    }
+
+    // Save to database
+    const newCalculation = await prisma.retirementCalculation.create({
+      data: calculationData
     })
 
-    console.log('Calculation saved successfully:', calculation.id)
-
-    return NextResponse.json({ calculation }, { status: 201 })
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      console.error("Validation error:", error.errors)
-      return NextResponse.json(
-        { error: "Invalid data", details: error.errors },
-        { status: 400 }
-      )
+    // Format response
+    const responseCalculation = {
+      ...newCalculation,
+      socialSecurityData: newCalculation.socialSecurityData ? JSON.parse(newCalculation.socialSecurityData) : null,
+      retirementDate: newCalculation.retirementDate.toISOString().split('T')[0],
+      createdAt: newCalculation.createdAt.toISOString(),
+      updatedAt: newCalculation.updatedAt.toISOString()
     }
-    
+
+    console.log("Calculation created successfully:", newCalculation.id)
+    return NextResponse.json(responseCalculation, { status: 201 })
+  } catch (error) {
     console.error("Error creating calculation:", error)
-    return NextResponse.json(
-      { error: "Failed to create calculation" },
-      { status: 500 }
-    )
+    return NextResponse.json({
+      error: "Failed to create calculation",
+      message: error instanceof Error ? error.message : "Unknown error"
+    }, { status: 500 })
   }
-} 
+}

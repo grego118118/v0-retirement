@@ -1,119 +1,118 @@
 import type { Metadata } from "next"
-import Link from "next/link"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { CalendarIcon, Clock, Search, User, ArrowRight } from "lucide-react"
-import { generateSEOMetadata } from "@/components/seo/metadata"
+import { Button } from "@/components/ui/button"
+import { Calendar, Clock, ArrowRight, TrendingUp, Calculator, Users } from "lucide-react"
+import Link from "next/link"
 import { blogPosts } from "@/lib/blog-data"
 import { ResponsiveBlogImage } from "@/components/blog/blog-image"
 
-export const metadata: Metadata = generateSEOMetadata({
-  title: "Retirement Planning Blog | Massachusetts Pension Estimator",
-  description:
-    "Expert articles, guides, and resources to help Massachusetts state employees plan for retirement and maximize their pension benefits.",
-  path: "/blog",
-  keywords: [
-    "retirement planning blog",
-    "Massachusetts retirement guides",
-    "state pension advice",
-    "retirement tips",
-    "pension maximization strategies",
-    "state employee retirement",
-    "Social Security Fairness Act",
-    "WEP",
-    "GPO",
-  ],
-})
+export const metadata: Metadata = {
+  title: "Blog | MA Pension Estimator",
+  description: "Latest insights, tips, and updates on Massachusetts retirement planning, pension benefits, and Social Security optimization.",
+}
+
+const categories = ["All", "Social Security", "Pension Basics", "Planning", "Strategies", "Policy Updates", "Benefits"]
 
 export default function BlogPage() {
+  const featuredPost = blogPosts[0] // First post as featured
+  const regularPosts = blogPosts.slice(1) // Rest of the posts
+
   return (
-    <div className="container py-8 md:py-12">
-      <div className="max-w-5xl mx-auto">
-        <h1 className="text-3xl font-bold tracking-tight mb-2">Retirement Planning Blog</h1>
-        <p className="text-muted-foreground mb-8 max-w-3xl">
-          Expert articles, guides, and resources to help Massachusetts state employees plan for retirement and maximize
-          their pension benefits.
-        </p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
+      {/* Hero Section */}
+      <section className="bg-gradient-to-br from-blue-600 via-indigo-700 to-purple-800 text-white py-16 md:py-20 relative overflow-hidden">
+        {/* Background Elements */}
+        <div className="absolute inset-0 bg-black/20"></div>
+        <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-white/10 to-transparent"></div>
 
-        {/* Search Bar */}
-        <div className="relative mb-8">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Search articles..." className="pl-10" aria-label="Search articles" />
+        <div className="container px-4 md:px-6 relative z-10">
+          <div className="text-center max-w-4xl mx-auto">
+            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl mb-6">
+              Retirement Planning
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-400">
+                Blog
+              </span>
+            </h1>
+            <p className="text-xl md:text-2xl text-blue-100 leading-relaxed max-w-3xl mx-auto">
+              Stay informed with the latest insights, tips, and updates on Massachusetts
+              retirement planning and <strong>benefit optimization</strong>.
+            </p>
+          </div>
         </div>
+      </section>
 
-        {/* Categories */}
-        <div className="flex flex-wrap gap-2 mb-8">
-          <Badge variant="outline" className="bg-primary/10 hover:bg-primary/20 cursor-pointer">
-            All Topics
-          </Badge>
-          <Badge variant="outline" className="hover:bg-primary/20 cursor-pointer">
-            Pension Basics
-          </Badge>
-          <Badge variant="outline" className="hover:bg-primary/20 cursor-pointer">
-            Planning
-          </Badge>
-          <Badge variant="outline" className="hover:bg-primary/20 cursor-pointer">
-            Strategies
-          </Badge>
-          <Badge variant="outline" className="hover:bg-primary/20 cursor-pointer">
-            Social Security
-          </Badge>
-          <Badge variant="outline" className="hover:bg-primary/20 cursor-pointer">
-            Healthcare
-          </Badge>
-          <Badge variant="outline" className="hover:bg-primary/20 cursor-pointer">
-            Legal
-          </Badge>
-        </div>
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-8">
 
-        {/* Featured Post */}
-        <div className="mb-12">
-          <Card className="overflow-hidden">
-            <div className="grid md:grid-cols-2 gap-0">
-              <div className="relative h-48 md:h-full bg-muted">
-                <ResponsiveBlogImage
-                  src="/images/blog/social-security-fairness-act.svg"
-                  alt="Social Security Fairness Act: What Massachusetts State Employees Need to Know"
-                  title="Social Security Fairness Act: What Massachusetts State Employees Need to Know"
-                  aspectRatio="16/9"
-                  priority={true}
-                />
+      {/* Featured Post */}
+      {featuredPost && (
+        <section className="mb-12">
+          <h2 className="text-2xl font-bold mb-6">Featured Article</h2>
+          <Card className="border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 overflow-hidden">
+            <div className="relative h-64 md:h-80 bg-muted">
+              <ResponsiveBlogImage
+                src={featuredPost.image || "/images/blog/default-blog-image.svg"}
+                alt={featuredPost.title}
+                title={featuredPost.title}
+                aspectRatio="16/9"
+                priority={true}
+              />
+            </div>
+            <CardHeader>
+              <div className="flex items-center gap-2 mb-2">
+                <Badge variant="secondary">{featuredPost.category}</Badge>
+                <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                  Featured
+                </Badge>
               </div>
-              <div className="p-6">
-                <Badge className="mb-2">Featured</Badge>
-                <h2 className="text-2xl font-bold mb-2">
-                  Social Security Fairness Act: What Massachusetts State Employees Need to Know
-                </h2>
-                <p className="text-muted-foreground mb-4">
-                  Learn how the elimination of WEP and GPO provisions will increase Social Security benefits for
-                  Massachusetts state employees and retirees.
-                </p>
-                <div className="flex items-center text-sm text-muted-foreground mb-4">
-                  <CalendarIcon className="mr-1 h-3 w-3" /> May 9, 2025
-                  <span className="mx-2">•</span>
-                  <Clock className="mr-1 h-3 w-3" /> 8 min read
+              <CardTitle className="text-2xl">{featuredPost.title}</CardTitle>
+              <CardDescription className="text-lg">{featuredPost.description}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-1">
+                    <Calendar className="h-4 w-4" />
+                    {new Date(featuredPost.date).toLocaleDateString()}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Clock className="h-4 w-4" />
+                    {featuredPost.readTime}
+                  </div>
                 </div>
                 <Button asChild>
-                  <Link
-                    href="/blog/social-security-fairness-act-what-massachusetts-state-employees-need-to-know"
-                    prefetch={true}
-                    scroll={false}
-                    className="no-underline"
-                  >
+                  <Link href={`/blog/${featuredPost.id}`}>
                     Read Article
+                    <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
               </div>
-            </div>
+            </CardContent>
           </Card>
-        </div>
+        </section>
+      )}
 
-        {/* Blog Posts Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {blogPosts.slice(1).map((post) => (
-            <Card key={post.id} className="overflow-hidden flex flex-col h-full">
+      {/* Category Filter */}
+      <section className="mb-8">
+        <div className="flex flex-wrap gap-2">
+          {categories.map((category) => (
+            <Button
+              key={category}
+              variant={category === "All" ? "default" : "outline"}
+              size="sm"
+            >
+              {category}
+            </Button>
+          ))}
+        </div>
+      </section>
+
+      {/* Blog Posts Grid */}
+      <section>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {regularPosts.map((post) => (
+            <Card key={post.id} className="hover:shadow-lg transition-shadow overflow-hidden flex flex-col h-full">
               <ResponsiveBlogImage
                 src={post.image || "/images/blog/default-blog-image.svg"}
                 alt={post.title}
@@ -123,63 +122,67 @@ export default function BlogPage() {
               />
               <CardHeader className="pb-2">
                 <div className="flex items-center gap-2 mb-2">
-                  <Badge variant="outline" className="bg-primary/10">
-                    {post.category}
-                  </Badge>
+                  <Badge variant="outline">{post.category}</Badge>
                 </div>
-                <CardTitle className="text-xl line-clamp-2">
+                <CardTitle className="text-lg line-clamp-2">
                   <Link
                     href={`/blog/${post.id}`}
                     className="hover:text-primary transition-colors no-underline"
-                    prefetch={true}
-                    scroll={false}
                   >
                     {post.title}
                   </Link>
                 </CardTitle>
                 <CardDescription className="line-clamp-3">{post.description}</CardDescription>
               </CardHeader>
-              <CardContent className="pb-2">
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <User className="mr-1 h-3 w-3" /> {post.author}
-                  <span className="mx-2">•</span>
-                  <CalendarIcon className="mr-1 h-3 w-3" /> {post.date}
-                  <span className="mx-2">•</span>
-                  <Clock className="mr-1 h-3 w-3" /> {post.readTime}
+              <CardContent className="mt-auto">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      {new Date(post.date).toLocaleDateString()}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      {post.readTime}
+                    </div>
+                  </div>
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link href={`/blog/${post.id}`}>
+                      Read More
+                      <ArrowRight className="ml-1 h-3 w-3" />
+                    </Link>
+                  </Button>
                 </div>
               </CardContent>
-              <CardFooter className="pt-2 mt-auto">
-                <Button variant="ghost" size="sm" asChild className="gap-1 hover:no-underline group">
-                  <Link
-                    href={`/blog/${post.id}`}
-                    className="flex items-center no-underline"
-                    prefetch={true}
-                    scroll={false}
-                  >
-                    Read more <span className="sr-only">about {post.title}</span>
-                    <ArrowRight className="h-3 w-3 ml-1 transition-transform group-hover:translate-x-1" />
-                  </Link>
-                </Button>
-              </CardFooter>
             </Card>
           ))}
         </div>
+      </section>
 
-        {/* Newsletter Signup */}
-        <div className="mt-12 bg-muted/30 p-6 rounded-lg border">
-          <div className="max-w-2xl mx-auto text-center">
-            <h2 className="text-xl font-semibold mb-2">Stay Updated on Retirement Planning</h2>
-            <p className="text-muted-foreground mb-4">
-              Subscribe to our newsletter to receive the latest retirement planning tips, pension updates, and resources
-              for Massachusetts state employees.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <Input placeholder="Your email address" type="email" className="sm:flex-1" />
+      {/* Newsletter Signup */}
+      <section className="mt-16">
+        <Card className="border-green-200 bg-green-50 dark:bg-green-950 dark:border-green-800">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl">Stay Updated</CardTitle>
+            <CardDescription className="text-lg">
+              Get the latest retirement planning insights delivered to your inbox
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="text-center">
+            <div className="flex max-w-md mx-auto gap-2">
+              <input
+                type="email"
+                placeholder="Enter your email"
+                className="flex-1 px-3 py-2 border border-input bg-background rounded-md"
+              />
               <Button>Subscribe</Button>
             </div>
-            <p className="text-xs text-muted-foreground mt-2">We respect your privacy. Unsubscribe at any time.</p>
-          </div>
-        </div>
+            <p className="text-sm text-muted-foreground mt-4">
+              No spam. Unsubscribe anytime.
+            </p>
+          </CardContent>
+        </Card>
+      </section>
       </div>
     </div>
   )

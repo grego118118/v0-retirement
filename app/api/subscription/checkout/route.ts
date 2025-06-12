@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth/auth-config"
-import { addPremiumUser } from "@/lib/subscription-utils"
+import { authOptions } from "@/lib/auth/auth-options"
+import { stripe, SUBSCRIPTION_PLANS, STRIPE_CONFIG } from "@/lib/stripe/config"
 
 export async function POST(request: Request) {
   try {
@@ -17,57 +17,82 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid plan type" }, { status: 400 })
     }
 
-    // In a real implementation, you would integrate with a payment processor like Stripe
-    // For now, we'll simulate the checkout process
+    // Get the plan configuration
+    const plan = SUBSCRIPTION_PLANS[planType as keyof typeof SUBSCRIPTION_PLANS]
     
-    const prices = {
-      monthly: { amount: 999, currency: 'usd', interval: 'month' }, // $9.99
-      annual: { amount: 7900, currency: 'usd', interval: 'year' }   // $79.00
+    if (!plan) {
+      return NextResponse.json({ error: "Invalid plan configuration" }, { status: 400 })
     }
-    
-    const selectedPrice = prices[planType as keyof typeof prices]
-    
-    // TODO: Replace with actual Stripe checkout session creation
-    // const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    //   apiVersion: '2023-10-16',
-    // })
-    
-    // const session = await stripe.checkout.sessions.create({
-    //   customer_email: session.user.email,
-    //   payment_method_types: ['card'],
-    //   line_items: [{
-    //     price_data: {
-    //       currency: selectedPrice.currency,
-    //       product_data: {
-    //         name: `Massachusetts Pension Estimator - ${planType === 'monthly' ? 'Monthly' : 'Annual'} Plan`,
-    //         description: 'Premium retirement planning features',
-    //       },
-    //       unit_amount: selectedPrice.amount,
-    //       recurring: {
-    //         interval: selectedPrice.interval,
-    //       },
-    //     },
-    //     quantity: 1,
-    //   }],
-    //   mode: 'subscription',
-    //   success_url: `${process.env.NEXTAUTH_URL}/subscribe/success?session_id={CHECKOUT_SESSION_ID}`,
-    //   cancel_url: `${process.env.NEXTAUTH_URL}/subscribe?cancelled=true`,
-    //   metadata: {
-    //     userId: session.user.id,
-    //     planType: planType,
-    //   },
-    // })
-    
-    // For demo purposes, return a mock checkout URL
-    const checkoutUrl = `/subscribe/demo-checkout?plan=${planType}&email=${encodeURIComponent(session.user.email)}`
-    
-    return NextResponse.json({
-      checkoutUrl,
-      planType,
-      amount: selectedPrice.amount,
-      currency: selectedPrice.currency,
-      interval: selectedPrice.interval
-    })
+
+    // For demo/development mode, return mock checkout URL
+    if (!stripe || !process.env.STRIPE_SECRET_KEY) {
+      console.log('Stripe not configured, using demo mode')
+      const checkoutUrl = `/subscribe/demo-checkout?plan=${planType}&email=${encodeURIComponent(session.user.email)}`
+      
+      return NextResponse.json({
+        checkoutUrl,
+        planType,
+        amount: plan.price * 100, // Convert to cents
+        currency: 'usd',
+        interval: plan.interval
+      })
+    }
+
+    try {
+      // Create Stripe checkout session
+      const checkoutSession = await stripe.checkout.sessions.create({
+        customer_email: session.user.email,
+        payment_method_types: ['card'],
+        line_items: [{
+          price: plan.priceId,
+          quantity: 1,
+        }],
+        mode: 'subscription',
+        success_url: STRIPE_CONFIG.successUrl + `?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: STRIPE_CONFIG.cancelUrl + `?cancelled=true`,
+        metadata: {
+          userId: session.user.id || session.user.email,
+          planType: planType,
+          userEmail: session.user.email,
+        },
+        subscription_data: {
+          metadata: {
+            userId: session.user.id || session.user.email,
+            planType: planType,
+            userEmail: session.user.email,
+          }
+        },
+        allow_promotion_codes: true,
+        billing_address_collection: 'auto',
+        tax_id_collection: {
+          enabled: true,
+        },
+      })
+
+      return NextResponse.json({
+        checkoutUrl: checkoutSession.url,
+        sessionId: checkoutSession.id,
+        planType,
+        amount: plan.price * 100,
+        currency: 'usd',
+        interval: plan.interval
+      })
+
+    } catch (stripeError: any) {
+      console.error('Stripe checkout session creation failed:', stripeError)
+      
+      // Fallback to demo mode if Stripe fails
+      const checkoutUrl = `/subscribe/demo-checkout?plan=${planType}&email=${encodeURIComponent(session.user.email)}`
+      
+      return NextResponse.json({
+        checkoutUrl,
+        planType,
+        amount: plan.price * 100,
+        currency: 'usd',
+        interval: plan.interval,
+        fallback: true
+      })
+    }
     
   } catch (error) {
     console.error('Error creating checkout session:', error)
@@ -76,4 +101,4 @@ export async function POST(request: Request) {
       { status: 500 }
     )
   }
-} 
+}

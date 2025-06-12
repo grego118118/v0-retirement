@@ -610,7 +610,7 @@ export const blogPosts = [
     authorTitle: "Healthcare Benefits Specialist",
     category: "Healthcare",
     tags: ["healthcare", "GIC", "Medicare", "insurance", "retiree benefits"],
-    image: "/images/blog/healthcare-retirement-options.png",
+    image: "/images/blog/healthcare-retirement-options.svg",
     content: `
       <h2>Introduction</h2>
       <p>Healthcare costs are a significant consideration in retirement planning. For Massachusetts state employees, understanding your healthcare options after retirement is crucial for both your physical and financial well-being. This comprehensive guide explores the healthcare benefits available to retired state employees, including coverage through the Group Insurance Commission (GIC), Medicare coordination, and strategies for managing healthcare costs in retirement.</p>
