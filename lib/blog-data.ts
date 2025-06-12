@@ -11,7 +11,7 @@ export const blogPosts = [
     authorTitle: "Social Security Specialist",
     category: "Social Security",
     tags: ["social security", "WEP", "GPO", "Social Security Fairness Act", "retirement benefits"],
-    image: "/social-security-fairness-act.jpg",
+    image: "/images/blog/social-security-fairness-act.svg",
     content: `
       <h2>Breaking News: Social Security Fairness Act Eliminates WEP and GPO</h2>
       <p>In a landmark development for public employees across the nation, including thousands of Massachusetts state workers and retirees, the Social Security Fairness Act was signed into law on January 5, 2025. This historic legislation eliminates two controversial provisions that have reduced Social Security benefits for millions of public servants for decades: the Windfall Elimination Provision (WEP) and the Government Pension Offset (GPO).</p>
@@ -200,7 +200,7 @@ export const blogPosts = [
     authorTitle: "Retirement Planning Specialist",
     category: "Pension Basics",
     tags: ["pension options", "retirement planning", "option A", "option B", "option C"],
-    image: "/placeholder.svg?key=o6g1f",
+    image: "/images/blog/pension-options-guide.svg",
     content: `
       <h2>Introduction to Massachusetts State Pension Options</h2>
       <p>When you retire as a Massachusetts state employee, you'll need to make an important decision that will affect both you and potentially your beneficiaries for years to come: selecting a retirement option. The Massachusetts State Retirement System offers three distinct options, each with different benefits and considerations.</p>
@@ -296,7 +296,7 @@ export const blogPosts = [
     authorTitle: "Retirement Specialist",
     category: "Planning",
     tags: ["retirement timeline", "preparation", "planning", "checklist"],
-    image: "/retirement-planning-timeline.png",
+    image: "/images/blog/retirement-planning-timeline.png",
     content: `
       <h2>Your Massachusetts State Retirement Planning Timeline</h2>
       <p>Planning for retirement is a process that should begin well before your actual retirement date. This timeline provides Massachusetts state employees with a structured approach to retirement planning, ensuring you don't miss critical steps along the way.</p>
@@ -489,7 +489,7 @@ export const blogPosts = [
     authorTitle: "Retirement Planning Advisor",
     category: "Strategies",
     tags: ["maximize benefits", "retirement strategies", "pension planning"],
-    image: "/maximizing-pension-benefits.png",
+    image: "/images/blog/maximizing-pension-benefits.png",
     content: `
       <h2>Introduction</h2>
       <p>As a Massachusetts state employee, your pension will likely be a cornerstone of your retirement income. While the basic formula for calculating your pension is straightforward, there are several strategies you can employ to maximize your benefits. This article explores five proven approaches to help you secure the highest possible pension benefit for your retirement years.</p>
@@ -610,7 +610,7 @@ export const blogPosts = [
     authorTitle: "Healthcare Benefits Specialist",
     category: "Healthcare",
     tags: ["healthcare", "GIC", "Medicare", "insurance", "retiree benefits"],
-    image: "/healthcare-retirement-options.png",
+    image: "/images/blog/healthcare-retirement-options.png",
     content: `
       <h2>Introduction</h2>
       <p>Healthcare costs are a significant consideration in retirement planning. For Massachusetts state employees, understanding your healthcare options after retirement is crucial for both your physical and financial well-being. This comprehensive guide explores the healthcare benefits available to retired state employees, including coverage through the Group Insurance Commission (GIC), Medicare coordination, and strategies for managing healthcare costs in retirement.</p>
@@ -790,7 +790,7 @@ export const blogPosts = [
     authorTitle: "Pension Specialist",
     category: "Pension Basics",
     tags: ["creditable service", "service purchase", "military service", "pension increase"],
-    image: "/placeholder.svg?key=dtqly",
+    image: "/images/blog/creditable-service-guide.svg",
     content: `
       <h2>Introduction</h2>
       <p>For Massachusetts state employees, one of the most effective strategies to increase your pension benefit is to maximize your creditable service. While your years of employment with the state automatically count toward your pension, you may be eligible to purchase additional creditable service for certain periods of your career. This guide explains the types of service you can purchase, the process for doing so, and how to determine if a service purchase is a good financial decision.</p>

@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { CalendarIcon, Clock, Search, User, ArrowRight } from "lucide-react"
 import { generateSEOMetadata } from "@/components/seo/metadata"
 import { blogPosts } from "@/lib/blog-data"
+import { ResponsiveBlogImage } from "@/components/blog/blog-image"
 
 export const metadata: Metadata = generateSEOMetadata({
   title: "Retirement Planning Blog | Massachusetts Pension Estimator",
@@ -72,12 +73,12 @@ export default function BlogPage() {
           <Card className="overflow-hidden">
             <div className="grid md:grid-cols-2 gap-0">
               <div className="relative h-48 md:h-full bg-muted">
-                <img
-                  src="/social-security-fairness-act.jpg"
+                <ResponsiveBlogImage
+                  src="/images/blog/social-security-fairness-act.svg"
                   alt="Social Security Fairness Act: What Massachusetts State Employees Need to Know"
-                  className="object-cover w-full h-full"
-                  loading="eager"
-                  fetchPriority="high"
+                  title="Social Security Fairness Act: What Massachusetts State Employees Need to Know"
+                  aspectRatio="16/9"
+                  priority={true}
                 />
               </div>
               <div className="p-6">
@@ -113,14 +114,13 @@ export default function BlogPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {blogPosts.slice(1).map((post) => (
             <Card key={post.id} className="overflow-hidden flex flex-col h-full">
-              <div className="relative h-48 bg-muted">
-                <img
-                  src={post.image || "/placeholder.svg"}
-                  alt={post.title}
-                  className="object-cover w-full h-full"
-                  loading="lazy"
-                />
-              </div>
+              <ResponsiveBlogImage
+                src={post.image || "/images/blog/default-blog-image.svg"}
+                alt={post.title}
+                title={post.title}
+                aspectRatio="16/9"
+                priority={false}
+              />
               <CardHeader className="pb-2">
                 <div className="flex items-center gap-2 mb-2">
                   <Badge variant="outline" className="bg-primary/10">

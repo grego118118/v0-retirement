@@ -1,0 +1,11 @@
+# Task ID: 12
+# Title: Group 3 Classification Support
+# Status: pending
+# Dependencies: None
+# Priority: high
+# Description: Implement specialized calculations for Group 3 employees
+# Details:
+Add Group 3 support for state police, municipal police, firefighters with 2.5% multiplier, age 55/20 years or 25 years retirement.
+
+# Test Strategy:
+Group 3 calculation testing, retirement eligibility validation, benefit multiplier verification

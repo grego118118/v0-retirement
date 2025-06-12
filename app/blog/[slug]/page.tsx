@@ -11,6 +11,7 @@ import BlogPostClient from "./page-client"
 import { TableOfContents } from "@/components/blog/table-of-contents"
 import { WepGpoTimeline } from "@/components/blog/wep-gpo-timeline"
 import { generateSEOMetadata } from "@/components/seo/metadata"
+import { BlogHeroImage, RelatedPostImage } from "@/components/blog/blog-image"
 
 export const dynamic = "force-dynamic"
 export const fetchCache = "force-no-store"
@@ -105,15 +106,12 @@ export default async function BlogPostPage({ params }: PageProps) {
               </div>
             </div>
 
-            <div className="relative h-[300px] md:h-[400px] mb-8 rounded-lg overflow-hidden">
-              <img
-                src={post.image || "/placeholder.svg"}
-                alt={post.title}
-                className="object-cover w-full h-full"
-                loading="eager"
-                fetchPriority="high"
-              />
-            </div>
+            <BlogHeroImage
+              src={post.image || "/images/blog/default-blog-image.svg"}
+              alt={post.title}
+              title={post.title}
+              priority={true}
+            />
 
             <div className="flex justify-between items-center mb-8">
               <div className="flex flex-wrap gap-2">
@@ -178,14 +176,11 @@ export default async function BlogPostPage({ params }: PageProps) {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {relatedPosts.map((relatedPost) => (
                   <div key={relatedPost.id} className="border rounded-lg overflow-hidden h-full flex flex-col">
-                    <div className="relative h-40 bg-muted">
-                      <img
-                        src={relatedPost.image || "/placeholder.svg?height=200&width=400"}
-                        alt={relatedPost.title}
-                        className="object-cover w-full h-full"
-                        loading="lazy"
-                      />
-                    </div>
+                    <RelatedPostImage
+                      src={relatedPost.image || "/images/blog/default-blog-image.svg"}
+                      alt={relatedPost.title}
+                      title={relatedPost.title}
+                    />
                     <div className="p-4 flex flex-col flex-grow">
                       <Badge variant="outline" className="mb-2 w-fit">
                         {relatedPost.category}
