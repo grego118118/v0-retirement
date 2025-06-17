@@ -50,11 +50,22 @@ export default function PensionResults({ result }: PensionResultsProps) {
 
   const showSurvivorBenefit = result.survivorAnnualPension && result.survivorAnnualPension > 0
 
-  // Calculate COLA information
-  const colaResult = calculateEnhancedMAPensionCOLA(result.annualPension)
-  const colaProjections = calculateEnhancedMAPensionCOLAProjections(result.annualPension, 10)
-  const colaInfo = getCOLADisplayInfo()
-  const colaScenarios = compareCOLAScenarios(result.annualPension, 10)
+  // Calculate COLA information with robust error handling
+  const pensionAmount = result.annualPension && result.annualPension > 0 ? result.annualPension : 0
+
+  const colaResult = calculateEnhancedMAPensionCOLA(pensionAmount)
+  const colaProjections = calculateEnhancedMAPensionCOLAProjections(pensionAmount, 10)
+  const colaInfo = getCOLADisplayInfo(pensionAmount)
+  const colaScenarios = compareCOLAScenarios(pensionAmount, 10)
+
+  // Temporary debugging
+  console.log('🔍 COLA Debug:', {
+    pensionAmount,
+    colaScenarios: colaScenarios?.comparison,
+    currentTotal: colaScenarios?.comparison?.currentTotal,
+    increasedBaseTotal: colaScenarios?.comparison?.increasedBaseTotal,
+    increasedRateTotal: colaScenarios?.comparison?.increasedRateTotal
+  })
 
   return (
     <motion.div
@@ -77,7 +88,6 @@ export default function PensionResults({ result }: PensionResultsProps) {
           </Button>
 
           <PensionPDFButton
-            pensionData={result}
             variant="outline"
             size="sm"
             showStatus={false}
@@ -211,13 +221,13 @@ export default function PensionResults({ result }: PensionResultsProps) {
                 </div>
                 <div className="text-center p-3 bg-white rounded-lg border">
                   <div className="text-2xl font-bold text-green-600">
-                    {formatCurrency(colaResult.colaIncrease)}
+                    {formatCurrency(colaResult.calculations[0]?.colaAmount || 0)}
                   </div>
                   <div className="text-xs text-muted-foreground">Your Annual COLA</div>
                 </div>
                 <div className="text-center p-3 bg-white rounded-lg border">
                   <div className="text-2xl font-bold text-purple-600">
-                    {formatCurrency(colaResult.monthlyIncrease)}
+                    {formatCurrency((colaResult.calculations[0]?.colaAmount || 0) / 12)}
                   </div>
                   <div className="text-xs text-muted-foreground">Monthly COLA</div>
                 </div>
@@ -231,11 +241,11 @@ export default function PensionResults({ result }: PensionResultsProps) {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span>Your Annual Pension:</span>
-                    <span className="font-medium">{formatCurrency(colaResult.originalPension)}</span>
+                    <span className="font-medium">{formatCurrency(pensionAmount)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>COLA Eligible Amount:</span>
-                    <span className="font-medium">{formatCurrency(colaResult.colaEligibleAmount)}</span>
+                    <span className="font-medium">{formatCurrency(Math.min(pensionAmount, 13000))}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>COLA Rate (FY2025):</span>
@@ -243,11 +253,11 @@ export default function PensionResults({ result }: PensionResultsProps) {
                   </div>
                   <div className="flex justify-between border-t pt-2">
                     <span className="font-semibold">Annual COLA Increase:</span>
-                    <span className="font-semibold text-green-600">{formatCurrency(colaResult.colaIncrease)}</span>
+                    <span className="font-semibold text-green-600">{formatCurrency(colaResult.calculations[0]?.colaAmount || 0)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="font-semibold">Effective COLA Rate:</span>
-                    <span className="font-semibold text-blue-600">{colaResult.effectiveRate}%</span>
+                    <span className="font-semibold text-blue-600">{pensionAmount > 0 ? (((colaResult.calculations[0]?.colaAmount || 0) / pensionAmount) * 100).toFixed(2) : '0.00'}%</span>
                   </div>
                 </div>
               </div>
@@ -293,7 +303,7 @@ export default function PensionResults({ result }: PensionResultsProps) {
                   </div>
                   <div className="text-center p-4 bg-purple-50 rounded-lg">
                     <div className="text-2xl font-bold text-purple-600">
-                      {formatCurrency(colaProjections[9]?.cumulativeIncrease || 0)}
+                      {formatCurrency(colaResult.totalIncrease || 0)}
                     </div>
                     <div className="text-sm text-muted-foreground">Total COLA Gained</div>
                   </div>
@@ -356,7 +366,7 @@ export default function PensionResults({ result }: PensionResultsProps) {
                     <div>Rate: 3%</div>
                     <div>Base: $13,000</div>
                     <div className="font-semibold text-gray-700">
-                      10-Year Total: {formatCurrency(colaScenarios.comparison.currentTotal)}
+                      10-Year Total: {formatCurrency(colaScenarios?.comparison?.currentTotal)}
                     </div>
                   </div>
                 </div>
@@ -366,7 +376,7 @@ export default function PensionResults({ result }: PensionResultsProps) {
                     <div>Rate: 3%</div>
                     <div>Base: $20,000</div>
                     <div className="font-semibold text-blue-700">
-                      10-Year Total: {formatCurrency(colaScenarios.comparison.increasedBaseTotal)}
+                      10-Year Total: {formatCurrency(colaScenarios?.comparison?.increasedBaseTotal)}
                     </div>
                   </div>
                 </div>
@@ -376,7 +386,7 @@ export default function PensionResults({ result }: PensionResultsProps) {
                     <div>Rate: 3.5%</div>
                     <div>Base: $13,000</div>
                     <div className="font-semibold text-green-700">
-                      10-Year Total: {formatCurrency(colaScenarios.comparison.increasedRateTotal)}
+                      10-Year Total: {formatCurrency(colaScenarios?.comparison?.increasedRateTotal)}
                     </div>
                   </div>
                 </div>

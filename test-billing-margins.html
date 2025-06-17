@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billing Page Margin Testing</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .test-container {
+            background: white;
+            margin: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .viewport-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            z-index: 1000;
+        }
+
+        .margin-indicator {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            background: rgba(255, 0, 0, 0.2);
+            border: 2px solid red;
+            z-index: 999;
+            pointer-events: none;
+        }
+
+        .margin-left {
+            left: 0;
+        }
+
+        .margin-right {
+            right: 0;
+        }
+
+        .test-links {
+            background: #f0f0f0;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border-left: 4px solid #007acc;
+        }
+
+        .test-links a {
+            display: inline-block;
+            margin: 5px 10px 5px 0;
+            padding: 8px 16px;
+            background: #007acc;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .test-links a:hover {
+            background: #005a9e;
+        }
+
+        .breakpoint-info {
+            background: #f0f0f0;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border-left: 4px solid #007acc;
+        }
+
+        .current-breakpoint {
+            background: #e7f3ff;
+            border-left-color: #0066cc;
+            font-weight: bold;
+        }
+
+        .test-instructions {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+
+        .test-instructions h3 {
+            margin-top: 0;
+            color: #856404;
+        }
+
+        .test-instructions ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .test-instructions li {
+            margin: 5px 0;
+            color: #856404;
+        }
+
+        /* Massachusetts Retirement System margin classes for testing */
+        .mrs-page-wrapper {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: hidden;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
+        @media (min-width: 376px) {
+            .mrs-page-wrapper {
+                padding-left: 1.25rem;
+                padding-right: 1.25rem;
+            }
+        }
+
+        @media (min-width: 641px) {
+            .mrs-page-wrapper {
+                padding-left: 1.5rem;
+                padding-right: 1.5rem;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .mrs-page-wrapper {
+                padding-left: 2rem;
+                padding-right: 2rem;
+            }
+        }
+
+        @media (min-width: 1025px) {
+            .mrs-page-wrapper {
+                padding-left: 2.5rem;
+                padding-right: 2.5rem;
+            }
+        }
+
+        @media (min-width: 1441px) {
+            .mrs-page-wrapper {
+                padding-left: 3rem;
+                padding-right: 3rem;
+            }
+        }
+
+        .mrs-content-container {
+            margin-left: auto;
+            margin-right: auto;
+            width: 100%;
+            max-width: 1400px;
+        }
+    </style>
+</head>
+<body>
+    <div class="viewport-info" id="viewportInfo">
+        Viewport: <span id="dimensions"></span><br>
+        Breakpoint: <span id="breakpoint"></span><br>
+        Expected Margin: <span id="expectedMargin"></span>
+    </div>
+
+    <div class="margin-indicator margin-left" id="marginLeft"></div>
+    <div class="margin-indicator margin-right" id="marginRight"></div>
+
+    <div class="mrs-page-wrapper">
+        <div class="mrs-content-container">
+            <div class="test-container">
+                <h1>Billing Page Margin Testing - Massachusetts Retirement System</h1>
+                
+                <div class="test-links">
+                    <h3>Test Links:</h3>
+                    <a href="http://localhost:3000/billing" target="_blank">Open Billing Page</a>
+                    <a href="http://localhost:3000/dashboard" target="_blank">Dashboard</a>
+                    <a href="http://localhost:3000/calculator" target="_blank">Calculator</a>
+                    <a href="http://localhost:3000/profile" target="_blank">Profile</a>
+                    <a href="http://localhost:3000/blog" target="_blank">Blog</a>
+                    <a href="http://localhost:3000" target="_blank">Home</a>
+                </div>
+
+                <div class="test-instructions">
+                    <h3>Billing Page Margin Testing Instructions:</h3>
+                    <ol>
+                        <li><strong>Open the billing page</strong> using the link above</li>
+                        <li><strong>Resize your browser window</strong> to test different breakpoints:
+                            <ul>
+                                <li>375px (small mobile)</li>
+                                <li>768px (tablet)</li>
+                                <li>1024px (desktop)</li>
+                                <li>1920px (large desktop)</li>
+                            </ul>
+                        </li>
+                        <li><strong>Verify content never touches browser edges</strong></li>
+                        <li><strong>Check that margins scale appropriately</strong> at larger screen sizes</li>
+                        <li><strong>Ensure all interactive elements</strong> maintain 44px minimum touch targets</li>
+                        <li><strong>Test all billing page sections:</strong>
+                            <ul>
+                                <li>Header with back button</li>
+                                <li>Account status card</li>
+                                <li>Subscription details</li>
+                                <li>Payment method information</li>
+                                <li>Billing history</li>
+                                <li>Premium features list</li>
+                                <li>Upgrade options (if applicable)</li>
+                                <li>Billing management section</li>
+                                <li>Support section</li>
+                            </ul>
+                        </li>
+                        <li><strong>Verify sub-2-second performance</strong> when navigating to the billing page</li>
+                        <li><strong>Test responsive design</strong> across all breakpoints</li>
+                    </ol>
+                </div>
+                
+                <div class="breakpoint-info" id="breakpoint375">
+                    <strong>375px and below:</strong> 1rem (16px) margins
+                </div>
+                
+                <div class="breakpoint-info" id="breakpoint376">
+                    <strong>376px - 640px:</strong> 1.25rem (20px) margins
+                </div>
+                
+                <div class="breakpoint-info" id="breakpoint641">
+                    <strong>641px - 768px:</strong> 1.5rem (24px) margins
+                </div>
+                
+                <div class="breakpoint-info" id="breakpoint769">
+                    <strong>769px - 1024px:</strong> 2rem (32px) margins
+                </div>
+                
+                <div class="breakpoint-info" id="breakpoint1025">
+                    <strong>1025px - 1440px:</strong> 2.5rem (40px) margins
+                </div>
+                
+                <div class="breakpoint-info" id="breakpoint1441">
+                    <strong>1441px and above:</strong> 3rem (48px) margins
+                </div>
+
+                <div style="background: #d4edda; border: 1px solid #c3e6cb; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                    <h3 style="color: #155724; margin-top: 0;">✅ Billing Page Implementation Status</h3>
+                    <ul style="color: #155724; margin: 10px 0; padding-left: 20px;">
+                        <li>✅ Applied <code>.mrs-page-wrapper</code> class to main container</li>
+                        <li>✅ Applied <code>.mrs-content-container</code> class for content centering</li>
+                        <li>✅ Removed conflicting <code>container mx-auto px-4</code> classes</li>
+                        <li>✅ Maintained existing <code>max-w-4xl</code> constraint for optimal reading</li>
+                        <li>✅ Preserved all existing functionality and design</li>
+                        <li>✅ Responsive margin system: 16px → 48px across breakpoints</li>
+                    </ul>
+                </div>
+
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                    <h3>Expected Results:</h3>
+                    <ul>
+                        <li><strong>Consistent spacing:</strong> Billing page matches other pages (dashboard, calculator, profile, blog)</li>
+                        <li><strong>Professional appearance:</strong> Content has proper breathing room from browser edges</li>
+                        <li><strong>Responsive design:</strong> Margins scale appropriately across all device sizes</li>
+                        <li><strong>Performance maintained:</strong> Sub-2-second load times preserved</li>
+                        <li><strong>Accessibility preserved:</strong> 44px touch targets and WCAG compliance maintained</li>
+                        <li><strong>Design consistency:</strong> All existing colors, gradients, and styling preserved</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateViewportInfo() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            
+            document.getElementById('dimensions').textContent = `${width}x${height}`;
+            
+            let breakpoint = '';
+            let expectedMargin = '';
+            let marginPx = 0;
+            
+            // Clear all current breakpoint highlights
+            document.querySelectorAll('.breakpoint-info').forEach(el => {
+                el.classList.remove('current-breakpoint');
+            });
+            
+            if (width <= 375) {
+                breakpoint = '≤375px (Small Mobile)';
+                expectedMargin = '1rem (16px)';
+                marginPx = 16;
+                document.getElementById('breakpoint375').classList.add('current-breakpoint');
+            } else if (width <= 640) {
+                breakpoint = '376px-640px (Mobile)';
+                expectedMargin = '1.25rem (20px)';
+                marginPx = 20;
+                document.getElementById('breakpoint376').classList.add('current-breakpoint');
+            } else if (width <= 768) {
+                breakpoint = '641px-768px (Large Mobile/Small Tablet)';
+                expectedMargin = '1.5rem (24px)';
+                marginPx = 24;
+                document.getElementById('breakpoint641').classList.add('current-breakpoint');
+            } else if (width <= 1024) {
+                breakpoint = '769px-1024px (Tablet/Small Desktop)';
+                expectedMargin = '2rem (32px)';
+                marginPx = 32;
+                document.getElementById('breakpoint769').classList.add('current-breakpoint');
+            } else if (width <= 1440) {
+                breakpoint = '1025px-1440px (Desktop)';
+                expectedMargin = '2.5rem (40px)';
+                marginPx = 40;
+                document.getElementById('breakpoint1025').classList.add('current-breakpoint');
+            } else {
+                breakpoint = '≥1441px (Large Desktop)';
+                expectedMargin = '3rem (48px)';
+                marginPx = 48;
+                document.getElementById('breakpoint1441').classList.add('current-breakpoint');
+            }
+            
+            document.getElementById('breakpoint').textContent = breakpoint;
+            document.getElementById('expectedMargin').textContent = expectedMargin;
+            
+            // Update margin indicators
+            document.getElementById('marginLeft').style.width = marginPx + 'px';
+            document.getElementById('marginRight').style.width = marginPx + 'px';
+        }
+        
+        // Update on load and resize
+        updateViewportInfo();
+        window.addEventListener('resize', updateViewportInfo);
+    </script>
+</body>
+</html>

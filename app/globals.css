@@ -53,11 +53,18 @@ p, h1, h2, h3, h4, h5, h6, span, div {
   hyphens: auto;
 }
 
-/* Enhanced responsive container fixes */
-@media (max-width: 640px) {
+/* Enhanced responsive container fixes with improved horizontal spacing */
+@media (max-width: 375px) {
   .container {
     padding-left: 1rem;
     padding-right: 1rem;
+  }
+}
+
+@media (min-width: 376px) and (max-width: 640px) {
+  .container {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
   }
 }
 
@@ -65,6 +72,27 @@ p, h1, h2, h3, h4, h5, h6, span, div {
   .container {
     padding-left: 1.5rem;
     padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+@media (min-width: 1025px) and (max-width: 1440px) {
+  .container {
+    padding-left: 2.5rem;
+    padding-right: 2.5rem;
+  }
+}
+
+@media (min-width: 1441px) {
+  .container {
+    padding-left: 3rem;
+    padding-right: 3rem;
   }
 }
 
@@ -184,6 +212,25 @@ nav {
   --input: 214.3 31.8% 91.4%;
   --ring: 222.2 84% 4.9%;
   --radius: 0.5rem;
+
+  /* Massachusetts Retirement System Design Variables */
+  --mrs-gradient-primary: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  --mrs-gradient-hero: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+  --mrs-gradient-surface: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  --mrs-gradient-accent: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  --mrs-gradient-gold: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+
+  /* Massachusetts Colors */
+  --mrs-navy-200: #bfdbfe;
+  --mrs-navy-600: #1e3a8a;
+  --mrs-blue-600: #1e40af;
+  --mrs-green-600: #059669;
+  --mrs-purple-600: #7c3aed;
+  --mrs-gold-500: #f59e0b;
+
+  /* Glass Effect and Surfaces */
+  --mrs-glass: rgba(255, 255, 255, 0.95);
+  --mrs-glass-border: rgba(255, 255, 255, 0.2);
 }
 
 .dark {
@@ -206,6 +253,25 @@ nav {
   --border: 217.2 32.6% 17.5%;
   --input: 217.2 32.6% 17.5%;
   --ring: 212.7 26.8% 83.9%;
+
+  /* Massachusetts Dark Mode Variables */
+  --mrs-gradient-primary: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+  --mrs-gradient-hero: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+  --mrs-gradient-surface: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  --mrs-gradient-accent: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+  --mrs-gradient-gold: linear-gradient(135deg, #fbbf24 0%, #fcd34d 100%);
+
+  /* Massachusetts Dark Colors */
+  --mrs-navy-200: #334155;
+  --mrs-navy-600: #1e3a8a;
+  --mrs-blue-600: #3b82f6;
+  --mrs-green-600: #10b981;
+  --mrs-purple-600: #a855f7;
+  --mrs-gold-500: #fbbf24;
+
+  /* Dark Glass Effect */
+  --mrs-glass: rgba(30, 41, 59, 0.95);
+  --mrs-glass-border: rgba(255, 255, 255, 0.1);
 }
 
 * {
@@ -339,4 +405,162 @@ body {
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* Massachusetts Retirement System Utility Classes */
+
+/* Page Layout Classes */
+.mrs-page-wrapper {
+  @apply w-full max-w-full overflow-x-hidden;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 376px) {
+  .mrs-page-wrapper {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+}
+
+@media (min-width: 641px) {
+  .mrs-page-wrapper {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 769px) {
+  .mrs-page-wrapper {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+@media (min-width: 1025px) {
+  .mrs-page-wrapper {
+    padding-left: 2.5rem;
+    padding-right: 2.5rem;
+  }
+}
+
+@media (min-width: 1441px) {
+  .mrs-page-wrapper {
+    padding-left: 3rem;
+    padding-right: 3rem;
+  }
+}
+
+/* Content Container with max-width and centering */
+.mrs-content-container {
+  @apply mx-auto w-full;
+  max-width: 1400px;
+}
+
+/* Typography Classes */
+.mrs-heading-1 {
+  @apply text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight;
+  color: white;
+}
+
+.mrs-heading-3 {
+  @apply text-lg lg:text-xl xl:text-2xl font-semibold;
+}
+
+.mrs-body {
+  @apply text-sm lg:text-base leading-relaxed;
+}
+
+.mrs-body-large {
+  @apply text-lg lg:text-xl xl:text-2xl leading-relaxed;
+}
+
+/* Glass Effect */
+.mrs-glass {
+  background: var(--mrs-glass);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--mrs-glass-border);
+}
+
+/* Card Styles */
+.mrs-card {
+  @apply rounded-xl shadow-lg border-0 transition-all duration-300;
+  background: var(--mrs-gradient-surface);
+}
+
+.mrs-card:hover {
+  @apply shadow-xl;
+  transform: translateY(-2px);
+}
+
+/* Button Styles */
+.mrs-btn-primary {
+  @apply px-6 py-3 rounded-lg font-medium transition-all duration-300 shadow-md;
+  background: var(--mrs-gradient-primary);
+  color: white;
+  border: none;
+}
+
+.mrs-btn-primary:hover {
+  @apply shadow-lg;
+  transform: translateY(-1px);
+}
+
+.mrs-btn-secondary {
+  @apply px-6 py-3 rounded-lg font-medium transition-all duration-300 shadow-md;
+  background: var(--mrs-gradient-surface);
+  color: var(--mrs-blue-600);
+  border: 1px solid var(--mrs-navy-200);
+}
+
+.mrs-btn-secondary:hover {
+  @apply shadow-lg;
+  transform: translateY(-1px);
+}
+
+/* Animation Classes */
+.mrs-fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
+.mrs-slide-up {
+  animation: slideUp 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Badge Styles */
+.mrs-badge-success {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
+  background: var(--mrs-gradient-accent);
+  color: white;
+}
+
+/* Gradient Text */
+.mrs-gradient-text {
+  background: var(--mrs-gradient-gold);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }

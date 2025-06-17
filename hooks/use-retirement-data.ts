@@ -14,6 +14,7 @@ interface RetirementProfile {
   yearsOfService?: number
   plannedRetirementAge?: number
   retirementOption?: string
+  retirementDate?: string
 }
 
 interface RetirementCalculation {
@@ -59,11 +60,34 @@ export function useRetirementData() {
 
     setLoading(true)
     try {
-      const response = await fetch("/api/retirement/profile")
+      const response = await fetch("/api/profile")
+
+      // Check if response is ok and content-type is JSON
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const contentType = response.headers.get("content-type")
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Response is not JSON")
+      }
+
       const data = await response.json()
-      
-      if (response.ok && data.profile) {
-        setProfile(data.profile)
+
+      if (data) {
+        // Convert the profile data to the expected format
+        setProfile({
+          dateOfBirth: data.dateOfBirth || "",
+          membershipDate: data.membershipDate || "",
+          retirementGroup: data.retirementGroup || "Group 1",
+          benefitPercentage: data.benefitPercentage || 2.0,
+          currentSalary: data.currentSalary || 0,
+          averageHighest3Years: data.averageHighest3Years || 0,
+          yearsOfService: data.yearsOfService || 0,
+          plannedRetirementAge: data.plannedRetirementAge || 65,
+          retirementOption: data.retirementOption || "A",
+          retirementDate: data.retirementDate || ""
+        })
       }
     } catch (error) {
       console.error("Error fetching profile:", error)
@@ -121,21 +145,42 @@ export function useRetirementData() {
 
     setLoading(true)
     try {
-      const method = profile ? "PUT" : "POST"
-      const response = await fetch("/api/retirement/profile", {
-        method,
+      const response = await fetch("/api/profile", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(profileData),
       })
 
+      // Check if response is ok and content-type is JSON
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const contentType = response.headers.get("content-type")
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Response is not JSON")
+      }
+
       const data = await response.json()
-      
-      if (response.ok) {
-        setProfile(data.profile)
+
+      if (data) {
+        // Convert the response data to the expected profile format
+        setProfile({
+          dateOfBirth: data.dateOfBirth || "",
+          membershipDate: data.membershipDate || "",
+          retirementGroup: data.retirementGroup || "Group 1",
+          benefitPercentage: data.benefitPercentage || 2.0,
+          currentSalary: data.currentSalary || 0,
+          averageHighest3Years: data.averageHighest3Years || 0,
+          yearsOfService: data.yearsOfService || 0,
+          plannedRetirementAge: data.plannedRetirementAge || 65,
+          retirementOption: data.retirementOption || "A",
+          retirementDate: data.retirementDate || ""
+        })
         toast.success(profile ? "Profile updated" : "Profile created")
         return true
       } else {
-        toast.error(data.error || "Failed to save profile")
+        toast.error("Failed to save profile")
         return false
       }
     } catch (error) {

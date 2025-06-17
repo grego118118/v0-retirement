@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"
+import { authOptions } from "@/lib/auth/auth-config"
 import { prisma } from "@/lib/prisma"
 
 export async function GET() {
@@ -72,9 +72,11 @@ export async function GET() {
 
     const responseData = {
       fullName: session.user.name || "",
-      retirementDate: userProfile?.plannedRetirementAge ?
-        new Date(new Date().getFullYear() + (plannedRetirementAge || 65) - (userProfile?.dateOfBirth ?
-          Math.floor((new Date().getTime() - new Date(userProfile.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365.25)) : 50), 0, 1).toISOString().split('T')[0] : "",
+      retirementDate: userProfile?.retirementDate ?
+        userProfile.retirementDate.toISOString().split('T')[0] :
+        (userProfile?.plannedRetirementAge ?
+          new Date(new Date().getFullYear() + (plannedRetirementAge || 65) - (userProfile?.dateOfBirth ?
+            Math.floor((new Date().getTime() - new Date(userProfile.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365.25)) : 50), 0, 1).toISOString().split('T')[0] : ""),
       dateOfBirth: userProfile?.dateOfBirth ? userProfile.dateOfBirth.toISOString().split('T')[0] : "",
       membershipDate: userProfile?.membershipDate ? userProfile.membershipDate.toISOString().split('T')[0] : "",
       retirementGroup: userProfile?.retirementGroup || "Group 1",
@@ -161,13 +163,20 @@ export async function POST(request: Request) {
       })
     }
 
-    // Handle retirement_date field - convert to plannedRetirementAge if dateOfBirth exists
-    if (requestBody.retirement_date && (profileData.dateOfBirth || requestBody.dateOfBirth)) {
-      const retirementDate = new Date(requestBody.retirement_date)
-      const birthDate = profileData.dateOfBirth || new Date(requestBody.dateOfBirth)
-      const retirementAge = retirementDate.getFullYear() - birthDate.getFullYear()
-      if (retirementAge > 0 && retirementAge < 100) {
-        profileData.plannedRetirementAge = retirementAge
+    // Handle retirement_date field (both snake_case and camelCase)
+    const retirementDateValue = requestBody.retirement_date || requestBody.retirementDate
+    if (retirementDateValue) {
+      // Store the actual retirement date in the database
+      profileData.retirementDate = new Date(retirementDateValue)
+
+      // Also calculate plannedRetirementAge for backward compatibility
+      if (profileData.dateOfBirth || requestBody.dateOfBirth) {
+        const retirementDate = new Date(retirementDateValue)
+        const birthDate = profileData.dateOfBirth || new Date(requestBody.dateOfBirth)
+        const retirementAge = retirementDate.getFullYear() - birthDate.getFullYear()
+        if (retirementAge > 0 && retirementAge < 100) {
+          profileData.plannedRetirementAge = retirementAge
+        }
       }
     }
 

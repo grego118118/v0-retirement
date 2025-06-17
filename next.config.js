@@ -1,9 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  serverExternalPackages: ['@prisma/client', 'prisma'],
-  
+  serverExternalPackages: ['@prisma/client', 'prisma', 'puppeteer'],
+
   // Production optimizations
   output: 'standalone',
+
+
   
   // Security headers
   async headers() {
@@ -43,37 +45,17 @@ const nextConfig = {
     formats: ['image/webp', 'image/avif'],
   },
   
-  // Webpack configuration
-  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
-    // Development optimizations
-    if (dev) {
-      // Faster builds in development
-      config.optimization.splitChunks = false
-      config.optimization.minimize = false
-
-      // Reduce bundle analysis overhead
-      config.stats = 'errors-warnings'
-    } else {
-      // Production optimizations
-      config.optimization.splitChunks = {
-        chunks: 'all',
-        cacheGroups: {
-          vendor: {
-            test: /[\\/]node_modules[\\/]/,
-            name: 'vendors',
-            chunks: 'all',
-          },
-        },
-      }
-    }
-
-    return config
-  },
+  // Webpack configuration temporarily disabled for debugging
+  // webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+  //   return config
+  // },
   
   // Additional configuration can be added here
 }
 
-// Sentry webpack plugin configuration
+// Sentry webpack plugin configuration (temporarily disabled to resolve build issues)
+// TODO: Re-enable once Sentry package compatibility is resolved
+/*
 const { withSentryConfig } = require('@sentry/nextjs')
 
 const sentryWebpackPluginOptions = {
@@ -85,6 +67,10 @@ const sentryWebpackPluginOptions = {
   widenClientFileUpload: true,
 }
 
-module.exports = process.env.NODE_ENV === 'production' 
+module.exports = process.env.NODE_ENV === 'production'
   ? withSentryConfig(nextConfig, sentryWebpackPluginOptions)
   : nextConfig
+*/
+
+// Temporarily export nextConfig directly without Sentry
+module.exports = nextConfig

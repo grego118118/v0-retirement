@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Loader2, User, Calculator, Settings, Calendar, DollarSign, Shield, Target, ArrowLeft, TrendingUp } from "lucide-react"
+import { Loader2, User, Calculator, Settings, Calendar, DollarSign, Shield, Target, ArrowLeft } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useProfile } from "@/contexts/profile-context"
 import { Badge } from "@/components/ui/badge"
@@ -46,6 +46,7 @@ interface ProfileData {
   averageHighest3Years?: number
   yearsOfService?: number
   plannedRetirementAge?: number
+  retirementDate?: string
   retirementOption?: string
   hasProfile?: boolean
 }
@@ -198,7 +199,8 @@ function ProfilePage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <div className="mrs-page-wrapper">
+      <div className="mrs-content-container py-8 max-w-6xl mx-auto">
       {/* Header */}
       <div className="flex items-center gap-4 mb-8">
         <Button variant="outline" size="sm" asChild>
@@ -223,7 +225,7 @@ function ProfilePage() {
       </div>
 
       {/* Profile Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/20 dark:to-blue-900/20">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-lg">
@@ -394,9 +396,9 @@ function ProfilePage() {
                     {formatPensionCurrency(pensionEstimate.monthlyPension)}
                   </div>
 
-                  <div className="text-sm text-muted-foreground">Benefit Percentage</div>
+                  <div className="text-sm text-muted-foreground">Benefit Multiplier</div>
                   <div className="font-medium">
-                    {pensionEstimate.benefitPercentage.toFixed(2)}% of salary
+                    {pensionEstimate.benefitMultiplier.toFixed(2)}% of salary
                   </div>
 
                   <div className="text-xs text-muted-foreground mt-2 p-2 bg-purple-50 dark:bg-purple-950/20 rounded">
@@ -408,138 +410,7 @@ function ProfilePage() {
           </CardContent>
         </Card>
 
-        {/* 4th Card - Retirement Projection Chart */}
-        <Card className="border-0 shadow-lg bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950/20 dark:to-orange-900/20">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <TrendingUp className="h-5 w-5 text-orange-600" />
-              Retirement Projections
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {(() => {
-              if (!displayData?.dateOfBirth || !displayData?.retirementGroup || !displayData?.currentSalary) {
-                return (
-                  <div className="text-center text-muted-foreground py-4">
-                    Complete your profile to see retirement projections
-                  </div>
-                )
-              }
 
-              const currentAge = calculateCurrentAge(displayData.dateOfBirth)
-              const yearsOfService = displayData.yearsOfService ||
-                (displayData.membershipDate ? calculateStandardizedYearsOfService(displayData.membershipDate) : 0)
-
-              // Determine minimum retirement age based on group
-              const minRetirementAge = (() => {
-                switch (displayData.retirementGroup) {
-                  case 'Group 1': return 60
-                  case 'Group 2': return 55
-                  case 'Group 3': return 50 // State Police can retire at any age with 20+ years
-                  case 'Group 4': return 50
-                  default: return 60
-                }
-              })()
-
-              const startAge = Math.max(currentAge, minRetirementAge)
-
-              // Generate projection data for next 5-10 years
-              const projectionRows = []
-              const groupKey = displayData.retirementGroup.replace(' ', '_').toUpperCase()
-              const salary = displayData.averageHighest3Years || displayData.currentSalary
-
-              for (let i = 0; i < 8; i++) {
-                const projAge = startAge + i
-                const projYOS = yearsOfService + (projAge - currentAge)
-
-                if (projAge > 70) break // Stop at age 70
-
-                try {
-                  // Determine service entry period
-                  const membershipDate = displayData.membershipDate ? new Date(displayData.membershipDate) : new Date()
-                  const serviceEntry = membershipDate >= new Date('2012-04-02') ? 'after_2012' : 'before_2012'
-
-                  // Check eligibility first
-                  const eligibilityResult = checkEligibility(
-                    projAge,
-                    projYOS,
-                    groupKey,
-                    serviceEntry
-                  )
-
-                  if (eligibilityResult.eligible) {
-                    const factor = getBenefitFactor(
-                      projAge,
-                      groupKey,
-                      serviceEntry,
-                      projYOS
-                    )
-
-                    if (factor > 0) {
-                      const annualPension = Math.min(salary * factor * projYOS, salary * 0.8)
-                      const monthlyPension = annualPension / 12
-
-                      projectionRows.push({
-                        age: projAge,
-                        yearsOfService: projYOS,
-                        factor: factor,
-                        monthlyBenefit: monthlyPension,
-                        annualBenefit: annualPension
-                      })
-                    }
-                  }
-                } catch (error) {
-                  console.error(`Error calculating projection for age ${projAge}:`, error)
-                }
-              }
-
-              if (projectionRows.length === 0) {
-                return (
-                  <div className="text-center text-muted-foreground py-4">
-                    No eligible retirement scenarios found
-                  </div>
-                )
-              }
-
-              return (
-                <div className="space-y-3">
-                  <div className="text-sm text-muted-foreground mb-3">
-                    Retirement benefits by age (Option {displayData.retirementOption || 'A'})
-                  </div>
-                  <div className="space-y-2 max-h-64 overflow-y-auto">
-                    {projectionRows.map((row, index) => (
-                      <div key={index} className="grid grid-cols-5 gap-2 text-xs p-2 bg-white/50 dark:bg-gray-800/50 rounded">
-                        <div>
-                          <div className="text-muted-foreground">Age</div>
-                          <div className="font-medium">{row.age}</div>
-                        </div>
-                        <div>
-                          <div className="text-muted-foreground">YOS</div>
-                          <div className="font-medium">{row.yearsOfService.toFixed(1)}</div>
-                        </div>
-                        <div>
-                          <div className="text-muted-foreground">Factor</div>
-                          <div className="font-medium">{(row.factor * 100).toFixed(1)}%</div>
-                        </div>
-                        <div>
-                          <div className="text-muted-foreground">Monthly</div>
-                          <div className="font-medium text-orange-600">{formatPensionCurrency(row.monthlyBenefit)}</div>
-                        </div>
-                        <div>
-                          <div className="text-muted-foreground">Annual</div>
-                          <div className="font-medium text-orange-600">{formatPensionCurrency(row.annualBenefit)}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-2 p-2 bg-orange-50 dark:bg-orange-950/20 rounded">
-                    Projections based on current profile data and {displayData.retirementGroup} rules
-                  </div>
-                </div>
-              )
-            })()}
-          </CardContent>
-        </Card>
       </div>
 
       {/* Profile Form Tabs */}
@@ -713,6 +584,20 @@ function ProfilePage() {
                     />
                   </div>
                   <div>
+                    <Label htmlFor="plannedRetirementDate">Planned Retirement Date</Label>
+                    <Input
+                      id="plannedRetirementDate"
+                      type="date"
+                      value={displayData?.retirementDate || ""}
+                      onChange={(e) => updateFormData({ retirementDate: e.target.value })}
+                      min={new Date().toISOString().split('T')[0]}
+                      className="w-full"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Set a specific retirement date to override automatic calculations
+                    </p>
+                  </div>
+                  <div>
                     <Label htmlFor="retirementOption">Retirement Option</Label>
                     <Select
                       value={displayData?.retirementOption || "A"}
@@ -731,6 +616,7 @@ function ProfilePage() {
                   <Button
                     onClick={() => saveProfile({
                       plannedRetirementAge: displayData?.plannedRetirementAge,
+                      retirementDate: displayData?.retirementDate,
                       retirementOption: displayData?.retirementOption
                     })}
                     disabled={saving}
@@ -784,6 +670,7 @@ function ProfilePage() {
             </Button>
           </CardContent>
         </Card>
+      </div>
       </div>
     </div>
   )

@@ -14,6 +14,7 @@ interface ProfileData {
   averageHighest3Years?: number
   yearsOfService?: number
   plannedRetirementAge?: number
+  retirementDate?: string
   retirementOption?: string
   hasProfile?: boolean
 }
@@ -59,6 +60,9 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
         }
         if (data.membershipDate && typeof data.membershipDate === 'string' && data.membershipDate.includes('T')) {
           data.membershipDate = data.membershipDate.split('T')[0]
+        }
+        if (data.retirementDate && typeof data.retirementDate === 'string' && data.retirementDate.includes('T')) {
+          data.retirementDate = data.retirementDate.split('T')[0]
         }
 
         setProfile(data)
@@ -117,6 +121,9 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
         }
         if (profileData.membershipDate && typeof profileData.membershipDate === 'string' && profileData.membershipDate.includes('T')) {
           profileData.membershipDate = profileData.membershipDate.split('T')[0]
+        }
+        if (profileData.retirementDate && typeof profileData.retirementDate === 'string' && profileData.retirementDate.includes('T')) {
+          profileData.retirementDate = profileData.retirementDate.split('T')[0]
         }
 
         // Merge the server response with current profile state

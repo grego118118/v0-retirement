@@ -91,7 +91,7 @@ export default function PensionCalculator() {
   const [showSaveDialog, setShowSaveDialog] = useState(false)
   const [savedMessage, setSavedMessage] = useState("")
   const { data: session } = useSession()
-  const { saveCalculation: saveCalculationToDb } = useRetirementData()
+  const { saveCalculation: saveCalculationToDb, profile: userProfile, fetchProfile, saveProfile } = useRetirementData()
   
   // Move subscription status hook to top level
   const { canSaveCalculations, maxSavedCalculations, savedCalculationsCount, isPremium } = useSubscriptionStatus()
@@ -114,15 +114,16 @@ export default function PensionCalculator() {
         const parsedData = JSON.parse(sessionData)
         // Ensure all values maintain their proper types to prevent controlled/uncontrolled input issues
         const sanitizedData = Object.keys(formData).reduce((acc, key) => {
+          const typedKey = key as keyof typeof formData
           if (parsedData[key] !== undefined && parsedData[key] !== null) {
             // Keep boolean values as booleans, convert others to strings
-            if (typeof formData[key] === 'boolean') {
-              acc[key] = Boolean(parsedData[key])
+            if (typeof formData[typedKey] === 'boolean') {
+              (acc as any)[typedKey] = Boolean(parsedData[key])
             } else {
-              acc[key] = String(parsedData[key])
+              (acc as any)[typedKey] = String(parsedData[key])
             }
           } else {
-            acc[key] = formData[key]
+            (acc as any)[typedKey] = formData[typedKey]
           }
           return acc
         }, {} as typeof formData)
@@ -132,15 +133,16 @@ export default function PensionCalculator() {
         const parsedData = JSON.parse(localData)
         // Ensure all values maintain their proper types to prevent controlled/uncontrolled input issues
         const sanitizedData = Object.keys(formData).reduce((acc, key) => {
+          const typedKey = key as keyof typeof formData
           if (parsedData[key] !== undefined && parsedData[key] !== null) {
             // Keep boolean values as booleans, convert others to strings
-            if (typeof formData[key] === 'boolean') {
-              acc[key] = Boolean(parsedData[key])
+            if (typeof formData[typedKey] === 'boolean') {
+              (acc as any)[typedKey] = Boolean(parsedData[key])
             } else {
-              acc[key] = String(parsedData[key])
+              (acc as any)[typedKey] = String(parsedData[key])
             }
           } else {
-            acc[key] = formData[key]
+            (acc as any)[typedKey] = formData[typedKey]
           }
           return acc
         }, {} as typeof formData)
@@ -160,6 +162,44 @@ export default function PensionCalculator() {
       setSavedMessage("Saved calculations are currently disabled.")
     }
   }, [session, searchParams])
+
+  // Load and integrate user profile data
+  useEffect(() => {
+    if (session?.user && userProfile) {
+      console.log("Loading profile data into calculator:", userProfile)
+
+      // Calculate current age from date of birth
+      let calculatedCurrentAge = ""
+      if (userProfile.dateOfBirth) {
+        const birthDate = new Date(userProfile.dateOfBirth)
+        const today = new Date()
+        const age = today.getFullYear() - birthDate.getFullYear()
+        const monthDiff = today.getMonth() - birthDate.getMonth()
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+          calculatedCurrentAge = String(age - 1)
+        } else {
+          calculatedCurrentAge = String(age)
+        }
+      }
+
+      // Pre-populate form with profile data (only if fields are empty to avoid overwriting user input)
+      setFormData(prevData => {
+        const updatedData = {
+          ...prevData,
+          // Only update if current values are empty
+          currentAge: prevData.currentAge || calculatedCurrentAge,
+          age: prevData.age || String(userProfile.plannedRetirementAge || ""),
+          membershipDate: prevData.membershipDate || userProfile.membershipDate || "",
+          group: prevData.group || (userProfile.retirementGroup ? `GROUP_${userProfile.retirementGroup.replace("Group ", "")}` : ""),
+          retirementOption: prevData.retirementOption || userProfile.retirementOption || "A"
+        }
+
+        // Save the updated data to storage
+        saveToStorage(updatedData)
+        return updatedData
+      })
+    }
+  }, [session?.user, userProfile])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -292,10 +332,7 @@ export default function PensionCalculator() {
       announceFormErrors(newErrors)
       // Focus the first error field after a short delay
       setTimeout(() => {
-        const formElement = document.querySelector('form') as HTMLElement
-        if (formElement) {
-          focusFirstErrorField(formElement)
-        }
+        focusFirstErrorField()
       }, 100)
     }
 
@@ -344,8 +381,8 @@ export default function PensionCalculator() {
       const calcData = {
         calculationName: calculationName || `Calculation ${new Date().toLocaleDateString()}`,
         retirementDate: new Date(
-          new Date().getFullYear() + (parseInt(formData.age) - new Date().getFullYear() + 
-          new Date(new Date().getFullYear(), 0, 1).getFullYear() - 
+          new Date().getFullYear() + (parseInt(formData.age) - new Date().getFullYear() +
+          new Date(new Date().getFullYear(), 0, 1).getFullYear() -
           new Date().getFullYear()),
           0,
           1
@@ -358,16 +395,39 @@ export default function PensionCalculator() {
         retirementOption: formData.retirementOption,
         monthlyBenefit: calculationResult.monthlyPension,
         annualBenefit: calculationResult.annualPension,
-        benefitReduction: calculationResult.details.cappedBase ? 
-          (1 - (calculationResult.annualPension / calculationResult.details.baseAnnualPension)) * 100 : 
+        benefitReduction: calculationResult.details.cappedBase ?
+          (1 - (calculationResult.annualPension / calculationResult.details.baseAnnualPension)) * 100 :
           undefined,
         survivorBenefit: calculationResult.survivorAnnualPension,
         notes: `Service entry: ${formData.serviceEntryDate}, Beneficiary age: ${formData.beneficiaryAge || 'N/A'}`,
       }
 
+      // Save the calculation to the database
       const success = await saveCalculationToDb(calcData)
+
       if (success) {
-        toast.success("Calculation saved successfully")
+        // Also update the user's profile with key calculated values
+        try {
+          const profileUpdateData = {
+            plannedRetirementAge: parseInt(formData.age),
+            retirementOption: formData.retirementOption,
+            retirementGroup: formData.group.replace("GROUP_", "Group "),
+            // Update other relevant profile fields
+            yearsOfService: parseFloat(formData.yearsOfService),
+            averageHighest3Years: calculationResult.details.averageSalary,
+            // Set retirement date if not already set
+            retirementDate: calcData.retirementDate.split('T')[0]
+          }
+
+          console.log("Updating profile with calculation data:", profileUpdateData)
+          await saveProfile(profileUpdateData)
+
+          toast.success("Calculation saved and profile updated")
+        } catch (profileError) {
+          console.error("Error updating profile:", profileError)
+          toast.success("Calculation saved (profile update failed)")
+        }
+
         setShowSaveDialog(false)
         setCalculationName("")
       }
@@ -479,6 +539,24 @@ export default function PensionCalculator() {
       setShowResults(true)
       setCurrentStep(2) // Move to results step
       setIsCalculating(false)
+
+      // Auto-save key calculation values to profile (if user is logged in)
+      if (session?.user && saveProfile) {
+        const profileUpdateData = {
+          plannedRetirementAge: parseInt(formData.age),
+          retirementOption: formData.retirementOption,
+          retirementGroup: formData.group.replace("GROUP_", "Group "),
+          yearsOfService: parseFloat(formData.yearsOfService),
+          averageHighest3Years: averageSalary
+        }
+
+        console.log("Auto-saving calculation values to profile:", profileUpdateData)
+        // Save silently without showing toast notifications (don't await to avoid blocking)
+        saveProfile(profileUpdateData).catch(error => {
+          console.error("Error auto-saving to profile:", error)
+          // Don't show error to user for auto-save failures
+        })
+      }
 
       // Performance monitoring
       const endTime = performance.now()
@@ -1301,7 +1379,24 @@ export default function PensionCalculator() {
                         title="Social Security Integration"
                         description="Add Social Security benefits to get your complete retirement income picture"
                       >
-                        <SocialSecurityCalculator />
+                        <SocialSecurityCalculator
+                          initialData={{
+                            currentAge: userProfile?.dateOfBirth ?
+                              (() => {
+                                const birthDate = new Date(userProfile.dateOfBirth)
+                                const today = new Date()
+                                const age = today.getFullYear() - birthDate.getFullYear()
+                                const monthDiff = today.getMonth() - birthDate.getMonth()
+                                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                                  return age - 1
+                                } else {
+                                  return age
+                                }
+                              })() : 45,
+                            retirementAge: userProfile?.plannedRetirementAge || 67,
+                            estimatedBenefit: 2500
+                          }}
+                        />
                       </PremiumGate>
                     </TabsContent>
                     <TabsContent value="combined" className="pt-4">
@@ -1311,16 +1406,16 @@ export default function PensionCalculator() {
                         description="See your pension and Social Security benefits combined with optimization suggestions"
                       >
                         <CombinedRetirementCalculator
-                          pensionResult={{
-                            monthlyPension: calculationResult.monthlyPension,
-                            annualPension: calculationResult.annualPension,
+                          pensionData={{
+                            monthlyBenefit: calculationResult.monthlyPension,
+                            annualBenefit: calculationResult.annualPension,
                             retirementAge: calculationResult.details.age,
                             retirementOption: formData.retirementOption,
                             details: calculationResult.details,
                           }}
-                          formData={{
-                            ...formData,
-                            averageSalary: calculationResult.details.averageSalary
+                          socialSecurityData={{
+                            estimatedBenefit: 0, // Placeholder - would be calculated separately
+                            fullRetirementAge: 67,
                           }}
                         />
                       </PremiumGate>

@@ -36,6 +36,7 @@ export interface BenefitProjectionData {
   colaAdjustedSS?: number
   colaAdjustedTotal?: number
   inflationRate?: number
+  percentage?: number
   notes?: string
 }
 
@@ -71,13 +72,16 @@ export function BenefitProjectionChart({
   onRefresh
 }: BenefitProjectionChartProps) {
 
-  // Process data for chart display
+  // Process data for chart display - optimized for performance
   const chartData = useMemo(() => {
-    return data.map(item => ({
+    // Limit data processing for performance
+    const limitedData = data.slice(0, 10) // Limit to 10 data points max
+
+    return limitedData.map(item => ({
       ...item,
       ageLabel: `Age ${item.age}`,
       yearLabel: item.year.toString(),
-      // Format values for display
+      // Pre-format values for display to avoid repeated calculations
       pensionDisplay: formatChartCurrency(item.pensionBenefit),
       ssDisplay: formatChartCurrency(item.socialSecurityBenefit),
       totalDisplay: formatChartCurrency(item.totalBenefit),
@@ -112,6 +116,15 @@ export function BenefitProjectionChart({
               </span>
             </div>
           ))}
+
+          {data.percentage && (
+            <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-700">
+              <span className="text-xs text-slate-500 dark:text-slate-400">
+                Pension Percentage: {data.percentage.toFixed(1)}%
+                {data.percentage >= 80 && <span className="ml-1 text-amber-500">📊 (80% Cap)</span>}
+              </span>
+            </div>
+          )}
 
           {showInflation && data.inflationRate && (
             <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-700">

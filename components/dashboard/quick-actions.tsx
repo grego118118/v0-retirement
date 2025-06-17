@@ -88,33 +88,11 @@ export function QuickActions({
       premium: false,
       priority: 'high'
     },
-    {
-      id: 'social-security',
-      title: 'Social Security Optimizer',
-      description: 'Optimize claiming strategy',
-      icon: TrendingUp,
-      color: 'bg-gradient-to-r from-purple-500 to-purple-600',
-      hoverColor: 'hover:from-purple-600 hover:to-purple-700',
-      textColor: 'text-white',
-      action: () => router.push('/social-security'),
-      premium: false,
-      priority: 'high'
-    }
+
   ]
 
   const secondaryActions = [
-    {
-      id: 'tax-calculator',
-      title: 'Tax Impact Analysis',
-      description: 'Calculate retirement taxes',
-      icon: BarChart3,
-      color: 'bg-gradient-to-r from-orange-500 to-orange-600',
-      hoverColor: 'hover:from-orange-600 hover:to-orange-700',
-      textColor: 'text-white',
-      action: () => router.push('/tax-calculator'),
-      premium: false,
-      priority: 'medium'
-    },
+
     {
       id: 'generate-pdf',
       title: 'Generate PDF Report',
@@ -241,7 +219,7 @@ export function QuickActions({
             <div className="space-y-3 lg:space-y-4">
               {primaryActions.map((action) => {
                 const Icon = action.icon
-                const isDisabled = action.disabled || (action.premium && !isPremium)
+                const isDisabled = ((action as any).disabled ?? false) || (action.premium && !isPremium)
 
                 return (
                   <TooltipProvider key={action.id}>
@@ -295,7 +273,7 @@ export function QuickActions({
                       <TooltipContent side="bottom" className="max-w-xs">
                         {isDisabled && action.premium && !isPremium ? (
                           <p>Premium feature - Upgrade to access advanced tools</p>
-                        ) : isDisabled && action.disabled ? (
+                        ) : isDisabled && ((action as any).disabled ?? false) ? (
                           <p>Complete a calculation first to unlock this feature</p>
                         ) : (
                           <p>{action.description}</p>
@@ -317,7 +295,7 @@ export function QuickActions({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:gap-4">
               {secondaryActions.map((action) => {
                 const Icon = action.icon
-                const isDisabled = action.disabled || (action.premium && !isPremium)
+                const isDisabled = ((action as any).disabled ?? false) || (action.premium && !isPremium)
 
                 return (
                   <TooltipProvider key={action.id}>
@@ -362,7 +340,7 @@ export function QuickActions({
                       <TooltipContent side="bottom">
                         {isDisabled && action.premium && !isPremium ? (
                           <p>Premium feature - Upgrade to access</p>
-                        ) : isDisabled && action.disabled ? (
+                        ) : isDisabled && ((action as any).disabled ?? false) ? (
                           <p>Complete a calculation first</p>
                         ) : (
                           <p>{action.description}</p>
@@ -431,6 +409,7 @@ export function QuickActions({
               <Progress
                 value={(pensionProjection.projectedPension / pensionProjection.maxBenefit) * 100}
                 className="h-3 lg:h-4 xl:h-5"
+                aria-label={`Progress to maximum benefit: ${((pensionProjection.projectedPension / pensionProjection.maxBenefit) * 100).toFixed(1)}%`}
               />
               <div className="flex justify-between text-xs lg:text-sm xl:text-base text-muted-foreground">
                 <span>Current: {formatCurrency(pensionProjection.currentPension)}</span>

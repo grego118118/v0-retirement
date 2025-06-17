@@ -30,58 +30,34 @@ export default function PricingPage() {
   const { isPremium } = useSubscription()
   const [isLoading, setIsLoading] = useState<'monthly' | 'annual' | null>(null)
 
-  // Redirect authenticated users to dashboard
-  if (session?.user) {
-    router.push('/dashboard')
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20 dark:from-slate-950 dark:via-blue-950/20 dark:to-indigo-950/10 flex items-center justify-center p-4">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <h2 className="text-xl font-semibold mb-2">Redirecting...</h2>
-          <p className="text-muted-foreground">Taking you to your dashboard</p>
-        </div>
-      </div>
-    )
+  const handleGetStarted = () => {
+    if (!session) {
+      // Redirect to sign in with callback to subscription selection
+      router.push('/auth/signin?callbackUrl=/subscription/select')
+      return
+    }
+
+    // Authenticated users go to subscription selection
+    router.push('/subscription/select')
   }
 
   const handleSubscribe = async (planType: 'monthly' | 'annual') => {
     if (status === 'loading') return
 
     if (!session) {
-      // Redirect to sign in with callback to pricing
-      router.push('/auth/signin?callbackUrl=/pricing')
+      // Redirect to sign in with callback to subscription selection with plan
+      router.push(`/auth/signin?callbackUrl=/subscription/select?plan=${planType}`)
       return
     }
 
     if (isPremium) {
-      // Redirect to customer portal for existing subscribers
-      router.push('/subscription/portal')
+      // Redirect to billing page for existing premium users
+      router.push('/billing')
       return
     }
 
-    setIsLoading(planType)
-
-    try {
-      const response = await fetch('/api/subscription/checkout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ planType })
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to create checkout session')
-      }
-
-      const { checkoutUrl } = await response.json()
-      window.location.href = checkoutUrl
-    } catch (error) {
-      console.error('Error creating checkout session:', error)
-      alert('Something went wrong. Please try again.')
-    } finally {
-      setIsLoading(null)
-    }
+    // Redirect to subscription selection with plan pre-selected
+    router.push(`/subscription/select?plan=${planType}`)
   }
 
   const premiumFeatures = [
@@ -125,8 +101,8 @@ export default function PricingPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20 dark:from-slate-950 dark:via-blue-950/20 dark:to-indigo-950/10">
-      <div className="container mx-auto px-4 py-8 lg:py-16">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20 dark:from-slate-950 dark:via-blue-950/20 dark:to-indigo-950/10 mrs-page-wrapper">
+      <div className="mrs-content-container py-8 lg:py-16">
         {/* Hero Section */}
         <div className="text-center mb-12 lg:mb-16">
           <Badge className="mb-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-4 py-2">
@@ -172,15 +148,13 @@ export default function PricingPage() {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Button 
-                variant="outline" 
-                className="w-full" 
+              <Button
+                variant="outline"
+                className="w-full"
                 size="lg"
-                asChild
+                onClick={handleGetStarted}
               >
-                <Link href="/calculator">
-                  Get Started Free
-                </Link>
+                Get Started Free
               </Button>
               <div className="space-y-3">
                 {freeFeatures.map((feature, index) => (
@@ -217,7 +191,7 @@ export default function PricingPage() {
                     Processing...
                   </>
                 ) : isPremium ? (
-                  'Manage Subscription'
+                  'Manage Billing'
                 ) : (
                   <>
                     Start Monthly Plan
@@ -250,7 +224,7 @@ export default function PricingPage() {
                 <span className="text-lg font-normal text-muted-foreground">/year</span>
               </div>
               <div className="text-sm text-green-600 dark:text-green-400 font-medium">
-                ${SUBSCRIPTION_PLANS.annual.monthlyEquivalent}/month • {SUBSCRIPTION_PLANS.annual.savings}
+                ${(SUBSCRIPTION_PLANS.annual.price / 12).toFixed(2)}/month • {SUBSCRIPTION_PLANS.annual.savings}
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -266,7 +240,7 @@ export default function PricingPage() {
                     Processing...
                   </>
                 ) : isPremium ? (
-                  'Manage Subscription'
+                  'Manage Billing'
                 ) : (
                   <>
                     Start Annual Plan
@@ -484,10 +458,8 @@ export default function PricingPage() {
                   <Crown className="mr-2 h-5 w-5" />
                   Start Premium Plan
                 </Button>
-                <Button variant="outline" size="lg" asChild>
-                  <Link href="/calculator">
-                    Try Free Calculator
-                  </Link>
+                <Button variant="outline" size="lg" onClick={handleGetStarted}>
+                  Try Free Calculator
                 </Button>
               </div>
             </CardContent>

@@ -16,22 +16,30 @@ export type { BaseChartProps } from './base-chart'
 
 // Specialized chart components
 export { BenefitProjectionChart } from './benefit-projection-chart'
-export type { 
-  BenefitProjectionChartProps, 
-  BenefitProjectionData 
+export type {
+  BenefitProjectionChartProps,
+  BenefitProjectionData
 } from './benefit-projection-chart'
 
 export { ComparisonChart } from './comparison-chart'
-export type { 
-  ComparisonChartProps, 
-  ComparisonData 
+export type {
+  ComparisonChartProps,
+  ComparisonData
 } from './comparison-chart'
 
 export { IncomeBreakdownChart } from './income-breakdown-chart'
-export type { 
-  IncomeBreakdownChartProps, 
-  IncomeBreakdownData 
+export type {
+  IncomeBreakdownChartProps,
+  IncomeBreakdownData
 } from './income-breakdown-chart'
+
+// Import types for use in this file
+import type { BenefitProjectionData } from './benefit-projection-chart'
+import type { ComparisonData } from './comparison-chart'
+import type { IncomeBreakdownData } from './income-breakdown-chart'
+
+// Import constants for use in functions
+import { PERFORMANCE_THRESHOLDS, formatChartCurrency } from '@/lib/charts/chart-config'
 
 // Chart configuration and utilities
 export {
@@ -185,7 +193,7 @@ export const validateChartData = (data: any[]): {
     warnings.push('Data array is empty')
   }
   
-  if (data.length > PERFORMANCE_THRESHOLDS.memoryLimit / 1000) {
+  if (data.length > PERFORMANCE_THRESHOLDS.memory * 1000) {
     warnings.push(`Large dataset (${data.length} points) may impact performance`)
   }
   

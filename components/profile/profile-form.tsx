@@ -82,7 +82,7 @@ export function ProfileForm({ initialData, onUpdate }: ProfileFormProps) {
     }
   }
 
-  async function onSubmit(data: ProfileFormValues, retryCount = 0) {
+  async function handleSubmit(data: ProfileFormValues, retryCount = 0) {
     console.log("Profile form submission started", {
       data,
       sessionUser: session?.user,
@@ -118,7 +118,7 @@ export function ProfileForm({ initialData, onUpdate }: ProfileFormProps) {
         console.log("Attempting to refresh session...")
         await refreshSession()
         // Retry submission after session refresh
-        setTimeout(() => onSubmit(data, 1), 1000)
+        setTimeout(() => handleSubmit(data, 1), 1000)
         return
       }
 
@@ -172,7 +172,7 @@ export function ProfileForm({ initialData, onUpdate }: ProfileFormProps) {
           if (retryCount === 0) {
             await refreshSession()
             // Retry submission after session refresh
-            setTimeout(() => onSubmit(data, 1), 1000)
+            setTimeout(() => handleSubmit(data, 1), 1000)
             return
           } else {
             setSessionError("Authentication failed. Please sign in again.")
@@ -220,6 +220,11 @@ export function ProfileForm({ initialData, onUpdate }: ProfileFormProps) {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  // Simple wrapper for form submission
+  const onSubmit = (data: ProfileFormValues) => {
+    handleSubmit(data, 0)
   }
 
   // Show loading state while session is loading
@@ -321,8 +326,6 @@ export function ProfileForm({ initialData, onUpdate }: ProfileFormProps) {
                   </>
                 ) : sessionError ? (
                   "Sign In Required"
-                ) : status === "loading" ? (
-                  "Loading Session..."
                 ) : (
                   "Update Profile"
                 )}
@@ -335,9 +338,6 @@ export function ProfileForm({ initialData, onUpdate }: ProfileFormProps) {
                 )}
                 {status === "unauthenticated" && (
                   <span>Not signed in</span>
-                )}
-                {status === "loading" && (
-                  <span>Loading session...</span>
                 )}
               </div>
             </form>

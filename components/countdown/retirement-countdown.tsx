@@ -166,15 +166,32 @@ export function RetirementCountdown({ retirementDate, className = "" }: Retireme
   return (
     <Card className={`overflow-hidden ${className}`}>
       <CardHeader className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-4 lg:px-6 xl:px-8 py-4 lg:py-6 xl:py-8">
-        <CardTitle className="flex items-center text-lg lg:text-xl xl:text-2xl 2xl:text-3xl">
-          <Clock className="mr-2 lg:mr-3 h-5 w-5 lg:h-6 lg:w-6 xl:h-7 xl:w-7" />
-          {isPast ? "🎉 You've Reached Retirement!" : "⏰ Countdown to Freedom"}
+        <CardTitle className="flex items-center justify-between text-lg lg:text-xl xl:text-2xl 2xl:text-3xl">
+          <div className="flex items-center">
+            <Clock className="mr-2 lg:mr-3 h-5 w-5 lg:h-6 lg:w-6 xl:h-7 xl:w-7" />
+            {isPast ? "🎉 You've Reached Retirement!" : "⏰ Countdown to Freedom"}
+          </div>
+          {/* Prominent MM/DD/YYYY Date Display */}
+          <div className="bg-white/20 backdrop-blur-sm px-3 lg:px-4 xl:px-5 py-2 lg:py-3 xl:py-4 rounded-lg border border-white/30 shadow-lg">
+            <div className="text-center">
+              <div className="text-xs lg:text-sm xl:text-base text-indigo-100 font-medium mb-1">
+                Target Date
+              </div>
+              <div className="text-lg lg:text-xl xl:text-2xl 2xl:text-3xl font-bold text-white tracking-wider">
+                {retirementDate.toLocaleDateString('en-US', {
+                  month: '2-digit',
+                  day: '2-digit',
+                  year: 'numeric'
+                })}
+              </div>
+            </div>
+          </div>
         </CardTitle>
         <div className="text-indigo-100 text-sm lg:text-base xl:text-lg">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <Calendar className="mr-2 lg:mr-3 h-4 w-4 lg:h-5 lg:w-5 xl:h-6 xl:w-6" />
-              <span>Target Date: {retirementDate.toLocaleDateString('en-US', {
+              <span>Full Date: {retirementDate.toLocaleDateString('en-US', {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',

@@ -223,7 +223,6 @@ export function ChartShowcase({
             enableZoom={true}
             enableBrush={true}
             highlightRetirementAge={67}
-            height={400}
             onRefresh={handleRefresh}
           />
         </TabsContent>

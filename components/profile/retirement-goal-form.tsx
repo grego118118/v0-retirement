@@ -89,19 +89,27 @@ export function RetirementGoalForm({ initialData, onUpdate }: RetirementGoalForm
         retirementOption: data.retirementOption,
       }
 
-      // Save to retirement profile
-      const method = initialData ? "PUT" : "POST"
-      const response = await fetch("/api/retirement/profile", {
-        method,
+      // Save to retirement profile using the main profile API
+      const response = await fetch("/api/profile", {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(retirementProfileData),
       })
 
+      // Check if response is ok and content-type is JSON
       if (!response.ok) {
-        throw new Error("Failed to update retirement goals")
+        throw new Error(`HTTP error! status: ${response.status}`)
       }
+
+      const contentType = response.headers.get("content-type")
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Response is not JSON")
+      }
+
+      // Parse the response to ensure it's valid JSON
+      await response.json()
 
       // Also update basic profile with retirement date
       if (retirementDate) {

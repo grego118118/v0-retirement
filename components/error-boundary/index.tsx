@@ -1,15 +1,22 @@
 /**
  * Error Boundary Components
  * Massachusetts Retirement System - Error Tracking and Monitoring
- * 
+ *
  * Comprehensive error boundary system providing graceful error handling
  * for different types of components and operations.
  */
+
+import React from 'react'
 
 // Main error boundary components
 export { ErrorBoundary } from './error-boundary'
 export { AsyncErrorBoundary, useAsyncErrorHandler } from './async-error-boundary'
 export { ChartErrorBoundary } from './chart-error-boundary'
+
+// Import for internal use
+import { ErrorBoundary } from './error-boundary'
+import { AsyncErrorBoundary } from './async-error-boundary'
+import { ChartErrorBoundary } from './chart-error-boundary'
 
 // Error boundary wrapper components
 export { default as withErrorBoundary } from './with-error-boundary'

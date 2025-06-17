@@ -4,11 +4,10 @@ import { Suspense, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { SavedCalculations } from "@/components/dashboard/saved-calculations"
-import { RetirementChart } from "@/components/dashboard/retirement-chart"
 import { RetirementCountdown } from "@/components/countdown/retirement-countdown"
 import { QuickActions } from "@/components/dashboard/quick-actions"
 import { HealthcareBenefits } from "@/components/dashboard/healthcare-benefits"
-import { ScenarioDashboardCards } from "@/components/scenario-modeling/scenario-dashboard-cards"
+
 import {
   calculateQuickPensionEstimate,
   calculateCurrentAge,
@@ -19,7 +18,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Download, Printer, Crown, DollarSign, TrendingUp, Calculator, ArrowRight, Lock, RefreshCw, CheckCircle, Calendar, Shield, AlertCircle, User } from "lucide-react"
+import { Download, Printer, Crown, DollarSign, Calculator, ArrowRight, Lock, RefreshCw, CheckCircle, Calendar, Shield, AlertCircle, User } from "lucide-react"
 import { useSubscriptionStatus } from "@/hooks/use-subscription"
 import { useRetirementData } from "@/hooks/use-retirement-data"
 import { useProfile } from "@/contexts/profile-context"
@@ -49,25 +48,45 @@ export default function DashboardPage() {
 
   // Calculate retirement date based on profile
   const getRetirementDate = () => {
-    if (!profile?.dateOfBirth || !profile?.yearsOfService) {
-      // Default to 65 years old if no profile data
-      const defaultDate = new Date()
-      defaultDate.setFullYear(defaultDate.getFullYear() + 5)
-      return defaultDate
+    // Priority 1: Use user-selected planned retirement date if available
+    if (profile?.retirementDate) {
+      // Always use the profile retirement date if it exists
+      // Parse the date string as YYYY-MM-DD format
+      const plannedDate = new Date(profile.retirementDate + 'T00:00:00')
+      // Validate that the date is in the future
+      if (plannedDate > new Date()) {
+        return plannedDate
+      }
     }
 
-    const birthDate = new Date(profile.dateOfBirth)
-    const currentDate = new Date()
-    const currentAge = currentDate.getFullYear() - birthDate.getFullYear()
-    
-    // Calculate retirement eligibility (simplified)
-    const retirementAge = Math.max(55, 65 - profile.yearsOfService)
-    const yearsToRetirement = Math.max(0, retirementAge - currentAge)
-    
-    const retirementDate = new Date()
-    retirementDate.setFullYear(retirementDate.getFullYear() + yearsToRetirement)
-    
-    return retirementDate
+    // Priority 2: Calculate based on profile data if available
+    if (profile?.dateOfBirth && profile?.plannedRetirementAge) {
+      const birthDate = new Date(profile.dateOfBirth)
+      const retirementYear = birthDate.getFullYear() + profile.plannedRetirementAge
+      const retirementDate = new Date(retirementYear, 0, 1) // January 1st of retirement year
+      return retirementDate
+    }
+
+    // Priority 3: Calculate based on years of service if available
+    if (profile?.dateOfBirth && profile?.yearsOfService) {
+      const birthDate = new Date(profile.dateOfBirth)
+      const currentDate = new Date()
+      const currentAge = currentDate.getFullYear() - birthDate.getFullYear()
+
+      // Calculate retirement eligibility (simplified)
+      const retirementAge = Math.max(55, 65 - profile.yearsOfService)
+      const yearsToRetirement = Math.max(0, retirementAge - currentAge)
+
+      const retirementDate = new Date()
+      retirementDate.setFullYear(retirementDate.getFullYear() + yearsToRetirement)
+
+      return retirementDate
+    }
+
+    // Priority 4: Default fallback if no profile data
+    const defaultDate = new Date()
+    defaultDate.setFullYear(defaultDate.getFullYear() + 5)
+    return defaultDate
   }
 
   // Get latest calculation data for dashboard metrics
@@ -132,8 +151,8 @@ export default function DashboardPage() {
   const latestCalc = getLatestCalculation()
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--mrs-gradient-hero)' }}>
-      <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8 max-w-7xl">
+    <div className="min-h-screen mrs-page-wrapper" style={{ background: 'var(--mrs-gradient-hero)' }}>
+      <div className="mrs-content-container py-6 lg:py-8 xl:py-12">
         {/* Enhanced Header with Professional Design */}
         <div className="mrs-fade-in flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 lg:gap-6 mb-8 lg:mb-12">
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 lg:gap-4">
@@ -293,34 +312,7 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
           }>
-            <HealthcareBenefits profile={profile} />
-          </Suspense>
-        </div>
-
-        {/* Scenario Modeling Dashboard Cards */}
-        <div className="mb-8">
-          <Suspense fallback={
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {[1, 2, 3].map((i) => (
-                <Card key={i} className="animate-pulse">
-                  <CardHeader>
-                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <div className="h-3 bg-gray-200 rounded"></div>
-                      <div className="h-3 bg-gray-200 rounded w-2/3"></div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          }>
-            <ScenarioDashboardCards
-              onCreateScenario={() => router.push('/scenarios')}
-              onViewScenarios={() => router.push('/scenarios')}
-            />
+            <HealthcareBenefits profile={profile || undefined} />
           </Suspense>
         </div>
 
@@ -399,27 +391,6 @@ export default function DashboardPage() {
 
           {/* Main Content */}
           <div className="xl:col-span-8 space-y-6 lg:space-y-8 xl:space-y-10">
-            <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-slate-50/50 dark:from-slate-900 dark:to-slate-800/50">
-              <CardHeader className="pb-4 lg:pb-6 xl:pb-8 px-4 lg:px-6 xl:px-8 pt-4 lg:pt-6 xl:pt-8">
-                <CardTitle className="card-title flex items-center gap-2 lg:gap-3 text-lg sm:text-xl lg:text-2xl xl:text-3xl">
-                  <div className="p-2 lg:p-3 xl:p-4 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md">
-                    <TrendingUp className="h-5 w-5 lg:h-6 lg:w-6 xl:h-7 xl:w-7" />
-                  </div>
-                  Pension Growth Projection
-                </CardTitle>
-                <CardDescription className="card-description text-sm lg:text-base xl:text-lg leading-relaxed">
-                  Visualize how your pension benefits grow over time based on your service years and retirement age
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="px-4 lg:px-6 xl:px-8 pb-4 lg:pb-6 xl:pb-8">
-                <Suspense fallback={
-                  <div className="h-[300px] lg:h-[400px] xl:h-[500px] animate-pulse bg-slate-100 dark:bg-slate-800 rounded-lg"></div>
-                }>
-                  <RetirementChart />
-                </Suspense>
-              </CardContent>
-            </Card>
-
             <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-slate-50/50 dark:from-slate-900 dark:to-slate-800/50">
               <CardHeader className="pb-4 lg:pb-6 xl:pb-8 px-4 lg:px-6 xl:px-8 pt-4 lg:pt-6 xl:pt-8">
                 <CardTitle className="card-title flex items-center gap-2 lg:gap-3 text-lg sm:text-xl lg:text-2xl xl:text-3xl">

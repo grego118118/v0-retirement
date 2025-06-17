@@ -240,6 +240,7 @@ export function EnhancedCalculationCard({
           <Progress
             value={isRetired ? 100 : Math.max(0, Math.min(100, 100 - (yearsLeft / 40) * 100))}
             className="h-2"
+            aria-label={`Retirement progress: ${isRetired ? 'Retired' : `${yearsLeft} years remaining`}`}
           />
         </div>
 

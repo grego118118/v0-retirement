@@ -249,7 +249,7 @@ export function ComparisonChart({
         dataKey="currentValue"
         fill={colors.current}
         name="Current"
-        radius={CHART_TYPE_CONFIG.bar.radius}
+        radius={[...CHART_TYPE_CONFIG.bar.radius] as [number, number, number, number]}
         maxBarSize={CHART_TYPE_CONFIG.bar.maxBarSize}
         onClick={handleBarClick}
         style={{ cursor: onBarClick ? 'pointer' : 'default' }}
@@ -260,7 +260,7 @@ export function ComparisonChart({
         dataKey="projectedValue"
         fill={colors.projected}
         name="Projected"
-        radius={CHART_TYPE_CONFIG.bar.radius}
+        radius={[...CHART_TYPE_CONFIG.bar.radius] as [number, number, number, number]}
         maxBarSize={CHART_TYPE_CONFIG.bar.maxBarSize}
         onClick={handleBarClick}
         style={{ cursor: onBarClick ? 'pointer' : 'default' }}
@@ -272,7 +272,7 @@ export function ComparisonChart({
           dataKey="targetValue"
           fill={colors.target}
           name="Target"
-          radius={CHART_TYPE_CONFIG.bar.radius}
+          radius={[...CHART_TYPE_CONFIG.bar.radius] as [number, number, number, number]}
           maxBarSize={CHART_TYPE_CONFIG.bar.maxBarSize}
           onClick={handleBarClick}
           style={{ cursor: onBarClick ? 'pointer' : 'default' }}

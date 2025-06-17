@@ -26,7 +26,8 @@ export default function BlogPage() {
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-white/10 to-transparent"></div>
 
-        <div className="container px-4 md:px-6 relative z-10">
+        <div className="mrs-page-wrapper">
+          <div className="mrs-content-container relative z-10">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl mb-6">
               Retirement Planning
@@ -40,10 +41,12 @@ export default function BlogPage() {
             </p>
           </div>
         </div>
+        </div>
       </section>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="mrs-page-wrapper">
+        <div className="mrs-content-container py-8">
 
       {/* Featured Post */}
       {featuredPost && (
@@ -183,6 +186,7 @@ export default function BlogPage() {
           </CardContent>
         </Card>
       </section>
+        </div>
       </div>
     </div>
   )

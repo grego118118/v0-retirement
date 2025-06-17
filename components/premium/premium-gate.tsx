@@ -34,9 +34,8 @@ export function PremiumGate({
   // Only log when decision changes
   if (lastDecisionRef.current !== isUpgradeRequired) {
     logPremium(`Access decision for ${feature}`, {
-      isPremium,
+      hasAccess: isPremium,
       subscriptionStatus,
-      upgradeRequired: isUpgradeRequired,
       action: isUpgradeRequired ? 'showing_upgrade_prompt' : 'showing_premium_content'
     })
     lastDecisionRef.current = isUpgradeRequired
@@ -108,9 +107,8 @@ export function PremiumBadge({ feature, children }: PremiumBadgeProps) {
   // Only log when decision changes
   if (lastDecisionRef.current !== isUpgradeRequired) {
     logPremium(`Badge decision for ${feature}`, {
-      isPremium,
+      hasAccess: isPremium,
       subscriptionStatus,
-      upgradeRequired: isUpgradeRequired,
       action: isUpgradeRequired ? 'showing_premium_badge' : 'showing_premium_content'
     })
     lastDecisionRef.current = isUpgradeRequired

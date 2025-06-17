@@ -36,22 +36,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return generateSEOMetadata({
     title: post.title,
     description: post.description,
-    keywords: post.tags.join(", "),
-    openGraph: {
-      title: post.title,
-      description: post.description,
-      type: "article",
-      publishedTime: post.date,
-      authors: [post.author],
-      tags: post.tags,
-      images: post.image ? [{ url: post.image, alt: post.title }] : undefined,
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: post.title,
-      description: post.description,
-      images: post.image ? [post.image] : undefined,
-    },
+    path: `/blog/${post.id}`,
+    keywords: post.tags,
+    ogImage: post.image || "/images/blog/default-blog-image.svg",
   })
 }
 
@@ -84,8 +71,9 @@ export default async function BlogPost({ params }: PageProps) {
 
   return (
     <BlogPostClient post={post} relatedPosts={relatedPosts}>
-      <div className="container py-8 md:py-12">
-        <div className="max-w-6xl mx-auto">
+      <div className="mrs-page-wrapper">
+        <div className="mrs-content-container py-8 md:py-12">
+          <div className="max-w-6xl mx-auto">
           <div className="mb-12">
             <Link
               href="/blog"
@@ -263,6 +251,7 @@ export default async function BlogPost({ params }: PageProps) {
               </p>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </BlogPostClient>

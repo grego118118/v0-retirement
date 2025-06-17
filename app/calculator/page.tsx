@@ -102,10 +102,12 @@ export default function CalculatorPage() {
         </section>
 
         {/* Enhanced Main Content for Desktop */}
-        <div className="container mx-auto px-4 lg:px-6 xl:px-8 py-6 lg:py-8 xl:py-12 max-w-7xl 2xl:max-w-8xl">
-          <Suspense fallback={<CalculatorSkeleton />}>
-            <PensionCalculator />
-          </Suspense>
+        <div className="mrs-page-wrapper">
+          <div className="mrs-content-container py-6 lg:py-8 xl:py-12">
+            <Suspense fallback={<CalculatorSkeleton />}>
+              <PensionCalculator />
+            </Suspense>
+          </div>
         </div>
       </div>
     </>

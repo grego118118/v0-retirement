@@ -3,7 +3,27 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth/auth-options"
 import { ActionItemsService } from "@/lib/recommendations/action-items-service"
 import { z } from "zod"
-import { reportAPIError, monitorServerOperation } from "@/sentry.server.config"
+// import { reportAPIError, monitorServerOperation } from "@/sentry.server.config"
+
+// Temporary fallback functions to avoid Sentry import issues
+const reportAPIError = (error: Error, endpoint: string, method: string) => {
+  console.error(`API Error [${method} ${endpoint}]:`, error)
+}
+
+const monitorServerOperation = async <T>(operation: () => Promise<T>, operationName: string): Promise<T> => {
+  const startTime = Date.now()
+  try {
+    const result = await operation()
+    const duration = Date.now() - startTime
+    if (duration > 2000) {
+      console.warn(`Slow operation detected: ${operationName} took ${duration}ms`)
+    }
+    return result
+  } catch (error) {
+    console.error(`Operation failed [${operationName}]:`, error)
+    throw error
+  }
+}
 
 // Schema for validating action item updates
 const updateActionItemSchema = z.object({
@@ -196,9 +216,9 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
             session.user.id,
             {
               status: 'pending',
-              completedAt: null,
-              dismissedAt: null,
-              dismissalReason: null,
+              completedAt: undefined,
+              dismissedAt: undefined,
+              dismissalReason: undefined,
             }
           )
           message = "Action item reopened"

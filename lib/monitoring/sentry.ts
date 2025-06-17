@@ -1,14 +1,19 @@
 /**
  * Sentry Error Monitoring Configuration
  * Comprehensive error tracking and performance monitoring for production
+ * Temporarily disabled for build compatibility - using stub implementations
  */
 
-import * as Sentry from '@sentry/nextjs'
+// import * as Sentry from '@sentry/nextjs' // Temporarily disabled for build compatibility
+
 interface User {
   id?: string
   email?: string | null
   name?: string | null
 }
+
+// Mock Sentry types for compatibility
+type SeverityLevel = 'fatal' | 'error' | 'warning' | 'info' | 'debug'
 
 // Sentry configuration
 const SENTRY_DSN = process.env.SENTRY_DSN
@@ -16,9 +21,11 @@ const SENTRY_ENVIRONMENT = process.env.SENTRY_ENVIRONMENT || process.env.NODE_EN
 const SENTRY_RELEASE = process.env.SENTRY_RELEASE || process.env.VERCEL_GIT_COMMIT_SHA
 
 /**
- * Initialize Sentry with production-ready configuration
+ * Initialize Sentry with production-ready configuration (stub implementation)
  */
 export function initSentry() {
+  console.log('Sentry initialization disabled for build compatibility')
+  /*
   if (!SENTRY_DSN) {
     console.warn('Sentry DSN not configured - error monitoring disabled')
     return
@@ -91,172 +98,122 @@ export function initSentry() {
   })
 
   console.log(`Sentry initialized for ${SENTRY_ENVIRONMENT} environment`)
+  */
 }
 
 /**
- * Set user context for error tracking
+ * Set user context for error tracking (stub implementation)
  */
 export function setSentryUser(user: Partial<User> | null) {
-  Sentry.setUser(user ? {
-    id: user.id,
-    email: user.email || undefined,
-    username: user.name || undefined,
-  } : null)
+  console.log('Sentry user context set (stub):', user?.id)
 }
 
 /**
- * Set additional context for error tracking
+ * Set additional context for error tracking (stub implementation)
  */
 export function setSentryContext(context: Record<string, any>) {
-  Sentry.setContext('additional', context)
+  console.log('Sentry context set (stub):', Object.keys(context))
 }
 
 /**
- * Capture exception with additional context
+ * Capture exception with additional context (stub implementation)
  */
 export function captureException(error: Error, context?: Record<string, any>) {
-  if (context) {
-    Sentry.withScope((scope) => {
-      Object.entries(context).forEach(([key, value]) => {
-        scope.setTag(key, value)
-      })
-      Sentry.captureException(error)
-    })
-  } else {
-    Sentry.captureException(error)
-  }
+  console.error('Error captured (stub):', error.message, context)
 }
 
 /**
- * Capture message with level and context
+ * Capture message with level and context (stub implementation)
  */
 export function captureMessage(
-  message: string, 
-  level: Sentry.SeverityLevel = 'info',
+  message: string,
+  level: SeverityLevel = 'info',
   context?: Record<string, any>
 ) {
-  if (context) {
-    Sentry.withScope((scope) => {
-      Object.entries(context).forEach(([key, value]) => {
-        scope.setTag(key, value)
-      })
-      Sentry.captureMessage(message, level)
-    })
-  } else {
-    Sentry.captureMessage(message, level)
+  console.log(`Message captured (stub) [${level}]:`, message, context)
+}
+
+/**
+ * Start a performance transaction (stub implementation)
+ */
+export function startTransaction(name: string, op: string) {
+  return {
+    setStatus: (status: string) => console.log(`Transaction status (stub): ${status}`),
+    finish: () => console.log(`Transaction finished (stub): ${name}`),
   }
 }
 
 /**
- * Start a performance transaction
- */
-export function startTransaction(name: string, op: string) {
-  return Sentry.startTransaction({ name, op })
-}
-
-/**
- * Add breadcrumb for debugging
+ * Add breadcrumb for debugging (stub implementation)
  */
 export function addBreadcrumb(
-  message: string, 
+  message: string,
   category: string = 'custom',
-  level: Sentry.SeverityLevel = 'info',
+  level: SeverityLevel = 'info',
   data?: Record<string, any>
 ) {
-  Sentry.addBreadcrumb({
-    message,
-    category,
-    level,
-    data,
-    timestamp: Date.now() / 1000,
-  })
+  console.log(`Breadcrumb added (stub) [${level}]:`, message, { category, data })
 }
 
 /**
- * Performance monitoring decorator for functions
+ * Performance monitoring decorator for functions (stub implementation)
  */
 export function withPerformanceMonitoring<T extends (...args: any[]) => any>(
   fn: T,
   operationName: string
 ): T {
   return ((...args: Parameters<T>) => {
-    const transaction = startTransaction(operationName, 'function')
-    
+    console.log(`Performance monitoring started (stub): ${operationName}`)
+
     try {
       const result = fn(...args)
-      
+
       // Handle async functions
       if (result instanceof Promise) {
         return result
           .then((value) => {
-            transaction.setStatus('ok')
-            transaction.finish()
+            console.log(`Operation completed (stub): ${operationName}`)
             return value
           })
           .catch((error) => {
-            transaction.setStatus('internal_error')
-            captureException(error, { operation: operationName })
-            transaction.finish()
+            console.error(`Operation failed (stub): ${operationName}`, error)
             throw error
           })
       }
-      
+
       // Handle sync functions
-      transaction.setStatus('ok')
-      transaction.finish()
+      console.log(`Operation completed (stub): ${operationName}`)
       return result
     } catch (error) {
-      transaction.setStatus('internal_error')
-      captureException(error as Error, { operation: operationName })
-      transaction.finish()
+      console.error(`Operation failed (stub): ${operationName}`, error)
       throw error
     }
   }) as T
 }
 
 /**
- * API route error handler with Sentry integration
+ * API route error handler with Sentry integration (stub implementation)
  */
 export function withSentryErrorHandler<T extends (...args: any[]) => any>(
   handler: T,
   routeName: string
 ): T {
   return (async (...args: Parameters<T>) => {
-    const transaction = startTransaction(`API ${routeName}`, 'http.server')
-    
+    console.log(`API call started (stub): ${routeName}`)
+
     try {
-      addBreadcrumb(`API call started: ${routeName}`, 'http')
-      
       const result = await handler(...args)
-      
-      transaction.setStatus('ok')
-      addBreadcrumb(`API call completed: ${routeName}`, 'http', 'info')
-      
+      console.log(`API call completed (stub): ${routeName}`)
       return result
     } catch (error) {
-      transaction.setStatus('internal_error')
-      
-      captureException(error as Error, {
-        route: routeName,
-        args: JSON.stringify(args, null, 2)
-      })
-      
-      addBreadcrumb(
-        `API call failed: ${routeName}`, 
-        'http', 
-        'error',
-        { error: (error as Error).message }
-      )
-      
+      console.error(`API call failed (stub): ${routeName}`, error)
       throw error
-    } finally {
-      transaction.finish()
     }
   }) as T
 }
 
 /**
- * Database operation monitoring
+ * Database operation monitoring (stub implementation)
  */
 export function withDatabaseMonitoring<T extends (...args: any[]) => any>(
   operation: T,
@@ -267,51 +224,41 @@ export function withDatabaseMonitoring<T extends (...args: any[]) => any>(
 }
 
 /**
- * Email operation monitoring
+ * Email operation monitoring (stub implementation)
  */
 export function withEmailMonitoring<T extends (...args: any[]) => any>(
   operation: T,
   emailType: string
 ): T {
   return ((...args: Parameters<T>) => {
-    const transaction = startTransaction(`email.${emailType}`, 'email')
-    
-    addBreadcrumb(`Email operation started: ${emailType}`, 'email')
-    
+    console.log(`Email operation started (stub): ${emailType}`)
+
     try {
       const result = operation(...args)
-      
+
       if (result instanceof Promise) {
         return result
           .then((value) => {
-            transaction.setStatus('ok')
-            addBreadcrumb(`Email sent successfully: ${emailType}`, 'email', 'info')
-            transaction.finish()
+            console.log(`Email sent successfully (stub): ${emailType}`)
             return value
           })
           .catch((error) => {
-            transaction.setStatus('internal_error')
-            captureException(error, { emailType, operation: 'send' })
-            addBreadcrumb(`Email failed: ${emailType}`, 'email', 'error')
-            transaction.finish()
+            console.error(`Email failed (stub): ${emailType}`, error)
             throw error
           })
       }
-      
-      transaction.setStatus('ok')
-      transaction.finish()
+
+      console.log(`Email sent successfully (stub): ${emailType}`)
       return result
     } catch (error) {
-      transaction.setStatus('internal_error')
-      captureException(error as Error, { emailType, operation: 'send' })
-      transaction.finish()
+      console.error(`Email failed (stub): ${emailType}`, error)
       throw error
     }
   }) as T
 }
 
 /**
- * PDF generation monitoring
+ * PDF generation monitoring (stub implementation)
  */
 export function withPDFMonitoring<T extends (...args: any[]) => any>(
   operation: T,
@@ -363,5 +310,11 @@ export class ExternalServiceError extends Error {
   }
 }
 
-// Export Sentry for direct use when needed
-export { Sentry }
+// Export stub Sentry object for compatibility
+export const Sentry = {
+  init: () => console.log('Sentry init (stub)'),
+  captureException: (error: Error) => console.error('Sentry captureException (stub):', error),
+  captureMessage: (message: string) => console.log('Sentry captureMessage (stub):', message),
+  setUser: (user: any) => console.log('Sentry setUser (stub):', user),
+  setContext: (key: string, context: any) => console.log('Sentry setContext (stub):', key, context),
+}

@@ -26,7 +26,7 @@ export const SUBSCRIPTION_PLANS = {
   monthly: {
     priceId: process.env.STRIPE_MONTHLY_PRICE_ID || 'price_monthly_placeholder',
     name: 'Premium Monthly',
-    price: 19.99,
+    price: 9.99,
     interval: 'month' as const,
     features: [
       'Unlimited pension calculations',
@@ -42,12 +42,12 @@ export const SUBSCRIPTION_PLANS = {
   annual: {
     priceId: process.env.STRIPE_ANNUAL_PRICE_ID || 'price_annual_placeholder',
     name: 'Premium Annual',
-    price: 199.99,
+    price: 99.99,
     interval: 'year' as const,
-    savings: 'Save $39.89 (17% off)',
+    savings: 'Save $19.89 (17% off)',
     features: [
       'All monthly features included',
-      'Annual savings of $39.89',
+      'Annual savings of $19.89',
       'Extended calculation history',
       'Advanced portfolio analysis',
       'Dedicated account manager',
@@ -57,7 +57,7 @@ export const SUBSCRIPTION_PLANS = {
   }
 } as const
 
-// Free tier limitations
+// Free tier limitations (defined first to avoid hoisting issues)
 export const FREE_TIER_LIMITS = {
   maxSavedCalculations: 3,
   maxSocialSecurityCalculations: 1,
@@ -71,7 +71,7 @@ export const FREE_TIER_LIMITS = {
   ]
 } as const
 
-// Premium features configuration
+// Premium features configuration (defined before USER_TYPES)
 export const PREMIUM_FEATURES = {
   social_security: {
     name: 'Social Security Calculator',
@@ -114,6 +114,49 @@ export const PREMIUM_FEATURES = {
     required: true,
     freeLimit: 0,
     premiumUnlimited: true
+  }
+} as const
+
+// Subscription types for hybrid model
+export type UserSubscriptionType =
+  | 'oauth_free'        // New OAuth users with free tier
+  | 'oauth_premium'     // Existing OAuth users with grandfathered premium
+  | 'stripe_monthly'    // Paid monthly subscription
+  | 'stripe_annual'     // Paid annual subscription
+
+// User type configuration (now all dependencies are defined above)
+export const USER_TYPES = {
+  oauth_free: {
+    name: 'Free Account',
+    description: 'Basic retirement planning tools',
+    isPremium: false,
+    billingType: 'oauth_authentication',
+    features: FREE_TIER_LIMITS.features,
+    limits: FREE_TIER_LIMITS
+  },
+  oauth_premium: {
+    name: 'Google OAuth Premium (Legacy)',
+    description: 'Grandfathered premium access via Google authentication',
+    isPremium: true,
+    billingType: 'oauth_authentication',
+    features: Object.values(PREMIUM_FEATURES).map(f => f.name),
+    limits: null // No limits for grandfathered users
+  },
+  stripe_monthly: {
+    name: 'Premium Monthly',
+    description: 'Full premium features with monthly billing',
+    isPremium: true,
+    billingType: 'stripe_subscription',
+    features: SUBSCRIPTION_PLANS.monthly.features,
+    limits: null // No limits for paid users
+  },
+  stripe_annual: {
+    name: 'Premium Annual',
+    description: 'Full premium features with annual billing',
+    isPremium: true,
+    billingType: 'stripe_subscription',
+    features: SUBSCRIPTION_PLANS.annual.features,
+    limits: null // No limits for paid users
   }
 } as const
 
@@ -177,6 +220,94 @@ export interface PremiumFeatureCheck {
   limit: number
   upgradeRequired: boolean
   feature: keyof typeof PREMIUM_FEATURES
+}
+
+// Helper functions for hybrid subscription model
+export function getUserSubscriptionType(user: {
+  subscriptionPlan?: string | null
+  stripeCustomerId?: string | null
+  subscriptionStatus?: string | null
+  createdAt?: Date | string
+}): UserSubscriptionType {
+  // If user has active subscription (either Stripe or demo)
+  if (user.subscriptionStatus === 'active' && user.subscriptionPlan) {
+    // Check if it's a real Stripe subscription (customer ID starts with 'cus_')
+    if (user.stripeCustomerId && user.stripeCustomerId.startsWith('cus_')) {
+      if (user.subscriptionPlan === 'monthly') return 'stripe_monthly'
+      if (user.subscriptionPlan === 'annual') return 'stripe_annual'
+    }
+
+    // Handle demo subscriptions (customer ID starts with 'demo_' or no customer ID)
+    if (!user.stripeCustomerId || user.stripeCustomerId.startsWith('demo_')) {
+      if (user.subscriptionPlan === 'monthly') return 'stripe_monthly'
+      if (user.subscriptionPlan === 'annual') return 'stripe_annual'
+    }
+
+    // Fallback for any other active subscription with customer ID
+    if (user.stripeCustomerId) {
+      if (user.subscriptionPlan === 'monthly') return 'stripe_monthly'
+      if (user.subscriptionPlan === 'annual') return 'stripe_annual'
+    }
+  }
+
+  // Check if user is grandfathered OAuth premium (created before hybrid model launch)
+  // For now, we'll consider all existing users as grandfathered
+  // In production, you'd check against a specific date
+  const hybridModelLaunchDate = new Date('2026-01-01') // Adjust this date - set to future to grandfather current users
+  const userCreatedAt = typeof user.createdAt === 'string' ? new Date(user.createdAt) : user.createdAt
+
+  if (userCreatedAt && userCreatedAt < hybridModelLaunchDate) {
+    return 'oauth_premium' // Grandfathered premium access
+  }
+
+  // New users default to free tier
+  return 'oauth_free'
+}
+
+export function isUserPremium(userType: UserSubscriptionType): boolean {
+  return USER_TYPES[userType].isPremium
+}
+
+export function getUserLimits(userType: UserSubscriptionType) {
+  return USER_TYPES[userType].limits
+}
+
+export function getUserFeatures(userType: UserSubscriptionType): string[] {
+  return USER_TYPES[userType].features
+}
+
+export function canAccessFeature(
+  userType: UserSubscriptionType,
+  feature: keyof typeof PREMIUM_FEATURES,
+  currentUsage: number = 0
+): PremiumFeatureCheck {
+  const isPremium = isUserPremium(userType)
+  const featureConfig = PREMIUM_FEATURES[feature]
+
+  if (isPremium) {
+    return {
+      hasAccess: true,
+      isLimitReached: false,
+      currentUsage,
+      limit: -1, // Unlimited
+      upgradeRequired: false,
+      feature
+    }
+  }
+
+  // Free tier checks
+  const limit = featureConfig.freeLimit
+  const hasAccess = !featureConfig.required || currentUsage < limit
+  const isLimitReached = currentUsage >= limit
+
+  return {
+    hasAccess,
+    isLimitReached,
+    currentUsage,
+    limit,
+    upgradeRequired: !hasAccess,
+    feature
+  }
 }
 
 // Webhook event types

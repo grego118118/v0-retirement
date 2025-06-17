@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth/auth-options"
+import { authOptions } from "@/lib/auth/auth-config"
 import { PDFService } from "@/lib/pdf/pdf-service"
 import { recordUserAction, monitorAsyncOperation } from "@/components/error-boundary/error-monitoring"
 import { z } from "zod"
@@ -44,9 +44,9 @@ export async function POST(request: NextRequest) {
       
       if (!validation.canGenerate) {
         return NextResponse.json(
-          { 
+          {
             error: "PDF generation requirements not met",
-            missingRequirements: validation.missingRequirements,
+            errors: validation.errors,
             warnings: validation.warnings,
           },
           { status: 400 }

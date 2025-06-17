@@ -37,15 +37,9 @@ function SubscriptionSuccessContent() {
   const premiumFeatures = [
     {
       icon: Calculator,
-      title: "Social Security Optimization",
-      description: "Maximize your Social Security benefits with advanced algorithms",
-      href: "/social-security"
-    },
-    {
-      icon: TrendingUp,
-      title: "Combined Planning Wizard",
-      description: "Comprehensive pension + Social Security income projections",
-      href: "/wizard"
+      title: "Advanced Pension Calculator",
+      description: "Enhanced pension calculations with detailed projections",
+      href: "/calculator"
     },
     {
       icon: DollarSign,
@@ -161,14 +155,14 @@ function SubscriptionSuccessContent() {
                 What would you like to do first?
               </h3>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button 
-                  size="lg" 
+                <Button
+                  size="lg"
                   className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700"
                   asChild
                 >
-                  <Link href="/social-security">
+                  <Link href="/calculator">
                     <Crown className="mr-2 h-5 w-5" />
-                    Try Social Security Optimization
+                    Try Advanced Calculator
                   </Link>
                 </Button>
                 <Button variant="outline" size="lg" asChild>

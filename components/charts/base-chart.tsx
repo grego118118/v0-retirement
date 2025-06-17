@@ -7,13 +7,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Download, Maximize2, RefreshCw } from 'lucide-react'
-import { 
-  getChartTheme, 
-  getResponsiveDimensions, 
+import {
+  getChartTheme,
+  getResponsiveDimensions,
   measureChartPerformance,
   ACCESSIBILITY_CONFIG,
   PERFORMANCE_THRESHOLDS
-} from '@/lib/charts/chart-config'
+} from '@/lib/charts'
 
 export interface BaseChartProps {
   title: string
@@ -271,7 +271,7 @@ export function BaseChart({
         >
           {state.isClient ? (
             <ResponsiveContainer width="100%" height="100%">
-              {children}
+              {children as React.ReactElement}
             </ResponsiveContainer>
           ) : (
             <div 
@@ -287,7 +287,7 @@ export function BaseChart({
         {process.env.NODE_ENV === 'development' && state.performanceMetrics.renderTime > 0 && (
           <div className="mt-2 text-xs text-muted-foreground">
             Render time: {state.performanceMetrics.renderTime.toFixed(2)}ms
-            {state.performanceMetrics.renderTime > PERFORMANCE_THRESHOLDS.renderTime && (
+            {state.performanceMetrics.renderTime > PERFORMANCE_THRESHOLDS.render && (
               <span className="text-yellow-600 ml-2">⚠️ Slow render</span>
             )}
           </div>

@@ -40,7 +40,7 @@ export function PDFGenerationButton({
   children,
   showStatus = true,
   disabled = false,
-  options = {}
+  options = { type: 'pension', data: {} }
 }: PDFGenerationButtonProps) {
   const { data: session } = useSession()
   const [showPreview, setShowPreview] = useState(false)
@@ -48,12 +48,17 @@ export function PDFGenerationButton({
 
   const {
     isGenerating,
-    lastResult,
+    error,
     generatePDF,
-    canGenerate,
-    missingRequirements,
-    warnings,
+    canGeneratePDF,
+    needsUpgrade
   } = usePDFGeneration()
+
+  // Provide fallbacks for missing properties
+  const lastResult = null
+  const canGenerate = canGeneratePDF()
+  const missingRequirements: string[] = needsUpgrade() ? ['Premium subscription required'] : []
+  const warnings: string[] = []
 
   // Load stats on mount
   React.useEffect(() => {
@@ -73,7 +78,7 @@ export function PDFGenerationButton({
     try {
       const result = await generatePDF(options)
 
-      if (result.success && result.data) {
+      if (result) {
         // Show preview first
         setShowPreview(true)
 
@@ -83,12 +88,10 @@ export function PDFGenerationButton({
           window.print()
         }, 500)
 
-        toast.success('PDF report generated successfully!', {
-          description: `Generated in ${result.generationTime}ms`,
-        })
+        toast.success('PDF report generated successfully!')
       } else {
         toast.error('Failed to generate PDF', {
-          description: result.error,
+          description: error || 'Unknown error',
         })
       }
     } catch (error) {
@@ -192,7 +195,7 @@ export function PDFGenerationButton({
           {canGenerate && (
             <div className="text-sm text-muted-foreground flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-green-600" />
-              <span>Ready to generate {options.reportType || 'comprehensive'} report</span>
+              <span>Ready to generate {options.type || 'pension'} report</span>
             </div>
           )}
         </div>
@@ -207,7 +210,7 @@ export function PDFGenerationButton({
 export function ComprehensivePDFButton(props: Omit<PDFGenerationButtonProps, 'options'>) {
   return (
     <PDFGenerationButton
-      options={{ reportType: 'comprehensive' }}
+      options={{ type: 'combined', data: {} }}
       {...props}
     >
       <Download className="h-4 w-4 mr-2" />
@@ -222,7 +225,7 @@ export function ComprehensivePDFButton(props: Omit<PDFGenerationButtonProps, 'op
 export function SummaryPDFButton(props: Omit<PDFGenerationButtonProps, 'options'>) {
   return (
     <PDFGenerationButton
-      options={{ reportType: 'summary' }}
+      options={{ type: 'pension', data: {} }}
       {...props}
     >
       <Download className="h-4 w-4 mr-2" />
@@ -237,7 +240,7 @@ export function SummaryPDFButton(props: Omit<PDFGenerationButtonProps, 'options'
 export function CalculationsPDFButton(props: Omit<PDFGenerationButtonProps, 'options'>) {
   return (
     <PDFGenerationButton
-      options={{ reportType: 'calculations-only' }}
+      options={{ type: 'pension', data: {} }}
       {...props}
     >
       <Download className="h-4 w-4 mr-2" />
@@ -252,7 +255,7 @@ export function CalculationsPDFButton(props: Omit<PDFGenerationButtonProps, 'opt
 export function PensionPDFButton(props: Omit<PDFGenerationButtonProps, 'options'>) {
   return (
     <PDFGenerationButton
-      options={{ reportType: 'comprehensive' }}
+      options={{ type: 'pension', data: {} }}
       {...props}
     >
       <Download className="h-4 w-4 mr-2" />

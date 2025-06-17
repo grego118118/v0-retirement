@@ -28,7 +28,8 @@ export function HomeContent() {
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-white/10 to-transparent"></div>
 
-        <div className="container px-4 md:px-6 relative z-10">
+        <div className="mrs-page-wrapper">
+          <div className="mrs-content-container relative z-10">
           <div className="grid gap-8 lg:grid-cols-2 lg:gap-16 items-center">
             <div className="space-y-6">
               {/* Trust Badge */}
@@ -194,6 +195,7 @@ export function HomeContent() {
               </div>
             </div>
           </div>
+        </div>
         </div>
       </section>
     </div>

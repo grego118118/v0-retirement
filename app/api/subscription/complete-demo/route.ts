@@ -22,6 +22,10 @@ export async function POST(request: Request) {
       where: { email: session.user.email }
     })
 
+    // Generate a demo customer ID for tracking
+    const demoCustomerId = `demo_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    const demoSubscriptionId = `demo_sub_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+
     if (!user) {
       user = await prisma.user.create({
         data: {
@@ -29,7 +33,10 @@ export async function POST(request: Request) {
           name: session.user.name || '',
           subscriptionStatus: 'active',
           subscriptionPlan: planType,
+          stripeCustomerId: demoCustomerId, // Demo customer ID for tracking
+          subscriptionId: demoSubscriptionId, // Demo subscription ID
           currentPeriodEnd: new Date(Date.now() + (planType === 'annual' ? 365 : 30) * 24 * 60 * 60 * 1000),
+          cancelAtPeriodEnd: false,
         }
       })
     } else {
@@ -39,12 +46,38 @@ export async function POST(request: Request) {
         data: {
           subscriptionStatus: 'active',
           subscriptionPlan: planType,
+          stripeCustomerId: demoCustomerId, // Demo customer ID for tracking
+          subscriptionId: demoSubscriptionId, // Demo subscription ID
           currentPeriodEnd: new Date(Date.now() + (planType === 'annual' ? 365 : 30) * 24 * 60 * 60 * 1000),
+          cancelAtPeriodEnd: false,
         }
       })
     }
 
     console.log(`Demo subscription activated for ${session.user.email}: ${planType} plan`)
+    console.log("Demo subscription details:", {
+      userId: user.id,
+      email: user.email,
+      subscriptionStatus: user.subscriptionStatus,
+      subscriptionPlan: user.subscriptionPlan,
+      stripeCustomerId: user.stripeCustomerId,
+      subscriptionId: user.subscriptionId,
+      currentPeriodEnd: user.currentPeriodEnd
+    })
+
+    // Trigger cache invalidation for immediate status update
+    try {
+      await fetch(`${process.env.NEXTAUTH_URL}/api/subscription/invalidate-cache`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      console.log('Cache invalidation triggered for demo subscription')
+    } catch (cacheError) {
+      console.warn('Failed to invalidate subscription cache:', cacheError)
+      // Don't fail the demo completion for cache invalidation errors
+    }
 
     return NextResponse.json({
       success: true,

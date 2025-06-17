@@ -44,7 +44,7 @@ type ViewMode = 'grid' | 'list'
 
 export function SavedCalculations() {
   const router = useRouter()
-  const { calculations, deleteCalculation, toggleFavorite, loading } = useRetirementData()
+  const { calculations, deleteCalculation, updateCalculation, loading } = useRetirementData()
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [calculationToDelete, setCalculationToDelete] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
@@ -126,7 +126,10 @@ export function SavedCalculations() {
   }
 
   const handleToggleFavorite = async (id: string) => {
-    await toggleFavorite(id)
+    const calculation = calculations.find(calc => calc.id === id)
+    if (calculation) {
+      await updateCalculation(id, { isFavorite: !calculation.isFavorite })
+    }
   }
 
   const getOptionDescription = (option: string) => {

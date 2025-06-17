@@ -174,8 +174,8 @@ export function PDFReport({
 
         {/* Social Security Section */}
         {data.calculations.some(calc => calc.socialSecurityData) && (
-          <SocialSecuritySection 
-            calculations={data.calculations.filter(calc => calc.socialSecurityData)}
+          <SocialSecuritySection
+            calculations={data.calculations.filter(calc => calc.socialSecurityData) as any}
             chartData={data.chartData?.incomeComparison}
           />
         )}

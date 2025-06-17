@@ -42,11 +42,23 @@ function DemoCheckoutContent() {
 
   const handlePayment = async () => {
     setIsProcessing(true)
-    
+
     try {
+      // Debug logging to verify variables are defined
+      console.log('Demo checkout - handlePayment called with plan:', plan)
+      console.log('Demo checkout - email:', email)
+
+      if (!plan) {
+        throw new Error('Plan type is not defined')
+      }
+
+      if (!['monthly', 'annual'].includes(plan)) {
+        throw new Error(`Invalid plan type: ${plan}`)
+      }
+
       // Simulate payment processing delay
       await new Promise(resolve => setTimeout(resolve, 2000))
-      
+
       // Call API to complete the demo subscription and grant premium access
       const response = await fetch('/api/subscription/complete-demo', {
         method: 'POST',
@@ -55,26 +67,42 @@ function DemoCheckoutContent() {
         },
         body: JSON.stringify({ planType: plan })
       })
-      
+
       if (!response.ok) {
-        throw new Error('Failed to complete subscription')
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(`Failed to complete subscription: ${response.status} - ${errorData.error || 'Unknown error'}`)
       }
-      
+
       const result = await response.json()
       console.log('Premium access granted:', result)
-      
+
+      // Trigger subscription update event for immediate UI refresh
+      if (typeof window !== 'undefined') {
+        console.log('Demo checkout - dispatching subscription-updated event with plan:', plan)
+        window.dispatchEvent(new CustomEvent('subscription-updated', {
+          detail: {
+            status: 'active',
+            plan: plan, // ✅ Fixed: using 'plan' variable instead of undefined 'planType'
+            source: 'demo-checkout'
+          }
+        }))
+      }
+
       setIsProcessing(false)
       setIsComplete(true)
-      
+
       // Redirect to success page after a delay
       setTimeout(() => {
         router.push('/subscribe/success')
       }, 2000)
-      
+
     } catch (error) {
       console.error('Error processing payment:', error)
       setIsProcessing(false)
-      alert('Payment processing failed. Please try again.')
+
+      // Enhanced error handling
+      const errorMessage = error instanceof Error ? error.message : 'Payment processing failed. Please try again.'
+      alert(errorMessage)
     }
   }
 

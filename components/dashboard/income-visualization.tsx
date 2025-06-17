@@ -8,20 +8,22 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
 
-// Dynamically import recharts components to avoid SSR issues
-const PieChart = dynamic(() => import("recharts").then((mod) => mod.PieChart), { ssr: false })
-const Pie = dynamic(() => import("recharts").then((mod) => mod.Pie), { ssr: false })
-const Cell = dynamic(() => import("recharts").then((mod) => mod.Cell), { ssr: false })
-const ResponsiveContainer = dynamic(() => import("recharts").then((mod) => mod.ResponsiveContainer), { ssr: false })
-const BarChart = dynamic(() => import("recharts").then((mod) => mod.BarChart), { ssr: false })
-const Bar = dynamic(() => import("recharts").then((mod) => mod.Bar), { ssr: false })
-const XAxis = dynamic(() => import("recharts").then((mod) => mod.XAxis), { ssr: false })
-const YAxis = dynamic(() => import("recharts").then((mod) => mod.YAxis), { ssr: false })
-const CartesianGrid = dynamic(() => import("recharts").then((mod) => mod.CartesianGrid), { ssr: false })
-const Tooltip = dynamic(() => import("recharts").then((mod) => mod.Tooltip), { ssr: false })
-const Legend = dynamic(() => import("recharts").then((mod) => mod.Legend), { ssr: false })
-const AreaChart = dynamic(() => import("recharts").then((mod) => mod.AreaChart), { ssr: false })
-const Area = dynamic(() => import("recharts").then((mod) => mod.Area), { ssr: false })
+// Import recharts components directly - SSR handled by making entire component dynamic
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  AreaChart,
+  Area
+} from 'recharts'
 import { 
   DollarSign, 
   TrendingUp, 

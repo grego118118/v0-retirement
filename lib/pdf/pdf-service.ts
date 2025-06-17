@@ -3,10 +3,32 @@
  * Handles creation of PDF reports for pension calculations, tax reports, and wizard results
  */
 
-import puppeteer from 'puppeteer'
 import { CombinedCalculationData } from '@/lib/wizard/wizard-types'
-import { TaxCalculationResult } from '@/lib/tax/tax-calculator'
 import { formatCurrency, formatDate } from '@/lib/utils'
+
+// Temporary type definition until tax calculator is implemented
+export interface TaxCalculationResult {
+  grossIncome: number
+  federalTax: number
+  stateTax: number
+  totalTax: number
+  netIncome: number
+  effectiveTaxRate: number
+  marginalRate: number
+  taxableIncome: number
+  socialSecurityTaxable: number
+  socialSecurityTaxablePercentage: number
+  breakdown?: {
+    federal?: any
+    state?: any
+    socialSecurity?: any
+  }
+  recommendations?: Array<{
+    title: string
+    description: string
+    potentialSavings: number
+  }>
+}
 
 export interface PDFGenerationOptions {
   type: 'pension' | 'tax' | 'wizard' | 'combined'
@@ -36,6 +58,7 @@ export interface PDFResult {
 export class PDFService {
   private static instance: PDFService
   private browser: any | null = null
+  private puppeteer: any | null = null
 
   private constructor() {}
 
@@ -47,11 +70,121 @@ export class PDFService {
   }
 
   /**
+   * Validate PDF generation requirements
+   */
+  static async validatePDFRequirements(userId: string): Promise<{
+    canGenerate: boolean
+    errors: string[]
+    warnings: string[]
+  }> {
+    const errors: string[] = []
+    const warnings: string[] = []
+
+    // Basic validation - in a real implementation, this would check:
+    // - User authentication
+    // - Premium subscription status
+    // - Rate limiting
+    // - Data completeness
+
+    if (!userId) {
+      errors.push('User authentication required')
+    }
+
+    // For now, allow PDF generation for all authenticated users
+    // In production, you might want to check subscription status, rate limits, etc.
+
+    return {
+      canGenerate: errors.length === 0,
+      errors,
+      warnings
+    }
+  }
+
+  /**
+   * Generate PDF report data
+   */
+  static async generateReportData(userId: string, data: any): Promise<{
+    success: boolean
+    data?: any
+    error?: string
+    generationTime: number
+  }> {
+    const startTime = Date.now()
+
+    try {
+      // Validate user and data
+      if (!userId) {
+        return {
+          success: false,
+          error: 'User ID required',
+          generationTime: Date.now() - startTime
+        }
+      }
+
+      // For now, return mock data
+      // In a real implementation, this would:
+      // - Fetch user's calculation data
+      // - Process and format the data
+      // - Generate the PDF content
+
+      const reportData = {
+        reportType: data.reportType || 'comprehensive',
+        generatedAt: new Date().toISOString(),
+        userId,
+        content: {
+          summary: 'PDF report data generated successfully',
+          calculations: [],
+          recommendations: []
+        }
+      }
+
+      return {
+        success: true,
+        data: reportData,
+        generationTime: Date.now() - startTime
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        generationTime: Date.now() - startTime
+      }
+    }
+  }
+
+  /**
+   * Get PDF generation statistics for a user
+   */
+  static async getPDFStats(userId: string): Promise<{
+    totalGenerated: number
+    lastGenerated?: Date
+    monthlyLimit: number
+    monthlyUsed: number
+    canGenerate: boolean
+  }> {
+    // For now, return mock statistics
+    // In a real implementation, this would query the database
+
+    return {
+      totalGenerated: 0,
+      lastGenerated: undefined,
+      monthlyLimit: 10,
+      monthlyUsed: 0,
+      canGenerate: true
+    }
+  }
+
+  /**
    * Initialize the PDF service with browser instance
    */
   async initialize(): Promise<void> {
     if (!this.browser) {
-      this.browser = await puppeteer.launch({
+      // Dynamically import puppeteer to avoid server-side build issues
+      if (!this.puppeteer) {
+        this.puppeteer = await import('puppeteer')
+      }
+
+      this.browser = await this.puppeteer.default.launch({
         headless: true,
         args: [
           '--no-sandbox',

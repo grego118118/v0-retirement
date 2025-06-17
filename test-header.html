@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Header Test - Massachusetts Retirement System</title>
+    <style>
+        /* Massachusetts Design System Variables */
+        :root {
+            --mrs-gradient-primary: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            --mrs-gradient-hero: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+            --mrs-gradient-surface: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            --mrs-navy-200: #bfdbfe;
+            --mrs-glass: rgba(255, 255, 255, 0.95);
+            --mrs-glass-border: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--mrs-gradient-hero);
+            min-height: 100vh;
+        }
+
+        /* Header styles */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            width: 100%;
+            background: var(--mrs-glass);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--mrs-navy-200);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            display: flex;
+            align-items: center;
+            height: 56px; /* h-14 equivalent */
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-right: 1.5rem;
+        }
+
+        .logo-container {
+            padding: 6px;
+            border-radius: 8px;
+            background: var(--mrs-gradient-primary);
+            transition: all 0.3s ease;
+        }
+
+        .logo-container:hover {
+            transform: scale(1.1);
+        }
+
+        .logo {
+            width: 24px;
+            height: 24px;
+            color: white;
+        }
+
+        .brand-text {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1f2937;
+            text-decoration: none;
+        }
+
+        .nav {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .nav-link {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            text-decoration: none;
+            color: #374151;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: white;
+            background: var(--mrs-gradient-primary);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-link.active {
+            color: white;
+            background: var(--mrs-gradient-primary);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Content area */
+        .content {
+            padding: 2rem 1rem;
+            text-align: center;
+            color: white;
+        }
+
+        .content h1 {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .content p {
+            font-size: 1.25rem;
+            opacity: 0.9;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav {
+                gap: 0.5rem;
+            }
+            
+            .nav-link {
+                padding: 0.375rem 0.75rem;
+                font-size: 0.875rem;
+            }
+            
+            .brand-text {
+                font-size: 0.875rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="logo-section">
+                <a href="/" class="logo-container">
+                    <svg class="logo" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="sealGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#1e40af;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <circle cx="16" cy="16" r="15" fill="url(#sealGradient)" stroke="#1e3a8a" stroke-width="1"/>
+                        <circle cx="16" cy="16" r="11" fill="white" stroke="#1e40af" stroke-width="1"/>
+                        <text x="16" y="18" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" font-weight="bold" fill="#1e40af">MA</text>
+                    </svg>
+                </a>
+                <a href="/" class="brand-text">MA Pension</a>
+            </div>
+            
+            <nav class="nav">
+                <a href="/calculator" class="nav-link active">Calculator</a>
+                <a href="/dashboard" class="nav-link">Dashboard</a>
+                <a href="/blog" class="nav-link">Blog</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="content">
+        <h1>Header Test Page</h1>
+        <p>Testing the new Massachusetts Retirement System header design</p>
+        <br>
+        <p><strong>Changes Made:</strong></p>
+        <ul style="list-style: none; margin-top: 1rem;">
+            <li>✅ Reduced header height from 64px to 56px</li>
+            <li>✅ Added Massachusetts state seal logo</li>
+            <li>✅ Implemented proper glass effect background</li>
+            <li>✅ Added Massachusetts design system colors</li>
+            <li>✅ Maintained responsive design</li>
+        </ul>
+    </div>
+</body>
+</html>

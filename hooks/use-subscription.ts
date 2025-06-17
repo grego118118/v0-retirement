@@ -52,11 +52,12 @@ export function useSubscriptionStatus() {
     console.log('useSubscriptionStatus: Checking subscription for:', session.user.email)
 
     try {
-      // Call the subscription status API
-      const response = await fetch('/api/subscription/status', {
+      // Call the subscription status API with timestamp to prevent caching
+      const response = await fetch(`/api/subscription/status?t=${Date.now()}`, {
         cache: 'no-store', // Ensure we don't get cached response
         headers: {
           'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
         }
       })
       console.log('useSubscriptionStatus: API response status:', response.status)

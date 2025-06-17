@@ -1,10 +1,13 @@
 /**
  * Sentry Client-Side Configuration
  * Error monitoring and performance tracking for the browser
+ * Temporarily disabled to resolve build issues
  */
 
-import * as Sentry from '@sentry/nextjs'
+// import * as Sentry from '@sentry/nextjs'
 
+// TODO: Re-enable once Sentry package compatibility is resolved
+/*
 const SENTRY_DSN = process.env.NEXT_PUBLIC_SENTRY_DSN
 const SENTRY_ENVIRONMENT = process.env.NEXT_PUBLIC_SENTRY_ENVIRONMENT || process.env.NODE_ENV
 const SENTRY_RELEASE = process.env.NEXT_PUBLIC_SENTRY_RELEASE
@@ -93,3 +96,75 @@ Sentry.init({
   // Normalize URLs for better grouping
   normalizeDepth: 6,
 })
+*/
+
+// Stub implementations for when Sentry is disabled
+export function reportError(error: Error, context?: Record<string, any>): void {
+  // Log to console in development
+  if (process.env.NODE_ENV === 'development') {
+    console.error('Error reported:', error, context)
+  }
+}
+
+export function reportWarning(message: string, context?: Record<string, any>): void {
+  // Log to console in development
+  if (process.env.NODE_ENV === 'development') {
+    console.warn('Warning reported:', message, context)
+  }
+}
+
+export function reportInfo(message: string, context?: Record<string, any>): void {
+  // Log to console in development
+  if (process.env.NODE_ENV === 'development') {
+    console.info('Info reported:', message, context)
+  }
+}
+
+export function addBreadcrumb(message: string, category?: string, level?: string): void {
+  // Log to console in development
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Breadcrumb:', { message, category, level })
+  }
+}
+
+export function setUserContext(user: Record<string, any>): void {
+  // Log to console in development
+  if (process.env.NODE_ENV === 'development') {
+    console.log('User context set:', user)
+  }
+}
+
+export function setRetirementContext(context: Record<string, any>): void {
+  // Log to console in development
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Retirement context set:', context)
+  }
+}
+
+export async function monitorPerformance<T>(
+  operation: () => Promise<T>,
+  operationName: string,
+  category: string = 'custom'
+): Promise<T> {
+  const startTime = Date.now()
+  try {
+    const result = await operation()
+    const duration = Date.now() - startTime
+
+    // Log to console in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`Performance: ${operationName} completed in ${duration}ms`)
+    }
+
+    return result
+  } catch (error) {
+    const duration = Date.now() - startTime
+
+    // Log to console in development
+    if (process.env.NODE_ENV === 'development') {
+      console.error(`Performance: ${operationName} failed after ${duration}ms`, error)
+    }
+
+    throw error
+  }
+}

@@ -103,6 +103,7 @@ model RetirementProfile {
   
   // Settings
   plannedRetirementAge Int?
+  retirementDate      DateTime? // User's planned retirement date
   retirementOption    String?   // Option A, B, or C
   
   createdAt           DateTime  @default(now())
