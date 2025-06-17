@@ -30,6 +30,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { ToastNotification } from "@/components/ui/toast-notification"
 import { useSearchParams, useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
+import { useProfile } from '@/contexts/profile-context';
 import { useRetirementData } from "@/hooks/use-retirement-data"
 import { useSubscriptionStatus } from "@/hooks/use-subscription"
 import { PremiumGate } from "@/components/premium/premium-gate"
@@ -91,6 +92,7 @@ export default function PensionCalculator() {
   const [showSaveDialog, setShowSaveDialog] = useState(false)
   const [savedMessage, setSavedMessage] = useState("")
   const { data: session } = useSession()
+  const { profile, loading: profileLoading, refreshProfile } = useProfile();
   const { saveCalculation: saveCalculationToDb } = useRetirementData()
   
   // Move subscription status hook to top level
@@ -151,6 +153,80 @@ export default function PensionCalculator() {
       console.error("Failed to load from storage:", error)
     }
   }, [])
+
+  useEffect(() => {
+    if (profile && Object.keys(profile).length > 0) {
+      console.log("PensionCalculator: Profile data available, attempting to pre-fill form.", profile);
+      const updates: Partial<typeof formData> = {};
+
+      // Helper to check if a form field can be pre-filled (is empty or hasn't been set by user directly yet)
+      // This is a simple check; more sophisticated "isDirty" tracking per field might be needed for complex scenarios.
+      const canPrefill = (fieldName: keyof typeof formData) => {
+        return !formData[fieldName] || formData[fieldName] === "";
+      };
+
+      if (profile.plannedRetirementAge && canPrefill('age')) {
+        updates.age = String(profile.plannedRetirementAge);
+      } else if (profile.dateOfBirth && canPrefill('age')) {
+        // Calculate age from dateOfBirth if plannedRetirementAge is not available
+        const birthDate = new Date(profile.dateOfBirth);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+          age--;
+        }
+        // This sets current age, user might want to adjust for retirement age
+        // updates.currentAge = String(age);
+        // For now, let's assume 'age' in form is 'age at retirement'
+        // If 'plannedRetirementAge' is the target, prioritize that.
+        // If not, maybe don't prefill 'age' or prefill 'currentAge' if that was a field.
+      }
+
+      if (profile.membershipDate && canPrefill('membershipDate')) {
+        updates.membershipDate = profile.membershipDate.split('T')[0]; // Ensure YYYY-MM-DD format
+      }
+
+      if (profile.retirementGroup && canPrefill('group')) {
+        // Assuming profile.retirementGroup is like "GROUP_1", "GROUP_2" etc.
+        // The form expects "GROUP_1", "GROUP_2", etc.
+        updates.group = profile.retirementGroup.startsWith("GROUP_") ? profile.retirementGroup : `GROUP_${profile.retirementGroup}`;
+      }
+
+      if (profile.currentSalary && canPrefill('salary1')) {
+        // Pre-fill first salary field with current salary as a baseline
+        updates.salary1 = String(profile.currentSalary);
+        // User might need to fill salary2 and salary3 or adjust salary1
+      }
+
+      if (profile.averageHighest3Years && canPrefill('salary1') && canPrefill('salary2') && canPrefill('salary3')) {
+          // If averageHighest3Years is available, it's better than just currentSalary for prefill
+          // However, the form takes 3 individual salaries. We can't perfectly reverse this.
+          // As a simple approach, set all three to the average. User must adjust.
+          const avgSalaryStr = String(profile.averageHighest3Years);
+          updates.salary1 = avgSalaryStr;
+          updates.salary2 = avgSalaryStr;
+          updates.salary3 = avgSalaryStr;
+      }
+
+
+      if (profile.yearsOfService && canPrefill('yearsOfService')) {
+        updates.yearsOfService = String(profile.yearsOfService);
+      }
+
+      // Only update if there are actual changes to apply
+      if (Object.keys(updates).length > 0) {
+        setFormData(prevData => {
+          const newFormData = { ...prevData, ...updates };
+          saveToStorage(newFormData); // Persist pre-filled data
+          return newFormData;
+        });
+        console.log("PensionCalculator: formData updated with profile data:", updates);
+        // Optionally, notify user that form has been pre-filled
+        // toast.info("Calculator form has been pre-filled with your profile data.");
+      }
+    }
+  }, [profile]); // Rerun when profile changes
 
   useEffect(() => {
     const calculationId = searchParams.get("id")
@@ -1301,7 +1377,14 @@ export default function PensionCalculator() {
                         title="Social Security Integration"
                         description="Add Social Security benefits to get your complete retirement income picture"
                       >
-                        <SocialSecurityCalculator />
+                        <SocialSecurityCalculator
+                          profile={profile} // Pass the profile object from useProfile()
+                          initialData={{ // Pass relevant parts of formData or calculationResult
+                            formData: formData, // Pass the main form data
+                            // You could also pass parts of calculationResult if deemed relevant, e.g.:
+                            // averageSalary: calculationResult?.details?.averageSalary
+                          }}
+                        />
                       </PremiumGate>
                     </TabsContent>
                     <TabsContent value="combined" className="pt-4">
