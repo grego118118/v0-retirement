@@ -273,7 +273,7 @@ export function getUserLimits(userType: UserSubscriptionType) {
 }
 
 export function getUserFeatures(userType: UserSubscriptionType): string[] {
-  return USER_TYPES[userType].features
+  return [...USER_TYPES[userType].features]
 }
 
 export function canAccessFeature(

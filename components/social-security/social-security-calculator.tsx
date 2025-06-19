@@ -121,7 +121,7 @@ export function SocialSecurityCalculator({ onCalculate, initialData }: SocialSec
           await saveProfile({
             plannedRetirementAge: data.retirementAge,
             // Could add socialSecurityEstimate field to profile
-          })
+          } as any)
           console.log("Social Security data saved to profile")
         } catch (error) {
           console.error("Error saving Social Security data to profile:", error)

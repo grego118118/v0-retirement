@@ -420,7 +420,7 @@ export default function PensionCalculator() {
           }
 
           console.log("Updating profile with calculation data:", profileUpdateData)
-          await saveProfile(profileUpdateData)
+          await saveProfile(profileUpdateData as any)
 
           toast.success("Calculation saved and profile updated")
         } catch (profileError) {
@@ -552,7 +552,7 @@ export default function PensionCalculator() {
 
         console.log("Auto-saving calculation values to profile:", profileUpdateData)
         // Save silently without showing toast notifications (don't await to avoid blocking)
-        saveProfile(profileUpdateData).catch(error => {
+        saveProfile(profileUpdateData as any).catch(error => {
           console.error("Error auto-saving to profile:", error)
           // Don't show error to user for auto-save failures
         })

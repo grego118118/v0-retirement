@@ -194,7 +194,7 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
 
   try {
     const customerId = invoice.customer as string
-    const subscriptionId = invoice.subscription as string
+    const subscriptionId = (invoice as any).subscription as string
 
     // Find user by customer ID
     const user = await prisma.user.findFirst({
@@ -326,6 +326,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     }
 
     // Update user with complete subscription information
+    const sub = subscription as any
     await prisma.user.update({
       where: { email: userEmail },
       data: {
@@ -333,9 +334,9 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
         subscriptionId: subscription.id,
         subscriptionStatus: subscription.status, // This should be 'active' for successful payments
         subscriptionPlan: planType,
-        currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-        cancelAtPeriodEnd: subscription.cancel_at_period_end,
-        trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null,
+        currentPeriodEnd: new Date(sub.current_period_end * 1000),
+        cancelAtPeriodEnd: sub.cancel_at_period_end,
+        trialEnd: sub.trial_end ? new Date(sub.trial_end * 1000) : null,
       }
     })
 
@@ -391,14 +392,15 @@ async function updateUserSubscription(userId: string, subscription: Stripe.Subsc
     })
 
     // Update user in database with all required fields
+    const sub = subscription as any
     const updateData = {
       stripeCustomerId: customerId,
       subscriptionId: subscription.id,
       subscriptionStatus: subscription.status,
       subscriptionPlan: planType,
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-      cancelAtPeriodEnd: subscription.cancel_at_period_end,
-      trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null,
+      currentPeriodEnd: new Date(sub.current_period_end * 1000),
+      cancelAtPeriodEnd: sub.cancel_at_period_end,
+      trialEnd: sub.trial_end ? new Date(sub.trial_end * 1000) : null,
     }
 
     await prisma.user.update({

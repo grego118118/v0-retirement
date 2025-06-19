@@ -129,12 +129,15 @@ export async function POST() {
       const priceId = activeSubscription.items.data[0]?.price.id
       const planType = getSubscriptionPlan(priceId)
       
+      // Type assertion for Stripe subscription properties
+      const subscription = activeSubscription as any
+
       console.log("✅ Active subscription found:", {
         subscriptionId: activeSubscription.id,
         status: activeSubscription.status,
         priceId,
         planType,
-        currentPeriodEnd: new Date(activeSubscription.current_period_end * 1000)
+        currentPeriodEnd: subscription.current_period_end ? new Date(subscription.current_period_end * 1000) : null
       })
 
       // Update user with current subscription data
@@ -142,9 +145,9 @@ export async function POST() {
         subscriptionId: activeSubscription.id,
         subscriptionStatus: activeSubscription.status,
         subscriptionPlan: planType,
-        currentPeriodEnd: new Date(activeSubscription.current_period_end * 1000),
-        cancelAtPeriodEnd: activeSubscription.cancel_at_period_end,
-        trialEnd: activeSubscription.trial_end ? new Date(activeSubscription.trial_end * 1000) : null,
+        currentPeriodEnd: subscription.current_period_end ? new Date(subscription.current_period_end * 1000) : null,
+        cancelAtPeriodEnd: subscription.cancel_at_period_end || false,
+        trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null,
       }
 
       await prisma.user.update({
@@ -162,8 +165,8 @@ export async function POST() {
         subscriptionData: {
           status: activeSubscription.status,
           plan: planType,
-          currentPeriodEnd: updateData.currentPeriodEnd.toISOString(),
-          cancelAtPeriodEnd: activeSubscription.cancel_at_period_end
+          currentPeriodEnd: updateData.currentPeriodEnd?.toISOString() || null,
+          cancelAtPeriodEnd: subscription.cancel_at_period_end || false
         },
         syncRequired: true
       })
