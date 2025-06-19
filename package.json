@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "node --require ./polyfill-node.js ./node_modules/next/dist/bin/next dev",
     "prebuild": "node scripts/setup-build.js",
-    "build": "node --require ./polyfill-node.js ./node_modules/next/dist/bin/next build",
+    "build": "prisma generate && node --require ./polyfill-node.js ./node_modules/next/dist/bin/next build",
     "start": "node --require ./polyfill-node.js ./node_modules/next/dist/bin/next start",
     "lint": "next lint",
     "test": "jest",
