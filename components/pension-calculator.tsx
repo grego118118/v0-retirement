@@ -46,6 +46,34 @@ import Link from "next/link"
 import { SocialSecurityCalculator } from "@/components/social-security/social-security-calculator"
 import { CombinedRetirementCalculator } from "@/components/combined-retirement-calculator"
 
+// Helper functions for date format conversion
+const convertISOToDateInput = (isoDate: string | null | undefined): string => {
+  if (!isoDate) return ""
+  try {
+    const date = new Date(isoDate)
+    if (isNaN(date.getTime())) return ""
+    // Convert to YYYY-MM-DD format for HTML date input
+    return date.toISOString().split('T')[0]
+  } catch (error) {
+    console.warn('Error converting ISO date to input format:', error)
+    return ""
+  }
+}
+
+const convertDateInputToISO = (dateInput: string | null | undefined): string => {
+  if (!dateInput) return ""
+  try {
+    // HTML date input gives us YYYY-MM-DD format
+    // Convert to ISO string for API
+    const date = new Date(dateInput + 'T00:00:00.000Z')
+    if (isNaN(date.getTime())) return ""
+    return date.toISOString()
+  } catch (error) {
+    console.warn('Error converting date input to ISO format:', error)
+    return ""
+  }
+}
+
 const steps = [
   { id: "calculator", title: "Pension Calculator" },
   { id: "advanced", title: "Advanced Options" },
@@ -103,6 +131,15 @@ export default function PensionCalculator() {
   const [isCalculating, setIsCalculating] = useState(false)
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [validationInProgress, setValidationInProgress] = useState(false)
+
+  // Social Security calculation state
+  const [socialSecurityResults, setSocialSecurityResults] = useState<any>(null)
+
+  // Handle Social Security calculation results
+  const handleSocialSecurityCalculation = (data: any) => {
+    console.log("📊 Received Social Security calculation results:", data)
+    setSocialSecurityResults(data)
+  }
 
   useEffect(() => {
     try {
@@ -188,8 +225,8 @@ export default function PensionCalculator() {
           ...prevData,
           // Only update if current values are empty
           currentAge: prevData.currentAge || calculatedCurrentAge,
-          age: prevData.age || String(userProfile.plannedRetirementAge || ""),
-          membershipDate: prevData.membershipDate || userProfile.membershipDate || "",
+          age: prevData.age || "", // Remove plannedRetirementAge reference
+          membershipDate: prevData.membershipDate || convertISOToDateInput(userProfile.membershipDate) || "",
           group: prevData.group || (userProfile.retirementGroup ? `GROUP_${userProfile.retirementGroup.replace("Group ", "")}` : ""),
           retirementOption: prevData.retirementOption || userProfile.retirementOption || "A"
         }
@@ -409,14 +446,11 @@ export default function PensionCalculator() {
         // Also update the user's profile with key calculated values
         try {
           const profileUpdateData = {
-            plannedRetirementAge: parseInt(formData.age),
             retirementOption: formData.retirementOption,
-            retirementGroup: formData.group.replace("GROUP_", "Group "),
+            retirementGroup: formData.group.replace("GROUP_", ""),
             // Update other relevant profile fields
             yearsOfService: parseFloat(formData.yearsOfService),
-            averageHighest3Years: calculationResult.details.averageSalary,
-            // Set retirement date if not already set
-            retirementDate: calcData.retirementDate.split('T')[0]
+            averageHighest3Years: calculationResult.details.averageSalary
           }
 
           console.log("Updating profile with calculation data:", profileUpdateData)
@@ -543,9 +577,8 @@ export default function PensionCalculator() {
       // Auto-save key calculation values to profile (if user is logged in)
       if (session?.user && saveProfile) {
         const profileUpdateData = {
-          plannedRetirementAge: parseInt(formData.age),
           retirementOption: formData.retirementOption,
-          retirementGroup: formData.group.replace("GROUP_", "Group "),
+          retirementGroup: formData.group.replace("GROUP_", ""),
           yearsOfService: parseFloat(formData.yearsOfService),
           averageHighest3Years: averageSalary
         }
@@ -1380,6 +1413,7 @@ export default function PensionCalculator() {
                         description="Add Social Security benefits to get your complete retirement income picture"
                       >
                         <SocialSecurityCalculator
+                          onCalculate={handleSocialSecurityCalculation}
                           initialData={{
                             currentAge: userProfile?.dateOfBirth ?
                               (() => {
@@ -1392,9 +1426,16 @@ export default function PensionCalculator() {
                                 } else {
                                   return age
                                 }
-                              })() : 45,
-                            retirementAge: userProfile?.plannedRetirementAge || 67,
-                            estimatedBenefit: 2500
+                              })() : 0,
+                            retirementAge: (() => {
+                              if (userProfile?.retirementDate && userProfile?.dateOfBirth) {
+                                const retirementDate = new Date(userProfile.retirementDate)
+                                const birthDate = new Date(userProfile.dateOfBirth)
+                                return retirementDate.getFullYear() - birthDate.getFullYear()
+                              }
+                              return 0
+                            })(),
+                            estimatedBenefit: userProfile?.estimatedSocialSecurityBenefit || 0
                           }}
                         />
                       </PremiumGate>
@@ -1414,7 +1455,7 @@ export default function PensionCalculator() {
                             details: calculationResult.details,
                           }}
                           socialSecurityData={{
-                            estimatedBenefit: 0, // Placeholder - would be calculated separately
+                            estimatedBenefit: socialSecurityResults?.estimatedBenefit || 0,
                             fullRetirementAge: 67,
                           }}
                         />

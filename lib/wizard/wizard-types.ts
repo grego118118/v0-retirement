@@ -166,9 +166,9 @@ export const WIZARD_STEPS: WizardStep[] = [
     description: 'Basic information about your retirement timeline',
     isComplete: false,
     validationRules: [
-      { field: 'birthYear', rule: 'required', message: 'Birth year is required' },
-      { field: 'birthYear', rule: 'range', min: 1940, max: 2010, message: 'Please enter a valid birth year' },
-      { field: 'retirementGoalAge', rule: 'range', min: 55, max: 75, message: 'Retirement age must be between 55 and 75' }
+      { field: 'personalInfo.birthYear', rule: 'required', message: 'Birth year is required' },
+      { field: 'personalInfo.birthYear', rule: 'range', min: 1940, max: 2010, message: 'Please enter a valid birth year' },
+      { field: 'personalInfo.retirementGoalAge', rule: 'range', min: 55, max: 75, message: 'Retirement age must be between 55 and 75' }
     ]
   },
   {
@@ -177,8 +177,8 @@ export const WIZARD_STEPS: WizardStep[] = [
     description: 'Your Massachusetts pension benefits and service details',
     isComplete: false,
     validationRules: [
-      { field: 'yearsOfService', rule: 'positive', message: 'Years of service must be positive' },
-      { field: 'averageSalary', rule: 'positive', message: 'Average salary must be positive' }
+      { field: 'pensionData.yearsOfService', rule: 'positive', message: 'Years of service must be positive' },
+      { field: 'pensionData.averageSalary', rule: 'positive', message: 'Average salary must be positive' }
     ]
   },
   {
@@ -187,7 +187,7 @@ export const WIZARD_STEPS: WizardStep[] = [
     description: 'Your Social Security benefit estimates from SSA.gov',
     isComplete: false,
     validationRules: [
-      { field: 'fullRetirementBenefit', rule: 'positive', message: 'Full retirement benefit is required' }
+      { field: 'socialSecurityData.fullRetirementBenefit', rule: 'positive', message: 'Full retirement benefit is required' }
     ]
   },
   {

@@ -102,7 +102,7 @@ export function HomeContent() {
                         <ArrowRight className="ml-2 h-5 w-5" />
                       </Link>
                     </Button>
-                    <Button size="lg" className="border border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white backdrop-blur-sm" asChild>
+                    <Button size="lg" className="border border-blue-300 bg-white/95 text-blue-700 hover:bg-blue-50 hover:text-blue-800 backdrop-blur-sm shadow-lg" asChild>
                       <Link href="/calculator">
                         <Calculator className="mr-2 h-5 w-5" />
                         Try Calculator

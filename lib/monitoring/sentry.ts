@@ -257,15 +257,7 @@ export function withEmailMonitoring<T extends (...args: any[]) => any>(
   }) as T
 }
 
-/**
- * PDF generation monitoring (stub implementation)
- */
-export function withPDFMonitoring<T extends (...args: any[]) => any>(
-  operation: T,
-  pdfType: string
-): T {
-  return withPerformanceMonitoring(operation, `pdf.${pdfType}`) as T
-}
+
 
 /**
  * Custom error classes for better error categorization

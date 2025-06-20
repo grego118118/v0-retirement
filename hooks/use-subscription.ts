@@ -49,7 +49,10 @@ export function useSubscriptionStatus() {
       return
     }
 
-    console.log('useSubscriptionStatus: Checking subscription for:', session.user.email)
+    // Only log in development mode
+    if (process.env.NODE_ENV === 'development') {
+      console.log('useSubscriptionStatus: Checking subscription for:', session.user.email)
+    }
 
     try {
       // Call the subscription status API with timestamp to prevent caching
@@ -60,23 +63,22 @@ export function useSubscriptionStatus() {
           'Pragma': 'no-cache',
         }
       })
-      console.log('useSubscriptionStatus: API response status:', response.status)
-      
+
       if (response.ok) {
         const data = await response.json()
-        console.log('useSubscriptionStatus: API response data:', data)
-        
+
         const newSubscriptionData = {
           isPremium: Boolean(data.isPremium), // Ensure it's a proper boolean
           subscriptionStatus: (data.isPremium ? 'premium' : 'free') as SubscriptionStatus,
           savedCalculationsCount: data.savedCalculationsCount || 0
         }
-        
-        console.log('useSubscriptionStatus: Setting subscription data:', newSubscriptionData)
+
         setSubscriptionData(newSubscriptionData)
       } else {
-        console.log('useSubscriptionStatus: API response not ok, defaulting to free')
         // Default to free if API fails
+        if (process.env.NODE_ENV === 'development') {
+          console.log('useSubscriptionStatus: API response not ok, defaulting to free')
+        }
         setSubscriptionData({
           isPremium: false,
           subscriptionStatus: 'free',
@@ -98,7 +100,7 @@ export function useSubscriptionStatus() {
     if (session?.user?.email) {
       checkSubscription()
     }
-  }, [session?.user?.email])
+  }, [session?.user?.id]) // Use user ID instead of email to prevent unnecessary re-renders
 
   useEffect(() => {
     // Listen for subscription updates
@@ -143,7 +145,14 @@ export function useSubscriptionStatus() {
     refreshStatus: checkSubscription
   }
 
-  console.log('useSubscriptionStatus: Final result being returned to components:', finalResult)
+  // Only log in development mode and reduce frequency
+  if (process.env.NODE_ENV === 'development' && Math.random() < 0.1) {
+    console.log('useSubscriptionStatus: Status check result:', {
+      isPremium: finalResult.isPremium,
+      status: finalResult.subscriptionStatus,
+      calculationsCount: finalResult.savedCalculationsCount
+    })
+  }
 
   return finalResult
 } 

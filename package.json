@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "node --require ./polyfill-node.js ./node_modules/next/dist/bin/next dev",
+    "dev": "next dev",
     "prebuild": "node scripts/setup-build.js",
     "build": "prisma generate && node --require ./polyfill-node.js ./node_modules/next/dist/bin/next build",
     "start": "node --require ./polyfill-node.js ./node_modules/next/dist/bin/next start",
@@ -65,6 +65,7 @@
     "@types/stripe": "^8.0.416",
     "autoprefixer": "^10.4.20",
     "bcryptjs": "^3.0.2",
+    "better-sqlite3": "^11.10.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "1.0.4",
@@ -80,12 +81,10 @@
     "nodemailer": "^6.9.8",
     "pg": "^8.16.0",
     "prisma": "^6.8.2",
-    "puppeteer": "^23.11.1",
     "react": "^19",
     "react-day-picker": "^9.3.4",
     "react-dom": "^19",
     "react-hook-form": "7.54.2",
-    "react-pdf": "^9.1.1",
     "react-resizable-panels": "^2.1.7",
     "recharts": "^2.15.0",
     "resend": "^4.0.0",
@@ -97,6 +96,7 @@
     "zod": "3.24.1"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
     "@types/ioredis": "^4.28.10",
     "@types/jest": "^29.5.12",
     "@types/node": "^22",

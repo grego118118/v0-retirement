@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Security Form Persistence Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .clear-btn {
+            background-color: #6c757d;
+        }
+        .clear-btn:hover {
+            background-color: #545b62;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .test-links {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .test-links a {
+            color: #007bff;
+            text-decoration: none;
+            margin-right: 15px;
+        }
+        .test-links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Social Security Form Persistence Test</h1>
+    
+    <div class="test-links">
+        <h3>Test the Real Implementation:</h3>
+        <a href="/social-security" target="_blank">Social Security Calculator Page</a>
+        <a href="/calculator" target="_blank">Main Calculator (with SS tab)</a>
+    </div>
+    
+    <div class="test-container">
+        <h2>Test Form (Simulates Social Security Calculator)</h2>
+        <p><strong>Instructions:</strong> This form uses the same localStorage keys as the real Social Security calculator. 
+        Test persistence by entering values, refreshing the page, or navigating to the real calculator.</p>
+        
+        <form id="testForm">
+            <div class="form-group">
+                <label for="currentAge">Current Age:</label>
+                <input type="number" id="currentAge" name="currentAge" min="18" max="100" value="45">
+            </div>
+            
+            <div class="form-group">
+                <label for="retirementAge">Planned Retirement Age:</label>
+                <input type="number" id="retirementAge" name="retirementAge" min="50" max="75" value="67">
+            </div>
+            
+            <div class="form-group">
+                <label for="estimatedBenefit">Estimated Monthly Benefit ($):</label>
+                <input type="number" id="estimatedBenefit" name="estimatedBenefit" min="0" max="10000" value="2500">
+            </div>
+            
+            <button type="button" onclick="saveData()">Save to Storage</button>
+            <button type="button" onclick="loadData()">Load from Storage</button>
+            <button type="button" onclick="clearData()" class="clear-btn">Clear Storage</button>
+        </form>
+        
+        <div id="status"></div>
+    </div>
+    
+    <div class="test-container">
+        <h2>Storage Contents</h2>
+        <div id="storageContents"></div>
+        <button type="button" onclick="displayStorageContents()">Refresh Storage Display</button>
+    </div>
+
+    <div class="test-container">
+        <h2>Test Instructions</h2>
+        <ol>
+            <li><strong>Basic Persistence:</strong> Change values above, refresh page, verify values persist</li>
+            <li><strong>Cross-Page Persistence:</strong> Set values here, then visit the real calculator pages</li>
+            <li><strong>Session vs Local Storage:</strong> Clear session storage in dev tools, refresh to test localStorage fallback</li>
+            <li><strong>Clear Function:</strong> Use "Clear Storage" to reset and test default values</li>
+        </ol>
+    </div>
+
+    <script>
+        const SOCIAL_SECURITY_STORAGE_KEY = "ma-social-security-calculator-data";
+        const SOCIAL_SECURITY_SESSION_KEY = "ma-social-security-calculator-session";
+        
+        function getFormData() {
+            return {
+                currentAge: parseInt(document.getElementById('currentAge').value) || 0,
+                retirementAge: parseInt(document.getElementById('retirementAge').value) || 0,
+                estimatedBenefit: parseInt(document.getElementById('estimatedBenefit').value) || 0
+            };
+        }
+        
+        function setFormData(data) {
+            document.getElementById('currentAge').value = data.currentAge || 45;
+            document.getElementById('retirementAge').value = data.retirementAge || 67;
+            document.getElementById('estimatedBenefit').value = data.estimatedBenefit || 2500;
+        }
+        
+        function saveData() {
+            try {
+                const data = getFormData();
+                sessionStorage.setItem(SOCIAL_SECURITY_SESSION_KEY, JSON.stringify(data));
+                localStorage.setItem(SOCIAL_SECURITY_STORAGE_KEY, JSON.stringify(data));
+                showStatus('Data saved successfully!', 'success');
+                displayStorageContents();
+            } catch (error) {
+                showStatus('Error saving data: ' + error.message, 'error');
+            }
+        }
+        
+        function loadData() {
+            try {
+                const sessionData = sessionStorage.getItem(SOCIAL_SECURITY_SESSION_KEY);
+                const localData = localStorage.getItem(SOCIAL_SECURITY_STORAGE_KEY);
+                
+                if (sessionData) {
+                    const data = JSON.parse(sessionData);
+                    setFormData(data);
+                    showStatus('Data loaded from session storage!', 'success');
+                } else if (localData) {
+                    const data = JSON.parse(localData);
+                    setFormData(data);
+                    showStatus('Data loaded from local storage!', 'success');
+                } else {
+                    showStatus('No saved data found.', 'info');
+                }
+                displayStorageContents();
+            } catch (error) {
+                showStatus('Error loading data: ' + error.message, 'error');
+            }
+        }
+        
+        function clearData() {
+            try {
+                sessionStorage.removeItem(SOCIAL_SECURITY_SESSION_KEY);
+                localStorage.removeItem(SOCIAL_SECURITY_STORAGE_KEY);
+                setFormData({ currentAge: 45, retirementAge: 67, estimatedBenefit: 2500 });
+                showStatus('Data cleared successfully!', 'success');
+                displayStorageContents();
+            } catch (error) {
+                showStatus('Error clearing data: ' + error.message, 'error');
+            }
+        }
+        
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = message;
+            statusDiv.className = 'status ' + type;
+        }
+        
+        function displayStorageContents() {
+            const sessionData = sessionStorage.getItem(SOCIAL_SECURITY_SESSION_KEY);
+            const localData = localStorage.getItem(SOCIAL_SECURITY_STORAGE_KEY);
+            
+            let html = '<h3>Session Storage:</h3>';
+            html += sessionData ? `<pre style="background: #f8f9fa; padding: 10px; border-radius: 4px;">${sessionData}</pre>` : '<p>No session data</p>';
+            
+            html += '<h3>Local Storage:</h3>';
+            html += localData ? `<pre style="background: #f8f9fa; padding: 10px; border-radius: 4px;">${localData}</pre>` : '<p>No local data</p>';
+            
+            document.getElementById('storageContents').innerHTML = html;
+        }
+        
+        // Auto-save on input change (simulates real form behavior)
+        document.getElementById('testForm').addEventListener('input', function() {
+            saveData();
+        });
+        
+        // Load data on page load
+        window.addEventListener('load', function() {
+            loadData();
+            displayStorageContents();
+        });
+    </script>
+</body>
+</html>

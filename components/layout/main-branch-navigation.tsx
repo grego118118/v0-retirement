@@ -94,10 +94,10 @@ export function MainBranchNavigation() {
           <div className="flex items-center space-x-4">
             {session ? (
               <>
-                <Link href="/profile">
+                <Link href="/account">
                   <Button variant="ghost" size="sm">
                     <User className="h-4 w-4 mr-2" />
-                    Profile
+                    Account
                   </Button>
                 </Link>
                 <Link href="/api/auth/signout">

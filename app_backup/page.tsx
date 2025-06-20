@@ -125,7 +125,7 @@ export default function Home() {
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
-                <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10 backdrop-blur-sm" asChild>
+                <Button size="lg" variant="outline" className="border-blue-300 bg-white/95 text-blue-700 hover:bg-blue-50 hover:text-blue-800 backdrop-blur-sm shadow-lg" asChild>
                   <Link href="/calculator">
                     Try Free Calculator
                   </Link>

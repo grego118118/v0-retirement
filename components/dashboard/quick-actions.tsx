@@ -93,24 +93,7 @@ export function QuickActions({
 
   const secondaryActions = [
 
-    {
-      id: 'generate-pdf',
-      title: 'Generate PDF Report',
-      description: 'Download comprehensive report',
-      icon: FileText,
-      color: 'bg-gradient-to-r from-indigo-500 to-indigo-600',
-      hoverColor: 'hover:from-indigo-600 hover:to-indigo-700',
-      textColor: 'text-white',
-      action: () => {
-        if (latestCalculation) {
-          // TODO: Implement PDF generation
-          console.log('Generate PDF for calculation:', latestCalculation.id)
-        }
-      },
-      premium: true,
-      disabled: !hasCalculations,
-      priority: 'medium'
-    },
+
     {
       id: 'share-analysis',
       title: 'Share Analysis',
@@ -143,7 +126,7 @@ export function QuickActions({
       title: 'Account Settings',
       description: 'Manage your profile',
       icon: User,
-      action: () => router.push('/profile'),
+      action: () => router.push('/account'),
       category: 'settings'
     },
     {
@@ -681,20 +664,6 @@ export function QuickActions({
                     >
                       View Details
                     </Button>
-                    {isPremium && (
-                      <Button
-                        size="sm"
-                        variant="default"
-                        onClick={() => {
-                          // TODO: Implement PDF generation
-                          console.log('Generate PDF for calculation:', latestCalculation.id)
-                        }}
-                        className="min-h-[44px] px-3 lg:px-4 xl:px-5 text-sm lg:text-base"
-                      >
-                        <Download className="h-4 w-4 lg:h-5 lg:w-5 mr-1 lg:mr-2" />
-                        PDF
-                      </Button>
-                    )}
                   </div>
                 </div>
               </div>

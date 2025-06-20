@@ -2,8 +2,8 @@
 const nextConfig = {
   serverExternalPackages: ['@prisma/client', 'prisma', 'puppeteer'],
 
-  // Production optimizations
-  output: 'standalone',
+  // Production optimizations (disabled for development)
+  // output: 'standalone',
 
 
   
@@ -41,7 +41,14 @@ const nextConfig = {
   
   // Image optimization
   images: {
-    domains: ['localhost'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        port: '',
+        pathname: '/**',
+      },
+    ],
     formats: ['image/webp', 'image/avif'],
   },
   

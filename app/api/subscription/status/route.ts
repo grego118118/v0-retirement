@@ -1,135 +1,217 @@
-import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth/auth-options"
-import { prisma } from "@/lib/prisma"
-import {
-  getUserSubscriptionType,
-  isUserPremium,
-  getUserFeatures,
-  getUserLimits,
-  USER_TYPES,
-  FREE_TIER_LIMITS
-} from "@/lib/stripe/config"
+import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth/auth-options'
+import { prisma } from '@/lib/prisma'
+import { StripeService } from '@/lib/stripe/service'
+import { isSubscriptionActive, FREE_TIER_LIMITS } from '@/lib/stripe/config'
+import type { SubscriptionStatus, SubscriptionPlan } from '@/lib/stripe/config'
 
-export async function GET() {
+// Fallback premium users for development (when Stripe is not configured)
+const FALLBACK_PREMIUM_USERS = [
+  'premium@example.com',
+  'test@premium.com',
+  'grego118@gmail.com'
+]
+
+interface SubscriptionResponse {
+  isPremium: boolean
+  subscriptionStatus: SubscriptionStatus | 'inactive'
+  subscriptionPlan: SubscriptionPlan
+  savedCalculationsCount: number
+  currentPeriodEnd?: string
+  cancelAtPeriodEnd?: boolean
+  trialEnd?: string
+  customerId?: string
+  subscriptionId?: string
+  usageLimits: {
+    maxSavedCalculations: number
+    maxSocialSecurityCalculations: number
+    maxWizardUses: number
+    maxPdfReports: number
+  }
+  currentUsage: {
+    savedCalculations: number
+    socialSecurityCalculations: number
+    wizardUses: number
+    pdfReports: number
+  }
+}
+
+export async function GET(request: NextRequest) {
   try {
-    console.log("Subscription status GET request started")
     const session = await getServerSession(authOptions)
 
-    console.log("Session in subscription status GET:", {
-      hasSession: !!session,
-      userId: session?.user?.id,
-      userEmail: session?.user?.email
-    })
-
-    if (!session?.user?.id) {
-      console.error("No session or user ID in subscription status GET")
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get user data from database
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        createdAt: true,
-        stripeCustomerId: true,
-        subscriptionId: true,
-        subscriptionStatus: true,
-        subscriptionPlan: true,
-        currentPeriodEnd: true,
-        cancelAtPeriodEnd: true,
-        trialEnd: true,
-        socialSecurityCalculations: true,
-        wizardUses: true,
-        pdfReports: true,
-        calculations: {
-          select: { id: true }
+    const userEmail = session.user.email
+    console.log('Checking subscription status for:', userEmail)
+
+    // Get user from database, create if doesn't exist
+    let user = await prisma.user.findUnique({
+      where: { email: userEmail }
+    })
+
+    if (!user) {
+      console.log('User not found in users table, creating new user:', userEmail)
+
+      // Create user in users table (this should have been done during OAuth but wasn't)
+      const userId = session.user.id || 'temp-id' // Use session user ID if available
+
+      try {
+        user = await prisma.user.create({
+          data: {
+            id: userId,
+            email: userEmail,
+          }
+        })
+
+        console.log('Successfully created user:', user)
+      } catch (error) {
+        console.error('Error creating user:', error)
+        // If user creation fails, return fallback data
+        const fallbackData = getDevelopmentSubscriptionData(userEmail, { id: userId, email: userEmail }, 0)
+        console.log('Returning fallback subscription data due to user creation error:', fallbackData)
+        return NextResponse.json(fallbackData)
+      }
+    }
+
+    // Get user's calculations count
+    const calculationsCount = await prisma.retirementCalculation.count({
+      where: {
+        userId: user.id,
+        calculationName: {
+          not: {
+            startsWith: 'Auto-saved'
+          }
         }
       }
     })
 
-    if (!user) {
-      return NextResponse.json({ message: "User not found" }, { status: 404 })
+    let subscriptionData: SubscriptionResponse
+
+    // Try to get Stripe subscription data
+    if (process.env.STRIPE_SECRET_KEY && user.stripeCustomerId) {
+      try {
+        const customer = await StripeService.getCustomerWithSubscriptions(user.stripeCustomerId)
+
+        if (customer && customer.subscriptions.length > 0) {
+          const activeSubscription = customer.subscriptions.find(sub =>
+            isSubscriptionActive(sub.status)
+          ) || customer.subscriptions[0]
+
+          subscriptionData = {
+            isPremium: isSubscriptionActive(activeSubscription.status),
+            subscriptionStatus: activeSubscription.status,
+            subscriptionPlan: activeSubscription.plan,
+            savedCalculationsCount: calculationsCount,
+            currentPeriodEnd: activeSubscription.currentPeriodEnd.toISOString(),
+            cancelAtPeriodEnd: activeSubscription.cancelAtPeriodEnd,
+            trialEnd: activeSubscription.trialEnd?.toISOString(),
+            customerId: customer.id,
+            subscriptionId: activeSubscription.id,
+            usageLimits: getUsageLimits(activeSubscription.plan),
+            currentUsage: await getCurrentUsage(user.id)
+          }
+        } else {
+          // No active subscription found
+          subscriptionData = getFreeUserData(user, calculationsCount)
+        }
+      } catch (error) {
+        console.error('Error fetching Stripe subscription:', error)
+        // Fallback to development mode
+        subscriptionData = getDevelopmentSubscriptionData(userEmail, user, calculationsCount)
+      }
+    } else {
+      // Development mode or no Stripe configuration
+      subscriptionData = getDevelopmentSubscriptionData(userEmail, user, calculationsCount)
     }
 
-    // Determine user subscription type using hybrid model
-    const userType = getUserSubscriptionType(user)
-    const isPremium = isUserPremium(userType)
-    const userConfig = USER_TYPES[userType]
-    const userLimits = getUserLimits(userType)
+    console.log('Returning subscription response:', subscriptionData)
+    return NextResponse.json(subscriptionData)
+  } catch (error) {
+    console.error('Error checking subscription status:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
 
-    // Debug logging for subscription type determination
-    console.log("Subscription status debug:", {
-      userId: user.id,
-      email: user.email,
-      subscriptionStatus: user.subscriptionStatus,
-      subscriptionPlan: user.subscriptionPlan,
-      stripeCustomerId: user.stripeCustomerId,
-      subscriptionId: user.subscriptionId,
-      userType,
-      isPremium,
-      userConfigName: userConfig.name
+function getFreeUserData(user: any, calculationsCount: number): SubscriptionResponse {
+  return {
+    isPremium: false,
+    subscriptionStatus: 'inactive',
+    subscriptionPlan: 'free',
+    savedCalculationsCount: calculationsCount,
+    usageLimits: getUsageLimits('free'),
+    currentUsage: {
+      savedCalculations: calculationsCount,
+      socialSecurityCalculations: 0, // TODO: Track this
+      wizardUses: 0, // TODO: Track this
+      pdfReports: 0, // TODO: Track this
+    }
+  }
+}
+
+function getDevelopmentSubscriptionData(userEmail: string, user: any, calculationsCount: number): SubscriptionResponse {
+  const isPremium = FALLBACK_PREMIUM_USERS.includes(userEmail)
+
+  return {
+    isPremium,
+    subscriptionStatus: isPremium ? 'active' : 'inactive',
+    subscriptionPlan: isPremium ? 'monthly' : 'free',
+    savedCalculationsCount: calculationsCount,
+    usageLimits: getUsageLimits(isPremium ? 'monthly' : 'free'),
+    currentUsage: {
+      savedCalculations: calculationsCount,
+      socialSecurityCalculations: 0,
+      wizardUses: 0,
+      pdfReports: 0,
+    }
+  }
+}
+
+function getUsageLimits(plan: SubscriptionPlan) {
+  if (plan === 'free') {
+    return {
+      maxSavedCalculations: FREE_TIER_LIMITS.maxSavedCalculations,
+      maxSocialSecurityCalculations: FREE_TIER_LIMITS.maxSocialSecurityCalculations,
+      maxWizardUses: FREE_TIER_LIMITS.maxWizardUses,
+      maxPdfReports: FREE_TIER_LIMITS.maxPdfReports,
+    }
+  }
+
+  // Premium plans have unlimited access
+  return {
+    maxSavedCalculations: -1, // -1 indicates unlimited
+    maxSocialSecurityCalculations: -1,
+    maxWizardUses: -1,
+    maxPdfReports: -1,
+  }
+}
+
+async function getCurrentUsage(userId: string) {
+  try {
+    // Get user's calculations count
+    const calculationsCount = await prisma.retirementCalculation.count({
+      where: { userId }
     })
 
-    // Calculate current usage
-    const currentUsage = {
-      savedCalculations: user.calculations.length,
-      socialSecurityCalculations: user.socialSecurityCalculations,
-      wizardUses: user.wizardUses,
-      pdfReports: user.pdfReports
+    return {
+      savedCalculations: calculationsCount,
+      socialSecurityCalculations: 0, // TODO: Track SS calculations
+      wizardUses: 0, // TODO: Track wizard uses
+      pdfReports: 0, // TODO: Track PDF reports
     }
-
-    // Build response data based on user type
-    const responseData = {
-      isPremium,
-      subscriptionStatus: isPremium ? "active" : "free",
-      plan: userType,
-      planName: userConfig.name,
-      planDescription: userConfig.description,
-      billingType: userConfig.billingType,
-      accountType: isPremium ? "premium" : "free",
-      accessLevel: isPremium ? "full" : "limited",
-
-      // Subscription details (for Stripe users)
-      subscriptionId: user.subscriptionId,
-      stripeCustomerId: user.stripeCustomerId,
-      currentPeriodEnd: user.currentPeriodEnd?.toISOString(),
-      cancelAtPeriodEnd: user.cancelAtPeriodEnd,
-      trialEnd: user.trialEnd?.toISOString(),
-
-      // Usage and limits
-      currentUsage,
-      usageLimits: userLimits || {
-        maxSavedCalculations: -1, // Unlimited for premium
-        maxSocialSecurityCalculations: -1,
-        maxWizardUses: -1,
-        maxPdfReports: -1
-      },
-
-      // Feature access
-      features: {
-        basicCalculations: true, // Available to all users
-        socialSecurityIntegration: isPremium || currentUsage.socialSecurityCalculations < (userLimits?.maxSocialSecurityCalculations || 1),
-        pdfReports: isPremium || currentUsage.pdfReports < (userLimits?.maxPdfReports || 0),
-        emailNotifications: isPremium,
-        prioritySupport: isPremium,
-        combinedCalculations: isPremium || currentUsage.wizardUses < (userLimits?.maxWizardUses || 0),
-        taxImplications: isPremium,
-        advancedPlanning: isPremium,
-        unlimitedSaves: isPremium || currentUsage.savedCalculations < (userLimits?.maxSavedCalculations || 3)
-      }
-    }
-
-    console.log("Returning subscription status data:", responseData)
-    return NextResponse.json(responseData)
   } catch (error) {
-    console.error("Error fetching subscription status:", error)
-    return NextResponse.json({
-      message: "Failed to fetch subscription status",
-      error: error instanceof Error ? error.message : "Unknown error"
-    }, { status: 500 })
+    console.error('Error getting current usage:', error)
+    return {
+      savedCalculations: 0,
+      socialSecurityCalculations: 0,
+      wizardUses: 0,
+      pdfReports: 0,
+    }
   }
 }

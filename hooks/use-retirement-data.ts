@@ -12,9 +12,9 @@ interface RetirementProfile {
   currentSalary: number
   averageHighest3Years?: number
   yearsOfService?: number
-  plannedRetirementAge?: number
   retirementOption?: string
   retirementDate?: string
+  estimatedSocialSecurityBenefit?: number
 }
 
 interface RetirementCalculation {
@@ -84,9 +84,9 @@ export function useRetirementData() {
           currentSalary: data.currentSalary || 0,
           averageHighest3Years: data.averageHighest3Years || 0,
           yearsOfService: data.yearsOfService || 0,
-          plannedRetirementAge: data.plannedRetirementAge || 65,
           retirementOption: data.retirementOption || "A",
-          retirementDate: data.retirementDate || ""
+          retirementDate: data.retirementDate || "",
+          estimatedSocialSecurityBenefit: data.estimatedSocialSecurityBenefit || 0
         })
       }
     } catch (error) {
@@ -127,14 +127,14 @@ export function useRetirementData() {
     if (session?.user) {
       fetchProfile()
     }
-  }, [session?.user, fetchProfile])
+  }, [session?.user?.id]) // Only depend on user ID, not the entire fetchProfile function
 
   // Auto-fetch calculations when session is available
   useEffect(() => {
     if (session?.user) {
       fetchCalculations()
     }
-  }, [session?.user, fetchCalculations])
+  }, [session?.user?.id]) // Only depend on user ID, not the entire fetchCalculations function
 
   // Save or update retirement profile
   const saveProfile = useCallback(async (profileData: RetirementProfile) => {
@@ -145,7 +145,7 @@ export function useRetirementData() {
 
     setLoading(true)
     try {
-      const response = await fetch("/api/profile", {
+      const response = await fetch("/api/retirement/profile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(profileData),
@@ -153,7 +153,8 @@ export function useRetirementData() {
 
       // Check if response is ok and content-type is JSON
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        const errorData = await response.json().catch(() => ({ message: "Unknown error" }))
+        throw new Error(`HTTP error! status: ${response.status} - ${errorData.message || "Unknown error"}`)
       }
 
       const contentType = response.headers.get("content-type")
@@ -163,19 +164,20 @@ export function useRetirementData() {
 
       const data = await response.json()
 
-      if (data) {
+      if (data && data.profile) {
         // Convert the response data to the expected profile format
+        const profileData = data.profile
         setProfile({
-          dateOfBirth: data.dateOfBirth || "",
-          membershipDate: data.membershipDate || "",
-          retirementGroup: data.retirementGroup || "Group 1",
-          benefitPercentage: data.benefitPercentage || 2.0,
-          currentSalary: data.currentSalary || 0,
-          averageHighest3Years: data.averageHighest3Years || 0,
-          yearsOfService: data.yearsOfService || 0,
-          plannedRetirementAge: data.plannedRetirementAge || 65,
-          retirementOption: data.retirementOption || "A",
-          retirementDate: data.retirementDate || ""
+          dateOfBirth: profileData.dateOfBirth || "",
+          membershipDate: profileData.membershipDate || "",
+          retirementGroup: profileData.retirementGroup || "Group 1",
+          benefitPercentage: profileData.benefitPercentage || 2.0,
+          currentSalary: profileData.currentSalary || 0,
+          averageHighest3Years: profileData.averageHighest3Years || 0,
+          yearsOfService: profileData.yearsOfService || 0,
+          retirementOption: profileData.retirementOption || "A",
+          retirementDate: profileData.retirementDate || "",
+          estimatedSocialSecurityBenefit: profileData.estimatedSocialSecurityBenefit || 0
         })
         toast.success(profile ? "Profile updated" : "Profile created")
         return true

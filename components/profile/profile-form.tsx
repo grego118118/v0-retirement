@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -9,7 +9,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
-import { Loader2, Calculator, Settings, AlertTriangle } from "lucide-react"
+import { Loader2, Calculator, Settings, AlertTriangle, CheckCircle, Save } from "lucide-react"
 import { useSession, signIn } from "next-auth/react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
@@ -23,10 +23,12 @@ const profileFormSchema = z.object({
     if (!date) return true // Allow empty retirement date
     const selectedDate = new Date(date)
     const today = new Date()
+    const minDate = new Date()
+    minDate.setFullYear(today.getFullYear() - 1) // Allow past year for flexibility
     const maxDate = new Date()
     maxDate.setFullYear(today.getFullYear() + 50) // Max 50 years in future
-    return selectedDate >= today && selectedDate <= maxDate
-  }, "Retirement date must be between today and 50 years in the future"),
+    return selectedDate >= minDate && selectedDate <= maxDate
+  }, "Retirement date must be within a reasonable range"),
 })
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>
@@ -39,8 +41,38 @@ interface ProfileFormProps {
   onUpdate: () => void
 }
 
+// Helper functions for date format conversion
+const convertISOToDateInput = (isoDate: string | null | undefined): string => {
+  if (!isoDate) return ""
+  try {
+    const date = new Date(isoDate)
+    if (isNaN(date.getTime())) return ""
+    // Convert to YYYY-MM-DD format for HTML date input
+    return date.toISOString().split('T')[0]
+  } catch (error) {
+    console.warn('Error converting ISO date to input format:', error)
+    return ""
+  }
+}
+
+const convertDateInputToISO = (dateInput: string | null | undefined): string => {
+  if (!dateInput) return ""
+  try {
+    // HTML date input gives us YYYY-MM-DD format
+    // Convert to ISO string for API
+    const date = new Date(dateInput + 'T00:00:00.000Z')
+    if (isNaN(date.getTime())) return ""
+    return date.toISOString()
+  } catch (error) {
+    console.warn('Error converting date input to ISO format:', error)
+    return ""
+  }
+}
+
 export function ProfileForm({ initialData, onUpdate }: ProfileFormProps) {
   const [isLoading, setIsLoading] = useState(false)
+  const [isAutoSaving, setIsAutoSaving] = useState(false)
+  const [lastSaved, setLastSaved] = useState<Date | null>(null)
   const [sessionError, setSessionError] = useState<string | null>(null)
   const { toast } = useToast()
   const { data: session, status, update } = useSession()
@@ -49,9 +81,80 @@ export function ProfileForm({ initialData, onUpdate }: ProfileFormProps) {
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
       fullName: initialData?.fullName || "",
-      retirementDate: initialData?.retirementDate || "",
+      retirementDate: convertISOToDateInput(initialData?.retirementDate) || "",
     },
   })
+
+  // Update form when initialData changes (e.g., after API fetch)
+  useEffect(() => {
+    if (initialData) {
+      form.reset({
+        fullName: initialData.fullName || "",
+        retirementDate: convertISOToDateInput(initialData.retirementDate) || "",
+      })
+    }
+  }, [initialData, form])
+
+  // Auto-save functionality with debouncing
+  const autoSave = useCallback(async (data: ProfileFormValues) => {
+    if (!session?.user?.id || status !== "authenticated") return
+
+    try {
+      setIsAutoSaving(true)
+
+      const payload = {
+        full_name: data.fullName?.trim() || "",
+        retirement_date: convertDateInputToISO(data.retirementDate) || "",
+      }
+
+      const response = await fetch("/api/profile", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      await response.json()
+      setLastSaved(new Date())
+      onUpdate()
+    } catch (error) {
+      console.error("Auto-save error:", error)
+      // Don't show toast for auto-save errors to avoid spam
+    } finally {
+      setIsAutoSaving(false)
+    }
+  }, [session?.user?.id, status, onUpdate])
+
+  // Watch for form changes and auto-save with debouncing
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout | null = null
+
+    const subscription = form.watch((value) => {
+      // Clear any existing timeout
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+      }
+
+      // Debounce auto-save by 2 seconds
+      timeoutId = setTimeout(() => {
+        if (value.fullName || value.retirementDate) {
+          autoSave(value as ProfileFormValues)
+        }
+      }, 2000)
+    })
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+      }
+      subscription.unsubscribe()
+    }
+  }, [form.watch, autoSave])
 
   // Monitor session status and handle authentication issues
   useEffect(() => {
@@ -137,7 +240,7 @@ export function ProfileForm({ initialData, onUpdate }: ProfileFormProps) {
       // Validate and prepare the payload
       const payload = {
         full_name: data.fullName?.trim() || "",
-        retirement_date: data.retirementDate || "",
+        retirement_date: convertDateInputToISO(data.retirementDate) || "",
       }
 
       console.log("Sending profile update request", {
@@ -305,7 +408,12 @@ export function ProfileForm({ initialData, onUpdate }: ProfileFormProps) {
                   <FormItem>
                     <FormLabel>Target Retirement Date</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <Input
+                        type="date"
+                        min="1950-01-01"
+                        max="2030-12-31"
+                        {...field}
+                      />
                     </FormControl>
                     <FormDescription>
                       Your expected retirement date. This will be used to calculate your countdown.
@@ -314,22 +422,45 @@ export function ProfileForm({ initialData, onUpdate }: ProfileFormProps) {
                   </FormItem>
                 )}
               />
-              <Button
-                type="submit"
-                disabled={isLoading || !!sessionError || status !== "authenticated"}
-                className="w-full"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Updating...
-                  </>
-                ) : sessionError ? (
-                  "Sign In Required"
-                ) : (
-                  "Update Profile"
-                )}
-              </Button>
+              {/* Auto-save status indicator */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  {isAutoSaving ? (
+                    <>
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      <span>Saving...</span>
+                    </>
+                  ) : lastSaved ? (
+                    <>
+                      <CheckCircle className="h-3 w-3 text-green-500" />
+                      <span>Saved {lastSaved.toLocaleTimeString()}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-3 w-3" />
+                      <span>Changes auto-save</span>
+                    </>
+                  )}
+                </div>
+
+                <Button
+                  type="submit"
+                  disabled={isLoading || !!sessionError || status !== "authenticated"}
+                  variant="outline"
+                  size="sm"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : sessionError ? (
+                    "Sign In Required"
+                  ) : (
+                    "Save Now"
+                  )}
+                </Button>
+              </div>
 
               {/* Session Status Indicator */}
               <div className="text-xs text-muted-foreground text-center">

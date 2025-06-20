@@ -51,12 +51,9 @@ export function Header() {
           >
             <Link
               href="/calculator"
-              className={`px-4 py-2 rounded-md font-medium transition-all duration-300 whitespace-nowrap ${
-                isActive("/calculator")
-                  ? "text-white shadow-md"
-                  : "text-gray-700 dark:text-gray-200 hover:text-white hover:shadow-md"
+              className={`nav-link ${
+                isActive("/calculator") ? "nav-link-active" : ""
               }`}
-              style={isActive("/calculator") ? { background: 'var(--mrs-gradient-primary)' } : { background: 'transparent' }}
             >
               Calculator
             </Link>
@@ -64,24 +61,18 @@ export function Header() {
             {session && (
               <Link
                 href="/dashboard"
-                className={`px-4 py-2 rounded-md font-medium transition-all duration-300 whitespace-nowrap ${
-                  isActive("/dashboard")
-                    ? "text-white shadow-md"
-                    : "text-gray-700 dark:text-gray-200 hover:text-white hover:shadow-md"
+                className={`nav-link ${
+                  isActive("/dashboard") ? "nav-link-active" : ""
                 }`}
-                style={isActive("/dashboard") ? { background: 'var(--mrs-gradient-primary)' } : { background: 'transparent' }}
               >
                 Dashboard
               </Link>
             )}
             <Link
               href="/blog"
-              className={`px-4 py-2 rounded-md font-medium transition-all duration-300 whitespace-nowrap ${
-                isActive("/blog")
-                  ? "text-white shadow-md"
-                  : "text-gray-700 dark:text-gray-200 hover:text-white hover:shadow-md"
+              className={`nav-link ${
+                isActive("/blog") ? "nav-link-active" : ""
               }`}
-              style={isActive("/blog") ? { background: 'var(--mrs-gradient-primary)' } : { background: 'transparent' }}
             >
               Blog
             </Link>
@@ -90,24 +81,18 @@ export function Header() {
             {session ? (
               <Link
                 href="/billing"
-                className={`px-4 py-2 rounded-md font-medium transition-all duration-300 whitespace-nowrap ${
-                  isActive("/billing")
-                    ? "text-white shadow-md"
-                    : "text-gray-700 dark:text-gray-200 hover:text-white hover:shadow-md"
+                className={`nav-link ${
+                  isActive("/billing") ? "nav-link-active" : ""
                 }`}
-                style={isActive("/billing") ? { background: 'var(--mrs-gradient-primary)' } : { background: 'transparent' }}
               >
                 Billing
               </Link>
             ) : (
               <Link
                 href="/pricing"
-                className={`px-4 py-2 rounded-md font-medium transition-all duration-300 whitespace-nowrap ${
-                  isActive("/pricing")
-                    ? "text-white shadow-md"
-                    : "text-gray-700 dark:text-gray-200 hover:text-white hover:shadow-md"
+                className={`nav-link ${
+                  isActive("/pricing") ? "nav-link-active" : ""
                 }`}
-                style={isActive("/pricing") ? { background: 'var(--mrs-gradient-primary)' } : { background: 'transparent' }}
               >
                 Pricing
               </Link>
@@ -122,12 +107,9 @@ export function Header() {
           >
             <Link
               href="/calculator"
-              className={`px-3 py-2 rounded-md font-medium transition-all duration-300 whitespace-nowrap text-xs ${
-                isActive("/calculator")
-                  ? "text-white shadow-md"
-                  : "text-gray-700 dark:text-gray-200 hover:text-white hover:shadow-md"
+              className={`nav-link-mobile ${
+                isActive("/calculator") ? "nav-link-active" : ""
               }`}
-              style={isActive("/calculator") ? { background: 'var(--mrs-gradient-primary)' } : { background: 'transparent' }}
             >
               Calc
             </Link>
@@ -135,12 +117,9 @@ export function Header() {
             {session && (
               <Link
                 href="/dashboard"
-                className={`px-3 py-2 rounded-md font-medium transition-all duration-300 whitespace-nowrap text-xs ${
-                  isActive("/dashboard")
-                    ? "text-white shadow-md"
-                    : "text-gray-700 dark:text-gray-200 hover:text-white hover:shadow-md"
+                className={`nav-link-mobile ${
+                  isActive("/dashboard") ? "nav-link-active" : ""
                 }`}
-                style={isActive("/dashboard") ? { background: 'var(--mrs-gradient-primary)' } : { background: 'transparent' }}
               >
                 Dashboard
               </Link>
@@ -148,12 +127,9 @@ export function Header() {
 
             <Link
               href="/blog"
-              className={`px-3 py-2 rounded-md font-medium transition-all duration-300 whitespace-nowrap text-xs ${
-                isActive("/blog")
-                  ? "text-white shadow-md"
-                  : "text-gray-700 dark:text-gray-200 hover:text-white hover:shadow-md"
+              className={`nav-link-mobile ${
+                isActive("/blog") ? "nav-link-active" : ""
               }`}
-              style={isActive("/blog") ? { background: 'var(--mrs-gradient-primary)' } : { background: 'transparent' }}
             >
               Blog
             </Link>
@@ -162,24 +138,18 @@ export function Header() {
             {session ? (
               <Link
                 href="/billing"
-                className={`px-3 py-2 rounded-md font-medium transition-all duration-300 whitespace-nowrap text-xs ${
-                  isActive("/billing")
-                    ? "text-white shadow-md"
-                    : "text-gray-700 dark:text-gray-200 hover:text-white hover:shadow-md"
+                className={`nav-link-mobile ${
+                  isActive("/billing") ? "nav-link-active" : ""
                 }`}
-                style={isActive("/billing") ? { background: 'var(--mrs-gradient-primary)' } : { background: 'transparent' }}
               >
                 Billing
               </Link>
             ) : (
               <Link
                 href="/pricing"
-                className={`px-3 py-2 rounded-md font-medium transition-all duration-300 whitespace-nowrap text-xs ${
-                  isActive("/pricing")
-                    ? "text-white shadow-md"
-                    : "text-gray-700 dark:text-gray-200 hover:text-white hover:shadow-md"
+                className={`nav-link-mobile ${
+                  isActive("/pricing") ? "nav-link-active" : ""
                 }`}
-                style={isActive("/pricing") ? { background: 'var(--mrs-gradient-primary)' } : { background: 'transparent' }}
               >
                 Pricing
               </Link>

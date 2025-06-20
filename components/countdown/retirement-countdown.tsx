@@ -32,11 +32,100 @@ export function RetirementCountdown({ retirementDate, className = "" }: Retireme
   useEffect(() => {
     if (!retirementDate || !mounted) return
 
-    const calculateTimeLeft = () => {
-      const now = new Date()
-      const difference = retirementDate.getTime() - now.getTime()
+    const calculateTimeLeft = (): TimeLeft => {
+      try {
+        const now = new Date()
+        const target = new Date(retirementDate)
 
-      if (difference <= 0) {
+        // Validate dates
+        if (isNaN(target.getTime()) || isNaN(now.getTime())) {
+          throw new Error('Invalid date')
+        }
+
+        const difference = target.getTime() - now.getTime()
+
+        if (difference <= 0) {
+          return {
+            years: 0,
+            months: 0,
+            days: 0,
+            hours: 0,
+            minutes: 0,
+            seconds: 0,
+            totalDays: 0,
+          }
+        }
+
+        // Calculate time units with proper precision
+        const totalMilliseconds = difference
+        const totalSeconds = Math.floor(totalMilliseconds / 1000)
+        const totalMinutes = Math.floor(totalSeconds / 60)
+        const totalHours = Math.floor(totalMinutes / 60)
+        const totalDays = Math.floor(totalHours / 24)
+
+        // Calculate remaining units
+        const seconds = totalSeconds % 60
+        const minutes = totalMinutes % 60
+        const hours = totalHours % 24
+
+        // More accurate year/month calculation using actual dates
+        let years = 0
+        let months = 0
+        let days = 0
+
+        // Create a working date starting from now
+        const workingDate = new Date(now)
+
+        // Calculate years
+        while (workingDate.getFullYear() < target.getFullYear() ||
+               (workingDate.getFullYear() === target.getFullYear() &&
+                workingDate.getMonth() < target.getMonth()) ||
+               (workingDate.getFullYear() === target.getFullYear() &&
+                workingDate.getMonth() === target.getMonth() &&
+                workingDate.getDate() < target.getDate())) {
+
+          const nextYear = new Date(workingDate)
+          nextYear.setFullYear(nextYear.getFullYear() + 1)
+
+          if (nextYear <= target) {
+            years++
+            workingDate.setFullYear(workingDate.getFullYear() + 1)
+          } else {
+            break
+          }
+        }
+
+        // Calculate months
+        while (workingDate.getMonth() < target.getMonth() ||
+               (workingDate.getMonth() === target.getMonth() &&
+                workingDate.getDate() < target.getDate())) {
+
+          const nextMonth = new Date(workingDate)
+          nextMonth.setMonth(nextMonth.getMonth() + 1)
+
+          if (nextMonth <= target) {
+            months++
+            workingDate.setMonth(workingDate.getMonth() + 1)
+          } else {
+            break
+          }
+        }
+
+        // Calculate remaining days
+        days = Math.floor((target.getTime() - workingDate.getTime()) / (1000 * 60 * 60 * 24))
+
+        return {
+          years,
+          months,
+          days,
+          hours,
+          minutes,
+          seconds,
+          totalDays,
+        }
+      } catch (error) {
+        console.warn('Error calculating time left:', error)
+        // Return zero values on error
         return {
           years: 0,
           months: 0,
@@ -47,43 +136,38 @@ export function RetirementCountdown({ retirementDate, className = "" }: Retireme
           totalDays: 0,
         }
       }
-
-      // Calculate time units
-      const seconds = Math.floor((difference / 1000) % 60)
-      const minutes = Math.floor((difference / (1000 * 60)) % 60)
-      const hours = Math.floor((difference / (1000 * 60 * 60)) % 24)
-
-      // Calculate total days first
-      const totalDays = Math.floor(difference / (1000 * 60 * 60 * 24))
-
-      // Then break it down to years, months, and remaining days
-      const years = Math.floor(totalDays / 365)
-      const remainingDaysAfterYears = totalDays % 365
-
-      // Approximate months (not exact due to varying month lengths)
-      const months = Math.floor(remainingDaysAfterYears / 30)
-      const days = remainingDaysAfterYears % 30
-
-      return {
-        years,
-        months,
-        days,
-        hours,
-        minutes,
-        seconds,
-        totalDays,
-      }
     }
 
     // Initial calculation
     setTimeLeft(calculateTimeLeft())
 
-    // Update every second
-    const timer = setInterval(() => {
-      setTimeLeft(calculateTimeLeft())
-    }, 1000)
+    // Optimized update strategy using requestAnimationFrame for better performance
+    let animationFrame: number
+    let lastUpdate = Date.now()
 
-    return () => clearInterval(timer)
+    const optimizedUpdate = () => {
+      const now = Date.now()
+
+      // Only update if at least 1 second has passed
+      if (now - lastUpdate >= 1000) {
+        setTimeLeft(calculateTimeLeft())
+        lastUpdate = now
+      }
+
+      // Continue animation loop only if component is still mounted
+      if (mounted) {
+        animationFrame = requestAnimationFrame(optimizedUpdate)
+      }
+    }
+
+    // Start the optimized update loop
+    animationFrame = requestAnimationFrame(optimizedUpdate)
+
+    return () => {
+      if (animationFrame) {
+        cancelAnimationFrame(animationFrame)
+      }
+    }
   }, [retirementDate, mounted])
 
   if (!mounted) {

@@ -2,533 +2,327 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Essential responsive layout fixes */
 html {
   scroll-behavior: smooth;
   height: 100%;
-  /* Prevent content shift when scrollbar appears/disappears */
-  scrollbar-gutter: stable;
-  /* Enhanced font rendering */
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
 }
 
-/* Ensure content doesn't jump on page transitions and prevent horizontal overflow */
+/* Ensure content doesn't jump on page transitions */
 body {
   min-height: 100%;
   overflow-y: scroll;
   overflow-x: hidden;
   position: relative;
-  /* Prevent horizontal scrolling issues */
-  max-width: 100vw;
 }
 
-/* Prevent any element from causing horizontal overflow */
-* {
-  box-sizing: border-box;
+/* Prevent content shift when scrollbar appears/disappears */
+html {
+  scrollbar-gutter: stable;
 }
 
-/* Ensure all containers respect viewport boundaries */
-.container,
-[class*="container"] {
-  max-width: 100%;
-  overflow-x: hidden;
-}
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
 
-/* Fix for responsive images and media */
-img,
-video,
-iframe,
-embed,
-object {
-  max-width: 100%;
-  height: auto;
-}
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
 
-/* Prevent text from causing overflow */
-p, h1, h2, h3, h4, h5, h6, span, div {
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  hyphens: auto;
-}
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
 
-/* Enhanced responsive container fixes with improved horizontal spacing */
-@media (max-width: 375px) {
-  .container {
-    padding-left: 1rem;
-    padding-right: 1rem;
+    --primary: 238 100% 67%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 238 100% 67%;
+
+    --radius: 0.5rem;
+
+    /* Massachusetts Retirement System Design Variables */
+    --mrs-gradient-primary: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+    --mrs-gradient-hero: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+    --mrs-gradient-surface: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    --mrs-gradient-accent: linear-gradient(135deg, #059669 0%, #10b981 100%);
+    --mrs-gradient-gold: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+
+    /* Massachusetts Colors */
+    --mrs-navy-200: #bfdbfe;
+    --mrs-navy-600: #1e3a8a;
+    --mrs-blue-600: #1e40af;
+    --mrs-green-600: #059669;
+    --mrs-purple-600: #7c3aed;
+    --mrs-gold-500: #f59e0b;
+
+    /* Glass Effect and Surfaces */
+    --mrs-glass: rgba(255, 255, 255, 0.95);
+    --mrs-glass-border: rgba(255, 255, 255, 0.2);
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 238 100% 67%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 238 100% 67%;
   }
 }
 
-@media (min-width: 376px) and (max-width: 640px) {
-  .container {
-    padding-left: 1.25rem;
-    padding-right: 1.25rem;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  /* Remove underlines from Next.js Links by default */
+  a {
+    text-decoration: none;
   }
 }
 
-@media (min-width: 641px) and (max-width: 768px) {
-  .container {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
+/* Custom animations */
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
   }
 }
 
-@media (min-width: 769px) and (max-width: 1024px) {
-  .container {
-    padding-left: 2rem;
-    padding-right: 2rem;
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+/* Improved focus styles for accessibility */
+:focus-visible {
+  @apply outline-2 outline-offset-2 outline-primary;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-muted;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/30 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-muted-foreground/50;
+}
+
+/* Page transitions */
+.page-transition-enter {
+  opacity: 0;
+}
+
+.page-transition-enter-active {
+  opacity: 1;
+  transition: opacity 300ms ease-in-out;
+}
+
+.page-transition-exit {
+  opacity: 1;
+}
+
+.page-transition-exit-active {
+  opacity: 0;
+  transition: opacity 300ms ease-in-out;
+}
+
+/* Improved form elements */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  opacity: 1;
+}
+
+/* Responsive typography */
+@media (max-width: 640px) {
+  h1 {
+    @apply text-2xl;
   }
-}
-
-@media (min-width: 1025px) and (max-width: 1440px) {
-  .container {
-    padding-left: 2.5rem;
-    padding-right: 2.5rem;
+  h2 {
+    @apply text-xl;
   }
-}
-
-@media (min-width: 1441px) {
-  .container {
-    padding-left: 3rem;
-    padding-right: 3rem;
+  h3 {
+    @apply text-lg;
   }
-}
-
-/* Ensure grid and flex containers don't overflow */
-.grid,
-.flex {
-  min-width: 0;
-}
-
-/* Fix for cards and components that might overflow */
-.card,
-[class*="card"] {
-  max-width: 100%;
-  overflow: hidden;
-}
-
-/* Responsive table fixes */
-table {
-  width: 100%;
-  table-layout: fixed;
-}
-
-/* Responsive form fixes */
-input,
-textarea,
-select {
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
-/* Fix for buttons that might overflow */
-button,
-[role="button"] {
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
-/* Additional responsive fixes for specific components */
-.blog-content {
-  max-width: 100%;
-  overflow-x: hidden;
-}
-
-/* Fix for wide tables on mobile */
-@media (max-width: 768px) {
-  table {
-    font-size: 0.875rem;
-    overflow-x: auto;
-    display: block;
-    white-space: nowrap;
-  }
-
-  table thead,
-  table tbody,
-  table tr {
-    display: block;
-  }
-
-  table td,
-  table th {
-    display: inline-block;
-    vertical-align: top;
-    padding: 0.5rem;
-  }
-}
-
-/* Fix for code blocks that might overflow */
-pre,
-code {
-  max-width: 100%;
-  overflow-x: auto;
-  word-wrap: break-word;
-  white-space: pre-wrap;
-}
-
-/* Fix for images in content */
-.prose img,
-.blog-content img,
-article img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-  margin: 0 auto;
-}
-
-/* Ensure navigation doesn't overflow */
-nav {
-  overflow-x: hidden;
-}
-
-/* Fix for modal and dialog components */
-[role="dialog"],
-.modal {
-  max-width: calc(100vw - 2rem);
-  max-height: calc(100vh - 2rem);
-}
-
-/* Custom CSS variables for theme support */
-:root {
-  --foreground: 222.2 84% 4.9%;
-  --background: 0 0% 100%;
-  --card: 0 0% 100%;
-  --card-foreground: 222.2 84% 4.9%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 222.2 84% 4.9%;
-  --primary: 222.2 47.4% 11.2%;
-  --primary-foreground: 210 40% 98%;
-  --secondary: 210 40% 96%;
-  --secondary-foreground: 222.2 84% 4.9%;
-  --muted: 210 40% 96%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-  --accent: 210 40% 96%;
-  --accent-foreground: 222.2 84% 4.9%;
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 222.2 84% 4.9%;
-  --radius: 0.5rem;
-
-  /* Massachusetts Retirement System Design Variables */
-  --mrs-gradient-primary: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-  --mrs-gradient-hero: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
-  --mrs-gradient-surface: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-  --mrs-gradient-accent: linear-gradient(135deg, #059669 0%, #10b981 100%);
-  --mrs-gradient-gold: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
-
-  /* Massachusetts Colors */
-  --mrs-navy-200: #bfdbfe;
-  --mrs-navy-600: #1e3a8a;
-  --mrs-blue-600: #1e40af;
-  --mrs-green-600: #059669;
-  --mrs-purple-600: #7c3aed;
-  --mrs-gold-500: #f59e0b;
-
-  /* Glass Effect and Surfaces */
-  --mrs-glass: rgba(255, 255, 255, 0.95);
-  --mrs-glass-border: rgba(255, 255, 255, 0.2);
-}
-
-.dark {
-  --foreground: 210 40% 98%;
-  --background: 222.2 84% 4.9%;
-  --card: 222.2 84% 4.9%;
-  --card-foreground: 210 40% 98%;
-  --popover: 222.2 84% 4.9%;
-  --popover-foreground: 210 40% 98%;
-  --primary: 210 40% 98%;
-  --primary-foreground: 222.2 47.4% 11.2%;
-  --secondary: 217.2 32.6% 17.5%;
-  --secondary-foreground: 210 40% 98%;
-  --muted: 217.2 32.6% 17.5%;
-  --muted-foreground: 215 20.2% 65.1%;
-  --accent: 217.2 32.6% 17.5%;
-  --accent-foreground: 210 40% 98%;
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 217.2 32.6% 17.5%;
-  --input: 217.2 32.6% 17.5%;
-  --ring: 212.7 26.8% 83.9%;
-
-  /* Massachusetts Dark Mode Variables */
-  --mrs-gradient-primary: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
-  --mrs-gradient-hero: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
-  --mrs-gradient-surface: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-  --mrs-gradient-accent: linear-gradient(135deg, #10b981 0%, #34d399 100%);
-  --mrs-gradient-gold: linear-gradient(135deg, #fbbf24 0%, #fcd34d 100%);
-
-  /* Massachusetts Dark Colors */
-  --mrs-navy-200: #334155;
-  --mrs-navy-600: #1e3a8a;
-  --mrs-blue-600: #3b82f6;
-  --mrs-green-600: #10b981;
-  --mrs-purple-600: #a855f7;
-  --mrs-gold-500: #fbbf24;
-
-  /* Dark Glass Effect */
-  --mrs-glass: rgba(30, 41, 59, 0.95);
-  --mrs-glass-border: rgba(255, 255, 255, 0.1);
-}
-
-* {
-  border-color: hsl(var(--border));
-}
-
-body {
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
 }
 
 /* Enhanced typography for large screens */
 @media (min-width: 1024px) {
   .dashboard-title {
-    @apply text-4xl lg:text-5xl xl:text-6xl font-bold;
+    @apply text-4xl font-bold;
   }
   .dashboard-subtitle {
-    @apply text-lg lg:text-xl;
+    @apply text-base;
   }
   .card-title {
-    @apply text-xl lg:text-2xl xl:text-3xl font-semibold;
+    @apply text-xl font-semibold;
   }
   .card-description {
-    @apply text-base lg:text-lg;
+    @apply text-sm;
   }
   .metric-value {
-    @apply text-4xl lg:text-5xl xl:text-6xl font-bold;
+    @apply text-3xl font-bold;
   }
   .metric-label {
-    @apply text-base lg:text-lg;
+    @apply text-sm;
   }
   .button-text {
-    @apply text-base lg:text-lg;
+    @apply text-base;
   }
 }
 
-/* Enhanced spacing for desktop */
-@media (min-width: 1024px) {
-  .desktop-icon-spacing {
-    @apply gap-3 lg:gap-4 xl:gap-5;
+@media (min-width: 1440px) {
+  .dashboard-title {
+    @apply text-5xl font-bold;
   }
-  .desktop-card-padding {
-    @apply p-6 lg:p-8 xl:p-10;
+  .metric-value {
+    @apply text-4xl font-bold;
   }
-  .desktop-button-padding {
-    @apply px-6 py-3 lg:px-8 lg:py-4;
-  }
-}
-
-/* Ensure minimum touch targets */
-@media (max-width: 768px) {
-  button,
-  [role="button"],
-  input[type="button"],
-  input[type="submit"],
-  .touch-target {
-    min-height: 44px;
-    min-width: 44px;
+  .card-title {
+    @apply text-2xl font-semibold;
   }
 }
 
-/* Dashboard card improvements */
-.dashboard-card {
-  @apply border-0 shadow-lg transition-all duration-300;
+@media (min-width: 1920px) {
+  .dashboard-title {
+    @apply text-6xl font-bold;
+  }
+  .metric-value {
+    @apply text-5xl font-bold;
+  }
+  .card-title {
+    @apply text-3xl font-semibold;
+  }
+  .card-description {
+    @apply text-base;
+  }
 }
 
-.dashboard-card:hover {
-  @apply shadow-xl;
+/* Fix for Next.js Link components */
+a.no-underline {
+  text-decoration: none !important;
 }
 
-.dashboard-card-header {
-  @apply pb-3 lg:pb-4 xl:pb-6 px-4 lg:px-6 xl:px-8 pt-4 lg:pt-6 xl:pt-8;
-}
-
-.dashboard-card-content {
-  @apply pt-0 px-4 lg:px-6 xl:px-8 pb-4 lg:pb-6 xl:pb-8;
-}
-
-/* Icon container improvements */
-.dashboard-icon-container {
-  @apply p-2.5 lg:p-3 xl:p-4 rounded-xl shadow-lg transition-all duration-300 flex-shrink-0;
-}
-
-.dashboard-icon {
-  @apply h-5 w-5 lg:h-6 lg:w-6 xl:h-7 xl:w-7;
-}
-
-/* Text improvements */
-.dashboard-card-title {
-  @apply text-sm lg:text-base xl:text-lg font-semibold leading-tight;
-}
-
-.dashboard-card-description {
-  @apply text-xs lg:text-sm leading-tight;
-}
-
-.dashboard-metric-value {
-  @apply text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold leading-tight;
-}
-
-.dashboard-metric-label {
-  @apply text-xs lg:text-sm;
-}
-
-/* Button improvements */
-.dashboard-button {
-  @apply h-auto transition-all duration-300 border-0 shadow-md w-full;
-}
-
-.dashboard-button:hover {
-  @apply shadow-lg;
-}
-
-/* Prevent text overflow */
-.text-safe {
-  @apply leading-tight;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
-
-/* Improved line clamping for older browsers */
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.line-clamp-3 {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+/* Prevent content jumping during navigation */
+.fixed-height-container {
+  min-height: 100vh;
 }
 
 /* Massachusetts Retirement System Utility Classes */
-
-/* Page Layout Classes */
-.mrs-page-wrapper {
-  @apply w-full max-w-full overflow-x-hidden;
-  padding-left: 1rem;
-  padding-right: 1rem;
-}
-
-@media (min-width: 376px) {
-  .mrs-page-wrapper {
-    padding-left: 1.25rem;
-    padding-right: 1.25rem;
-  }
-}
-
-@media (min-width: 641px) {
-  .mrs-page-wrapper {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-  }
-}
-
-@media (min-width: 769px) {
-  .mrs-page-wrapper {
-    padding-left: 2rem;
-    padding-right: 2rem;
-  }
-}
-
-@media (min-width: 1025px) {
-  .mrs-page-wrapper {
-    padding-left: 2.5rem;
-    padding-right: 2.5rem;
-  }
-}
-
-@media (min-width: 1441px) {
-  .mrs-page-wrapper {
-    padding-left: 3rem;
-    padding-right: 3rem;
-  }
-}
-
-/* Content Container with max-width and centering */
-.mrs-content-container {
-  @apply mx-auto w-full;
-  max-width: 1400px;
-}
-
-/* Typography Classes */
-.mrs-heading-1 {
-  @apply text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight;
-  color: white;
-}
-
-.mrs-heading-3 {
-  @apply text-lg lg:text-xl xl:text-2xl font-semibold;
-}
-
-.mrs-body {
-  @apply text-sm lg:text-base leading-relaxed;
-}
-
-.mrs-body-large {
-  @apply text-lg lg:text-xl xl:text-2xl leading-relaxed;
-}
-
-/* Glass Effect */
 .mrs-glass {
   background: var(--mrs-glass);
   backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
   border: 1px solid var(--mrs-glass-border);
 }
 
-/* Card Styles */
+.mrs-heading-1 {
+  @apply text-4xl font-bold tracking-tight;
+}
+
+.mrs-heading-3 {
+  @apply text-lg font-semibold;
+}
+
+.mrs-body {
+  @apply text-base leading-relaxed;
+}
+
+.mrs-body-large {
+  @apply text-lg leading-relaxed;
+}
+
 .mrs-card {
-  @apply rounded-xl shadow-lg border-0 transition-all duration-300;
-  background: var(--mrs-gradient-surface);
+  @apply bg-white rounded-lg shadow-sm border border-gray-200;
 }
 
-.mrs-card:hover {
-  @apply shadow-xl;
-  transform: translateY(-2px);
-}
-
-/* Button Styles */
 .mrs-btn-primary {
-  @apply px-6 py-3 rounded-lg font-medium transition-all duration-300 shadow-md;
   background: var(--mrs-gradient-primary);
-  color: white;
-  border: none;
-}
-
-.mrs-btn-primary:hover {
-  @apply shadow-lg;
-  transform: translateY(-1px);
+  @apply text-white px-4 py-2 rounded-md font-medium transition-all duration-300 hover:shadow-md;
 }
 
 .mrs-btn-secondary {
-  @apply px-6 py-3 rounded-lg font-medium transition-all duration-300 shadow-md;
-  background: var(--mrs-gradient-surface);
-  color: var(--mrs-blue-600);
-  border: 1px solid var(--mrs-navy-200);
+  @apply bg-gray-100 text-gray-700 px-4 py-2 rounded-md font-medium transition-all duration-300 hover:bg-gray-200;
 }
 
-.mrs-btn-secondary:hover {
-  @apply shadow-lg;
-  transform: translateY(-1px);
+.mrs-gradient-text {
+  background: var(--mrs-gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-/* Animation Classes */
+.mrs-badge-success {
+  background: var(--mrs-gradient-accent);
+  @apply text-white px-2 py-1 rounded-full text-xs font-medium;
+}
+
 .mrs-fade-in {
-  animation: fadeIn 0.6s ease-out;
+  animation: fadeIn 0.5s ease-in-out;
 }
 
 .mrs-slide-up {
-  animation: slideUp 0.6s ease-out;
+  animation: slideUp 0.5s ease-out;
 }
 
 @keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
   from {
     opacity: 0;
     transform: translateY(20px);
@@ -539,28 +333,83 @@ body {
   }
 }
 
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* Page wrapper and content container classes */
+.mrs-page-wrapper {
+  @apply w-full px-4 sm:px-6 lg:px-8;
 }
 
-/* Badge Styles */
-.mrs-badge-success {
-  @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
-  background: var(--mrs-gradient-accent);
-  color: white;
+.mrs-content-container {
+  @apply max-w-7xl mx-auto;
 }
 
-/* Gradient Text */
-.mrs-gradient-text {
-  background: var(--mrs-gradient-gold);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+/* Navigation Link Styles - Fixed Hover Issue */
+.nav-link {
+  @apply px-4 py-2 rounded-md font-medium transition-all duration-300 whitespace-nowrap;
+  @apply text-gray-700 dark:text-gray-200;
+  background: transparent;
+  position: relative;
+  z-index: 1;
+}
+
+.nav-link:hover {
+  @apply text-white shadow-md;
+  background: var(--mrs-gradient-primary) !important;
+  transform: translateY(-1px);
+  border-color: transparent !important;
+  outline: none !important;
+}
+
+.nav-link-active {
+  @apply text-white shadow-md;
+  background: var(--mrs-gradient-primary) !important;
+}
+
+.nav-link-mobile {
+  @apply px-3 py-2 rounded-md font-medium transition-all duration-300 whitespace-nowrap text-xs;
+  @apply text-gray-700 dark:text-gray-200;
+  background: transparent;
+  position: relative;
+  z-index: 1;
+}
+
+.nav-link-mobile:hover {
+  @apply text-white shadow-md;
+  background: var(--mrs-gradient-primary) !important;
+  transform: translateY(-1px);
+  border-color: transparent !important;
+  outline: none !important;
+}
+
+/* Ensure navigation links stay visible and clickable */
+.nav-link,
+.nav-link-mobile {
+  display: inline-block;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* Fix any potential z-index conflicts */
+nav {
+  position: relative;
+  z-index: 40;
+}
+
+header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+/* Ensure navigation links have proper stacking context */
+.nav-link,
+.nav-link-mobile {
+  position: relative;
+  z-index: 41;
+}
+
+/* Prevent any overlay issues */
+.nav-link:hover,
+.nav-link-mobile:hover {
+  z-index: 42;
 }

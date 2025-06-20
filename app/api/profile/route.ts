@@ -19,74 +19,34 @@ export async function GET() {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
     }
 
-    // Ensure user exists in database
-    let user = await prisma.user.findUnique({
-      where: { id: session.user.id }
-    })
+    console.log("Querying profile for user:", session.user.id)
 
-    if (!user) {
-      console.log("User not found in GET, creating user record...")
-      try {
-        user = await prisma.user.create({
-          data: {
-            id: session.user.id,
-            email: session.user.email || "",
-            name: session.user.name || "",
-            image: session.user.image || null
-          }
-        })
-        console.log("User created in GET:", user)
-      } catch (userCreateError) {
-        console.error("Failed to create user in GET:", userCreateError)
-        return NextResponse.json({
-          message: "Failed to create user record",
-          error: userCreateError instanceof Error ? userCreateError.message : "Unknown error"
-        }, { status: 500 })
-      }
-    }
+    // Query both User table and RetirementProfile table
+    const [user, retirementProfile] = await Promise.all([
+      prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { name: true, retirementDate: true }
+      }),
+      prisma.retirementProfile.findUnique({
+        where: { userId: session.user.id }
+      })
+    ])
 
-    // Query the database for user profile
-    const userProfile = await prisma.retirementProfile.findUnique({
-      where: {
-        userId: session.user.id
-      }
-    })
+    console.log("Profile query result:", { user, retirementProfile })
 
-    // Calculate years of service if membership date exists (only if not manually set)
-    let yearsOfService = userProfile?.yearsOfService
-    if (!yearsOfService && userProfile?.membershipDate) {
-      const membershipDate = new Date(userProfile.membershipDate)
-      const currentDate = new Date()
-      const diffTime = Math.abs(currentDate.getTime() - membershipDate.getTime())
-      yearsOfService = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365.25))
-    }
-
-    // Calculate planned retirement age if date of birth exists
-    let plannedRetirementAge = userProfile?.plannedRetirementAge
-    if (!plannedRetirementAge && userProfile?.dateOfBirth) {
-      const birthDate = new Date(userProfile.dateOfBirth)
-      const currentDate = new Date()
-      const currentAge = Math.floor((currentDate.getTime() - birthDate.getTime()) / (1000 * 60 * 60 * 24 * 365.25))
-      plannedRetirementAge = Math.max(55, currentAge + 5) // Default to current age + 5 years, minimum 55
-    }
-
+    // Convert Prisma result to expected format
     const responseData = {
-      fullName: session.user.name || "",
-      retirementDate: userProfile?.retirementDate ?
-        userProfile.retirementDate.toISOString().split('T')[0] :
-        (userProfile?.plannedRetirementAge ?
-          new Date(new Date().getFullYear() + (plannedRetirementAge || 65) - (userProfile?.dateOfBirth ?
-            Math.floor((new Date().getTime() - new Date(userProfile.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365.25)) : 50), 0, 1).toISOString().split('T')[0] : ""),
-      dateOfBirth: userProfile?.dateOfBirth ? userProfile.dateOfBirth.toISOString().split('T')[0] : "",
-      membershipDate: userProfile?.membershipDate ? userProfile.membershipDate.toISOString().split('T')[0] : "",
-      retirementGroup: userProfile?.retirementGroup || "Group 1",
-      benefitPercentage: userProfile?.benefitPercentage || 2.0,
-      currentSalary: userProfile?.currentSalary || 0,
-      averageHighest3Years: userProfile?.averageHighest3Years || 0,
-      yearsOfService: yearsOfService || userProfile?.yearsOfService || 0,
-      plannedRetirementAge: plannedRetirementAge || 65,
-      retirementOption: userProfile?.retirementOption || "A",
-      hasProfile: !!userProfile
+      fullName: user?.name || "",
+      retirementDate: user?.retirementDate?.toISOString() || "",
+      dateOfBirth: retirementProfile?.dateOfBirth?.toISOString() || "",
+      membershipDate: retirementProfile?.membershipDate?.toISOString() || "",
+      retirementGroup: retirementProfile?.retirementGroup || "1",
+      benefitPercentage: retirementProfile?.benefitPercentage || 2.0,
+      currentSalary: retirementProfile?.currentSalary || 0,
+      averageHighest3Years: retirementProfile?.averageHighest3Years || 0,
+      yearsOfService: retirementProfile?.yearsOfService || 0,
+      retirementOption: retirementProfile?.retirementOption || "A",
+      estimatedSocialSecurityBenefit: retirementProfile?.estimatedSocialSecurityBenefit || 0
     }
 
     console.log("Returning profile data:", responseData)
@@ -103,157 +63,296 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     console.log("Profile POST request started")
+
+    // Get request headers for debugging
+    const headers = Object.fromEntries(request.headers.entries())
+    console.log("Request headers:", {
+      cookie: headers.cookie ? "present" : "missing",
+      authorization: headers.authorization ? "present" : "missing",
+      userAgent: headers["user-agent"]
+    })
+
     const session = await getServerSession(authOptions)
 
     console.log("Session in profile POST:", {
       hasSession: !!session,
       userId: session?.user?.id,
-      userEmail: session?.user?.email
+      userEmail: session?.user?.email,
+      sessionKeys: session ? Object.keys(session) : [],
+      userKeys: session?.user ? Object.keys(session.user) : []
     })
 
-    if (!session?.user?.id) {
-      console.error("No session or user ID in profile POST")
+    if (!session) {
+      console.error("No session found in profile POST")
       return NextResponse.json({
-        message: "Unauthorized",
+        message: "No session found. Please sign in again.",
         error: "NO_SESSION"
+      }, { status: 401 })
+    }
+
+    if (!session.user) {
+      console.error("No user in session")
+      return NextResponse.json({
+        message: "Invalid session. Please sign in again.",
+        error: "NO_USER_IN_SESSION"
+      }, { status: 401 })
+    }
+
+    if (!session.user.id) {
+      console.error("No user ID in session", {
+        sessionUser: session.user,
+        userKeys: Object.keys(session.user),
+        hasId: !!session.user.id,
+        idValue: session.user.id
+      })
+      return NextResponse.json({
+        message: "Session missing user ID. Please sign in again.",
+        error: "NO_USER_ID",
+        debug: {
+          hasUser: !!session.user,
+          userKeys: Object.keys(session.user),
+          userId: session.user.id
+        }
       }, { status: 401 })
     }
 
     const requestBody = await request.json()
     console.log("Profile POST request body:", requestBody)
 
-    // Validate and prepare data for database
-    const profileData: any = {}
+    // Extract profile data from request body
+    const {
+      // Basic profile fields
+      full_name,
+      retirement_date,
+      // Detailed retirement profile fields
+      dateOfBirth,
+      membershipDate,
+      retirementGroup,
+      benefitPercentage,
+      currentSalary,
+      averageHighest3Years,
+      yearsOfService,
+      retirementOption,
+      retirementDate,
+      estimatedSocialSecurityBenefit
+    } = requestBody
 
-    // Handle both camelCase and snake_case field names for compatibility
-    if (requestBody.dateOfBirth || requestBody.date_of_birth) {
-      profileData.dateOfBirth = new Date(requestBody.dateOfBirth || requestBody.date_of_birth)
-    }
-    if (requestBody.membershipDate || requestBody.membership_date) {
-      profileData.membershipDate = new Date(requestBody.membershipDate || requestBody.membership_date)
-    }
-    if (requestBody.retirementGroup || requestBody.retirement_group) {
-      profileData.retirementGroup = requestBody.retirementGroup || requestBody.retirement_group
-    }
-    if (requestBody.benefitPercentage !== undefined || requestBody.benefit_percentage !== undefined) {
-      profileData.benefitPercentage = parseFloat(requestBody.benefitPercentage || requestBody.benefit_percentage)
-    }
-    if (requestBody.currentSalary !== undefined || requestBody.current_salary !== undefined) {
-      profileData.currentSalary = parseFloat(requestBody.currentSalary || requestBody.current_salary)
-    }
-    if (requestBody.averageHighest3Years !== undefined || requestBody.average_highest_3_years !== undefined) {
-      profileData.averageHighest3Years = parseFloat(requestBody.averageHighest3Years || requestBody.average_highest_3_years)
-    }
-    if (requestBody.yearsOfService !== undefined || requestBody.years_of_service !== undefined) {
-      profileData.yearsOfService = parseFloat(requestBody.yearsOfService || requestBody.years_of_service)
-    }
-    if (requestBody.plannedRetirementAge !== undefined || requestBody.planned_retirement_age !== undefined) {
-      profileData.plannedRetirementAge = parseInt(requestBody.plannedRetirementAge || requestBody.planned_retirement_age)
-    }
-    if (requestBody.retirementOption || requestBody.retirement_option) {
-      profileData.retirementOption = requestBody.retirementOption || requestBody.retirement_option
+    console.log("Validation check:", {
+      full_name,
+      retirement_date,
+      dateOfBirth,
+      membershipDate,
+      retirementGroup,
+      benefitPercentage,
+      currentSalary,
+      averageHighest3Years,
+      yearsOfService,
+      retirementOption,
+      retirementDate,
+      estimatedSocialSecurityBenefit
+    })
+
+    // Check if this is a basic profile update (full_name, retirement_date)
+    const isBasicProfileUpdate = full_name !== undefined || retirement_date !== undefined
+    const isDetailedProfileUpdate = dateOfBirth || membershipDate || retirementGroup || currentSalary
+    // Check if this is a Social Security partial update
+    const isSocialSecurityUpdate = estimatedSocialSecurityBenefit !== undefined
+
+    console.log("Update type:", {
+      isBasicProfileUpdate,
+      isDetailedProfileUpdate,
+      isSocialSecurityUpdate
+    })
+
+    console.log("Social Security check values:", {
+      estimatedSocialSecurityBenefit,
+      estimatedSocialSecurityBenefitUndefined: estimatedSocialSecurityBenefit === undefined
+    })
+
+    console.log("Updating user profile for user:", session.user.id)
+
+    // Prioritize Social Security updates when they only contain SS fields
+    if (isSocialSecurityUpdate && !isBasicProfileUpdate && (!isDetailedProfileUpdate || estimatedSocialSecurityBenefit !== undefined)) {
+      // Handle Social Security partial update
+      console.log("Processing Social Security partial update")
+
+      // Prepare update data for Social Security fields only
+      const socialSecurityData: {
+        estimatedSocialSecurityBenefit?: number;
+      } = {}
+
+      if (estimatedSocialSecurityBenefit !== undefined) {
+        socialSecurityData.estimatedSocialSecurityBenefit = estimatedSocialSecurityBenefit
+      }
+
+      console.log("Social Security update data:", socialSecurityData)
+
+      // Check if retirement profile exists
+      const existingProfile = await prisma.retirementProfile.findUnique({
+        where: { userId: session.user.id }
+      })
+
+      if (!existingProfile) {
+        // If no profile exists, we can't do a partial update for Social Security data
+        // Return an error asking user to complete their profile first
+        return NextResponse.json({
+          message: "Please complete your retirement profile first before saving Social Security data",
+          error: "PROFILE_REQUIRED"
+        }, { status: 400 })
+      }
+
+      // Update existing profile with Social Security data
+      const updatedProfile = await prisma.retirementProfile.update({
+        where: { userId: session.user.id },
+        data: socialSecurityData
+      })
+
+      console.log("Social Security data updated successfully:", updatedProfile)
+
+      const responseData = {
+        message: "Social Security data updated successfully",
+        estimatedSocialSecurityBenefit: updatedProfile.estimatedSocialSecurityBenefit
+      }
+
+      console.log("Social Security update successful, returning:", responseData)
+      return NextResponse.json(responseData)
     }
 
-    // Handle legacy fields from profile form
-    if (requestBody.full_name && session.user.name !== requestBody.full_name) {
-      // Update user name in the User table if it's different
-      await prisma.user.update({
-        where: { id: session.user.id },
-        data: { name: requestBody.full_name }
+    if (isBasicProfileUpdate) {
+      // Handle basic profile update (full_name, retirement_date)
+      console.log("Processing basic profile update")
+
+      // Prepare update data for User table
+      const updateData: { name?: string; retirementDate?: Date | null } = {}
+
+      if (full_name !== undefined) {
+        updateData.name = full_name
+      }
+
+      if (retirement_date !== undefined) {
+        updateData.retirementDate = retirement_date ? new Date(retirement_date) : null
+      }
+
+      // Update user data in NextAuth user table (use upsert to handle missing records)
+      if (Object.keys(updateData).length > 0) {
+        await prisma.user.upsert({
+          where: { id: session.user.id },
+          update: updateData,
+          create: {
+            id: session.user.id,
+            email: session.user.email || "",
+            ...updateData
+          }
+        })
+        console.log("Updated user data:", updateData)
+      }
+
+      console.log("Basic profile update completed successfully")
+
+      return NextResponse.json({
+        message: "Basic profile updated successfully",
+        fullName: full_name || session.user.name,
+        retirementDate: retirement_date || ""
       })
     }
 
-    // Handle retirement_date field (both snake_case and camelCase)
-    const retirementDateValue = requestBody.retirement_date || requestBody.retirementDate
-    if (retirementDateValue) {
-      // Store the actual retirement date in the database
-      profileData.retirementDate = new Date(retirementDateValue)
+    if (isDetailedProfileUpdate) {
+      // Handle detailed retirement profile update
+      console.log("Processing detailed retirement profile update")
 
-      // Also calculate plannedRetirementAge for backward compatibility
-      if (profileData.dateOfBirth || requestBody.dateOfBirth) {
-        const retirementDate = new Date(retirementDateValue)
-        const birthDate = profileData.dateOfBirth || new Date(requestBody.dateOfBirth)
-        const retirementAge = retirementDate.getFullYear() - birthDate.getFullYear()
-        if (retirementAge > 0 && retirementAge < 100) {
-          profileData.plannedRetirementAge = retirementAge
-        }
+      // Validate required fields for detailed profile
+      if (!dateOfBirth || !membershipDate || !retirementGroup || !currentSalary) {
+        console.error("Missing required retirement profile fields")
+        return NextResponse.json({
+          message: "Date of birth, membership date, retirement group, and current salary are required for detailed profile"
+        }, { status: 400 })
       }
-    }
 
-    console.log("About to upsert profile with data:", JSON.stringify(profileData, null, 2))
-    console.log("User ID:", session.user.id)
-
-    // CRITICAL FIX: Ensure user exists before creating profile
-    console.log("🔍 Checking if user exists in database...")
-    let user = await prisma.user.findUnique({
-      where: { id: session.user.id }
-    })
-
-    if (!user) {
-      console.log("❌ User not found, creating user record...")
-      try {
-        user = await prisma.user.create({
-          data: {
-            id: session.user.id,
-            email: session.user.email || "",
-            name: session.user.name || "",
-            image: session.user.image || null
-          }
-        })
-        console.log("✅ User created successfully:", user)
-      } catch (userCreateError) {
-        console.error("❌ Failed to create user:", userCreateError)
-        throw new Error(`Failed to create user record: ${userCreateError instanceof Error ? userCreateError.message : 'Unknown error'}`)
+      // Use Prisma to update the RetirementProfile
+      const profileData = {
+        dateOfBirth: new Date(dateOfBirth),
+        membershipDate: new Date(membershipDate),
+        retirementGroup,
+        benefitPercentage: benefitPercentage || 2.0,
+        currentSalary,
+        averageHighest3Years: averageHighest3Years || undefined,
+        yearsOfService: yearsOfService || undefined,
+        retirementOption: retirementOption || undefined,
+        retirementDate: retirementDate ? new Date(retirementDate) : undefined,
+        estimatedSocialSecurityBenefit: estimatedSocialSecurityBenefit || undefined
       }
-    } else {
-      console.log("✅ User exists:", { id: user.id, email: user.email, name: user.name })
-    }
 
-    // Upsert the profile (create if doesn't exist, update if it does)
-    let updatedProfile
-    try {
-      updatedProfile = await prisma.retirementProfile.upsert({
+      // Remove undefined values
+      const cleanProfileData = Object.fromEntries(
+        Object.entries(profileData).filter(([_, value]) => value !== undefined)
+      )
+
+      console.log("Clean profile data for Prisma:", cleanProfileData)
+
+      // Use Prisma upsert to create or update the profile
+      const updatedProfile = await prisma.retirementProfile.upsert({
         where: {
           userId: session.user.id
         },
-        update: profileData,
+        update: cleanProfileData,
         create: {
           userId: session.user.id,
-          dateOfBirth: profileData.dateOfBirth || new Date('1970-01-01'),
-          membershipDate: profileData.membershipDate || new Date(),
-          retirementGroup: profileData.retirementGroup || 'Group 1',
-          benefitPercentage: profileData.benefitPercentage || 2.0,
-          currentSalary: profileData.currentSalary || 0,
-          ...profileData
+          dateOfBirth: new Date(dateOfBirth),
+          membershipDate: new Date(membershipDate),
+          retirementGroup,
+          benefitPercentage: benefitPercentage || 2.0,
+          currentSalary,
+          averageHighest3Years: averageHighest3Years || null,
+          yearsOfService: yearsOfService || null,
+          retirementOption: retirementOption || null,
+          retirementDate: retirementDate ? new Date(retirementDate) : null,
+          estimatedSocialSecurityBenefit: estimatedSocialSecurityBenefit || null
         }
       })
-      console.log("✅ Profile upsert successful:", JSON.stringify(updatedProfile, null, 2))
-    } catch (upsertError) {
-      console.error("❌ Profile upsert failed:", {
-        error: upsertError,
-        errorType: typeof upsertError,
-        errorConstructor: upsertError?.constructor?.name,
-        message: upsertError instanceof Error ? upsertError.message : String(upsertError),
-        stack: upsertError instanceof Error ? upsertError.stack : undefined,
-        profileData: JSON.stringify(profileData),
-        userId: session.user.id,
-        userExists: !!user
-      })
-      throw upsertError
+
+      console.log("User retirement profile updated successfully:", updatedProfile)
+
+      const responseData = {
+        message: "Retirement profile updated successfully",
+        dateOfBirth: updatedProfile.dateOfBirth.toISOString(),
+        membershipDate: updatedProfile.membershipDate.toISOString(),
+        retirementGroup: updatedProfile.retirementGroup,
+        benefitPercentage: updatedProfile.benefitPercentage,
+        currentSalary: updatedProfile.currentSalary,
+        averageHighest3Years: updatedProfile.averageHighest3Years,
+        yearsOfService: updatedProfile.yearsOfService,
+        retirementOption: updatedProfile.retirementOption,
+        retirementDate: updatedProfile.retirementDate?.toISOString(),
+        estimatedSocialSecurityBenefit: updatedProfile.estimatedSocialSecurityBenefit
+      }
+
+      console.log("Retirement profile update successful, returning:", responseData)
+      return NextResponse.json(responseData)
     }
 
-    const responseData = {
-      message: "Profile updated successfully",
-      profile: updatedProfile
-    }
 
-    console.log("Profile update successful, returning:", responseData)
-    return NextResponse.json(responseData)
+
+    // If none of the update types match, return error
+    return NextResponse.json({
+      message: "No valid profile data provided"
+    }, { status: 400 })
+
+
   } catch (error) {
     console.error("Error updating profile:", error)
+
+    // More detailed error information
+    const errorMessage = error instanceof Error ? error.message : "Unknown error"
+    const errorDetails = {
+      message: "Failed to update profile",
+      error: errorMessage,
+      stack: error instanceof Error ? error.stack : undefined
+    }
+
+    console.error("Profile update error details:", errorDetails)
     return NextResponse.json({
       message: "Failed to update profile",
-      error: error instanceof Error ? error.message : "Unknown error"
+      error: errorMessage
     }, { status: 500 })
   }
 }

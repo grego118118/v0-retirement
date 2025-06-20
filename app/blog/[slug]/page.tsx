@@ -12,7 +12,7 @@ import { TableOfContents } from "@/components/blog/table-of-contents"
 import { WepGpoTimeline } from "@/components/blog/wep-gpo-timeline"
 import { generateSEOMetadata } from "@/components/seo/metadata"
 import { BlogHeroImage, RelatedPostImage } from "@/components/blog/blog-image"
-import "../blog.css"
+import { CalculatorCTA } from "@/components/blog/calculator-cta"
 
 export const dynamic = "force-dynamic"
 export const fetchCache = "force-no-store"
@@ -25,203 +25,193 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params
-  const post = blogPosts.find((p) => p.id === slug)
+  const post = blogPosts.find((post) => post.id === slug)
 
   if (!post) {
-    return {
-      title: "Post Not Found",
-    }
+    return generateSEOMetadata({
+      title: "Blog Post Not Found",
+      description: "The requested blog post could not be found.",
+      path: `/blog/${slug}`,
+    })
   }
 
   return generateSEOMetadata({
-    title: post.title,
+    title: `${post.title} | Massachusetts Pension Estimator`,
     description: post.description,
     path: `/blog/${post.id}`,
     keywords: post.tags,
-    ogImage: post.image || "/images/blog/default-blog-image.svg",
   })
 }
 
-export default async function BlogPost({ params }: PageProps) {
+export default async function BlogPostPage({ params }: PageProps) {
   const { slug } = await params
-  const post = blogPosts.find((p) => p.id === slug)
+  const post = blogPosts.find((post) => post.id === slug)
 
   if (!post) {
     notFound()
   }
 
-  // Get related posts (same category, excluding current post)
-  const relatedPosts = blogPosts
-    .filter((p) => p.category === post.category && p.id !== post.id)
-    .slice(0, 3)
+  const relatedPosts = post.relatedPosts ? blogPosts.filter((p) => post.relatedPosts?.includes(p.id)) : []
 
-  // Check if this is the SSFA post to insert timeline
+  // Check if this is the Social Security Fairness Act post
   const isSSFAPost = post.id === "social-security-fairness-act-what-massachusetts-state-employees-need-to-know"
 
-  // Split content for timeline insertion
+  // Split the content to insert the timeline for the SSFA post
   let contentBefore = post.content
   let contentAfter = ""
 
   if (isSSFAPost) {
-    const timelineMarker = "<!-- TIMELINE_INSERTION_POINT -->"
-    const parts = post.content.split(timelineMarker)
-    contentBefore = parts[0] || post.content
-    contentAfter = parts[1] || ""
+    // Find a good insertion point after the "Implementation Timeline" section
+    const insertPoint = post.content.indexOf("<h2>Implementation Progress and What to Expect</h2>")
+    if (insertPoint !== -1) {
+      contentBefore = post.content.substring(0, insertPoint)
+      contentAfter = post.content.substring(insertPoint)
+    }
   }
 
   return (
     <BlogPostClient post={post} relatedPosts={relatedPosts}>
-      <div className="mrs-page-wrapper">
-        <div className="mrs-content-container py-8 md:py-12">
-          <div className="max-w-6xl mx-auto">
-          <div className="mb-12">
+      <div className="container py-8 md:py-12">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-8">
             <Link
               href="/blog"
               prefetch={true}
-              className="text-muted-foreground hover:text-primary flex items-center gap-1 mb-8 transition-colors no-underline"
+              className="text-muted-foreground hover:text-primary flex items-center gap-1 mb-6 transition-colors no-underline"
               scroll={false}
             >
               <ArrowLeft className="h-4 w-4" /> Back to all articles
             </Link>
 
-            <div className="max-w-4xl mx-auto">
-              <Badge className="mb-6">{post.category}</Badge>
+            <Badge className="mb-4">{post.category}</Badge>
 
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 leading-tight">{post.title}</h1>
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">{post.title}</h1>
 
-              <p className="text-xl md:text-2xl text-muted-foreground mb-8 leading-relaxed">{post.description}</p>
+            <p className="text-xl text-muted-foreground mb-6">{post.description}</p>
 
-              <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground mb-8">
-                <div className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  <span className="font-medium">{post.author}</span>
-                  <span className="text-xs">•</span>
-                  <span className="text-xs">{post.authorTitle}</span>
+            <div className="flex flex-wrap items-center gap-4 mb-8">
+              <div className="flex items-center gap-2">
+                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <User className="h-5 w-5 text-primary" />
                 </div>
-                <div className="flex items-center gap-2">
-                  <CalendarIcon className="h-4 w-4" />
-                  <span>{new Date(post.date).toLocaleDateString()}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  <span>{post.readTime}</span>
+                <div>
+                  <p className="font-medium">{post.author}</p>
+                  <p className="text-sm text-muted-foreground">{post.authorTitle}</p>
                 </div>
               </div>
 
-              <div className="relative h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] mb-12 rounded-xl overflow-hidden shadow-2xl">
-                <BlogHeroImage
-                  src={post.image || "/images/blog/default-blog-image.svg"}
-                  alt={`${post.title} - ${post.description}`}
-                  title={post.title}
-                  priority={true}
-                />
+              <div className="flex items-center text-sm text-muted-foreground">
+                <CalendarIcon className="mr-1 h-3 w-3" /> {post.date}
+                <span className="mx-2">•</span>
+                <Clock className="mr-1 h-3 w-3" /> {post.readTime}
+              </div>
+            </div>
+
+            <BlogHeroImage
+              src={post.image || "/images/blog/default-blog-image.svg"}
+              alt={post.title}
+              title={post.title}
+              priority={true}
+            />
+
+            <div className="flex justify-between items-center mb-8">
+              <div className="flex flex-wrap gap-2">
+                {post.tags.map((tag) => (
+                  <Badge key={tag} variant="outline" className="flex items-center gap-1">
+                    <Tag className="h-3 w-3" /> {tag}
+                  </Badge>
+                ))}
               </div>
 
-              <div className="flex justify-between items-center mb-12">
-                <div className="flex flex-wrap gap-2">
-                  {post.tags.map((tag) => (
-                    <Badge key={tag} variant="outline" className="flex items-center gap-1 px-3 py-1">
-                      <Tag className="h-3 w-3" /> {tag}
-                    </Badge>
-                  ))}
-                </div>
-
-                <div className="flex gap-2">
-                  <Button variant="ghost" size="icon" title="Share article" className="h-10 w-10">
-                    <Share2 className="h-5 w-5" />
-                  </Button>
-                  <Button variant="ghost" size="icon" title="Bookmark article" className="h-10 w-10">
-                    <Bookmark className="h-5 w-5" />
-                  </Button>
-                </div>
+              <div className="flex gap-2">
+                <Button variant="ghost" size="icon" title="Share article">
+                  <Share2 className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" title="Bookmark article">
+                  <Bookmark className="h-4 w-4" />
+                </Button>
               </div>
             </div>
           </div>
 
+          {/* Compact Calculator CTA */}
+          <div className="mb-8">
+            <CalculatorCTA variant="compact" />
+          </div>
+
           {/* Wrap the article and table of contents in a flex container */}
-          <div className="flex flex-col lg:flex-row gap-12">
+          <div className="flex flex-col lg:flex-row">
             {/* Article Content */}
-            <article className="blog-content mb-16 flex-grow min-w-0">
+            <article className="blog-content mb-12 flex-grow">
               {/* First part of content */}
               <div dangerouslySetInnerHTML={{ __html: contentBefore }} />
 
               {/* Insert timeline for SSFA post */}
-              {isSSFAPost && (
-                <div className="my-12">
-                  <WepGpoTimeline />
-                </div>
-              )}
+              {isSSFAPost && <WepGpoTimeline />}
 
               {/* Rest of content */}
               {contentAfter && <div dangerouslySetInnerHTML={{ __html: contentAfter }} />}
             </article>
 
-            {/* Table of Contents - Hidden on mobile, sticky on desktop */}
-            <aside className="hidden lg:block lg:w-80 flex-shrink-0">
-              <div className="sticky top-24">
-                <TableOfContents />
-              </div>
-            </aside>
+            {/* Table of Contents */}
+            <TableOfContents />
+          </div>
+
+          {/* Calculator CTA */}
+          <div className="mb-12">
+            <CalculatorCTA variant="default" />
           </div>
 
           {/* Author Bio */}
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-gradient-to-r from-muted/30 to-muted/10 p-8 rounded-xl mb-16 border border-border/50">
-              <div className="flex items-start gap-6">
-                <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                  <User className="h-10 w-10 text-primary" />
-                </div>
-                <div className="flex-grow">
-                  <h3 className="font-bold text-xl mb-2">{post.author}</h3>
-                  <p className="text-muted-foreground mb-4 font-medium">{post.authorTitle}</p>
-                  <p className="text-base leading-relaxed">
-                    Expert in Massachusetts retirement planning with over 10 years of experience helping state employees
-                    optimize their pension and Social Security benefits. Specializes in complex benefit calculations and
-                    retirement income optimization strategies.
-                  </p>
-                </div>
+          <div className="bg-muted/30 p-6 rounded-lg border mb-12">
+            <div className="flex items-start gap-4">
+              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <User className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold mb-1">About {post.author}</h3>
+                <p className="text-sm text-muted-foreground mb-2">{post.authorTitle}</p>
+                <p className="text-sm">
+                  {post.author} is a {post.authorTitle.toLowerCase()} with over 15 years of experience helping
+                  Massachusetts state employees navigate their pension benefits. They previously worked at the
+                  Massachusetts State Retirement Board and now write about retirement planning strategies.
+                </p>
               </div>
             </div>
           </div>
 
           {/* Related Articles */}
           {relatedPosts.length > 0 && (
-            <div className="max-w-6xl mx-auto mb-16">
-              <h2 className="text-3xl font-bold mb-8 text-center">Related Articles</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="mb-12">
+              <h2 className="text-2xl font-semibold mb-6">Related Articles</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {relatedPosts.map((relatedPost) => (
-                  <div key={relatedPost.id} className="border border-border/50 rounded-xl overflow-hidden h-full flex flex-col hover:shadow-lg transition-all duration-300 hover:border-primary/20">
+                  <div key={relatedPost.id} className="border rounded-lg overflow-hidden h-full flex flex-col">
                     <RelatedPostImage
                       src={relatedPost.image || "/images/blog/default-blog-image.svg"}
                       alt={relatedPost.title}
                       title={relatedPost.title}
                     />
-                    <div className="p-6 flex flex-col flex-grow">
-                      <Badge variant="outline" className="mb-3 w-fit">
+                    <div className="p-4 flex flex-col flex-grow">
+                      <Badge variant="outline" className="mb-2 w-fit">
                         {relatedPost.category}
                       </Badge>
-                      <h3 className="font-bold mb-3 text-lg leading-tight">
+                      <h3 className="font-semibold mb-2 text-sm leading-tight">
                         <Link
                           href={`/blog/${relatedPost.id}`}
-                          className="hover:text-primary transition-colors no-underline"
+                          className="hover:text-primary transition-colors"
                           prefetch={true}
-                          scroll={false}
                         >
                           {relatedPost.title}
                         </Link>
                       </h3>
-                      <p className="text-sm text-muted-foreground mb-4 flex-grow line-clamp-3 leading-relaxed">
+                      <p className="text-xs text-muted-foreground line-clamp-2 flex-grow">
                         {relatedPost.description}
                       </p>
-                      <div className="flex items-center justify-between text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <CalendarIcon className="h-4 w-4" />
-                          {new Date(relatedPost.date).toLocaleDateString()}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-4 w-4" />
-                          {relatedPost.readTime}
-                        </div>
+                      <div className="flex items-center text-xs text-muted-foreground mt-2 pt-2 border-t">
+                        <CalendarIcon className="mr-1 h-3 w-3" /> {relatedPost.date}
+                        <span className="mx-2">•</span>
+                        <Clock className="mr-1 h-3 w-3" /> {relatedPost.readTime}
                       </div>
                     </div>
                   </div>
@@ -230,28 +220,41 @@ export default async function BlogPost({ params }: PageProps) {
             </div>
           )}
 
-          {/* Newsletter Signup */}
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/20 rounded-xl p-8 text-center">
-              <h3 className="text-2xl font-bold mb-4">Stay Updated on Massachusetts Pension News</h3>
-              <p className="text-muted-foreground mb-6 text-lg leading-relaxed max-w-2xl mx-auto">
-                Get the latest updates on Massachusetts state pension benefits, policy changes, and retirement planning
-                tips delivered to your inbox.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-                <Input
-                  type="email"
-                  placeholder="Enter your email"
-                  className="flex-1 h-12 text-base"
-                />
-                <Button className="h-12 px-8 text-base font-semibold">Subscribe</Button>
+          {/* Comments Section */}
+          <div className="mb-12">
+            <h2 className="text-2xl font-semibold mb-6">Comments</h2>
+            <div className="space-y-6">
+              <div className="border rounded-lg p-6 bg-muted/30">
+                <p className="text-muted-foreground text-center">
+                  Comments are currently disabled. For questions about your Massachusetts state pension, please{" "}
+                  <Link href="/contact" className="text-primary hover:underline">
+                    contact us
+                  </Link>{" "}
+                  or use our{" "}
+                  <Link href="/calculator" className="text-primary hover:underline">
+                    pension calculator
+                  </Link>
+                  .
+                </p>
               </div>
-              <p className="text-sm text-muted-foreground mt-4">
-                We respect your privacy. Unsubscribe at any time.
-              </p>
             </div>
           </div>
-        </div>
+
+          {/* Newsletter Signup */}
+          <div className="bg-primary/5 border border-primary/20 rounded-lg p-6">
+            <h3 className="text-xl font-semibold mb-2">Stay Updated on Massachusetts Pension News</h3>
+            <p className="text-muted-foreground mb-4">
+              Get the latest updates on Massachusetts state pension benefits, policy changes, and retirement planning
+              tips delivered to your inbox.
+            </p>
+            <div className="flex gap-2">
+              <Input type="email" placeholder="Enter your email" className="flex-1" />
+              <Button>Subscribe</Button>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              We respect your privacy. Unsubscribe at any time.
+            </p>
+          </div>
         </div>
       </div>
     </BlogPostClient>

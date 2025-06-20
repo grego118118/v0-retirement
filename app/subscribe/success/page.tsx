@@ -1,200 +1,192 @@
 "use client"
 
-import { useEffect, useState, Suspense } from "react"
-import { useSearchParams } from "next/navigation"
-import { useSession } from "next-auth/react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { 
-  Check, 
-  Crown, 
-  Calculator, 
-  FileText, 
-  TrendingUp, 
-  DollarSign,
-  ArrowRight,
-  Sparkles
-} from "lucide-react"
+import { CheckCircle, Crown, Calculator, FileText, Users, RefreshCw } from "lucide-react"
+import Link from "next/link"
 
-function SubscriptionSuccessContent() {
-  const searchParams = useSearchParams()
-  const { data: session } = useSession()
-  const [isLoading, setIsLoading] = useState(true)
-  const sessionId = searchParams.get('session_id')
+const premiumFeatures = [
+  {
+    icon: Calculator,
+    title: "Social Security Integration",
+    description: "Combine your pension with Social Security benefits",
+    href: "/social-security"
+  },
+  {
+    icon: FileText,
+    title: "Unlimited Saved Calculations",
+    description: "Save and compare multiple retirement scenarios",
+    href: "/calculator"
+  },
+  {
+    icon: Users,
+    title: "Advanced Analysis Tools",
+    description: "Access comprehensive retirement planning features",
+    href: "/calculator"
+  }
+]
 
-  useEffect(() => {
-    // Trigger subscription status refresh
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new Event('subscription-updated'))
-    }
-    
-    // Set loading to false after a brief delay
-    setTimeout(() => setIsLoading(false), 1000)
-  }, [])
+export default function SubscribeSuccessPage() {
+  const router = useRouter()
 
-  const premiumFeatures = [
-    {
-      icon: Calculator,
-      title: "Advanced Pension Calculator",
-      description: "Enhanced pension calculations with detailed projections",
-      href: "/calculator"
-    },
-    {
-      icon: DollarSign,
-      title: "Tax Implications Calculator",
-      description: "Federal and Massachusetts state tax optimization strategies",
-      href: "/calculator"
-    },
-    {
-      icon: FileText,
-      title: "Professional PDF Reports",
-      description: "Detailed retirement planning reports with charts and analysis",
-      href: "/dashboard"
-    }
-  ]
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50/30 to-indigo-50/20 dark:from-green-950/20 dark:via-blue-950/20 dark:to-indigo-950/10 flex items-center justify-center p-4">
-        <Card className="max-w-md w-full text-center">
-          <CardContent className="pt-6">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-            <h2 className="text-xl font-semibold mb-2">Activating Your Premium Features...</h2>
-            <p className="text-muted-foreground">Please wait while we set up your account</p>
-          </CardContent>
-        </Card>
-      </div>
-    )
+  const refreshSubscriptionStatus = () => {
+    // Trigger a subscription status refresh
+    const event = new CustomEvent('subscription-updated')
+    window.dispatchEvent(event)
   }
 
+  useEffect(() => {
+    // Automatically trigger status refresh when page loads
+    const timer = setTimeout(() => {
+      refreshSubscriptionStatus()
+    }, 1000) // Small delay to ensure API calls are ready
+
+    return () => clearTimeout(timer)
+  }, [])
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50/30 to-indigo-50/20 dark:from-green-950/20 dark:via-blue-950/20 dark:to-indigo-950/10">
-      <div className="container mx-auto px-4 py-8 lg:py-16">
-        {/* Success Header */}
-        <div className="text-center mb-12">
-          <div className="text-6xl mb-4">🎉</div>
-          <Badge className="mb-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2">
-            <Crown className="mr-2 h-4 w-4" />
-            Premium Activated
-          </Badge>
-          <h1 className="text-3xl lg:text-4xl font-bold text-slate-900 dark:text-slate-100 mb-4">
-            Welcome to Premium!
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Your subscription is now active. You have access to all premium features to maximize your Massachusetts retirement benefits.
-          </p>
-        </div>
+    <div className="container mx-auto py-8 px-4 max-w-4xl">
+      <div className="text-center mb-8">
+        <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
+        <Badge className="mb-4 bg-green-100 text-green-800">
+          <Crown className="mr-1 h-3 w-3" />
+          Premium Activated
+        </Badge>
+        <h1 className="text-4xl font-bold tracking-tight mb-4">
+          Welcome to Premium!
+        </h1>
+        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          Thank you for upgrading. You now have access to all premium features and advanced retirement planning tools.
+        </p>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={refreshSubscriptionStatus}
+          className="mt-4"
+        >
+          <RefreshCw className="mr-2 h-4 w-4" />
+          Refresh Status
+        </Button>
+      </div>
 
-        {/* Success Card */}
-        <Card className="mb-8 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 max-w-2xl mx-auto">
-          <CardContent className="pt-6">
-            <div className="text-center space-y-4">
-              <div className="text-2xl font-bold text-green-600">
-                <Sparkles className="inline mr-2 h-6 w-6" />
-                Subscription Confirmed
-              </div>
-              <p className="text-muted-foreground">
-                Your premium features are now active. Start exploring the advanced tools below!
-              </p>
-              {sessionId && (
-                <div className="text-xs text-muted-foreground">
-                  Session ID: {sessionId}
-                </div>
-              )}
+      {/* Success Card */}
+      <Card className="mb-8 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20">
+        <CardContent className="pt-6">
+          <div className="text-center space-y-4">
+            <div className="text-2xl font-bold text-green-600">
+              🎉 Subscription Confirmed
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Premium Features */}
-        <div className="mb-12">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-slate-100 mb-4">
-              Start Using Your Premium Features
-            </h2>
-            <p className="text-lg text-muted-foreground">
-              Click on any feature below to get started
+            <p className="text-muted-foreground">
+              Your premium features are now active. Try the Social Security Integration below!
             </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button asChild>
+                <Link href="/calculator">
+                  <Calculator className="mr-2 h-4 w-4" />
+                  Start Using Premium Features
+                </Link>
+              </Button>
+              <Button variant="outline" asChild>
+                <Link href="/social-security">
+                  <Crown className="mr-2 h-4 w-4" />
+                  Try Social Security Integration
+                </Link>
+              </Button>
+            </div>
           </div>
+        </CardContent>
+      </Card>
 
-          <div className="grid md:grid-cols-2 gap-6 lg:gap-8 max-w-4xl mx-auto">
-            {premiumFeatures.map((feature, index) => {
-              const Icon = feature.icon
-              return (
-                <Card key={index} className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg bg-gradient-to-br from-white to-slate-50/50 dark:from-slate-900 dark:to-slate-800/50 cursor-pointer">
-                  <Link href={feature.href}>
-                    <CardHeader className="pb-4">
-                      <div className="flex items-start gap-4">
-                        <div className="p-3 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
-                          <Icon className="h-6 w-6" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <CardTitle className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-2 group-hover:text-blue-600 transition-colors">
-                            {feature.title}
-                          </CardTitle>
-                          <CardDescription className="text-sm text-muted-foreground leading-relaxed">
-                            {feature.description}
-                          </CardDescription>
-                        </div>
-                        <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-blue-600 transition-colors flex-shrink-0 mt-1" />
-                      </div>
-                    </CardHeader>
-                  </Link>
-                </Card>
-              )
-            })}
-          </div>
+      {/* Premium Features */}
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold text-center mb-6">
+          Your Premium Features Are Ready
+        </h2>
+        <div className="grid md:grid-cols-3 gap-6">
+          {premiumFeatures.map((feature, index) => (
+            <Card key={index} className="hover:shadow-lg transition-shadow cursor-pointer">
+              <CardHeader className="text-center">
+                <feature.icon className="h-12 w-12 text-blue-500 mx-auto mb-2" />
+                <CardTitle className="text-lg">{feature.title}</CardTitle>
+                <CardDescription>{feature.description}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button asChild className="w-full" variant="outline">
+                  <Link href={feature.href}>Get Started</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
         </div>
+      </div>
 
-        {/* Quick Actions */}
-        <div className="text-center">
-          <Card className="max-w-2xl mx-auto bg-gradient-to-br from-blue-50 via-indigo-50/50 to-purple-50/30 dark:from-blue-950/20 dark:via-indigo-950/20 dark:to-purple-950/20 border-0 shadow-xl">
-            <CardContent className="pt-8 pb-8">
-              <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-4">
-                What would you like to do first?
+      {/* Next Steps */}
+      <Card>
+        <CardHeader>
+          <CardTitle>What's Next?</CardTitle>
+          <CardDescription>
+            Here's how to make the most of your premium subscription
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="space-y-3">
+              <h3 className="font-semibold flex items-center gap-2">
+                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-600 text-sm font-bold">1</span>
+                Complete Your Pension Calculation
               </h3>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button
-                  size="lg"
-                  className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700"
-                  asChild
-                >
-                  <Link href="/calculator">
-                    <Crown className="mr-2 h-5 w-5" />
-                    Try Advanced Calculator
-                  </Link>
-                </Button>
-                <Button variant="outline" size="lg" asChild>
-                  <Link href="/dashboard">
-                    <Calculator className="mr-2 h-5 w-5" />
-                    Go to Dashboard
-                  </Link>
-                </Button>
-              </div>
-              <p className="text-sm text-muted-foreground mt-4">
-                Need help getting started? Check out our <Link href="/resources" className="text-blue-600 hover:underline">resources page</Link> or <Link href="/contact" className="text-blue-600 hover:underline">contact support</Link>.
+              <p className="text-sm text-muted-foreground ml-8">
+                Use our enhanced calculator with unlimited saves and advanced scenario modeling.
               </p>
-            </CardContent>
-          </Card>
+            </div>
+            <div className="space-y-3">
+              <h3 className="font-semibold flex items-center gap-2">
+                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-600 text-sm font-bold">2</span>
+                Add Social Security Benefits
+              </h3>
+              <p className="text-sm text-muted-foreground ml-8">
+                Integrate your Social Security estimates for complete retirement income planning.
+              </p>
+            </div>
+            <div className="space-y-3">
+              <h3 className="font-semibold flex items-center gap-2">
+                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-600 text-sm font-bold">3</span>
+                Compare Scenarios
+              </h3>
+              <p className="text-sm text-muted-foreground ml-8">
+                Save multiple calculations and compare different retirement dates and options.
+              </p>
+            </div>
+            <div className="space-y-3">
+              <h3 className="font-semibold flex items-center gap-2">
+                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-600 text-sm font-bold">4</span>
+                Export Your Plans
+              </h3>
+              <p className="text-sm text-muted-foreground ml-8">
+                Download PDF reports and share your retirement plan with advisors or family.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Support Information */}
+      <div className="mt-8 text-center">
+        <p className="text-sm text-muted-foreground mb-4">
+          Need help getting started? Our premium support team is here to help.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <Button variant="outline" asChild>
+            <Link href="/contact">Contact Support</Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link href="/faq">View FAQ</Link>
+          </Button>
         </div>
       </div>
     </div>
   )
-}
-
-export default function SubscriptionSuccessPage() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50/30 to-indigo-50/20 dark:from-green-950/20 dark:via-blue-950/20 dark:to-indigo-950/10 flex items-center justify-center p-4">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <h2 className="text-xl font-semibold mb-2">Loading success page...</h2>
-          <p className="text-muted-foreground">Please wait while we confirm your subscription</p>
-        </div>
-      </div>
-    }>
-      <SubscriptionSuccessContent />
-    </Suspense>
-  )
-}
+} 

@@ -8,8 +8,6 @@ import { Badge } from "@/components/ui/badge"
 import { Download, Printer, Crown, TrendingUp, DollarSign, Calendar, Info, AlertTriangle } from "lucide-react"
 import { motion } from "framer-motion"
 import { PremiumBadge } from "@/components/premium/premium-gate"
-import { PensionPDFButton } from "@/components/pdf/pdf-generation-button"
-import { PDFShareDialog } from "@/components/email/pdf-share-dialog"
 import { useSubscriptionStatus } from "@/hooks/use-subscription"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import {
@@ -74,7 +72,7 @@ export default function PensionResults({ result }: PensionResultsProps) {
       transition={{ duration: 0.5 }}
       className="space-y-6"
     >
-      {/* Header with export buttons */}
+      {/* Header with print button */}
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-center">Your Estimated Pension</h2>
         <div className="flex gap-2">
@@ -86,18 +84,6 @@ export default function PensionResults({ result }: PensionResultsProps) {
             <Printer className="h-4 w-4 mr-2" />
             Print
           </Button>
-
-          <PensionPDFButton
-            variant="outline"
-            size="sm"
-            showStatus={false}
-          />
-
-          <PDFShareDialog
-            pdfData={result}
-            pdfType="pension"
-            reportTitle="Massachusetts Pension Calculation Report"
-          />
         </div>
       </div>
 

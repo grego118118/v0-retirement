@@ -19,6 +19,9 @@ model User {
   image         String?
   emailVerified DateTime?
 
+  // Basic profile fields
+  retirementDate DateTime? // User's planned retirement date
+
   // OAuth accounts
   accounts      Account[]
   sessions      Session[]
@@ -26,9 +29,7 @@ model User {
   // Retirement data
   profile       RetirementProfile?
   calculations  RetirementCalculation[]
-  pdfGenerations PdfGeneration[]
   emailLogs     EmailLog[]
-  pdfShares     PdfShare[]
 
   // Subscription data
   stripeCustomerId    String?   // Stripe customer ID
@@ -102,10 +103,12 @@ model RetirementProfile {
   yearsOfService      Float?    // Can be calculated from membershipDate
   
   // Settings
-  plannedRetirementAge Int?
   retirementDate      DateTime? // User's planned retirement date
   retirementOption    String?   // Option A, B, or C
-  
+
+  // Social Security information
+  estimatedSocialSecurityBenefit Float? // Monthly Social Security benefit estimate
+
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 }
@@ -146,20 +149,6 @@ model RetirementCalculation {
   @@index([createdAt])
 }
 
-// PDF Generation tracking - stores PDF generation history and usage
-model PdfGeneration {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type        String   // 'pension', 'tax', 'wizard', 'combined'
-  size        Int      // File size in bytes
-  filename    String?  // Generated filename
-  createdAt   DateTime @default(now())
-
-  @@index([userId])
-  @@index([createdAt])
-  @@index([type])
-}
 
 // Email Log - tracks email sending for rate limiting and analytics
 model EmailLog {
@@ -176,18 +165,4 @@ model EmailLog {
   @@index([type])
 }
 
-// PDF Share - tracks PDF sharing via email
-model PdfShare {
-  id                String   @id @default(cuid())
-  userId            String
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  pdfType           String   // 'pension', 'tax', 'wizard', 'combined'
-  recipients        String   // Comma-separated email addresses
-  recipientCount    Int      // Number of recipients
-  successfulShares  Int      // Number of successful email sends
-  createdAt         DateTime @default(now())
 
-  @@index([userId])
-  @@index([createdAt])
-  @@index([pdfType])
-}

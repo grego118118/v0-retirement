@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 
@@ -9,9 +9,9 @@ interface CombinedRetirementCalculatorProps {
   socialSecurityData?: any
 }
 
-export function CombinedRetirementCalculator({ 
-  pensionData, 
-  socialSecurityData 
+export function CombinedRetirementCalculator({
+  pensionData,
+  socialSecurityData
 }: CombinedRetirementCalculatorProps) {
   const [results, setResults] = useState<any>(null)
 
@@ -19,7 +19,15 @@ export function CombinedRetirementCalculator({
     const pensionAmount = pensionData?.monthlyBenefit || 0
     const ssAmount = socialSecurityData?.estimatedBenefit || 0
     const total = pensionAmount + ssAmount
-    
+
+    console.log("🔄 Combined Calculator - Calculating with:", {
+      pensionAmount,
+      ssAmount,
+      total,
+      pensionData,
+      socialSecurityData
+    })
+
     setResults({
       pension: pensionAmount,
       socialSecurity: ssAmount,
@@ -27,6 +35,14 @@ export function CombinedRetirementCalculator({
       annual: total * 12
     })
   }
+
+  // Auto-calculate when data changes
+  useEffect(() => {
+    if (pensionData?.monthlyBenefit || socialSecurityData?.estimatedBenefit) {
+      console.log("📊 Combined Calculator - Auto-calculating due to data change")
+      calculateCombined()
+    }
+  }, [pensionData, socialSecurityData])
 
   return (
     <Card>

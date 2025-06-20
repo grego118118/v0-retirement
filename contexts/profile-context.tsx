@@ -13,9 +13,9 @@ interface ProfileData {
   currentSalary?: number
   averageHighest3Years?: number
   yearsOfService?: number
-  plannedRetirementAge?: number
   retirementDate?: string
   retirementOption?: string
+  estimatedSocialSecurityBenefit?: number
   hasProfile?: boolean
 }
 
@@ -91,13 +91,21 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
     setProfile(prev => {
       const newProfile = prev ? { ...prev, ...updates } : updates as ProfileData
       console.log("📊 ProfileContext: Optimistic update applied:", newProfile)
-      
+
       // Trigger a re-render by creating a new object
       return { ...newProfile }
     })
 
     try {
-      const response = await fetch("/api/profile", {
+      // Determine which endpoint to use based on the data being updated
+      const isCalculatorData = updates.retirementOption || updates.retirementGroup ||
+                              updates.yearsOfService !== undefined || updates.averageHighest3Years !== undefined ||
+                              updates.currentSalary !== undefined || updates.dateOfBirth || updates.membershipDate
+
+      const endpoint = isCalculatorData ? "/api/retirement/profile" : "/api/profile"
+      console.log("🎯 ProfileContext: Using endpoint:", endpoint, "for data:", updates)
+
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updates),
@@ -133,6 +141,12 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
           return finalProfile
         })
 
+        // Refresh profile data to ensure consistency
+        if (isCalculatorData) {
+          // For calculator data, refresh the full profile to get updated data
+          setTimeout(() => fetchProfile(), 100)
+        }
+
         return true
       } else {
         console.error("❌ ProfileContext: Server update failed:", data)
@@ -157,12 +171,12 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
 
   // Auto-fetch profile when session is available
   useEffect(() => {
-    if (session?.user) {
+    if (session?.user?.id) {
       fetchProfile()
     } else {
       setProfile(null)
     }
-  }, [session?.user?.id, fetchProfile])
+  }, [session?.user?.id]) // Remove fetchProfile dependency to prevent infinite loops
 
   const value: ProfileContextType = {
     profile,

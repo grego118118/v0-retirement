@@ -109,8 +109,11 @@ export class StripeService {
    * Create customer portal session
    */
   static async createPortalSession(customerId: string): Promise<string> {
+    if (!stripe) {
+      throw new StripeError('Stripe is not configured. Please add STRIPE_SECRET_KEY to environment variables.')
+    }
+
     try {
-      if (!stripe) throw new Error('Stripe not initialized')
       const session = await stripe.billingPortal.sessions.create({
         customer: customerId,
         return_url: STRIPE_CONFIG.customerPortalUrl,

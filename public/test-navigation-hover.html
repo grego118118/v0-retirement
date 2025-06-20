@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navigation Hover Test - Massachusetts Retirement System</title>
+    <style>
+        /* Massachusetts Design System Variables */
+        :root {
+            --mrs-gradient-primary: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            --mrs-glass: rgba(255, 255, 255, 0.95);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            padding: 20px;
+        }
+
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .test-header {
+            background: var(--mrs-gradient-primary);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .test-section {
+            padding: 30px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .test-section:last-child {
+            border-bottom: none;
+        }
+
+        .test-section h2 {
+            margin-bottom: 20px;
+            color: #1f2937;
+            font-size: 1.5rem;
+        }
+
+        /* Navigation Test Styles */
+        .nav-test {
+            background: var(--mrs-glass);
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .nav-test h3 {
+            margin-bottom: 15px;
+            color: #374151;
+            font-size: 1.1rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 500;
+            text-decoration: none;
+            color: #374151;
+            background: transparent;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            position: relative;
+            z-index: 1;
+            display: inline-block;
+            visibility: visible !important;
+            opacity: 1 !important;
+            pointer-events: auto !important;
+        }
+
+        .nav-link:hover {
+            color: white;
+            background: var(--mrs-gradient-primary) !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .nav-link.active {
+            color: white;
+            background: var(--mrs-gradient-primary);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-link-mobile {
+            padding: 6px 12px;
+            font-size: 0.875rem;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-left: 8px;
+        }
+
+        .status-pass {
+            background: #10b981;
+        }
+
+        .status-fail {
+            background: #ef4444;
+        }
+
+        .test-instructions {
+            background: #f3f4f6;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .test-instructions ol {
+            margin-left: 20px;
+        }
+
+        .test-instructions li {
+            margin-bottom: 8px;
+        }
+
+        .breakpoint-test {
+            border: 2px dashed #d1d5db;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .nav-link {
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 375px) {
+            .test-section {
+                padding: 20px;
+            }
+            
+            .nav-link {
+                padding: 10px 12px;
+                font-size: 0.875rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1>Navigation Hover Test</h1>
+            <p>Test the navigation hover behavior across different breakpoints</p>
+        </div>
+
+        <div class="test-section">
+            <div class="test-instructions">
+                <h2>Test Instructions</h2>
+                <ol>
+                    <li><strong>Hover Test:</strong> Hover over each navigation link below - they should change color and background without disappearing</li>
+                    <li><strong>Visibility Test:</strong> Links should remain visible and clickable at all times</li>
+                    <li><strong>Responsive Test:</strong> Resize your browser window to test mobile breakpoints (768px, 375px)</li>
+                    <li><strong>Active State Test:</strong> Click links to see active state behavior</li>
+                    <li><strong>Z-index Test:</strong> Links should appear above other elements without conflicts</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>Desktop Navigation Test (1024px+)</h2>
+            <div class="nav-test">
+                <h3>Primary Navigation</h3>
+                <div class="nav-links">
+                    <a href="#" class="nav-link">Calculator</a>
+                    <a href="#" class="nav-link active">Dashboard</a>
+                    <a href="#" class="nav-link">Blog</a>
+                    <a href="#" class="nav-link">Pricing</a>
+                    <a href="#" class="nav-link">About</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>Mobile Navigation Test (768px and below)</h2>
+            <div class="nav-test">
+                <h3>Mobile Navigation</h3>
+                <div class="nav-links">
+                    <a href="#" class="nav-link nav-link-mobile">Calc</a>
+                    <a href="#" class="nav-link nav-link-mobile active">Dashboard</a>
+                    <a href="#" class="nav-link nav-link-mobile">Blog</a>
+                    <a href="#" class="nav-link nav-link-mobile">Pricing</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>Breakpoint Tests</h2>
+            
+            <div class="breakpoint-test">
+                <h3>Desktop (1024px+) <span class="status-indicator status-pass" id="desktop-status"></span></h3>
+                <p>Navigation should display horizontally with full text labels</p>
+                <div class="nav-links">
+                    <a href="#" class="nav-link">Calculator</a>
+                    <a href="#" class="nav-link">Dashboard</a>
+                    <a href="#" class="nav-link">Blog</a>
+                </div>
+            </div>
+
+            <div class="breakpoint-test">
+                <h3>Tablet (768px) <span class="status-indicator status-pass" id="tablet-status"></span></h3>
+                <p>Navigation should adapt to smaller screen size</p>
+                <div class="nav-links">
+                    <a href="#" class="nav-link">Calculator</a>
+                    <a href="#" class="nav-link">Dashboard</a>
+                    <a href="#" class="nav-link">Blog</a>
+                </div>
+            </div>
+
+            <div class="breakpoint-test">
+                <h3>Mobile (375px) <span class="status-indicator status-pass" id="mobile-status"></span></h3>
+                <p>Navigation should stack vertically on small screens</p>
+                <div class="nav-links">
+                    <a href="#" class="nav-link">Calculator</a>
+                    <a href="#" class="nav-link">Dashboard</a>
+                    <a href="#" class="nav-link">Blog</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>Real Application Test</h2>
+            <p>Test the actual navigation in the Massachusetts Retirement System application:</p>
+            <div style="margin-top: 15px;">
+                <a href="/" target="_blank" style="color: #1e40af; text-decoration: underline;">Open Main Application</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simple test to verify hover functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            navLinks.forEach(link => {
+                link.addEventListener('mouseenter', function() {
+                    console.log('Hover detected on:', this.textContent);
+                });
+                
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    // Remove active class from all links
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    // Add active class to clicked link
+                    this.classList.add('active');
+                });
+            });
+            
+            // Test breakpoint detection
+            function updateBreakpointStatus() {
+                const width = window.innerWidth;
+                const desktopStatus = document.getElementById('desktop-status');
+                const tabletStatus = document.getElementById('tablet-status');
+                const mobileStatus = document.getElementById('mobile-status');
+                
+                // Reset all statuses
+                [desktopStatus, tabletStatus, mobileStatus].forEach(status => {
+                    status.className = 'status-indicator status-fail';
+                });
+                
+                if (width >= 1024) {
+                    desktopStatus.className = 'status-indicator status-pass';
+                } else if (width >= 768) {
+                    tabletStatus.className = 'status-indicator status-pass';
+                } else {
+                    mobileStatus.className = 'status-indicator status-pass';
+                }
+            }
+            
+            updateBreakpointStatus();
+            window.addEventListener('resize', updateBreakpointStatus);
+        });
+    </script>
+</body>
+</html>
