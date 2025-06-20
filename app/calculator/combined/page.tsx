@@ -1,25 +1,11 @@
+"use client"
+
 import { Suspense } from "react"
-import { generateSEOMetadata } from "@/components/seo/metadata"
 import Script from "next/script"
 import { CombinedCalculationWizard } from "@/components/wizard/combined-calculation-wizard"
 import { Skeleton } from "@/components/ui/skeleton"
 import { AuthDisabledNotice } from "@/components/auth-disabled-notice"
 
-export const metadata = generateSEOMetadata({
-  title: "Combined Retirement Planning Wizard | Massachusetts Retirement Calculator",
-  description:
-    "Complete 7-step retirement planning wizard combining pension, Social Security, and personal savings calculations for Massachusetts state employees.",
-  path: "/calculator/combined",
-  keywords: [
-    "retirement planning wizard",
-    "combined retirement calculator",
-    "Massachusetts pension and social security",
-    "retirement income planning",
-    "comprehensive retirement calculator",
-    "state employee retirement planning",
-    "MA retirement wizard",
-  ],
-})
 
 export default function CombinedCalculatorPage() {
   // Structured data for SEO
@@ -55,7 +41,12 @@ export default function CombinedCalculatorPage() {
           </div>
           <AuthDisabledNotice className="mb-6" />
           <Suspense fallback={<CombinedCalculatorSkeleton />}>
-            <CombinedCalculationWizard />
+            <CombinedCalculationWizard
+              onComplete={(data) => {
+                console.log('Wizard completed with data:', data)
+                // Handle completion - could redirect to results page or show success message
+              }}
+            />
           </Suspense>
         </div>
       </div>
