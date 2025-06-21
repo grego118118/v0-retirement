@@ -38,6 +38,7 @@ import {
   Loader2
 } from "lucide-react"
 import { CombinedCalculationData, WizardProgress, WIZARD_STEPS, ValidationRule } from "@/lib/wizard/wizard-types"
+import { calculateAnnualPension, getBenefitFactor } from "@/lib/pension-calculations"
 
 // Validation schemas for each step
 const personalInfoSchema = z.object({
@@ -354,31 +355,40 @@ export function CombinedCalculationWizard({
     }
   }
 
-  // Calculate pension benefit
+  // Calculate pension benefit using proper MSRB methodology
   const calculatePensionBenefit = (): number => {
     const pensionData = wizardData.pensionData
-    if (!pensionData) return 0
+    const personalInfo = wizardData.personalInfo
+    if (!pensionData || !personalInfo) return 0
 
-    const { averageSalary, yearsOfService, retirementGroup } = pensionData
-    let multiplier = 2.5 // Base multiplier
+    const { averageSalary, yearsOfService, retirementGroup, retirementOption } = pensionData
+    const retirementAge = personalInfo.retirementGoalAge || 65
 
-    // Adjust multiplier based on group
-    switch (retirementGroup) {
-      case '2':
-        multiplier = 2.5
-        break
-      case '3':
-        multiplier = 2.5
-        break
-      case '4':
-        multiplier = 2.5
-        break
-      default:
-        multiplier = 2.0
+    // Use proper MSRB calculation methodology
+    try {
+      const group = `GROUP_${retirementGroup}` as const
+      const serviceEntry = "before_2012" // Default assumption for wizard
+
+      const annualBenefit = calculateAnnualPension(
+        averageSalary,
+        retirementAge,
+        yearsOfService,
+        retirementOption || "A",
+        group,
+        serviceEntry
+      )
+
+      return annualBenefit / 12 // Return monthly benefit
+    } catch (error) {
+      console.error('Error calculating pension benefit:', error)
+
+      // Fallback to proper MSRB benefit factors
+      const benefitFactor = getBenefitFactor(retirementAge, group, serviceEntry, yearsOfService)
+      const annualBenefit = averageSalary * yearsOfService * benefitFactor
+      const maxBenefit = averageSalary * 0.8 // 80% cap
+
+      return Math.min(annualBenefit, maxBenefit) / 12
     }
-
-    const annualBenefit = (averageSalary * yearsOfService * multiplier) / 100
-    return Math.min(annualBenefit / 12, averageSalary * 0.8 / 12) // Cap at 80%
   }
 
   const handleComplete = async () => {
