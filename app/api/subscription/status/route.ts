@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth/auth-config'
+import { authOptions } from '@/lib/auth/auth-options'
 import { prisma } from '@/lib/prisma'
 import { StripeService } from '@/lib/stripe/service'
 import { isSubscriptionActive, FREE_TIER_LIMITS } from '@/lib/stripe/config'
 import type { SubscriptionStatus, SubscriptionPlan } from '@/lib/stripe/config'
+import { isPremiumUser } from '@/lib/subscription-utils'
 
 // Fallback premium users for development (when Stripe is not configured)
 const FALLBACK_PREMIUM_USERS = [
@@ -156,7 +157,13 @@ function getFreeUserData(user: any, calculationsCount: number): SubscriptionResp
 }
 
 function getDevelopmentSubscriptionData(userEmail: string, user: any, calculationsCount: number): SubscriptionResponse {
-  const isPremium = FALLBACK_PREMIUM_USERS.includes(userEmail)
+  // Check both fallback users and in-memory premium users store
+  const isPremium = FALLBACK_PREMIUM_USERS.includes(userEmail) || isPremiumUser(userEmail)
+
+  console.log(`Checking premium status for ${userEmail}:`)
+  console.log(`- In FALLBACK_PREMIUM_USERS: ${FALLBACK_PREMIUM_USERS.includes(userEmail)}`)
+  console.log(`- In in-memory premium store: ${isPremiumUser(userEmail)}`)
+  console.log(`- Final isPremium result: ${isPremium}`)
 
   return {
     isPremium,
