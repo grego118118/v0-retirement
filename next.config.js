@@ -5,6 +5,14 @@ const nextConfig = {
   // Production optimizations (disabled for development)
   // output: 'standalone',
 
+  // Optimize CSS loading to prevent preload warnings
+  experimental: {
+    // Disable CSS optimization that requires critters module
+    // optimizeCss: true,
+    // Use strict CSS chunking to reduce preload warnings
+    cssChunking: 'strict',
+  },
+
 
   
   // Security headers
@@ -31,7 +39,7 @@ const nextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://vercel.live https://*.vercel.app https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https: blob:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://*.vercel.app https://*.supabase.co wss://*.vercel.app https://vercel.live wss://vercel.live; frame-src 'self' https://vercel.live; worker-src 'self' blob:; object-src 'none';"
+            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://vercel.live https://*.vercel.app https://va.vercel-scripts.com https://apis.google.com https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https: blob:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://*.vercel.app https://*.supabase.co wss://*.vercel.app https://vercel.live wss://vercel.live https://apis.google.com https://accounts.google.com; frame-src 'self' https://vercel.live https://accounts.google.com; worker-src 'self' blob:; object-src 'none';"
           }
         ]
       }

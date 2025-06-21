@@ -8,6 +8,7 @@ import { Header } from "@/components/layout/header"
 import { SessionProvider } from "@/components/auth/session-provider"
 import Script from "next/script"
 import { Toaster } from "@/components/ui/sonner"
+import { ResourceOptimizer } from "@/components/layout/resource-optimizer"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -32,7 +33,11 @@ export default function RootLayout({
         {/* Resource optimization */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://accounts.google.com" />
+        <link rel="preconnect" href="https://apis.google.com" />
         <meta name="format-detection" content="telephone=no" />
+        {/* Disable automatic CSS preloading that causes warnings */}
+        <meta name="next-head-count" content="0" />
 
         {/* Trusted Types Polyfill */}
         <Script
@@ -64,6 +69,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <SessionProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <ResourceOptimizer />
             <div className="flex min-h-screen flex-col">
               <Header />
               <main className="flex-1">{children}</main>
