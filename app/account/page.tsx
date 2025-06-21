@@ -173,18 +173,35 @@ export default function AccountPage() {
     try {
       setIsSaving(true)
 
-      // Prepare data for API
+      // Validate required fields
+      if (!data.fullName || !data.dateOfBirth || !data.membershipDate) {
+        toast({
+          title: "Validation Error",
+          description: "Please fill in all required fields: Full Name, Date of Birth, and Membership Date.",
+          variant: "destructive",
+        })
+        return
+      }
+
+      // Prepare data for API - fix field mapping and remove duplicate
       const profileUpdateData = {
+        // Basic profile fields (for User table)
         full_name: data.fullName,
         retirement_date: data.retirementDate || null,
+
+        // Detailed profile fields (for RetirementProfile table)
         dateOfBirth: data.dateOfBirth,
         membershipDate: data.membershipDate,
         retirementGroup: data.retirementGroup,
         currentSalary: data.currentSalary,
         yearsOfService: data.yearsOfService,
         retirementOption: data.retirementOption,
-        retirementDate: data.retirementDate || null,
+
+        // Remove duplicate retirementDate field
+        // retirementDate is handled by retirement_date above
       }
+
+      console.log("Submitting profile data:", profileUpdateData)
 
       const response = await fetch("/api/profile", {
         method: "POST",
@@ -194,11 +211,16 @@ export default function AccountPage() {
         body: JSON.stringify(profileUpdateData),
       })
 
+      console.log("Profile update response status:", response.status)
+
       if (!response.ok) {
-        throw new Error("Failed to update profile")
+        const errorData = await response.json()
+        console.error("Profile update failed:", errorData)
+        throw new Error(errorData.message || "Failed to update profile")
       }
 
       const result = await response.json()
+      console.log("Profile update successful:", result)
       
       // Update session if name changed
       if (data.fullName !== session?.user?.name) {
