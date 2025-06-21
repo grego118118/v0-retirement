@@ -34,13 +34,6 @@ const createPrismaClient = () => {
       }
     },
     log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
-    // Additional configuration to handle serverless environment
-    __internal: {
-      engine: {
-        // Force disable prepared statements in serverless
-        enableEngineDebugMode: false,
-      }
-    }
   })
 }
 
