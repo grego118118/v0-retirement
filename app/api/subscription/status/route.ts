@@ -7,6 +7,19 @@ import { isSubscriptionActive, FREE_TIER_LIMITS } from '@/lib/stripe/config'
 import type { SubscriptionStatus, SubscriptionPlan } from '@/lib/stripe/config'
 import { isPremiumUser } from '@/lib/subscription-utils'
 
+// Safe date utility to prevent RangeError: Invalid time value
+const safeToISOString = (date: Date | null | undefined): string | undefined => {
+  if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
+    return undefined;
+  }
+  try {
+    return date.toISOString();
+  } catch (error) {
+    console.error('Error converting date to ISO string:', error, 'Date value:', date);
+    return undefined;
+  }
+};
+
 // Fallback premium users for development (when Stripe is not configured)
 const FALLBACK_PREMIUM_USERS = [
   'premium@example.com',
@@ -107,9 +120,9 @@ export async function GET(request: NextRequest) {
             subscriptionStatus: activeSubscription.status,
             subscriptionPlan: activeSubscription.plan,
             savedCalculationsCount: calculationsCount,
-            currentPeriodEnd: activeSubscription.currentPeriodEnd.toISOString(),
+            currentPeriodEnd: safeToISOString(activeSubscription.currentPeriodEnd),
             cancelAtPeriodEnd: activeSubscription.cancelAtPeriodEnd,
-            trialEnd: activeSubscription.trialEnd?.toISOString(),
+            trialEnd: safeToISOString(activeSubscription.trialEnd),
             customerId: customer.id,
             subscriptionId: activeSubscription.id,
             usageLimits: getUsageLimits(activeSubscription.plan),
@@ -184,7 +197,7 @@ function getDevelopmentSubscriptionData(userEmail: string, user: any, calculatio
     subscriptionStatus: subscriptionStatus as any,
     subscriptionPlan: subscriptionPlan as any,
     savedCalculationsCount: calculationsCount,
-    currentPeriodEnd: user?.currentPeriodEnd?.toISOString(),
+    currentPeriodEnd: safeToISOString(user?.currentPeriodEnd),
     cancelAtPeriodEnd: user?.cancelAtPeriodEnd || false,
     usageLimits: getUsageLimits(subscriptionPlan as any),
     currentUsage: {

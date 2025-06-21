@@ -17,12 +17,15 @@ import {
   DollarSign,
   Wand2,
   Menu,
-  X
+  X,
+  Crown
 } from "lucide-react"
+import { useSubscriptionStatus } from "@/hooks/use-subscription"
 
 export function Header() {
   const pathname = usePathname()
   const { data: session } = useSession()
+  const { isPremium, subscriptionStatus } = useSubscriptionStatus()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const mobileMenuRef = useRef<HTMLDivElement>(null)
 
@@ -181,6 +184,20 @@ export function Header() {
         </div>
         <div className="ml-auto flex items-center space-x-2 md:space-x-4 flex-shrink-0">
           <ModeToggle />
+
+          {/* Premium Status Indicator */}
+          {session && isPremium && subscriptionStatus === 'premium' && (
+            <div
+              className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs font-medium shadow-sm animate-pulse"
+              title="Premium Member"
+              aria-label="Premium subscription active"
+              role="status"
+            >
+              <Crown className="h-3 w-3" />
+              <span className="hidden sm:inline">Premium</span>
+            </div>
+          )}
+
           <UserMenu />
         </div>
         </div>
