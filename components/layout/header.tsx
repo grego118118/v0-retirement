@@ -8,6 +8,14 @@ import { ModeToggle } from "@/components/mode-toggle"
 import { UserMenu } from "@/components/auth/user-menu"
 import { useSession } from "next-auth/react"
 import Image from "next/image"
+import {
+  Calculator,
+  LayoutDashboard,
+  BookOpen,
+  CreditCard,
+  DollarSign,
+  Wand2
+} from "lucide-react"
 
 export function Header() {
   const pathname = usePathname()
@@ -51,29 +59,43 @@ export function Header() {
           >
             <Link
               href="/calculator"
-              className={`nav-link ${
+              className={`nav-link flex items-center gap-1.5 ${
                 isActive("/calculator") ? "nav-link-active" : ""
               }`}
             >
+              <Calculator className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               Calculator
             </Link>
 
             {session && (
-              <Link
-                href="/dashboard"
-                className={`nav-link ${
-                  isActive("/dashboard") ? "nav-link-active" : ""
-                }`}
-              >
-                Dashboard
-              </Link>
+              <>
+                <Link
+                  href="/wizard"
+                  className={`nav-link flex items-center gap-1.5 ${
+                    isActive("/wizard") ? "nav-link-active" : ""
+                  }`}
+                >
+                  <Wand2 className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                  Retirement Wizard
+                </Link>
+                <Link
+                  href="/dashboard"
+                  className={`nav-link flex items-center gap-1.5 ${
+                    isActive("/dashboard") ? "nav-link-active" : ""
+                  }`}
+                >
+                  <LayoutDashboard className="h-4 w-4 text-green-600 dark:text-green-400" />
+                  Dashboard
+                </Link>
+              </>
             )}
             <Link
               href="/blog"
-              className={`nav-link ${
+              className={`nav-link flex items-center gap-1.5 ${
                 isActive("/blog") ? "nav-link-active" : ""
               }`}
             >
+              <BookOpen className="h-4 w-4 text-orange-600 dark:text-orange-400" />
               Blog
             </Link>
 
@@ -81,19 +103,21 @@ export function Header() {
             {session ? (
               <Link
                 href="/billing"
-                className={`nav-link ${
+                className={`nav-link flex items-center gap-1.5 ${
                   isActive("/billing") ? "nav-link-active" : ""
                 }`}
               >
+                <CreditCard className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
                 Billing
               </Link>
             ) : (
               <Link
                 href="/pricing"
-                className={`nav-link ${
+                className={`nav-link flex items-center gap-1.5 ${
                   isActive("/pricing") ? "nav-link-active" : ""
                 }`}
               >
+                <DollarSign className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
                 Pricing
               </Link>
             )}
@@ -107,30 +131,44 @@ export function Header() {
           >
             <Link
               href="/calculator"
-              className={`nav-link-mobile ${
+              className={`nav-link-mobile flex items-center gap-1 ${
                 isActive("/calculator") ? "nav-link-active" : ""
               }`}
             >
+              <Calculator className="h-3 w-3 text-blue-600 dark:text-blue-400" />
               Calc
             </Link>
 
             {session && (
-              <Link
-                href="/dashboard"
-                className={`nav-link-mobile ${
-                  isActive("/dashboard") ? "nav-link-active" : ""
-                }`}
-              >
-                Dashboard
-              </Link>
+              <>
+                <Link
+                  href="/wizard"
+                  className={`nav-link-mobile flex items-center gap-1 ${
+                    isActive("/wizard") ? "nav-link-active" : ""
+                  }`}
+                >
+                  <Wand2 className="h-3 w-3 text-purple-600 dark:text-purple-400" />
+                  Wizard
+                </Link>
+                <Link
+                  href="/dashboard"
+                  className={`nav-link-mobile flex items-center gap-1 ${
+                    isActive("/dashboard") ? "nav-link-active" : ""
+                  }`}
+                >
+                  <LayoutDashboard className="h-3 w-3 text-green-600 dark:text-green-400" />
+                  Dashboard
+                </Link>
+              </>
             )}
 
             <Link
               href="/blog"
-              className={`nav-link-mobile ${
+              className={`nav-link-mobile flex items-center gap-1 ${
                 isActive("/blog") ? "nav-link-active" : ""
               }`}
             >
+              <BookOpen className="h-3 w-3 text-orange-600 dark:text-orange-400" />
               Blog
             </Link>
 
@@ -138,19 +176,21 @@ export function Header() {
             {session ? (
               <Link
                 href="/billing"
-                className={`nav-link-mobile ${
+                className={`nav-link-mobile flex items-center gap-1 ${
                   isActive("/billing") ? "nav-link-active" : ""
                 }`}
               >
+                <CreditCard className="h-3 w-3 text-indigo-600 dark:text-indigo-400" />
                 Billing
               </Link>
             ) : (
               <Link
                 href="/pricing"
-                className={`nav-link-mobile ${
+                className={`nav-link-mobile flex items-center gap-1 ${
                   isActive("/pricing") ? "nav-link-active" : ""
                 }`}
               >
+                <DollarSign className="h-3 w-3 text-indigo-600 dark:text-indigo-400" />
                 Pricing
               </Link>
             )}
