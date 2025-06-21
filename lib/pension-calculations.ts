@@ -87,10 +87,25 @@ const PENSION_FACTORS_POST_2012_LT_30YOS = {
 }
 
 const MAX_PENSION_PERCENTAGE_OF_SALARY = 0.8
+
+// Option B: Annuity Protection - Age-based reduction factors
 const OPTION_B_REDUCTIONS = { 50: 0.01, 60: 0.03, 70: 0.05 }
-const OPTION_C_PERCENTAGES_OF_A = { "55-55": 0.94, "65-55": 0.84, "65-65": 0.89, "70-65": 0.83, "70-70": 0.86 }
-const OPTION_C_GENERAL_REDUCTION_APPROX = 0.88
-const OPTION_C_SURVIVOR_PERCENTAGE = 2 / 3
+
+// Option C: Joint Survivor - Official Massachusetts State Retirement Board reduction factors
+// Member Age / Beneficiary Age: Percentage of Option A benefit
+const OPTION_C_PERCENTAGES_OF_A = {
+  "55-55": 0.94,  // 6% reduction
+  "65-55": 0.84,  // 16% reduction
+  "65-65": 0.89,  // 11% reduction
+  "70-65": 0.83,  // 17% reduction
+  "70-70": 0.86   // 14% reduction
+}
+
+// General approximation for Option C when specific age combination not in table
+const OPTION_C_GENERAL_REDUCTION_APPROX = 0.88  // 12% reduction
+
+// Option C: Survivor receives exactly 66.67% (two-thirds) of retiree's monthly benefit
+const OPTION_C_SURVIVOR_PERCENTAGE = 2 / 3  // 66.67%
 
 export function getBenefitFactor(age: number, group: string, serviceEntry: string, yearsOfService: number): number {
   let factorsToUse
@@ -154,21 +169,40 @@ export function calculatePensionWithOption(
   beneficiaryAgeStr: string,
 ) {
   let finalPension = basePension
-  let optionDescription = "Option A: Full Allowance"
+  let optionDescription = "Option A: Full Allowance (100%)"
   let warningMessage = ""
   let survivorPension = 0
 
   if (option === "B") {
-    let reductionPercent = OPTION_B_REDUCTIONS[70]
-    if (memberAge <= 50) reductionPercent = OPTION_B_REDUCTIONS[50]
-    else if (memberAge <= 60) reductionPercent = OPTION_B_REDUCTIONS[60]
+    // Option B: Annuity Protection - Age-based reduction with interpolation
+    let reductionPercent: number
+
+    if (memberAge <= 50) {
+      reductionPercent = OPTION_B_REDUCTIONS[50]  // 1%
+    } else if (memberAge <= 60) {
+      // Interpolate between age 50 (1%) and age 60 (3%)
+      const ageRange = 60 - 50
+      const agePosition = memberAge - 50
+      const reductionRange = OPTION_B_REDUCTIONS[60] - OPTION_B_REDUCTIONS[50]
+      reductionPercent = OPTION_B_REDUCTIONS[50] + (agePosition / ageRange) * reductionRange
+    } else if (memberAge <= 70) {
+      // Interpolate between age 60 (3%) and age 70 (5%)
+      const ageRange = 70 - 60
+      const agePosition = memberAge - 60
+      const reductionRange = OPTION_B_REDUCTIONS[70] - OPTION_B_REDUCTIONS[60]
+      reductionPercent = OPTION_B_REDUCTIONS[60] + (agePosition / ageRange) * reductionRange
+    } else {
+      reductionPercent = OPTION_B_REDUCTIONS[70]  // 5%
+    }
+
     finalPension = basePension * (1 - reductionPercent)
-    optionDescription = `Option B: Annuity Protection (approx. ${(reductionPercent * 100).toFixed(0)}% less)`
+    optionDescription = `Option B: Annuity Protection (${(reductionPercent * 100).toFixed(1)}% reduction)`
   } else if (option === "C") {
     const beneficiaryAge = Number.parseInt(beneficiaryAgeStr)
     if (isNaN(beneficiaryAge) || beneficiaryAge <= 0) {
       warningMessage = "Valid Beneficiary Age needed for Option C. Using general approximation."
       finalPension = basePension * OPTION_C_GENERAL_REDUCTION_APPROX
+      optionDescription = `Option C: Joint & Survivor (66.67%) - ${((1 - OPTION_C_GENERAL_REDUCTION_APPROX) * 100).toFixed(0)}% reduction (general approx.)`
     } else {
       const roundedMemberAge = Math.round(memberAge)
       const roundedBeneficiaryAge = Math.round(beneficiaryAge)
@@ -177,7 +211,7 @@ export function calculatePensionWithOption(
 
       if (specificPercentage) {
         finalPension = basePension * specificPercentage
-        optionDescription = `Option C: Joint Survivor (approx. ${((1 - specificPercentage) * 100).toFixed(0)}% less for ages ${roundedMemberAge}/${roundedBeneficiaryAge})`
+        optionDescription = `Option C: Joint & Survivor (66.67%) - ${((1 - specificPercentage) * 100).toFixed(0)}% reduction (ages ${roundedMemberAge}/${roundedBeneficiaryAge})`
       } else {
         let closestMemberAge: number | null = null
         let minDiff = Number.POSITIVE_INFINITY
@@ -193,19 +227,24 @@ export function calculatePensionWithOption(
         const foundKey = Object.keys(OPTION_C_PERCENTAGES_OF_A).find((k) => k.startsWith(closestMemberAge + "-"))
 
         if (foundKey) {
-          finalPension = basePension * OPTION_C_PERCENTAGES_OF_A[foundKey as keyof typeof OPTION_C_PERCENTAGES_OF_A]
-          warningMessage = `Factor for Member Age ${roundedMemberAge}/${roundedBeneficiaryAge} not in table. Approx. based on Member Age ${closestMemberAge} (${((1 - OPTION_C_PERCENTAGES_OF_A[foundKey as keyof typeof OPTION_C_PERCENTAGES_OF_A]) * 100).toFixed(0)}% less). Official calculation needed.`
+          const approximatePercentage = OPTION_C_PERCENTAGES_OF_A[foundKey as keyof typeof OPTION_C_PERCENTAGES_OF_A]
+          finalPension = basePension * approximatePercentage
+          optionDescription = `Option C: Joint & Survivor (66.67%) - ${((1 - approximatePercentage) * 100).toFixed(0)}% reduction (approx. for ages ${roundedMemberAge}/${roundedBeneficiaryAge})`
+          warningMessage = `Exact factor for ages ${roundedMemberAge}/${roundedBeneficiaryAge} not available. Using approximation based on member age ${closestMemberAge}. Contact MSRB for official calculation.`
         } else {
           finalPension = basePension * OPTION_C_GENERAL_REDUCTION_APPROX
-          warningMessage = `Factor for Member Age ${roundedMemberAge}/${roundedBeneficiaryAge} not in table. General approx. (${((1 - OPTION_C_GENERAL_REDUCTION_APPROX) * 100).toFixed(0)}% less). Official calculation needed.`
+          optionDescription = `Option C: Joint & Survivor (66.67%) - ${((1 - OPTION_C_GENERAL_REDUCTION_APPROX) * 100).toFixed(0)}% reduction (general approx.)`
+          warningMessage = `Exact factor for ages ${roundedMemberAge}/${roundedBeneficiaryAge} not available. Using general approximation. Contact MSRB for official calculation.`
         }
       }
     }
 
+    // Ensure Option C description is properly formatted if not already set
     if (!optionDescription.startsWith("Option C:")) {
-      optionDescription = "Option C: Joint Survivor"
+      optionDescription = "Option C: Joint & Survivor (66.67%)"
     }
 
+    // Calculate survivor pension: exactly 66.67% (two-thirds) of retiree's monthly benefit
     survivorPension = finalPension * OPTION_C_SURVIVOR_PERCENTAGE
   }
 
@@ -371,14 +410,19 @@ export function calculateAnnualPension(
   option: "A" | "B" | "C" = "A"
 ): number {
   let percentage = calculatePensionPercentage(age, yearsOfService)
-  
-  // Apply option reduction factors
+
+  // Apply option reduction factors based on official MSRB guidelines
   switch (option) {
     case "B":
-      percentage *= 0.91 // 9% reduction for Option B
+      // Option B: Age-based reduction (1% at age 50, 3% at age 60, 5% at age 70)
+      let reductionFactor = 0.97 // Default 3% reduction for middle ages
+      if (age <= 50) reductionFactor = 0.99      // 1% reduction
+      else if (age >= 70) reductionFactor = 0.95 // 5% reduction
+      percentage *= reductionFactor
       break
     case "C":
-      percentage *= 0.86 // 14% reduction for Option C
+      // Option C: Typical reduction ranges from 7-15% (using 12% as general approximation)
+      percentage *= 0.88 // 12% reduction for Option C (general approximation)
       break
   }
 

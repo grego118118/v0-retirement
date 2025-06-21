@@ -927,7 +927,7 @@ export default function PensionCalculator() {
                     <div className="flex items-center">
                       <RadioGroupItem value="A" id="optionA" />
                       <Label htmlFor="optionA" className="ml-2 font-medium text-sm">
-                        Option A: Full Allowance
+                        Option A: Full Allowance (100%)
                       </Label>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1 ml-6">
@@ -943,7 +943,7 @@ export default function PensionCalculator() {
                       </Label>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1 ml-6">
-                      Slightly reduced allowance. Beneficiary receives remaining accumulated deductions.
+                      Reduced allowance (1-5% less based on age). Beneficiary receives remaining accumulated deductions.
                     </p>
                   </div>
 
@@ -951,11 +951,11 @@ export default function PensionCalculator() {
                     <div className="flex items-center">
                       <RadioGroupItem value="C" id="optionC" />
                       <Label htmlFor="optionC" className="ml-2 font-medium text-sm">
-                        Option C: Joint Survivor
+                        Option C: Joint & Survivor (66.67%)
                       </Label>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1 ml-6">
-                      Reduced allowance. Beneficiary receives 2/3rds of allowance for life.
+                      Reduced allowance (7-15% less). Beneficiary receives exactly 66.67% of allowance for life.
                     </p>
 
                     {formData.retirementOption === "C" && (
@@ -1231,7 +1231,7 @@ export default function PensionCalculator() {
                 <div className="flex items-center">
                   <RadioGroupItem value="A" id="optionA" />
                   <Label htmlFor="optionA" className="ml-2 font-medium">
-                    Option A: Full Allowance
+                    Option A: Full Allowance (100%)
                   </Label>
                 </div>
                 <p className="text-sm text-muted-foreground mt-2 ml-6">
@@ -1247,7 +1247,7 @@ export default function PensionCalculator() {
                   </Label>
                 </div>
                 <p className="text-sm text-muted-foreground mt-2 ml-6">
-                  Slightly reduced lifetime allowance (approx. 1-5% less). Upon death, beneficiary receives remaining
+                  Reduced lifetime allowance (1-5% less based on age). Upon death, beneficiary receives remaining
                   accumulated deductions. Beneficiary can be changed.
                 </p>
               </div>
@@ -1256,12 +1256,12 @@ export default function PensionCalculator() {
                 <div className="flex items-center">
                   <RadioGroupItem value="C" id="optionC" />
                   <Label htmlFor="optionC" className="ml-2 font-medium">
-                    Option C: Joint Survivor
+                    Option C: Joint & Survivor (66.67%)
                   </Label>
                 </div>
                 <p className="text-sm text-muted-foreground mt-2 ml-6">
-                  Reduced lifetime allowance (approx. 7-15%+ less). Upon death, your designated beneficiary receives
-                  2/3rds of your allowance for their life. If beneficiary predeceases, allowance "pops up".
+                  Reduced lifetime allowance (7-15% less based on ages). Upon death, your designated beneficiary receives
+                  exactly 66.67% (two-thirds) of your allowance for their life. If beneficiary predeceases, allowance "pops up".
                 </p>
 
                 {formData.retirementOption === "C" && (

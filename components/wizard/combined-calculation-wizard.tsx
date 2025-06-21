@@ -706,7 +706,7 @@ export function CombinedCalculationWizard({
                 <SelectValue placeholder="Select retirement option" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="A">Option A - Maximum Benefit</SelectItem>
+                <SelectItem value="A">Option A - Maximum Benefit (100%)</SelectItem>
                 <SelectItem value="B">Option B - Annuity Protection</SelectItem>
                 <SelectItem value="C">Option C - Joint & Survivor (66.67%)</SelectItem>
                 <SelectItem value="D">Option D - Guaranteed Period</SelectItem>

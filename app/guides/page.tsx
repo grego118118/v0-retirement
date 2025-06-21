@@ -71,20 +71,20 @@ export default function RetirementGuidePage() {
   const retirementOptions = [
     {
       option: "Option A",
-      description: "Maximum Allowance",
+      description: "Maximum Allowance (100%)",
       details: "Highest monthly benefit, no survivor benefits",
       bestFor: "Single individuals or those with adequate life insurance"
     },
     {
-      option: "Option B", 
-      description: "Joint and Survivor (100%)",
-      details: "Reduced monthly benefit, full benefit continues to survivor",
-      bestFor: "Married couples wanting maximum survivor protection"
+      option: "Option B",
+      description: "Annuity Protection",
+      details: "Reduced monthly benefit (1-5% less), beneficiary receives remaining accumulated deductions",
+      bestFor: "Individuals wanting some protection for beneficiaries with minimal reduction"
     },
     {
       option: "Option C",
-      description: "Joint and Survivor (66⅔%)",
-      details: "Moderate reduction, survivor receives 2/3 of benefit",
+      description: "Joint & Survivor (66.67%)",
+      details: "Moderate reduction (7-15% less), survivor receives exactly 66.67% of benefit for life",
       bestFor: "Married couples balancing current income with survivor protection"
     }
   ]
