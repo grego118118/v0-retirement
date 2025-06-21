@@ -34,12 +34,25 @@ export async function GET() {
 
     console.log("Profile query result:", { user, retirementProfile })
 
+    // Safe date conversion utility
+    const safeToISOString = (date: Date | null | undefined): string => {
+      if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
+        return "";
+      }
+      try {
+        return date.toISOString();
+      } catch (error) {
+        console.error('Error converting date to ISO string:', error, 'Date value:', date);
+        return "";
+      }
+    };
+
     // Convert Prisma result to expected format
     const responseData = {
       fullName: user?.name || "",
-      retirementDate: user?.retirementDate?.toISOString() || "",
-      dateOfBirth: retirementProfile?.dateOfBirth?.toISOString() || "",
-      membershipDate: retirementProfile?.membershipDate?.toISOString() || "",
+      retirementDate: safeToISOString(user?.retirementDate),
+      dateOfBirth: safeToISOString(retirementProfile?.dateOfBirth),
+      membershipDate: safeToISOString(retirementProfile?.membershipDate),
       retirementGroup: retirementProfile?.retirementGroup || "1",
       benefitPercentage: retirementProfile?.benefitPercentage || 2.0,
       currentSalary: retirementProfile?.currentSalary || 0,
@@ -312,17 +325,30 @@ export async function POST(request: Request) {
 
       console.log("User retirement profile updated successfully:", updatedProfile)
 
+      // Safe date conversion utility for POST response
+      const safeToISOString = (date: Date | null | undefined): string | undefined => {
+        if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
+          return undefined;
+        }
+        try {
+          return date.toISOString();
+        } catch (error) {
+          console.error('Error converting date to ISO string:', error, 'Date value:', date);
+          return undefined;
+        }
+      };
+
       const responseData = {
         message: "Retirement profile updated successfully",
-        dateOfBirth: updatedProfile.dateOfBirth.toISOString(),
-        membershipDate: updatedProfile.membershipDate.toISOString(),
+        dateOfBirth: safeToISOString(updatedProfile.dateOfBirth) || "",
+        membershipDate: safeToISOString(updatedProfile.membershipDate) || "",
         retirementGroup: updatedProfile.retirementGroup,
         benefitPercentage: updatedProfile.benefitPercentage,
         currentSalary: updatedProfile.currentSalary,
         averageHighest3Years: updatedProfile.averageHighest3Years,
         yearsOfService: updatedProfile.yearsOfService,
         retirementOption: updatedProfile.retirementOption,
-        retirementDate: updatedProfile.retirementDate?.toISOString(),
+        retirementDate: safeToISOString(updatedProfile.retirementDate),
         estimatedSocialSecurityBenefit: updatedProfile.estimatedSocialSecurityBenefit
       }
 

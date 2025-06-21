@@ -56,27 +56,56 @@ export function useRetirementData() {
 
   // Fetch retirement profile
   const fetchProfile = useCallback(async () => {
-    if (!session?.user) return
+    if (!session?.user) {
+      console.log("fetchProfile: No session or user, skipping profile fetch")
+      return
+    }
 
+    console.log("fetchProfile: Starting profile fetch for user:", session.user.id)
     setLoading(true)
     try {
-      const response = await fetch("/api/profile")
+      const response = await fetch("/api/profile", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-cache"
+        }
+      })
+
+      console.log("fetchProfile: Response status:", response.status)
 
       // Check if response is ok and content-type is JSON
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        const errorText = await response.text().catch(() => "Unknown error")
+        console.error("fetchProfile: HTTP error response:", {
+          status: response.status,
+          statusText: response.statusText,
+          errorText: errorText.substring(0, 500)
+        })
+
+        if (response.status === 401) {
+          toast.error("Please sign in to access your profile")
+          return
+        } else if (response.status === 500) {
+          toast.error("Server error loading profile. Please try again.")
+          return
+        }
+
+        throw new Error(`HTTP error! status: ${response.status} - ${errorText}`)
       }
 
       const contentType = response.headers.get("content-type")
       if (!contentType || !contentType.includes("application/json")) {
+        console.error("fetchProfile: Response is not JSON, content-type:", contentType)
         throw new Error("Response is not JSON")
       }
 
       const data = await response.json()
+      console.log("fetchProfile: Received profile data:", data)
 
       if (data) {
         // Convert the profile data to the expected format
-        setProfile({
+        const profileData = {
           dateOfBirth: data.dateOfBirth || "",
           membershipDate: data.membershipDate || "",
           retirementGroup: data.retirementGroup || "Group 1",
@@ -87,11 +116,28 @@ export function useRetirementData() {
           retirementOption: data.retirementOption || "A",
           retirementDate: data.retirementDate || "",
           estimatedSocialSecurityBenefit: data.estimatedSocialSecurityBenefit || 0
-        })
+        }
+
+        console.log("fetchProfile: Setting profile data:", profileData)
+        setProfile(profileData)
+      } else {
+        console.log("fetchProfile: No profile data returned, setting empty profile")
+        setProfile(null)
       }
     } catch (error) {
-      console.error("Error fetching profile:", error)
-      toast.error("Failed to fetch retirement profile")
+      console.error("fetchProfile: Error fetching profile:", error)
+
+      // Provide more specific error messages
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        toast.error("Network error. Please check your connection and try again.")
+      } else if (error instanceof Error) {
+        toast.error(`Failed to fetch profile: ${error.message}`)
+      } else {
+        toast.error("Failed to fetch retirement profile")
+      }
+
+      // Set profile to null on error to trigger fallback behavior
+      setProfile(null)
     } finally {
       setLoading(false)
     }
