@@ -21,27 +21,32 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 
-import { 
-  User, 
-  Mail, 
-  Calendar, 
-  Building, 
-  DollarSign, 
-  Clock, 
-  Shield, 
-  Settings, 
-  Download, 
-  Trash2, 
-  Save, 
-  X, 
-  Home, 
+import {
+  User,
+  Mail,
+  Calendar,
+  Building,
+  DollarSign,
+  Clock,
+  Shield,
+  Settings,
+  Download,
+  Trash2,
+  Save,
+  X,
+  Home,
   ChevronRight,
   AlertCircle,
   CheckCircle,
   Loader2,
   Eye,
-  EyeOff
+  EyeOff,
+  Crown,
+  CreditCard
 } from "lucide-react"
+
+import { useSubscriptionStatus } from "@/hooks/use-subscription"
+import { getSubscriptionDisplayStatus } from "@/lib/stripe/config"
 
 // Form validation schemas
 const profileSchema = z.object({
@@ -81,12 +86,19 @@ export default function AccountPage() {
   const { data: session, status, update } = useSession()
   const router = useRouter()
   const { toast } = useToast()
-  
+
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [profileData, setProfileData] = useState<ProfileData | null>(null)
   const [activeTab, setActiveTab] = useState("profile")
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+
+  // Add subscription status hook
+  const {
+    isPremium,
+    subscriptionStatus,
+    refreshStatus
+  } = useSubscriptionStatus()
 
   // Form instances
   const profileForm = useForm<ProfileFormData>({
@@ -310,11 +322,36 @@ export default function AccountPage() {
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-sm text-gray-600">Account Status</p>
+                <p className="text-sm text-gray-600">Subscription Status</p>
                 <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                  <span className="text-green-600 font-medium">Active</span>
+                  {isPremium ? (
+                    <>
+                      <Crown className="h-4 w-4 text-amber-600" />
+                      <span className="text-amber-600 font-medium">Premium</span>
+                    </>
+                  ) : (
+                    <>
+                      <User className="h-4 w-4 text-blue-600" />
+                      <span className="text-blue-600 font-medium">Free</span>
+                    </>
+                  )}
                 </div>
+                {isPremium && (
+                  <Link
+                    href="/subscription/portal"
+                    className="text-xs text-gray-500 hover:text-primary underline mt-1 block"
+                  >
+                    Manage subscription
+                  </Link>
+                )}
+                {!isPremium && (
+                  <Link
+                    href="/pricing"
+                    className="text-xs text-gray-500 hover:text-primary underline mt-1 block"
+                  >
+                    Upgrade to Premium
+                  </Link>
+                )}
               </div>
             </div>
           </CardContent>
@@ -322,10 +359,14 @@ export default function AccountPage() {
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 h-auto p-1">
+          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 h-auto p-1">
             <TabsTrigger value="profile" className="flex flex-col items-center p-3">
               <User className="h-4 w-4 mb-1" />
               <span className="text-xs">Profile</span>
+            </TabsTrigger>
+            <TabsTrigger value="subscription" className="flex flex-col items-center p-3">
+              <Crown className="h-4 w-4 mb-1" />
+              <span className="text-xs">Subscription</span>
             </TabsTrigger>
             <TabsTrigger value="email" className="flex flex-col items-center p-3">
               <Mail className="h-4 w-4 mb-1" />
@@ -558,6 +599,138 @@ export default function AccountPage() {
                     </div>
                   </form>
                 </Form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Subscription Tab */}
+          <TabsContent value="subscription" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Crown className="h-5 w-5 text-amber-600" />
+                  Subscription Status
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {/* Current Status */}
+                  <div className="p-4 border rounded-lg bg-gradient-to-r from-blue-50 to-amber-50">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        {isPremium ? (
+                          <Crown className="h-8 w-8 text-amber-600" />
+                        ) : (
+                          <User className="h-8 w-8 text-blue-600" />
+                        )}
+                        <div>
+                          <h3 className="text-lg font-semibold">
+                            {isPremium ? 'Premium Account' : 'Free Account'}
+                          </h3>
+                          <p className="text-sm text-gray-600">
+                            {isPremium
+                              ? 'You have access to all premium features'
+                              : 'Upgrade to unlock premium features'
+                            }
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <Badge className={isPremium ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800'}>
+                          {isPremium ? 'Premium' : 'Free'}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-3">
+                    {isPremium ? (
+                      <>
+                        <Button asChild>
+                          <Link href="/subscription/portal">
+                            <CreditCard className="h-4 w-4 mr-2" />
+                            Manage Subscription
+                          </Link>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            refreshStatus()
+                            toast({
+                              title: "Status Refreshed",
+                              description: "Your subscription status has been updated.",
+                            })
+                          }}
+                        >
+                          Refresh Status
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button asChild>
+                          <Link href="/pricing">
+                            <Crown className="h-4 w-4 mr-2" />
+                            Upgrade to Premium
+                          </Link>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            refreshStatus()
+                            toast({
+                              title: "Status Refreshed",
+                              description: "Your subscription status has been updated.",
+                            })
+                          }}
+                        >
+                          Refresh Status
+                        </Button>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Feature Comparison */}
+                  <div className="space-y-4">
+                    <h4 className="font-medium text-gray-900">Feature Access</h4>
+                    <div className="grid gap-3">
+                      <div className="flex items-center justify-between p-3 border rounded-lg">
+                        <div>
+                          <p className="font-medium">Basic Pension Calculator</p>
+                          <p className="text-sm text-gray-600">Calculate your retirement benefits</p>
+                        </div>
+                        <Badge variant="secondary">Included</Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-3 border rounded-lg">
+                        <div>
+                          <p className="font-medium">Social Security Integration</p>
+                          <p className="text-sm text-gray-600">Combined retirement planning</p>
+                        </div>
+                        <Badge className={isPremium ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                          {isPremium ? 'Included' : 'Premium Only'}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-3 border rounded-lg">
+                        <div>
+                          <p className="font-medium">Unlimited Saved Calculations</p>
+                          <p className="text-sm text-gray-600">Save and compare scenarios</p>
+                        </div>
+                        <Badge className={isPremium ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                          {isPremium ? 'Unlimited' : 'Limited to 3'}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-3 border rounded-lg">
+                        <div>
+                          <p className="font-medium">Advanced Planning Tools</p>
+                          <p className="text-sm text-gray-600">Comprehensive retirement wizard</p>
+                        </div>
+                        <Badge className={isPremium ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                          {isPremium ? 'Included' : 'Premium Only'}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
