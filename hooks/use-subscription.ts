@@ -40,7 +40,9 @@ export function useSubscriptionStatus() {
 
   const checkSubscription = async (forceRefresh = false) => {
     if (!session?.user?.email) {
-      console.log('useSubscriptionStatus: No session or email')
+      if (process.env.NODE_ENV === 'development') {
+        console.log('useSubscriptionStatus: No session or email')
+      }
       setSubscriptionData({
         isPremium: false,
         subscriptionStatus: 'free',
@@ -49,8 +51,10 @@ export function useSubscriptionStatus() {
       return
     }
 
-    // Enhanced logging for debugging
-    console.log(`🔍 useSubscriptionStatus: Checking subscription for: ${session.user.email}${forceRefresh ? ' (FORCE REFRESH)' : ''}`)
+    // Enhanced logging for debugging (development only)
+    if (process.env.NODE_ENV === 'development' || forceRefresh) {
+      console.log(`🔍 useSubscriptionStatus: Checking subscription for: ${session.user.email}${forceRefresh ? ' (FORCE REFRESH)' : ''}`)
+    }
 
     try {
       // Call the subscription status API with timestamp to prevent caching
@@ -62,11 +66,16 @@ export function useSubscriptionStatus() {
         }
       })
 
-      console.log(`📡 Subscription API response: ${response.status} ${response.statusText}`)
+      if (process.env.NODE_ENV === 'development' || forceRefresh) {
+        console.log(`📡 Subscription API response: ${response.status} ${response.statusText}`)
+      }
 
       if (response.ok) {
         const data = await response.json()
-        console.log('📊 Subscription API data:', data)
+
+        if (process.env.NODE_ENV === 'development' || forceRefresh) {
+          console.log('📊 Subscription API data:', data)
+        }
 
         const newSubscriptionData = {
           isPremium: Boolean(data.isPremium), // Ensure it's a proper boolean
@@ -74,7 +83,9 @@ export function useSubscriptionStatus() {
           savedCalculationsCount: data.savedCalculationsCount || 0
         }
 
-        console.log('✅ Setting subscription data:', newSubscriptionData)
+        if (process.env.NODE_ENV === 'development' || forceRefresh) {
+          console.log('✅ Setting subscription data:', newSubscriptionData)
+        }
         setSubscriptionData(newSubscriptionData)
 
         // Trigger a custom event for other components to listen to
@@ -85,7 +96,9 @@ export function useSubscriptionStatus() {
         }
       } else {
         // Default to free if API fails
-        console.log(`❌ useSubscriptionStatus: API response not ok (${response.status}), defaulting to free`)
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`❌ useSubscriptionStatus: API response not ok (${response.status}), defaulting to free`)
+        }
         setSubscriptionData({
           isPremium: false,
           subscriptionStatus: 'free',

@@ -45,7 +45,7 @@ export default function RootLayout({
           src="/trusted-types-polyfill.js"
           strategy="beforeInteractive"
         />
-        {/* Trusted Types Policy for Next.js */}
+        {/* Enhanced Trusted Types Policy for Next.js and third-party scripts */}
         <Script
           id="trusted-types-policy"
           strategy="beforeInteractive"
@@ -53,14 +53,49 @@ export default function RootLayout({
             __html: `
               if (typeof window !== 'undefined' && window.trustedTypes && window.trustedTypes.createPolicy) {
                 try {
+                  // Create a comprehensive default policy
                   window.trustedTypes.createPolicy('default', {
-                    createHTML: (string) => string,
-                    createScriptURL: (string) => string,
-                    createScript: (string) => string,
+                    createHTML: (string) => {
+                      // Allow all HTML for now (can be restricted later)
+                      return string;
+                    },
+                    createScriptURL: (string) => {
+                      // Allow trusted script URLs
+                      const allowedDomains = [
+                        'vercel.live',
+                        'va.vercel-scripts.com',
+                        'apis.google.com',
+                        'accounts.google.com',
+                        'js.stripe.com',
+                        'checkout.stripe.com',
+                        window.location.origin
+                      ];
+
+                      try {
+                        const url = new URL(string, window.location.origin);
+                        if (allowedDomains.some(domain => url.hostname.includes(domain))) {
+                          return string;
+                        }
+                      } catch (e) {
+                        // If URL parsing fails, allow relative URLs
+                        if (!string.includes('://')) {
+                          return string;
+                        }
+                      }
+
+                      console.warn('Blocked script URL:', string);
+                      return string; // Allow for now, log for debugging
+                    },
+                    createScript: (string) => {
+                      // Allow all scripts for now (Next.js, Vercel Live, etc.)
+                      return string;
+                    },
                   });
                 } catch (e) {
                   // Policy might already exist
-                  console.log('Trusted Types policy already exists');
+                  if (e.name !== 'NotAllowedError') {
+                    console.log('Trusted Types policy creation:', e.message);
+                  }
                 }
               }
             `,

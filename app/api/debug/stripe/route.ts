@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth/auth-config'
-import { SUBSCRIPTION_PLANS, STRIPE_CONFIG } from '@/lib/stripe/config'
+import { SUBSCRIPTION_PLANS, STRIPE_CONFIG, stripe } from '@/lib/stripe/config'
+import { prisma } from '@/lib/prisma'
 
 export async function GET() {
   try {
@@ -19,8 +20,62 @@ export async function GET() {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
+    // Get user data from database
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email }
+    })
+
+    let stripeCustomerData = null
+    let stripeSubscriptions = null
+
+    if (user?.stripeCustomerId && stripe) {
+      try {
+        // Get customer data from Stripe
+        stripeCustomerData = await stripe.customers.retrieve(user.stripeCustomerId)
+
+        // Get subscriptions for this customer
+        const subscriptionsResponse = await stripe.subscriptions.list({
+          customer: user.stripeCustomerId,
+          limit: 10
+        })
+        stripeSubscriptions = subscriptionsResponse.data
+      } catch (error: any) {
+        console.error('Error fetching Stripe data:', error)
+        stripeCustomerData = { error: error.message }
+        stripeSubscriptions = { error: error.message }
+      }
+    } else if (user?.stripeCustomerId && !stripe) {
+      stripeCustomerData = { error: 'Stripe not configured' }
+      stripeSubscriptions = { error: 'Stripe not configured' }
+    }
+
     const debugInfo = {
       environment: process.env.NODE_ENV,
+      userInfo: {
+        email: session.user.email,
+        databaseUserId: user?.id,
+        stripeCustomerId: user?.stripeCustomerId,
+        subscriptionId: user?.subscriptionId,
+        subscriptionStatus: user?.subscriptionStatus,
+        subscriptionPlan: user?.subscriptionPlan,
+        currentPeriodEnd: user?.currentPeriodEnd,
+        cancelAtPeriodEnd: user?.cancelAtPeriodEnd,
+      },
+      stripeCustomerData,
+      stripeSubscriptions: stripeSubscriptions && Array.isArray(stripeSubscriptions) ? stripeSubscriptions.map((sub: any) => ({
+        id: sub.id,
+        status: sub.status,
+        current_period_end: sub.current_period_end,
+        current_period_start: sub.current_period_start,
+        cancel_at_period_end: sub.cancel_at_period_end,
+        items: sub.items.data.map((item: any) => ({
+          price_id: item.price.id,
+          product_id: item.price.product,
+          amount: item.price.unit_amount,
+          currency: item.price.currency,
+          interval: item.price.recurring?.interval
+        }))
+      })) : stripeSubscriptions,
       stripeConfigured: {
         hasSecretKey: !!process.env.STRIPE_SECRET_KEY,
         hasPublishableKey: !!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,

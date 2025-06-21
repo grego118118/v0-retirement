@@ -24,7 +24,8 @@ export const STRIPE_CONFIG = {
 // Subscription Plans
 export const SUBSCRIPTION_PLANS = {
   monthly: {
-    priceId: process.env.STRIPE_MONTHLY_PRICE_ID || 'price_monthly_placeholder',
+    // Use the actual price ID from Stripe Dashboard
+    priceId: process.env.STRIPE_MONTHLY_PRICE_ID || 'price_1RUqM6QBHWl7jXHEuGpE9jcX',
     name: 'Premium Monthly',
     price: 9.99,
     interval: 'month' as const,
@@ -40,7 +41,8 @@ export const SUBSCRIPTION_PLANS = {
     ]
   },
   annual: {
-    priceId: process.env.STRIPE_ANNUAL_PRICE_ID || 'price_annual_placeholder',
+    // Use the actual price ID from Stripe Dashboard
+    priceId: process.env.STRIPE_ANNUAL_PRICE_ID || 'price_1RZkNFQBHWl7jXHELKksQgBY',
     name: 'Premium Annual',
     price: 99.99,
     interval: 'year' as const,
