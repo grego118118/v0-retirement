@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth/auth-options'
+import { authOptions } from '@/lib/auth/auth-config'
 import { prisma } from '@/lib/prisma'
 import { StripeService } from '@/lib/stripe/service'
 import { SUBSCRIPTION_PLANS } from '@/lib/stripe/config'
@@ -18,15 +18,22 @@ interface CheckoutRequest {
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('🔄 Stripe checkout session creation started')
+
     const session = await getServerSession(authOptions)
-    
+
     if (!session?.user?.email) {
+      console.error('❌ Unauthorized: No session or email')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    console.log(`✅ User authenticated: ${session.user.email}`)
+
     const { priceId, successUrl, cancelUrl }: CheckoutRequest = await request.json()
+    console.log('📝 Request payload:', { priceId, successUrl, cancelUrl })
 
     if (!priceId) {
+      console.error('❌ Missing price ID')
       return NextResponse.json({ error: 'Price ID is required' }, { status: 400 })
     }
 
@@ -36,8 +43,19 @@ export async function POST(request: NextRequest) {
       SUBSCRIPTION_PLANS.annual.priceId
     ]
 
+    console.log('🔍 Valid price IDs:', validPriceIds)
+    console.log('📋 Subscription plans:', {
+      monthly: SUBSCRIPTION_PLANS.monthly,
+      annual: SUBSCRIPTION_PLANS.annual
+    })
+
     if (!validPriceIds.includes(priceId)) {
-      return NextResponse.json({ error: 'Invalid price ID' }, { status: 400 })
+      console.error(`❌ Invalid price ID: ${priceId}. Valid IDs: ${validPriceIds.join(', ')}`)
+      return NextResponse.json({
+        error: 'Invalid price ID',
+        validPriceIds,
+        receivedPriceId: priceId
+      }, { status: 400 })
     }
 
     const userEmail = session.user.email

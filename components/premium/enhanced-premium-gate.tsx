@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Crown, Lock, Star, ArrowRight, CheckCircle, AlertTriangle, Calendar, CreditCard } from "lucide-react"
 import Link from "next/link"
-import { PREMIUM_FEATURES, FREE_TIER_LIMITS, getSubscriptionDisplayStatus } from "@/lib/stripe/config"
+import { PREMIUM_FEATURES, FREE_TIER_LIMITS, getSubscriptionDisplayStatus, SUBSCRIPTION_PLANS } from "@/lib/stripe/config"
 import type { SubscriptionStatus, SubscriptionPlan } from "@/lib/stripe/config"
 
 interface PremiumGateProps {
@@ -114,9 +114,9 @@ export function EnhancedPremiumGate({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          priceId: plan === 'monthly' 
-            ? process.env.NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID 
-            : process.env.NEXT_PUBLIC_STRIPE_ANNUAL_PRICE_ID,
+          priceId: plan === 'monthly'
+            ? SUBSCRIPTION_PLANS.monthly.priceId
+            : SUBSCRIPTION_PLANS.annual.priceId,
           successUrl: `${window.location.origin}/subscription/success`,
           cancelUrl: window.location.href,
         }),
