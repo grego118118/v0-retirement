@@ -50,26 +50,17 @@ export default function WizardPage() {
 
   if (showWizard) {
     return (
-      <PremiumGate
-        feature="combined_wizard"
-        title="Combined Retirement Planning Wizard"
-        description="Advanced retirement optimization with pension and Social Security analysis"
-      >
+      <div className="container mx-auto px-4 py-8">
         <CombinedCalculationWizard
           onComplete={handleWizardComplete}
           resumeToken={resumeToken}
         />
-      </PremiumGate>
+      </div>
     )
   }
 
   return (
-    <PremiumGate
-      feature="combined_wizard"
-      title="Combined Retirement Planning Wizard"
-      description="Advanced retirement optimization with pension and Social Security analysis"
-    >
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <div className="container mx-auto px-4 py-8 max-w-6xl">
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold mb-4">
@@ -296,30 +287,28 @@ export default function WizardPage() {
 
         {/* Action Buttons */}
         <div className="text-center space-y-4">
-          {session?.user && (
-            <div className="flex justify-center gap-4">
+          <div className="flex justify-center gap-4">
+            <Button
+              size="lg"
+              onClick={handleStartWizard}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              <Calculator className="mr-2 h-5 w-5" />
+              Start New Analysis
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+
+            {typeof window !== 'undefined' && session?.user?.id && localStorage.getItem(`wizard-state-${session.user.id}`) && (
               <Button
                 size="lg"
-                onClick={handleStartWizard}
-                className="bg-blue-600 hover:bg-blue-700"
+                variant="outline"
+                onClick={handleResumeWizard}
               >
-                <Calculator className="mr-2 h-5 w-5" />
-                Start New Analysis
-                <ArrowRight className="ml-2 h-5 w-5" />
+                <FileText className="mr-2 h-5 w-5" />
+                Resume Saved Analysis
               </Button>
-
-              {typeof window !== 'undefined' && session.user?.id && localStorage.getItem(`wizard-state-${session.user.id}`) && (
-                <Button
-                  size="lg"
-                  variant="outline"
-                  onClick={handleResumeWizard}
-                >
-                  <FileText className="mr-2 h-5 w-5" />
-                  Resume Saved Analysis
-                </Button>
-              )}
-            </div>
-          )}
+            )}
+          </div>
 
           <Alert className="max-w-2xl mx-auto">
             <CheckCircle className="h-4 w-4" />
@@ -347,6 +336,6 @@ export default function WizardPage() {
           </CardContent>
         </Card>
       </div>
-    </PremiumGate>
+    </div>
   )
 }
