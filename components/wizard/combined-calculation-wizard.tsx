@@ -38,7 +38,7 @@ import {
   Loader2
 } from "lucide-react"
 import { CombinedCalculationData, WizardProgress, WIZARD_STEPS, ValidationRule } from "@/lib/wizard/wizard-types"
-import { calculateAnnualPension, getBenefitFactor } from "@/lib/pension-calculations"
+import { calculateAnnualPension, getBenefitFactor, generateProjectionTable } from "@/lib/pension-calculations"
 
 // Validation schemas for each step
 const personalInfoSchema = z.object({
@@ -52,6 +52,9 @@ const pensionDataSchema = z.object({
   yearsOfService: z.number().min(0).max(50),
   averageSalary: z.number().min(0),
   retirementGroup: z.enum(['1', '2', '3', '4']),
+  serviceEntry: z.enum(['before_2012', 'after_2012']),
+  pensionRetirementAge: z.number().min(18).max(80),
+  beneficiaryAge: z.number().min(18).max(100).optional(),
   retirementOption: z.enum(['A', 'B', 'C', 'D']),
 })
 
@@ -141,6 +144,9 @@ export function CombinedCalculationWizard({
               yearsOfService: profile.yearsOfService || 0,
               averageSalary: profile.averageHighest3Years || profile.currentSalary || 0,
               retirementGroup: profile.retirementGroup || '1',
+              serviceEntry: 'before_2012' as const, // Default to before_2012, user can change
+              pensionRetirementAge: profile.plannedRetirementAge || 65,
+              beneficiaryAge: undefined,
               benefitPercentage: 2.5,
               retirementOption: (profile.retirementOption as 'A' | 'B' | 'C' | 'D') || 'A',
               retirementDate: '',
@@ -361,13 +367,13 @@ export function CombinedCalculationWizard({
     const personalInfo = wizardData.personalInfo
     if (!pensionData || !personalInfo) return 0
 
-    const { averageSalary, yearsOfService, retirementGroup, retirementOption } = pensionData
-    const retirementAge = personalInfo.retirementGoalAge || 65
+    const { averageSalary, yearsOfService, retirementGroup, retirementOption, serviceEntry, pensionRetirementAge, beneficiaryAge } = pensionData
+    const retirementAge = pensionRetirementAge || personalInfo.retirementGoalAge || 65
 
     // Use proper MSRB calculation methodology
     try {
       const group = `GROUP_${retirementGroup}` as const
-      const serviceEntry = "before_2012" // Default assumption for wizard
+      const userServiceEntry = serviceEntry || "before_2012" // Use user selection or default
 
       // Filter retirement option to only include supported options
       const supportedOption = (retirementOption === "A" || retirementOption === "B" || retirementOption === "C")
@@ -380,7 +386,8 @@ export function CombinedCalculationWizard({
         yearsOfService,
         supportedOption,
         group,
-        serviceEntry
+        userServiceEntry,
+        beneficiaryAge?.toString()
       )
 
       return annualBenefit / 12 // Return monthly benefit
@@ -389,8 +396,8 @@ export function CombinedCalculationWizard({
 
       // Fallback to proper MSRB benefit factors
       const group = `GROUP_${retirementGroup}` as const
-      const serviceEntry = "before_2012" // Default assumption for wizard
-      const benefitFactor = getBenefitFactor(retirementAge, group, serviceEntry, yearsOfService)
+      const userServiceEntry = serviceEntry || "before_2012" // Use user selection or default
+      const benefitFactor = getBenefitFactor(retirementAge, group, userServiceEntry, yearsOfService)
       const annualBenefit = averageSalary * yearsOfService * benefitFactor
       const maxBenefit = averageSalary * 0.8 // 80% cap
 
@@ -444,6 +451,118 @@ export function CombinedCalculationWizard({
   const updateWizardData = (stepData: Partial<CombinedCalculationData>) => {
     setWizardData(prev => ({ ...prev, ...stepData }))
     setErrors({}) // Clear errors when data is updated
+  }
+
+  // Helper function to get minimum retirement age by group
+  const getMinRetirementAge = (group: string): number => {
+    switch (group) {
+      case '1': return 55 // Group 1: General employees
+      case '2': return 55 // Group 2: Certain public safety
+      case '3': return 18 // Group 3: State Police (any age with 20+ years)
+      case '4': return 50 // Group 4: Public safety
+      default: return 55
+    }
+  }
+
+  // Helper function to validate pension retirement age
+  const validatePensionRetirementAge = (age: number, group: string, yearsOfService: number): string | null => {
+    const minAge = getMinRetirementAge(group)
+
+    if (age < minAge) {
+      if (group === '3' && yearsOfService >= 20) {
+        return null // Group 3 can retire at any age with 20+ years
+      }
+      return `Minimum retirement age for Group ${group} is ${minAge}`
+    }
+
+    if (age > 80) {
+      return 'Maximum retirement age is 80'
+    }
+
+    return null
+  }
+
+  // Generate retirement projection data for chart
+  const generateRetirementProjection = () => {
+    const pensionData = wizardData.pensionData
+    const personalInfo = wizardData.personalInfo
+    const socialSecurityData = wizardData.socialSecurityData
+
+    if (!pensionData || !personalInfo || !socialSecurityData) return []
+
+    const currentAge = personalInfo.currentAge || 0
+    const projectionData = []
+
+    // Generate data from current age to 80
+    for (let age = Math.max(currentAge, 50); age <= 80; age++) {
+      const projectedYearsOfService = pensionData.yearsOfService + Math.max(0, age - currentAge)
+
+      // Calculate pension benefit at this age
+      let pensionBenefit = 0
+      if (age >= (pensionData.pensionRetirementAge || 65)) {
+        try {
+          const group = `GROUP_${pensionData.retirementGroup}` as const
+          const serviceEntry = pensionData.serviceEntry || "before_2012"
+          const benefitFactor = getBenefitFactor(age, group, serviceEntry, projectedYearsOfService)
+
+          if (benefitFactor > 0) {
+            let annualPension = pensionData.averageSalary * projectedYearsOfService * benefitFactor
+            const maxPension = pensionData.averageSalary * 0.8 // 80% cap
+            annualPension = Math.min(annualPension, maxPension)
+
+            // Apply retirement option adjustments
+            const annualWithOption = calculateAnnualPension(
+              pensionData.averageSalary,
+              age,
+              projectedYearsOfService,
+              pensionData.retirementOption as "A" | "B" | "C",
+              group,
+              serviceEntry,
+              pensionData.beneficiaryAge?.toString()
+            )
+
+            pensionBenefit = annualWithOption / 12
+          }
+        } catch (error) {
+          console.error('Error calculating pension for age', age, error)
+        }
+      }
+
+      // Calculate Social Security benefit at this age
+      let socialSecurityBenefit = 0
+      if (age >= (socialSecurityData.selectedClaimingAge || 67)) {
+        const fullBenefit = socialSecurityData.fullRetirementBenefit || 0
+        const claimingAge = socialSecurityData.selectedClaimingAge || 67
+        const fullRetirementAge = 67
+
+        if (claimingAge < fullRetirementAge) {
+          // Early retirement reduction
+          const monthsEarly = (fullRetirementAge - claimingAge) * 12
+          const reductionRate = monthsEarly <= 36 ? 0.0055 : 0.0041
+          socialSecurityBenefit = fullBenefit * (1 - (monthsEarly * reductionRate))
+        } else if (claimingAge > fullRetirementAge) {
+          // Delayed retirement credits
+          const yearsDelayed = claimingAge - fullRetirementAge
+          socialSecurityBenefit = fullBenefit * (1 + (yearsDelayed * 0.08))
+        } else {
+          socialSecurityBenefit = fullBenefit
+        }
+      }
+
+      projectionData.push({
+        age,
+        ageLabel: `Age ${age}`,
+        pensionMonthly: Math.round(pensionBenefit),
+        socialSecurityMonthly: Math.round(socialSecurityBenefit),
+        totalMonthly: Math.round(pensionBenefit + socialSecurityBenefit),
+        pensionAnnual: Math.round(pensionBenefit * 12),
+        socialSecurityAnnual: Math.round(socialSecurityBenefit * 12),
+        totalAnnual: Math.round((pensionBenefit + socialSecurityBenefit) * 12),
+        yearsOfService: projectedYearsOfService
+      })
+    }
+
+    return projectionData
   }
 
   const getStepIcon = (stepIndex: number) => {
@@ -624,6 +743,9 @@ export function CombinedCalculationWizard({
       yearsOfService: 0,
       averageSalary: 0,
       retirementGroup: '1' as const,
+      serviceEntry: 'before_2012' as const,
+      pensionRetirementAge: 65,
+      beneficiaryAge: undefined,
       benefitPercentage: 2.5,
       retirementOption: 'A' as const,
       retirementDate: '',
@@ -709,13 +831,77 @@ export function CombinedCalculationWizard({
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="serviceEntry">Service Entry Period</Label>
+            <Select
+              value={pensionData.serviceEntry || 'before_2012'}
+              onValueChange={(value) => updateWizardData({
+                pensionData: {
+                  ...pensionData,
+                  serviceEntry: value as 'before_2012' | 'after_2012'
+                }
+              })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select service entry period" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="before_2012">Before April 2, 2012</SelectItem>
+                <SelectItem value="after_2012">On or after April 2, 2012</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-sm text-muted-foreground">
+              Your service entry date affects eligibility requirements and benefit calculations.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="pensionRetirementAge" className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              Pension Retirement Age
+            </Label>
+            <Input
+              id="pensionRetirementAge"
+              type="number"
+              placeholder="65"
+              value={pensionData.pensionRetirementAge || ''}
+              onChange={(e) => {
+                const value = e.target.value
+                const numValue = value ? parseInt(value) : 0
+                updateWizardData({
+                  pensionData: {
+                    ...pensionData,
+                    pensionRetirementAge: numValue
+                  }
+                })
+              }}
+              className={errors['pensionData.pensionRetirementAge'] ? "border-red-500" : ""}
+            />
+            {errors['pensionData.pensionRetirementAge'] && <p className="text-sm text-red-500">{errors['pensionData.pensionRetirementAge']}</p>}
+            {pensionData.pensionRetirementAge && pensionData.retirementGroup && pensionData.yearsOfService && (
+              (() => {
+                const validationError = validatePensionRetirementAge(pensionData.pensionRetirementAge, pensionData.retirementGroup, pensionData.yearsOfService)
+                return validationError ? (
+                  <p className="text-sm text-red-500">{validationError}</p>
+                ) : (
+                  <p className="text-sm text-green-600">✓ Valid retirement age for Group {pensionData.retirementGroup}</p>
+                )
+              })()
+            )}
+            <p className="text-sm text-muted-foreground">
+              Age when you plan to start receiving your pension benefits (may differ from Social Security claiming age).
+            </p>
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="retirementOption">Retirement Option</Label>
             <Select
               value={pensionData.retirementOption || 'A'}
               onValueChange={(value) => updateWizardData({
                 pensionData: {
                   ...pensionData,
-                  retirementOption: value as 'A' | 'B' | 'C' | 'D'
+                  retirementOption: value as 'A' | 'B' | 'C' | 'D',
+                  // Clear beneficiary age if not Option C
+                  beneficiaryAge: value === 'C' ? pensionData.beneficiaryAge : undefined
                 }
               })}
             >
@@ -729,6 +915,37 @@ export function CombinedCalculationWizard({
                 <SelectItem value="D">Option D - Guaranteed Period</SelectItem>
               </SelectContent>
             </Select>
+
+            {/* Conditional Beneficiary Age field for Option C */}
+            {pensionData.retirementOption === 'C' && (
+              <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <Label htmlFor="beneficiaryAge" className="flex items-center gap-2 mb-2">
+                  <Users className="h-4 w-4" />
+                  Beneficiary's Age (at your retirement)
+                </Label>
+                <Input
+                  id="beneficiaryAge"
+                  type="number"
+                  placeholder="e.g., 58"
+                  value={pensionData.beneficiaryAge || ''}
+                  onChange={(e) => {
+                    const value = e.target.value
+                    const numValue = value ? parseInt(value) : undefined
+                    updateWizardData({
+                      pensionData: {
+                        ...pensionData,
+                        beneficiaryAge: numValue
+                      }
+                    })
+                  }}
+                  className={errors['pensionData.beneficiaryAge'] ? "border-red-500" : ""}
+                />
+                {errors['pensionData.beneficiaryAge'] && <p className="text-sm text-red-500">{errors['pensionData.beneficiaryAge']}</p>}
+                <p className="text-sm text-muted-foreground mt-2">
+                  Required for Option C. The beneficiary's age affects the reduction percentage applied to your pension.
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -1282,6 +1499,9 @@ export function CombinedCalculationWizard({
       yearsOfService: 0,
       averageSalary: 0,
       retirementGroup: '1' as const,
+      serviceEntry: 'before_2012' as const,
+      pensionRetirementAge: 65,
+      beneficiaryAge: undefined,
       benefitPercentage: 2.5,
       retirementOption: 'A' as const,
       retirementDate: '',
@@ -1372,6 +1592,20 @@ export function CombinedCalculationWizard({
                   <span className="font-semibold">Group {pensionData.retirementGroup}</span>
                 </div>
                 <div className="flex justify-between">
+                  <span>Pension Retirement Age:</span>
+                  <span className="font-semibold">{pensionData.pensionRetirementAge}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Retirement Option:</span>
+                  <span className="font-semibold">Option {pensionData.retirementOption}</span>
+                </div>
+                {pensionData.retirementOption === 'C' && pensionData.beneficiaryAge && (
+                  <div className="flex justify-between">
+                    <span>Beneficiary Age:</span>
+                    <span className="font-semibold">{pensionData.beneficiaryAge}</span>
+                  </div>
+                )}
+                <div className="flex justify-between">
                   <span>Monthly Benefit:</span>
                   <span className="font-semibold text-green-600">
                     ${Math.round(calculatePensionBenefit()).toLocaleString()}
@@ -1447,8 +1681,149 @@ export function CombinedCalculationWizard({
           </Card>
         </div>
 
+        {/* Retirement Age Projection Chart */}
+        <Card className="mt-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5" />
+              Retirement Benefits Projection
+            </CardTitle>
+            <CardDescription>
+              Projected monthly benefits from current age to 80 based on your inputs
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {(() => {
+                const projectionData = generateRetirementProjection()
+
+                if (projectionData.length === 0) {
+                  return (
+                    <div className="text-center py-8 text-muted-foreground">
+                      Complete all steps to see your retirement projection
+                    </div>
+                  )
+                }
+
+                // Find key ages for highlighting
+                const currentAge = wizardData.personalInfo?.currentAge || 0
+                const pensionAge = wizardData.pensionData?.pensionRetirementAge || 65
+                const ssAge = wizardData.socialSecurityData?.selectedClaimingAge || 67
+
+                return (
+                  <div className="space-y-4">
+                    {/* Chart Legend */}
+                    <div className="flex flex-wrap gap-4 text-sm">
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-green-500 rounded"></div>
+                        <span>Pension Benefits</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-blue-500 rounded"></div>
+                        <span>Social Security Benefits</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-purple-500 rounded"></div>
+                        <span>Total Monthly Income</span>
+                      </div>
+                    </div>
+
+                    {/* Projection Table */}
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b">
+                            <th className="text-left p-2">Age</th>
+                            <th className="text-right p-2">Pension</th>
+                            <th className="text-right p-2">Social Security</th>
+                            <th className="text-right p-2">Total Monthly</th>
+                            <th className="text-right p-2">Total Annual</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {projectionData.filter((_, index) => index % 2 === 0).map((row) => (
+                            <tr
+                              key={row.age}
+                              className={`border-b hover:bg-muted/50 ${
+                                row.age === pensionAge || row.age === ssAge
+                                  ? 'bg-blue-50 dark:bg-blue-950/20 font-semibold'
+                                  : ''
+                              }`}
+                            >
+                              <td className="p-2">
+                                {row.age}
+                                {row.age === pensionAge && (
+                                  <Badge variant="outline" className="ml-2 text-xs">Pension</Badge>
+                                )}
+                                {row.age === ssAge && (
+                                  <Badge variant="outline" className="ml-2 text-xs">SS</Badge>
+                                )}
+                              </td>
+                              <td className="text-right p-2 text-green-600">
+                                ${row.pensionMonthly.toLocaleString()}
+                              </td>
+                              <td className="text-right p-2 text-blue-600">
+                                ${row.socialSecurityMonthly.toLocaleString()}
+                              </td>
+                              <td className="text-right p-2 font-semibold text-purple-600">
+                                ${row.totalMonthly.toLocaleString()}
+                              </td>
+                              <td className="text-right p-2 text-muted-foreground">
+                                ${row.totalAnnual.toLocaleString()}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Key Insights */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                      <div className="bg-green-50 dark:bg-green-950/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
+                        <div className="text-sm font-medium text-green-800 dark:text-green-200">
+                          Pension Starts
+                        </div>
+                        <div className="text-lg font-bold text-green-600">
+                          Age {pensionAge}
+                        </div>
+                        <div className="text-sm text-green-600">
+                          ${projectionData.find(p => p.age === pensionAge)?.pensionMonthly.toLocaleString() || '0'}/month
+                        </div>
+                      </div>
+
+                      <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                        <div className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                          Social Security Starts
+                        </div>
+                        <div className="text-lg font-bold text-blue-600">
+                          Age {ssAge}
+                        </div>
+                        <div className="text-sm text-blue-600">
+                          ${projectionData.find(p => p.age === ssAge)?.socialSecurityMonthly.toLocaleString() || '0'}/month
+                        </div>
+                      </div>
+
+                      <div className="bg-purple-50 dark:bg-purple-950/20 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
+                        <div className="text-sm font-medium text-purple-800 dark:text-purple-200">
+                          Peak Monthly Income
+                        </div>
+                        <div className="text-lg font-bold text-purple-600">
+                          ${Math.max(...projectionData.map(p => p.totalMonthly)).toLocaleString()}
+                        </div>
+                        <div className="text-sm text-purple-600">
+                          When both benefits active
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })()}
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
           <Button variant="outline" className="flex items-center gap-2">
             <Save className="h-4 w-4" />
             Save to Dashboard
