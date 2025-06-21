@@ -205,18 +205,18 @@ export function Header() {
 
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 z-50 bg-black bg-opacity-50 transition-opacity duration-300">
+        <div className="lg:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm transition-all duration-300">
           <div
             ref={mobileMenuRef}
-            className="fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-white dark:bg-gray-900 shadow-xl transform transition-transform duration-300 ease-in-out"
+            className="fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-2xl border-l border-gray-200/50 dark:border-gray-700/50 transform transition-transform duration-300 ease-in-out"
             id="mobile-navigation-menu"
             role="navigation"
             aria-label="Mobile navigation menu"
           >
             {/* Mobile Menu Header */}
-            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200/80 dark:border-gray-700/80 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm">
               <div className="flex items-center space-x-2">
-                <div className="p-1.5 rounded-lg" style={{ background: 'var(--mrs-gradient-primary)' }}>
+                <div className="p-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 shadow-sm">
                   <Image
                     src="/images/massachusetts-seal.svg"
                     alt="Massachusetts State Seal"
@@ -225,29 +225,31 @@ export function Header() {
                     className="h-5 w-5 text-white"
                   />
                 </div>
-                <span className="font-semibold text-gray-800 dark:text-white">MA Pension</span>
+                <span className="font-semibold text-gray-900 dark:text-white">MA Pension</span>
               </div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={closeMobileMenu}
                 aria-label="Close navigation menu"
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800"
+                className="p-2 hover:bg-gray-200/80 dark:hover:bg-gray-700/80 rounded-lg transition-colors"
               >
-                <X className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+                <X className="h-5 w-5 text-gray-800 dark:text-gray-200" />
               </Button>
             </div>
 
             {/* Mobile Menu Content */}
-            <nav className="flex flex-col p-4 space-y-2">
+            <nav className="flex flex-col p-4 space-y-2 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
               <Link
                 href="/calculator"
                 onClick={closeMobileMenu}
-                className={`flex items-center gap-3 p-3 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 ${
-                  isActive("/calculator") ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300" : "text-gray-700 dark:text-gray-300"
+                className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 min-h-[48px] ${
+                  isActive("/calculator")
+                    ? "bg-blue-100/90 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200 shadow-sm border border-blue-200/50 dark:border-blue-700/50"
+                    : "text-gray-800 dark:text-gray-200 hover:bg-gray-200/80 dark:hover:bg-gray-700/60 hover:shadow-sm"
                 }`}
               >
-                <Calculator className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                <Calculator className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
                 <span className="font-medium">Calculator</span>
               </Link>
 
@@ -256,21 +258,25 @@ export function Header() {
                   <Link
                     href="/wizard"
                     onClick={closeMobileMenu}
-                    className={`flex items-center gap-3 p-3 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 ${
-                      isActive("/wizard") ? "bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300" : "text-gray-700 dark:text-gray-300"
+                    className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 min-h-[48px] ${
+                      isActive("/wizard")
+                        ? "bg-purple-100/90 dark:bg-purple-900/40 text-purple-800 dark:text-purple-200 shadow-sm border border-purple-200/50 dark:border-purple-700/50"
+                        : "text-gray-800 dark:text-gray-200 hover:bg-gray-200/80 dark:hover:bg-gray-700/60 hover:shadow-sm"
                     }`}
                   >
-                    <Wand2 className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                    <Wand2 className="h-5 w-5 text-purple-600 dark:text-purple-400 flex-shrink-0" />
                     <span className="font-medium">Retirement Wizard</span>
                   </Link>
                   <Link
                     href="/dashboard"
                     onClick={closeMobileMenu}
-                    className={`flex items-center gap-3 p-3 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 ${
-                      isActive("/dashboard") ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300" : "text-gray-700 dark:text-gray-300"
+                    className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 min-h-[48px] ${
+                      isActive("/dashboard")
+                        ? "bg-green-100/90 dark:bg-green-900/40 text-green-800 dark:text-green-200 shadow-sm border border-green-200/50 dark:border-green-700/50"
+                        : "text-gray-800 dark:text-gray-200 hover:bg-gray-200/80 dark:hover:bg-gray-700/60 hover:shadow-sm"
                     }`}
                   >
-                    <LayoutDashboard className="h-5 w-5 text-green-600 dark:text-green-400" />
+                    <LayoutDashboard className="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0" />
                     <span className="font-medium">Dashboard</span>
                   </Link>
                 </>
@@ -279,11 +285,13 @@ export function Header() {
               <Link
                 href="/blog"
                 onClick={closeMobileMenu}
-                className={`flex items-center gap-3 p-3 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 ${
-                  isActive("/blog") ? "bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300" : "text-gray-700 dark:text-gray-300"
+                className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 min-h-[48px] ${
+                  isActive("/blog")
+                    ? "bg-orange-100/90 dark:bg-orange-900/40 text-orange-800 dark:text-orange-200 shadow-sm border border-orange-200/50 dark:border-orange-700/50"
+                    : "text-gray-800 dark:text-gray-200 hover:bg-gray-200/80 dark:hover:bg-gray-700/60 hover:shadow-sm"
                 }`}
               >
-                <BookOpen className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                <BookOpen className="h-5 w-5 text-orange-600 dark:text-orange-400 flex-shrink-0" />
                 <span className="font-medium">Blog</span>
               </Link>
 
@@ -292,22 +300,26 @@ export function Header() {
                 <Link
                   href="/billing"
                   onClick={closeMobileMenu}
-                  className={`flex items-center gap-3 p-3 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 ${
-                    isActive("/billing") ? "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300" : "text-gray-700 dark:text-gray-300"
+                  className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 min-h-[48px] ${
+                    isActive("/billing")
+                      ? "bg-indigo-100/90 dark:bg-indigo-900/40 text-indigo-800 dark:text-indigo-200 shadow-sm border border-indigo-200/50 dark:border-indigo-700/50"
+                      : "text-gray-800 dark:text-gray-200 hover:bg-gray-200/80 dark:hover:bg-gray-700/60 hover:shadow-sm"
                   }`}
                 >
-                  <CreditCard className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                  <CreditCard className="h-5 w-5 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
                   <span className="font-medium">Billing</span>
                 </Link>
               ) : (
                 <Link
                   href="/pricing"
                   onClick={closeMobileMenu}
-                  className={`flex items-center gap-3 p-3 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 ${
-                    isActive("/pricing") ? "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300" : "text-gray-700 dark:text-gray-300"
+                  className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 min-h-[48px] ${
+                    isActive("/pricing")
+                      ? "bg-indigo-100/90 dark:bg-indigo-900/40 text-indigo-800 dark:text-indigo-200 shadow-sm border border-indigo-200/50 dark:border-indigo-700/50"
+                      : "text-gray-800 dark:text-gray-200 hover:bg-gray-200/80 dark:hover:bg-gray-700/60 hover:shadow-sm"
                   }`}
                 >
-                  <DollarSign className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                  <DollarSign className="h-5 w-5 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
                   <span className="font-medium">Pricing</span>
                 </Link>
               )}
