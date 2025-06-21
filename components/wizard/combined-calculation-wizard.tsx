@@ -369,11 +369,16 @@ export function CombinedCalculationWizard({
       const group = `GROUP_${retirementGroup}` as const
       const serviceEntry = "before_2012" // Default assumption for wizard
 
+      // Filter retirement option to only include supported options
+      const supportedOption = (retirementOption === "A" || retirementOption === "B" || retirementOption === "C")
+        ? retirementOption
+        : "A"
+
       const annualBenefit = calculateAnnualPension(
         averageSalary,
         retirementAge,
         yearsOfService,
-        retirementOption || "A",
+        supportedOption,
         group,
         serviceEntry
       )
@@ -383,6 +388,8 @@ export function CombinedCalculationWizard({
       console.error('Error calculating pension benefit:', error)
 
       // Fallback to proper MSRB benefit factors
+      const group = `GROUP_${retirementGroup}` as const
+      const serviceEntry = "before_2012" // Default assumption for wizard
       const benefitFactor = getBenefitFactor(retirementAge, group, serviceEntry, yearsOfService)
       const annualBenefit = averageSalary * yearsOfService * benefitFactor
       const maxBenefit = averageSalary * 0.8 // 80% cap

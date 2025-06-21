@@ -4,6 +4,16 @@ import { authOptions } from "@/lib/auth/auth-config"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
+// Extended session type to include user.id
+interface ExtendedSession {
+  user?: {
+    id?: string
+    name?: string
+    email?: string
+    image?: string
+  }
+}
+
 // Helper function to validate and parse dates
 const validateDate = (date: string | undefined): boolean => {
   if (!date || date === "") return true // Allow empty strings
@@ -72,10 +82,13 @@ export async function GET() {
 
 // POST - Create or update retirement profile (supports partial updates for auto-save)
 export async function POST(request: NextRequest) {
-  try {
-    console.log("POST /api/retirement/profile - Starting profile save request")
+  console.log("POST /api/retirement/profile - Starting profile save request")
 
-    const session = await getServerSession(authOptions)
+  // Declare session outside try block to make it accessible in catch block
+  let session: ExtendedSession | null = null
+
+  try {
+    session = await getServerSession(authOptions)
     console.log("Session check:", {
       hasSession: !!session,
       hasUser: !!session?.user,
@@ -309,10 +322,13 @@ export async function POST(request: NextRequest) {
 
 // PUT - Update existing retirement profile (complete update)
 export async function PUT(request: NextRequest) {
-  try {
-    console.log("PUT /api/retirement/profile - Starting complete profile update")
+  console.log("PUT /api/retirement/profile - Starting complete profile update")
 
-    const session = await getServerSession(authOptions)
+  // Declare session outside try block to make it accessible in catch block
+  let session: ExtendedSession | null = null
+
+  try {
+    session = await getServerSession(authOptions)
 
     if (!session?.user?.id) {
       console.error("Unauthorized: No session or user ID")
