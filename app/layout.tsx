@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   },
   description: "Estimate your Massachusetts state employee pension benefits and determine the optimal time to retire.",
   generator: 'v0.dev',
-  metadataBase: new URL('http://localhost:3000'),
+  metadataBase: new URL(process.env.NEXTAUTH_URL || 'https://v0-mass-retire-new.vercel.app'),
 }
 
 export default function RootLayout({
