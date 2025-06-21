@@ -157,25 +157,41 @@ function getFreeUserData(user: any, calculationsCount: number): SubscriptionResp
 }
 
 function getDevelopmentSubscriptionData(userEmail: string, user: any, calculationsCount: number): SubscriptionResponse {
-  // Check both fallback users and in-memory premium users store
-  const isPremium = FALLBACK_PREMIUM_USERS.includes(userEmail) || isPremiumUser(userEmail)
+  // Check multiple sources for premium status:
+  // 1. Database subscription status (most authoritative)
+  // 2. In-memory premium users store (for immediate demo access)
+  // 3. Fallback premium users array (for development)
+
+  const inFallbackUsers = FALLBACK_PREMIUM_USERS.includes(userEmail)
+  const inMemoryPremium = isPremiumUser(userEmail)
+  const dbSubscriptionActive = user?.subscriptionStatus === 'active'
+
+  const isPremium = dbSubscriptionActive || inMemoryPremium || inFallbackUsers
 
   console.log(`Checking premium status for ${userEmail}:`)
-  console.log(`- In FALLBACK_PREMIUM_USERS: ${FALLBACK_PREMIUM_USERS.includes(userEmail)}`)
-  console.log(`- In in-memory premium store: ${isPremiumUser(userEmail)}`)
+  console.log(`- Database subscription status: ${user?.subscriptionStatus || 'none'}`)
+  console.log(`- Database subscription plan: ${user?.subscriptionPlan || 'none'}`)
+  console.log(`- In FALLBACK_PREMIUM_USERS: ${inFallbackUsers}`)
+  console.log(`- In in-memory premium store: ${inMemoryPremium}`)
   console.log(`- Final isPremium result: ${isPremium}`)
+
+  // Use database values if available, otherwise fall back to defaults
+  const subscriptionStatus = isPremium ? (user?.subscriptionStatus || 'active') : 'inactive'
+  const subscriptionPlan = isPremium ? (user?.subscriptionPlan || 'monthly') : 'free'
 
   return {
     isPremium,
-    subscriptionStatus: isPremium ? 'active' : 'inactive',
-    subscriptionPlan: isPremium ? 'monthly' : 'free',
+    subscriptionStatus: subscriptionStatus as any,
+    subscriptionPlan: subscriptionPlan as any,
     savedCalculationsCount: calculationsCount,
-    usageLimits: getUsageLimits(isPremium ? 'monthly' : 'free'),
+    currentPeriodEnd: user?.currentPeriodEnd?.toISOString(),
+    cancelAtPeriodEnd: user?.cancelAtPeriodEnd || false,
+    usageLimits: getUsageLimits(subscriptionPlan as any),
     currentUsage: {
       savedCalculations: calculationsCount,
-      socialSecurityCalculations: 0,
-      wizardUses: 0,
-      pdfReports: 0,
+      socialSecurityCalculations: user?.socialSecurityCalculations || 0,
+      wizardUses: user?.wizardUses || 0,
+      pdfReports: user?.pdfReports || 0,
     }
   }
 }
