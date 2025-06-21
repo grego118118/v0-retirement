@@ -12,37 +12,59 @@ export function ResourceOptimizer() {
     const handleCSSPreloads = () => {
       // Find all preloaded CSS links
       const preloadedCSS = document.querySelectorAll('link[rel="preload"][as="style"]')
-      
+
       preloadedCSS.forEach((link) => {
         const href = link.getAttribute('href')
         if (href) {
           // Check if the CSS is actually being used
           const existingStylesheet = document.querySelector(`link[rel="stylesheet"][href="${href}"]`)
-          
+
           if (!existingStylesheet) {
             // Convert preload to actual stylesheet if not already loaded
             const stylesheet = document.createElement('link')
             stylesheet.rel = 'stylesheet'
             stylesheet.href = href
+            stylesheet.media = 'all' // Ensure it's applied immediately
             stylesheet.onload = () => {
               // Remove the preload link once stylesheet is loaded
-              link.remove()
+              if (link.parentNode) {
+                link.parentNode.removeChild(link)
+              }
+            }
+            stylesheet.onerror = () => {
+              // Remove preload link even if stylesheet fails to load
+              if (link.parentNode) {
+                link.parentNode.removeChild(link)
+              }
             }
             document.head.appendChild(stylesheet)
+          } else {
+            // If stylesheet already exists, remove the preload link
+            if (link.parentNode) {
+              link.parentNode.removeChild(link)
+            }
           }
         }
       })
     }
 
-    // Run after a short delay to allow Next.js to finish initial loading
-    const timer = setTimeout(handleCSSPreloads, 100)
+    // Run immediately and after short delays to catch all preloads
+    handleCSSPreloads()
+    const timer1 = setTimeout(handleCSSPreloads, 100)
+    const timer2 = setTimeout(handleCSSPreloads, 500)
+    const timer3 = setTimeout(handleCSSPreloads, 1000)
 
     // Also run on window load to catch any remaining preloads
-    window.addEventListener('load', handleCSSPreloads)
+    const loadHandler = () => {
+      setTimeout(handleCSSPreloads, 100)
+    }
+    window.addEventListener('load', loadHandler)
 
     return () => {
-      clearTimeout(timer)
-      window.removeEventListener('load', handleCSSPreloads)
+      clearTimeout(timer1)
+      clearTimeout(timer2)
+      clearTimeout(timer3)
+      window.removeEventListener('load', loadHandler)
     }
   }, [])
 

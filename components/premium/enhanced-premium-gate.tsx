@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Crown, Lock, Star, ArrowRight, CheckCircle, AlertTriangle, Calendar, CreditCard } from "lucide-react"
 import Link from "next/link"
 import { PREMIUM_FEATURES, FREE_TIER_LIMITS, getSubscriptionDisplayStatus, SUBSCRIPTION_PLANS } from "@/lib/stripe/config"
+import { triggerSubscriptionRefresh, forceRefreshSubscriptionStatus } from "@/lib/subscription-refresh"
 import type { SubscriptionStatus, SubscriptionPlan } from "@/lib/stripe/config"
 
 interface PremiumGateProps {
@@ -361,20 +362,35 @@ export function EnhancedPremiumGate({
             </div>
           </div>
 
-          <div className="flex gap-3 pt-4">
-            {subscriptionData.customerId && (
-              <Link href="/subscription/portal" className="flex-1">
+          <div className="space-y-3 pt-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                console.log('🔄 Manual subscription refresh triggered from premium gate')
+                await forceRefreshSubscriptionStatus()
+                triggerSubscriptionRefresh(0)
+              }}
+              className="w-full text-xs"
+            >
+              Already upgraded? Refresh status
+            </Button>
+
+            <div className="flex gap-3">
+              {subscriptionData.customerId && (
+                <Link href="/subscription/portal" className="flex-1">
+                  <Button variant="outline" className="w-full">
+                    <CreditCard className="mr-2 h-4 w-4" />
+                    Manage Subscription
+                  </Button>
+                </Link>
+              )}
+              <Link href="/pricing" className="flex-1">
                 <Button variant="outline" className="w-full">
-                  <CreditCard className="mr-2 h-4 w-4" />
-                  Manage Subscription
+                  View All Features
                 </Button>
               </Link>
-            )}
-            <Link href="/pricing" className="flex-1">
-              <Button variant="outline" className="w-full">
-                View All Features
-              </Button>
-            </Link>
+            </div>
           </div>
         </CardContent>
       </Card>

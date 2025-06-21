@@ -38,7 +38,7 @@ export function useSubscriptionStatus() {
     savedCalculationsCount: 0
   })
 
-  const checkSubscription = async () => {
+  const checkSubscription = async (forceRefresh = false) => {
     if (!session?.user?.email) {
       console.log('useSubscriptionStatus: No session or email')
       setSubscriptionData({
@@ -49,14 +49,12 @@ export function useSubscriptionStatus() {
       return
     }
 
-    // Only log in development mode
-    if (process.env.NODE_ENV === 'development') {
-      console.log('useSubscriptionStatus: Checking subscription for:', session.user.email)
-    }
+    // Enhanced logging for debugging
+    console.log(`🔍 useSubscriptionStatus: Checking subscription for: ${session.user.email}${forceRefresh ? ' (FORCE REFRESH)' : ''}`)
 
     try {
       // Call the subscription status API with timestamp to prevent caching
-      const response = await fetch(`/api/subscription/status?t=${Date.now()}`, {
+      const response = await fetch(`/api/subscription/status?t=${Date.now()}&force=${forceRefresh}`, {
         cache: 'no-store', // Ensure we don't get cached response
         headers: {
           'Cache-Control': 'no-cache',
@@ -64,8 +62,11 @@ export function useSubscriptionStatus() {
         }
       })
 
+      console.log(`📡 Subscription API response: ${response.status} ${response.statusText}`)
+
       if (response.ok) {
         const data = await response.json()
+        console.log('📊 Subscription API data:', data)
 
         const newSubscriptionData = {
           isPremium: Boolean(data.isPremium), // Ensure it's a proper boolean
@@ -73,12 +74,18 @@ export function useSubscriptionStatus() {
           savedCalculationsCount: data.savedCalculationsCount || 0
         }
 
+        console.log('✅ Setting subscription data:', newSubscriptionData)
         setSubscriptionData(newSubscriptionData)
+
+        // Trigger a custom event for other components to listen to
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('subscription-status-updated', {
+            detail: newSubscriptionData
+          }))
+        }
       } else {
         // Default to free if API fails
-        if (process.env.NODE_ENV === 'development') {
-          console.log('useSubscriptionStatus: API response not ok, defaulting to free')
-        }
+        console.log(`❌ useSubscriptionStatus: API response not ok (${response.status}), defaulting to free`)
         setSubscriptionData({
           isPremium: false,
           subscriptionStatus: 'free',
@@ -86,7 +93,7 @@ export function useSubscriptionStatus() {
         })
       }
     } catch (error) {
-      console.error('useSubscriptionStatus: Error checking subscription:', error)
+      console.error('❌ useSubscriptionStatus: Error checking subscription:', error)
       setSubscriptionData({
         isPremium: false,
         subscriptionStatus: 'free',
@@ -141,8 +148,8 @@ export function useSubscriptionStatus() {
     canSaveCalculations,
     maxSavedCalculations,
     upgradeRequired,
-    // Add a manual refresh function
-    refreshStatus: checkSubscription
+    // Add a manual refresh function with force option
+    refreshStatus: (force = true) => checkSubscription(force)
   }
 
   // Only log in development mode and reduce frequency

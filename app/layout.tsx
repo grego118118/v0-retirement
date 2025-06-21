@@ -9,6 +9,7 @@ import { SessionProvider } from "@/components/auth/session-provider"
 import Script from "next/script"
 import { Toaster } from "@/components/ui/sonner"
 import { ResourceOptimizer } from "@/components/layout/resource-optimizer"
+import { SubscriptionListener } from "@/components/layout/subscription-listener"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -70,6 +71,7 @@ export default function RootLayout({
         <SessionProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <ResourceOptimizer />
+            <SubscriptionListener />
             <div className="flex min-h-screen flex-col">
               <Header />
               <main className="flex-1">{children}</main>
