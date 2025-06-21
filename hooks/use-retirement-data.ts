@@ -185,22 +185,62 @@ export function useRetirementData() {
   // Save or update retirement profile
   const saveProfile = useCallback(async (profileData: RetirementProfile) => {
     if (!session?.user) {
+      console.log("saveProfile: No session or user, cannot save profile")
       toast.error("You must be logged in to save your profile")
       return false
     }
+
+    console.log("saveProfile: Starting profile save for user:", session.user.id)
+    console.log("saveProfile: Profile data to save:", {
+      ...profileData,
+      // Don't log sensitive data in production
+      dataKeys: Object.keys(profileData),
+      hasDateOfBirth: !!profileData.dateOfBirth,
+      hasMembershipDate: !!profileData.membershipDate,
+      retirementGroup: profileData.retirementGroup
+    })
 
     setLoading(true)
     try {
       const response = await fetch("/api/retirement/profile", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-cache"
+        },
         body: JSON.stringify(profileData),
       })
+
+      console.log("saveProfile: Response status:", response.status)
 
       // Check if response is ok and content-type is JSON
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: "Unknown error" }))
-        throw new Error(`HTTP error! status: ${response.status} - ${errorData.message || "Unknown error"}`)
+        console.error("saveProfile: HTTP error response:", {
+          status: response.status,
+          statusText: response.statusText,
+          errorData: errorData
+        })
+
+        // Provide specific error messages based on status code
+        if (response.status === 401) {
+          toast.error("Please sign in to save your profile")
+          return false
+        } else if (response.status === 400) {
+          const message = errorData.message || "Please check your input data and try again"
+          toast.error(message)
+          return false
+        } else if (response.status === 409) {
+          const message = errorData.message || "Profile already exists"
+          toast.error(message)
+          return false
+        } else if (response.status === 500) {
+          const message = errorData.message || "Server error. Please try again in a moment."
+          toast.error(message)
+          return false
+        }
+
+        throw new Error(`HTTP ${response.status}: ${errorData.error || response.statusText}`)
       }
 
       const contentType = response.headers.get("content-type")
@@ -232,8 +272,26 @@ export function useRetirementData() {
         return false
       }
     } catch (error) {
-      console.error("Error saving profile:", error)
-      toast.error("Failed to save profile")
+      console.error("saveProfile: Error saving profile:", error)
+
+      // Provide more specific error messages
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        toast.error("Network error. Please check your connection and try again.")
+      } else if (error instanceof Error) {
+        // Don't show technical error messages to users
+        if (error.message.includes('HTTP 500')) {
+          toast.error("Server error. Please try again in a moment.")
+        } else if (error.message.includes('HTTP 400')) {
+          toast.error("Please check your input data and try again.")
+        } else if (error.message.includes('Response is not JSON')) {
+          toast.error("Server error. Please try again.")
+        } else {
+          toast.error("Failed to save profile. Please try again.")
+        }
+      } else {
+        toast.error("Failed to save profile")
+      }
+
       return false
     } finally {
       setLoading(false)
