@@ -336,6 +336,5 @@ export default function WizardPage() {
           </CardContent>
         </Card>
       </div>
-    </div>
   )
 }
