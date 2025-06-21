@@ -175,14 +175,16 @@ export function calculatePensionWithOption(
 
   if (option === "B") {
     // Option B: Annuity Protection - Age-based reduction with interpolation
+    // Based on MSRB official results: Age 55 uses 1% reduction (same as age 50)
     let reductionPercent: number
 
-    if (memberAge <= 50) {
+    if (memberAge <= 55) {
+      // Ages 50-55: Use 1% reduction (MSRB official)
       reductionPercent = OPTION_B_REDUCTIONS[50]  // 1%
     } else if (memberAge <= 60) {
-      // Interpolate between age 50 (1%) and age 60 (3%)
-      const ageRange = 60 - 50
-      const agePosition = memberAge - 50
+      // Interpolate between age 55 (1%) and age 60 (3%)
+      const ageRange = 60 - 55
+      const agePosition = memberAge - 55
       const reductionRange = OPTION_B_REDUCTIONS[60] - OPTION_B_REDUCTIONS[50]
       reductionPercent = OPTION_B_REDUCTIONS[50] + (agePosition / ageRange) * reductionRange
     } else if (memberAge <= 70) {
