@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { useSession } from "next-auth/react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -35,7 +35,9 @@ import {
   Target,
   BarChart3,
   Download,
-  Loader2
+  Loader2,
+  Check,
+  Clock
 } from "lucide-react"
 import { CombinedCalculationData, WizardProgress, WIZARD_STEPS, ValidationRule } from "@/lib/wizard/wizard-types"
 import { calculateAnnualPension, getBenefitFactor, generateProjectionTable } from "@/lib/pension-calculations"
@@ -113,6 +115,10 @@ export function CombinedCalculationWizard({
   const [isLoadingProfile, setIsLoadingProfile] = useState(true)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [optimizationResults, setOptimizationResults] = useState<any>(null)
+  const [isSaving, setIsSaving] = useState(false)
+  const [lastSaved, setLastSaved] = useState<Date | null>(null)
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Load user profile data
   useEffect(() => {
@@ -192,35 +198,136 @@ export function CombinedCalculationWizard({
     loadUserProfile()
   }, [session?.user?.id])
 
-  // Initialize wizard data structure from saved state
+  // Initialize wizard data structure from saved state and profile
   useEffect(() => {
-    if (resumeToken && session?.user?.id && !isLoadingProfile) {
-      // Load saved wizard state from localStorage
+    if (session?.user?.id && !isLoadingProfile) {
+      // Always try to load saved wizard state from localStorage
       const savedData = localStorage.getItem(`wizard-data-${session.user.id}`)
-      if (savedData) {
+
+      if (savedData && resumeToken) {
+        // Resume from saved state
         try {
           const parsed = JSON.parse(savedData)
           setWizardData(parsed.data || {})
           setCurrentStep(parsed.currentStep || 0)
+          console.log('Resumed wizard from saved state:', parsed)
         } catch (error) {
           console.error("Failed to load saved wizard data:", error)
         }
+      } else if (userProfile && Object.keys(wizardData).length === 0) {
+        // Initialize from user profile if no saved data
+        const initialData: Partial<CombinedCalculationData> = {
+          personalInfo: {
+            birthYear: userProfile.dateOfBirth ? new Date(userProfile.dateOfBirth).getFullYear() : 0,
+            retirementGoalAge: 65,
+            lifeExpectancy: 85,
+            filingStatus: 'single' as const,
+            currentAge: userProfile.dateOfBirth ? new Date().getFullYear() - new Date(userProfile.dateOfBirth).getFullYear() : 0
+          },
+          pensionData: {
+            yearsOfService: userProfile.yearsOfService || 0,
+            averageSalary: userProfile.averageHighest3Years || userProfile.currentSalary || 0,
+            retirementGroup: (userProfile.retirementGroup || '1') as '1' | '2' | '3' | '4',
+            serviceEntry: 'before_2012' as const,
+            pensionRetirementAge: 65, // Default pension retirement age
+            beneficiaryAge: undefined,
+            benefitPercentage: 2.5,
+            retirementOption: (userProfile.retirementOption || 'A') as 'A' | 'B' | 'C' | 'D',
+            retirementDate: '',
+            monthlyBenefit: 0,
+            annualBenefit: 0
+          },
+          socialSecurityData: {
+            fullRetirementAge: 67,
+            earlyRetirementBenefit: 0,
+            fullRetirementBenefit: userProfile.estimatedSocialSecurityBenefit || 0,
+            delayedRetirementBenefit: 0,
+            selectedClaimingAge: 67,
+            selectedMonthlyBenefit: userProfile.estimatedSocialSecurityBenefit || 0,
+            isMarried: false
+          },
+          incomeData: {
+            totalAnnualIncome: 0,
+            otherRetirementIncome: 0,
+            hasRothIRA: false,
+            rothIRABalance: 0,
+            has401k: false,
+            traditional401kBalance: 0,
+            estimatedMedicarePremiums: 174.70
+          },
+          preferences: {
+            riskTolerance: 'moderate' as const,
+            inflationScenario: 'moderate' as const,
+            includeTaxOptimization: true,
+            includeMonteCarloAnalysis: false,
+            retirementIncomeGoal: 0
+          }
+        }
+
+        setWizardData(initialData)
+        console.log('Initialized wizard from user profile:', initialData)
       }
     }
-  }, [resumeToken, session?.user?.id, isLoadingProfile])
+  }, [resumeToken, session?.user?.id, isLoadingProfile, userProfile, wizardData])
 
-  // Auto-save wizard progress
+  // Debounced auto-save function
+  const debouncedAutoSave = useCallback((data: Partial<CombinedCalculationData>, step: number) => {
+    if (!session?.user?.id) return
+
+    // Clear existing timeout
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current)
+    }
+
+    // Set saving status
+    setSaveStatus('saving')
+    setIsSaving(true)
+
+    // Set new timeout for 1.5 seconds
+    saveTimeoutRef.current = setTimeout(() => {
+      try {
+        const saveData = {
+          currentStep: step,
+          data: data,
+          savedAt: new Date().toISOString()
+        }
+        localStorage.setItem(`wizard-data-${session.user.id}`, JSON.stringify(saveData))
+        localStorage.setItem(`wizard-state-${session.user.id}`, `step-${step}`)
+
+        setSaveStatus('saved')
+        setLastSaved(new Date())
+        setIsSaving(false)
+
+        // Reset to idle after 2 seconds
+        setTimeout(() => {
+          setSaveStatus('idle')
+        }, 2000)
+      } catch (error) {
+        console.error('Auto-save failed:', error)
+        setSaveStatus('error')
+        setIsSaving(false)
+
+        // Reset to idle after 3 seconds
+        setTimeout(() => {
+          setSaveStatus('idle')
+        }, 3000)
+      }
+    }, 1500)
+  }, [session?.user?.id])
+
+  // Auto-save wizard progress with debouncing
   useEffect(() => {
     if (session?.user?.id && Object.keys(wizardData).length > 0) {
-      const saveData = {
-        currentStep,
-        data: wizardData,
-        savedAt: new Date().toISOString()
-      }
-      localStorage.setItem(`wizard-data-${session.user.id}`, JSON.stringify(saveData))
-      localStorage.setItem(`wizard-state-${session.user.id}`, `step-${currentStep}`)
+      debouncedAutoSave(wizardData, currentStep)
     }
-  }, [wizardData, currentStep, session?.user?.id])
+
+    // Cleanup timeout on unmount
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+      }
+    }
+  }, [wizardData, currentStep, session?.user?.id, debouncedAutoSave])
 
   const progress: WizardProgress = {
     stepNumber: currentStep + 1,
@@ -237,37 +344,48 @@ export function CombinedCalculationWizard({
     const step = WIZARD_STEPS[currentStep]
     const stepData = wizardData
 
-    if (!step.validationRules) return true
-
     const stepErrors: Record<string, string> = {}
 
-    for (const rule of step.validationRules) {
-      const value = getNestedValue(stepData, rule.field)
+    // Standard field validation
+    if (step.validationRules) {
+      for (const rule of step.validationRules) {
+        const value = getNestedValue(stepData, rule.field)
 
-      switch (rule.rule) {
-        case 'required':
-          if (value === undefined || value === null || value === '' || value === 0) {
-            stepErrors[rule.field] = rule.message
-          }
-          break
-        case 'positive':
-          if (typeof value === 'number' && value <= 0) {
-            stepErrors[rule.field] = rule.message
-          }
-          break
-        case 'range':
-          if (typeof value === 'number' && value > 0 && (
-            (rule.min !== undefined && value < rule.min) ||
-            (rule.max !== undefined && value > rule.max)
-          )) {
-            stepErrors[rule.field] = rule.message
-          }
-          break
-        case 'custom':
-          if (rule.customValidator && !rule.customValidator(value)) {
-            stepErrors[rule.field] = rule.message
-          }
-          break
+        switch (rule.rule) {
+          case 'required':
+            if (value === undefined || value === null || value === '' || value === 0) {
+              stepErrors[rule.field] = rule.message
+            }
+            break
+          case 'positive':
+            if (typeof value === 'number' && value <= 0) {
+              stepErrors[rule.field] = rule.message
+            }
+            break
+          case 'range':
+            if (typeof value === 'number' && value > 0 && (
+              (rule.min !== undefined && value < rule.min) ||
+              (rule.max !== undefined && value > rule.max)
+            )) {
+              stepErrors[rule.field] = rule.message
+            }
+            break
+          case 'custom':
+            if (rule.customValidator && !rule.customValidator(value)) {
+              stepErrors[rule.field] = rule.message
+            }
+            break
+        }
+      }
+    }
+
+    // Add data consistency validation for pension details step
+    if (step.id === 'pension-details') {
+      const consistencyValidation = validateDataConsistency()
+      if (!consistencyValidation.isValid) {
+        consistencyValidation.errors.forEach((error, index) => {
+          stepErrors[`consistency_${index}`] = error
+        })
       }
     }
 
@@ -453,6 +571,53 @@ export function CombinedCalculationWizard({
     setErrors({}) // Clear errors when data is updated
   }
 
+  // Save status indicator component
+  const SaveStatusIndicator = () => {
+    if (saveStatus === 'idle') return null
+
+    const getStatusConfig = () => {
+      switch (saveStatus) {
+        case 'saving':
+          return {
+            icon: Clock,
+            text: 'Saving...',
+            className: 'text-blue-600 bg-blue-50 border-blue-200'
+          }
+        case 'saved':
+          return {
+            icon: Check,
+            text: 'Saved',
+            className: 'text-green-600 bg-green-50 border-green-200'
+          }
+        case 'error':
+          return {
+            icon: AlertTriangle,
+            text: 'Save failed',
+            className: 'text-red-600 bg-red-50 border-red-200'
+          }
+        default:
+          return null
+      }
+    }
+
+    const config = getStatusConfig()
+    if (!config) return null
+
+    const { icon: Icon, text, className } = config
+
+    return (
+      <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-md border text-xs font-medium ${className}`}>
+        <Icon className="h-3 w-3" />
+        {text}
+        {lastSaved && saveStatus === 'saved' && (
+          <span className="text-muted-foreground ml-1">
+            {lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </span>
+        )}
+      </div>
+    )
+  }
+
   // Helper function to get minimum retirement age by group
   const getMinRetirementAge = (group: string): number => {
     switch (group) {
@@ -482,6 +647,66 @@ export function CombinedCalculationWizard({
     return null
   }
 
+  // Data consistency validation function
+  const validateDataConsistency = (): { isValid: boolean; errors: string[] } => {
+    const errors: string[] = []
+    const pensionData = wizardData.pensionData
+    const personalInfo = wizardData.personalInfo
+
+    if (!pensionData || !personalInfo) {
+      return { isValid: true, errors: [] } // Skip validation if data is incomplete
+    }
+
+    // Validate pension retirement age against group rules
+    if (pensionData.pensionRetirementAge && pensionData.retirementGroup) {
+      const ageValidation = validatePensionRetirementAge(
+        pensionData.pensionRetirementAge,
+        pensionData.retirementGroup,
+        pensionData.yearsOfService || 0
+      )
+      if (ageValidation) {
+        errors.push(`Pension Retirement Age: ${ageValidation}`)
+      }
+    }
+
+    // Validate beneficiary age for Option C
+    if (pensionData.retirementOption === 'C' && !pensionData.beneficiaryAge) {
+      errors.push('Beneficiary age is required for Option C retirement')
+    }
+
+    // Validate years of service
+    if (pensionData.yearsOfService && pensionData.yearsOfService < 0) {
+      errors.push('Years of service cannot be negative')
+    }
+
+    // Validate average salary
+    if (pensionData.averageSalary && pensionData.averageSalary <= 0) {
+      errors.push('Average salary must be greater than zero')
+    }
+
+    // Cross-validate pension retirement age with current age
+    if (pensionData.pensionRetirementAge && personalInfo.currentAge) {
+      if (pensionData.pensionRetirementAge <= personalInfo.currentAge) {
+        errors.push('Pension retirement age must be greater than current age')
+      }
+    }
+
+    // Validate that pension benefit calculations are consistent
+    try {
+      const calculatedBenefit = calculatePensionBenefit()
+      if (calculatedBenefit < 0) {
+        errors.push('Calculated pension benefit is invalid')
+      }
+    } catch (error) {
+      errors.push('Error in pension benefit calculation')
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors
+    }
+  }
+
   // Generate retirement projection data for chart
   const generateRetirementProjection = () => {
     const pensionData = wizardData.pensionData
@@ -490,43 +715,17 @@ export function CombinedCalculationWizard({
 
     if (!pensionData || !personalInfo || !socialSecurityData) return []
 
-    const currentAge = personalInfo.currentAge || 0
+    const pensionRetirementAge = pensionData.pensionRetirementAge || 65
     const projectionData = []
 
-    // Generate data from current age to 80
-    for (let age = Math.max(currentAge, 50); age <= 80; age++) {
-      const projectedYearsOfService = pensionData.yearsOfService + Math.max(0, age - currentAge)
+    // Calculate the fixed pension benefit using the same function as the Pension Details card
+    const fixedPensionBenefit = calculatePensionBenefit()
 
-      // Calculate pension benefit at this age
-      let pensionBenefit = 0
-      if (age >= (pensionData.pensionRetirementAge || 65)) {
-        try {
-          const group = `GROUP_${pensionData.retirementGroup}` as const
-          const serviceEntry = pensionData.serviceEntry || "before_2012"
-          const benefitFactor = getBenefitFactor(age, group, serviceEntry, projectedYearsOfService)
-
-          if (benefitFactor > 0) {
-            let annualPension = pensionData.averageSalary * projectedYearsOfService * benefitFactor
-            const maxPension = pensionData.averageSalary * 0.8 // 80% cap
-            annualPension = Math.min(annualPension, maxPension)
-
-            // Apply retirement option adjustments
-            const annualWithOption = calculateAnnualPension(
-              pensionData.averageSalary,
-              age,
-              projectedYearsOfService,
-              pensionData.retirementOption as "A" | "B" | "C",
-              group,
-              serviceEntry,
-              pensionData.beneficiaryAge?.toString()
-            )
-
-            pensionBenefit = annualWithOption / 12
-          }
-        } catch (error) {
-          console.error('Error calculating pension for age', age, error)
-        }
-      }
+    // Generate data from pension retirement age to 80
+    const startAge = Math.max(pensionRetirementAge, 50) // Start at pension retirement age, minimum 50
+    for (let age = startAge; age <= 80; age++) {
+      // Pension benefit is fixed once you retire - use the same calculation as the details card
+      const pensionBenefit = fixedPensionBenefit
 
       // Calculate Social Security benefit at this age
       let socialSecurityBenefit = 0
@@ -558,7 +757,7 @@ export function CombinedCalculationWizard({
         pensionAnnual: Math.round(pensionBenefit * 12),
         socialSecurityAnnual: Math.round(socialSecurityBenefit * 12),
         totalAnnual: Math.round((pensionBenefit + socialSecurityBenefit) * 12),
-        yearsOfService: projectedYearsOfService
+        yearsOfService: pensionData.yearsOfService // Use actual years of service for consistency
       })
     }
 
@@ -1847,9 +2046,12 @@ export function CombinedCalculationWizard({
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-2xl font-bold">Combined Retirement Planning Wizard</h1>
-          <Badge variant="outline">
-            Step {progress.stepNumber} of {progress.totalSteps}
-          </Badge>
+          <div className="flex items-center gap-3">
+            <SaveStatusIndicator />
+            <Badge variant="outline">
+              Step {progress.stepNumber} of {progress.totalSteps}
+            </Badge>
+          </div>
         </div>
         
         <Progress value={progress.percentComplete} className="mb-2" />
