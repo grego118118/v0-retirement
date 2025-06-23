@@ -15,6 +15,9 @@ export const metadata: Metadata = {
   robots: "noindex, nofollow" // Prevent search engine indexing
 }
 
+// Force deployment refresh - Environment variable fix for NEXTAUTH_URL
+// Build timestamp: 2025-01-23
+
 export default function WizardV2DevPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
