@@ -208,18 +208,18 @@ export function EnhancedCalculationPreview({ data, onChange, className = "" }: E
             A: {
               annual: optionAResult.pension,
               monthly: optionAResult.pension / 12,
-              description: optionAResult.optionDescription
+              description: optionAResult.description
             },
             B: {
               annual: optionBResult.pension,
               monthly: optionBResult.pension / 12,
-              description: optionBResult.optionDescription,
+              description: optionBResult.description,
               reduction: ((basePension - optionBResult.pension) / basePension) * 100
             },
             C: {
               annual: optionCResult.pension,
               monthly: optionCResult.pension / 12,
-              description: optionCResult.optionDescription,
+              description: optionCResult.description,
               reduction: ((basePension - optionCResult.pension) / basePension) * 100,
               survivorAnnual: optionCResult.survivorPension,
               survivorMonthly: optionCResult.survivorPension / 12
