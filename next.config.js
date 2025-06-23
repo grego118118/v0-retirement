@@ -104,70 +104,14 @@ const nextConfig = {
     })
   },
 
-  // Webpack configuration to exclude dev routes in production
+  // Webpack configuration for production builds
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
-    // Exclude development files from production builds
+    // Only apply minimal changes in production
     if (!dev && process.env.NODE_ENV === 'production') {
-      // Ignore development files completely
-      config.plugins.push(
-        // Ignore entire dev directory
-        new webpack.IgnorePlugin({
-          resourceRegExp: /^\.\/dev\/.*$/,
-          contextRegExp: /app$/,
-        }),
-        // Ignore specific dev components
-        new webpack.IgnorePlugin({
-          resourceRegExp: /wizard-v2-dev\.tsx$/,
-        }),
-        new webpack.IgnorePlugin({
-          resourceRegExp: /wizard-navigation-v2\.tsx$/,
-        }),
-        new webpack.IgnorePlugin({
-          resourceRegExp: /essential-information-step\.tsx$/,
-        }),
-        new webpack.IgnorePlugin({
-          resourceRegExp: /enhanced-calculation-preview\.tsx$/,
-        }),
-        new webpack.IgnorePlugin({
-          resourceRegExp: /live-calculation-preview\.tsx$/,
-        }),
-        new webpack.IgnorePlugin({
-          resourceRegExp: /wizard-test-helper\.tsx$/,
-        }),
-        new webpack.IgnorePlugin({
-          resourceRegExp: /wizard-types-v2\.ts$/,
-        }),
-        new webpack.IgnorePlugin({
-          resourceRegExp: /smart-defaults\.ts$/,
-        })
-      )
-
-      // Exclude dev pages from being processed
-      const originalEntry = config.entry
-      config.entry = async () => {
-        const entries = await originalEntry()
-
-        // Filter out dev pages from entries
-        Object.keys(entries).forEach(key => {
-          if (key.includes('/dev/') || key.includes('dev/wizard-v2')) {
-            delete entries[key]
-          }
-        })
-
-        return entries
-      }
-
-      // Also exclude from module resolution and use production stubs
+      // Use production stub for wizard-v2-dev component if needed
       config.resolve.alias = {
         ...config.resolve.alias,
         '@/components/wizard/wizard-v2-dev': require.resolve('./components/wizard/wizard-v2-dev.production.tsx'),
-        '@/components/wizard/wizard-navigation-v2': false,
-        '@/components/wizard/essential-information-step': false,
-        '@/components/wizard/enhanced-calculation-preview': false,
-        '@/components/wizard/live-calculation-preview': false,
-        '@/components/wizard/wizard-test-helper': false,
-        '@/lib/wizard/wizard-types-v2': false,
-        '@/lib/wizard/smart-defaults': false,
       }
     }
 

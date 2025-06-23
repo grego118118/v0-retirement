@@ -8,23 +8,6 @@
 
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
-import dynamic from "next/dynamic"
-
-// Conditionally import the WizardV2Dev component only in development
-const WizardV2Dev = dynamic(
-  () => import("@/components/wizard/wizard-v2-dev").then(mod => ({ default: mod.WizardV2Dev })),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading development wizard...</p>
-        </div>
-      </div>
-    )
-  }
-)
 
 export const metadata: Metadata = {
   title: "Wizard V2 Development | Massachusetts Retirement System",
@@ -36,10 +19,18 @@ export const metadata: Metadata = {
 // Build timestamp: 2025-01-23
 
 export default function WizardV2DevPage() {
-  // Block access in production
+  // Block access in production immediately
   if (process.env.NODE_ENV === 'production') {
     notFound()
   }
+
+  // Only load the component in development
+  if (process.env.NODE_ENV !== 'development') {
+    notFound()
+  }
+
+  // Dynamic import only in development
+  const { WizardV2Dev } = require("@/components/wizard/wizard-v2-dev")
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="container mx-auto py-8">
