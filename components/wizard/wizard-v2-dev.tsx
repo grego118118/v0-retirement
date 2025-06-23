@@ -346,7 +346,7 @@ export function WizardV2Dev({ onClose }: WizardV2DevProps) {
     const pristineWizardData = { ...wizardData.essentialInfo, ...newData }
     setWizardData({
       ...wizardData,
-      essentialInfo: pristineWizardData
+      essentialInfo: pristineWizardData as EssentialInfoData
     })
     console.log('✅ Updated wizardData.essentialInfo (pristine):', pristineWizardData)
 
