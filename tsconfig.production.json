@@ -1,0 +1,48 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "target": "ES6",
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": [
+    "node_modules", 
+    "scripts", 
+    "app_backup",
+    "app/dev/**/*",
+    "components/wizard/wizard-v2-dev.tsx",
+    "components/wizard/wizard-navigation-v2.tsx",
+    "components/wizard/essential-information-step.tsx",
+    "components/wizard/enhanced-calculation-preview.tsx",
+    "components/wizard/live-calculation-preview.tsx",
+    "components/wizard/wizard-test-helper.tsx",
+    "lib/wizard/wizard-types-v2.ts",
+    "lib/wizard/smart-defaults.ts",
+    "**/*-dev.tsx",
+    "**/*-dev.ts",
+    "**/dev/**/*",
+    "test-*.js",
+    "validate-*.js",
+    "debug-*.js",
+    "__tests__/**/*"
+  ]
+}

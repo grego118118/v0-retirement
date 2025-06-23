@@ -89,16 +89,63 @@ const nextConfig = {
     formats: ['image/webp', 'image/avif'],
   },
   
+  // TypeScript configuration for production builds
+  typescript: {
+    // In production, use production-specific TypeScript config that excludes dev files
+    ...(process.env.NODE_ENV === 'production' && {
+      ignoreBuildErrors: false, // Keep strict validation for production files
+      tsconfigPath: './tsconfig.production.json'
+    })
+  },
+
   // Webpack configuration to exclude dev routes in production
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
     // Exclude development files from production builds
     if (!dev && process.env.NODE_ENV === 'production') {
+      // Ignore development files completely
       config.plugins.push(
         new webpack.IgnorePlugin({
           resourceRegExp: /^\.\/dev\/.*$/,
           contextRegExp: /app$/,
+        }),
+        new webpack.IgnorePlugin({
+          resourceRegExp: /wizard-v2-dev\.tsx$/,
+        }),
+        new webpack.IgnorePlugin({
+          resourceRegExp: /wizard-navigation-v2\.tsx$/,
+        }),
+        new webpack.IgnorePlugin({
+          resourceRegExp: /essential-information-step\.tsx$/,
+        }),
+        new webpack.IgnorePlugin({
+          resourceRegExp: /enhanced-calculation-preview\.tsx$/,
+        }),
+        new webpack.IgnorePlugin({
+          resourceRegExp: /live-calculation-preview\.tsx$/,
+        }),
+        new webpack.IgnorePlugin({
+          resourceRegExp: /wizard-test-helper\.tsx$/,
+        }),
+        new webpack.IgnorePlugin({
+          resourceRegExp: /wizard-types-v2\.ts$/,
+        }),
+        new webpack.IgnorePlugin({
+          resourceRegExp: /smart-defaults\.ts$/,
         })
       )
+
+      // Also exclude from module resolution
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        '@/components/wizard/wizard-v2-dev': false,
+        '@/components/wizard/wizard-navigation-v2': false,
+        '@/components/wizard/essential-information-step': false,
+        '@/components/wizard/enhanced-calculation-preview': false,
+        '@/components/wizard/live-calculation-preview': false,
+        '@/components/wizard/wizard-test-helper': false,
+        '@/lib/wizard/wizard-types-v2': false,
+        '@/lib/wizard/smart-defaults': false,
+      }
     }
 
     return config
