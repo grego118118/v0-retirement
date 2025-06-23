@@ -96,14 +96,15 @@ export default function TestAdSensePage() {
       {/* Manual Script Check */}
       <div className="bg-red-50 p-6 rounded-lg">
         <h2 className="text-xl font-semibold mb-4">Manual Script Check</h2>
-        <button 
+        <button
           onClick={() => {
             const scripts = document.querySelectorAll('script[src*="adsbygoogle"]')
             console.log('AdSense scripts found:', scripts.length)
             scripts.forEach((script, index) => {
-              console.log(`Script ${index + 1}:`, script.src)
+              const scriptElement = script as HTMLScriptElement
+              console.log(`Script ${index + 1}:`, scriptElement.src)
             })
-            
+
             if (typeof window !== 'undefined' && window.adsbygoogle) {
               console.log('adsbygoogle array length:', window.adsbygoogle.length)
             }
