@@ -38,6 +38,12 @@ const nextConfig = {
     }
   },
 
+  // Exclude development pages from static generation in production
+  async generateBuildId() {
+    // Use a consistent build ID for production
+    return process.env.NODE_ENV === 'production' ? 'production' : 'development'
+  },
+
 
   
   // Security headers
@@ -104,10 +110,12 @@ const nextConfig = {
     if (!dev && process.env.NODE_ENV === 'production') {
       // Ignore development files completely
       config.plugins.push(
+        // Ignore entire dev directory
         new webpack.IgnorePlugin({
           resourceRegExp: /^\.\/dev\/.*$/,
           contextRegExp: /app$/,
         }),
+        // Ignore specific dev components
         new webpack.IgnorePlugin({
           resourceRegExp: /wizard-v2-dev\.tsx$/,
         }),
@@ -134,10 +142,25 @@ const nextConfig = {
         })
       )
 
-      // Also exclude from module resolution
+      // Exclude dev pages from being processed
+      const originalEntry = config.entry
+      config.entry = async () => {
+        const entries = await originalEntry()
+
+        // Filter out dev pages from entries
+        Object.keys(entries).forEach(key => {
+          if (key.includes('/dev/') || key.includes('dev/wizard-v2')) {
+            delete entries[key]
+          }
+        })
+
+        return entries
+      }
+
+      // Also exclude from module resolution and use production stubs
       config.resolve.alias = {
         ...config.resolve.alias,
-        '@/components/wizard/wizard-v2-dev': false,
+        '@/components/wizard/wizard-v2-dev': require.resolve('./components/wizard/wizard-v2-dev.production.tsx'),
         '@/components/wizard/wizard-navigation-v2': false,
         '@/components/wizard/essential-information-step': false,
         '@/components/wizard/enhanced-calculation-preview': false,
