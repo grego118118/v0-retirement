@@ -37,7 +37,16 @@ interface WizardV2DevProps {
 export function WizardV2Dev({ onClose }: WizardV2DevProps) {
   const [currentStep, setCurrentStep] = useState(0)
   const [wizardData, setWizardData] = useState<Partial<CombinedCalculationDataV2>>({
-    essentialInfo: {}
+    essentialInfo: {
+      birthYear: 0,
+      currentAge: 0,
+      retirementGroup: '1',
+      yearsOfService: 0,
+      averageSalary: 0,
+      plannedRetirementAge: 0,
+      serviceEntry: 'before_2012',
+      retirementOption: 'A'
+    } as EssentialInfoData
   })
 
   // CRITICAL FIX: Separate pristine user input state that never gets corrupted
