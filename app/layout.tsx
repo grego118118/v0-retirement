@@ -50,15 +50,7 @@ export default function RootLayout({
           strategy="beforeInteractive"
         />
 
-        {/* AdSense Auto Ads (optional - for automatic ad placement) */}
-        {process.env.NODE_ENV === 'production' && (
-          <Script
-            async
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID || 'ca-pub-8456317857596950'}`}
-            crossOrigin="anonymous"
-            strategy="afterInteractive"
-          />
-        )}
+
         {/* Enhanced Trusted Types Policy for Next.js and third-party scripts */}
         <Script
           id="trusted-types-policy"
