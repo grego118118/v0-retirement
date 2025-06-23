@@ -15,8 +15,8 @@ export function generateSEOMetadata({
   keywords = [],
   ogImage = "/images/og-image.jpg",
 }: SEOMetadataProps): Metadata {
-  // Remove dependency on NEXT_PUBLIC_BASE_URL
-  const baseUrl = "https://mapensionestimator.gov"
+  // Use the new masspension.com domain
+  const baseUrl = "https://www.masspension.com"
   const url = path
 
   // Default keywords for all pages

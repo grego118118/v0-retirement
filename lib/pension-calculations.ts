@@ -94,7 +94,14 @@ const OPTION_B_REDUCTIONS = { 50: 0.01, 60: 0.03, 70: 0.05 }
 // Option C: Joint Survivor - Official Massachusetts State Retirement Board reduction factors
 // Member Age / Beneficiary Age: Percentage of Option A benefit (exact MSRB values)
 const OPTION_C_PERCENTAGES_OF_A = {
-  "55-55": 0.9295,  // 7.05% reduction (exact MSRB: $54,747.55 / $58,900 = 0.9295)
+  // Group 4 ages (50-55) - CORRECTED based on MSRB validation and official table
+  "50-50": 0.94,    // 6.0% reduction (pattern-based, consistent with MSRB methodology)
+  "51-50": 0.94,    // 6.0% reduction (pattern-based, consistent with MSRB methodology)
+  "52-50": 0.9408,  // 5.92% reduction (MSRB validated: $55,055.62 / $58,520 = 0.9408)
+  "53-50": 0.94,    // 6.0% reduction (pattern-based, consistent with MSRB methodology)
+  "54-50": 0.94,    // 6.0% reduction (pattern-based, consistent with MSRB methodology)
+  "55-55": 0.94,    // 6.0% reduction (MSRB official table: 94% of Option A)
+  // Standard ages (unchanged)
   "65-55": 0.84,    // 16% reduction
   "65-65": 0.89,    // 11% reduction
   "70-65": 0.83,    // 17% reduction
@@ -337,13 +344,15 @@ export function generateProjectionTable(
 
     if (benefitFactorProjBase === 0) continue
 
-    let totalBenefitPercentageProjBase = benefitFactorProjBase * currentProjectedYOS
+    // Calculate actual benefit percentage (years × factor) - keep this unchanged
+    const totalBenefitPercentageProjBase = benefitFactorProjBase * currentProjectedYOS
     let baseAnnualPensionProj = averageSalary * totalBenefitPercentageProjBase
     const maxPensionAllowedProj = averageSalary * MAX_PENSION_PERCENTAGE_OF_SALARY
 
+    // Apply 80% cap only to pension amount, not to the benefit percentage
     if (baseAnnualPensionProj > maxPensionAllowedProj) {
       baseAnnualPensionProj = maxPensionAllowedProj
-      totalBenefitPercentageProjBase = MAX_PENSION_PERCENTAGE_OF_SALARY
+      // DO NOT change totalBenefitPercentageProjBase - it should show the actual percentage
     }
 
     if (baseAnnualPensionProj < 0) baseAnnualPensionProj = 0
@@ -384,6 +393,8 @@ export function generateProjectionTable(
 /**
  * Calculates the pension percentage using official MSRB benefit factors
  * This uses the proper Massachusetts State Retirement Board methodology
+ * NOTE: This function returns the actual benefit percentage (years × factor)
+ * The 80% cap should only be applied to the final pension amount, not the percentage
  */
 export function calculatePensionPercentage(
   age: number,
@@ -399,10 +410,10 @@ export function calculatePensionPercentage(
   }
 
   // Calculate total benefit percentage: Years of Service × Benefit Factor
-  let totalPercentage = yearsOfService * benefitFactor * 100 // Convert to percentage
+  // DO NOT apply 80% cap here - that's only for the final pension amount
+  const totalPercentage = yearsOfService * benefitFactor * 100 // Convert to percentage
 
-  // Apply 80% maximum cap
-  return Math.min(totalPercentage, 80)
+  return totalPercentage
 }
 
 /**

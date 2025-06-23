@@ -43,7 +43,7 @@ git push origin main
 ### **2. Test Health Check**
 After deployment (2-3 minutes), test:
 ```
-https://v0-mass-retire-new.vercel.app/api/health
+https://www.masspension.com/api/health
 ```
 
 **Expected Result:**

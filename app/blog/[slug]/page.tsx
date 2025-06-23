@@ -13,6 +13,7 @@ import { WepGpoTimeline } from "@/components/blog/wep-gpo-timeline"
 import { generateSEOMetadata } from "@/components/seo/metadata"
 import { BlogHeroImage, RelatedPostImage } from "@/components/blog/blog-image"
 import { CalculatorCTA } from "@/components/blog/calculator-cta"
+import { ResponsiveAd, PremiumAlternative } from "@/components/ads/adsense"
 
 export const dynamic = "force-dynamic"
 export const fetchCache = "force-no-store"
@@ -160,6 +161,12 @@ export default async function BlogPostPage({ params }: PageProps) {
           {/* Calculator CTA */}
           <div className="mb-12">
             <CalculatorCTA variant="default" />
+          </div>
+
+          {/* AdSense Ad for Free Users */}
+          <div className="mb-12">
+            <ResponsiveAd className="flex justify-center" />
+            <PremiumAlternative />
           </div>
 
           {/* Author Bio */}

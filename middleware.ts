@@ -4,22 +4,28 @@ import { getCSP } from "@/lib/csp"
 
 export default withAuth(
   function middleware(req) {
+    const isDevelopment = process.env.NODE_ENV !== 'production'
+
+    // Block access to development routes in production
+    if (!isDevelopment && req.nextUrl.pathname.startsWith('/dev/')) {
+      return NextResponse.redirect(new URL('/404', req.url))
+    }
+
     // Create a response
     const response = NextResponse.next()
-    
+
     // Add security headers
-    const isDevelopment = process.env.NODE_ENV !== 'production'
     response.headers.set('Content-Security-Policy', getCSP(isDevelopment))
     response.headers.set('X-Frame-Options', 'DENY')
     response.headers.set('X-Content-Type-Options', 'nosniff')
     response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
     response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
-    
+
     // Add Trusted Types header for browsers that support it
     if (!isDevelopment) {
       response.headers.set('Require-Trusted-Types-For', "'script'")
     }
-    
+
     return response
   },
   {

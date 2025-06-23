@@ -18,6 +18,7 @@ import {
 } from "@/lib/pension/ma-cola-calculator"
 import { formatCurrency } from "@/lib/utils"
 import Link from "next/link"
+import { ResponsiveAd, PremiumAlternative } from "@/components/ads/adsense"
 
 interface PensionResultsProps {
   result: {
@@ -404,6 +405,12 @@ export default function PensionResults({ result }: PensionResultsProps) {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* AdSense Ad for Free Users / Premium Alternative */}
+      <div className="mt-8">
+        <ResponsiveAd className="flex justify-center" />
+        <PremiumAlternative />
+      </div>
     </motion.div>
   )
 }

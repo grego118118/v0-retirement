@@ -29,6 +29,7 @@ import {
   Zap,
   Calculator
 } from "lucide-react"
+import { BannerAd, PremiumAlternative } from "@/components/ads/adsense"
 
 interface UserProfile {
   fullName?: string
@@ -453,6 +454,20 @@ export default function DashboardPage() {
                 )}
               </div>
             </div>
+
+            {/* AdSense Ad for Free Users */}
+            {!isPremium && (
+              <div className="mt-8">
+                <BannerAd className="flex justify-center" />
+              </div>
+            )}
+
+            {/* Premium Alternative for Premium Users */}
+            {isPremium && (
+              <div className="mt-8">
+                <PremiumAlternative />
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="calculations" className="space-y-8">

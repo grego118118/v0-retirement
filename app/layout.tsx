@@ -10,6 +10,7 @@ import Script from "next/script"
 import { Toaster } from "@/components/ui/sonner"
 import { ResourceOptimizer } from "@/components/layout/resource-optimizer"
 import { SubscriptionListener } from "@/components/layout/subscription-listener"
+import { AdSenseScript } from "@/components/ads/adsense-script"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -20,7 +21,7 @@ export const metadata: Metadata = {
   },
   description: "Estimate your Massachusetts state employee pension benefits and determine the optimal time to retire.",
   generator: 'v0.dev',
-  metadataBase: new URL(process.env.NEXTAUTH_URL || 'https://v0-mass-retire-new.vercel.app'),
+  metadataBase: new URL(process.env.NEXTAUTH_URL || 'https://www.masspension.com'),
 }
 
 export default function RootLayout({
@@ -36,6 +37,9 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://accounts.google.com" />
         <link rel="preconnect" href="https://apis.google.com" />
+        {/* AdSense preconnect for better performance */}
+        <link rel="preconnect" href="https://pagead2.googlesyndication.com" />
+        <link rel="preconnect" href="https://googleads.g.doubleclick.net" />
         <meta name="format-detection" content="telephone=no" />
         {/* Disable automatic CSS preloading that causes warnings */}
         <meta name="next-head-count" content="0" />
@@ -45,6 +49,16 @@ export default function RootLayout({
           src="/trusted-types-polyfill.js"
           strategy="beforeInteractive"
         />
+
+        {/* AdSense Auto Ads (optional - for automatic ad placement) */}
+        {process.env.NODE_ENV === 'production' && (
+          <Script
+            async
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID || 'ca-pub-8456317857596950'}`}
+            crossOrigin="anonymous"
+            strategy="afterInteractive"
+          />
+        )}
         {/* Enhanced Trusted Types Policy for Next.js and third-party scripts */}
         <Script
           id="trusted-types-policy"
@@ -68,6 +82,9 @@ export default function RootLayout({
                         'accounts.google.com',
                         'js.stripe.com',
                         'checkout.stripe.com',
+                        'pagead2.googlesyndication.com',
+                        'googleads.g.doubleclick.net',
+                        'tpc.googlesyndication.com',
                         window.location.origin
                       ];
 
@@ -107,6 +124,7 @@ export default function RootLayout({
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <ResourceOptimizer />
             <SubscriptionListener />
+            <AdSenseScript />
             <div className="flex min-h-screen flex-col">
               <Header />
               <main className="flex-1">{children}</main>

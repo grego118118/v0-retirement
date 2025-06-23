@@ -143,7 +143,13 @@ export function EmploymentInfoForm({ initialData, onUpdate, onSave }: Employment
                       type="number"
                       placeholder="75000"
                       {...field}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                      onChange={(e) => {
+                        const value = e.target.value
+                        const numValue = value && value.trim() !== '' ? parseInt(value, 10) : 0
+                        if (!isNaN(numValue) || value === '') {
+                          field.onChange(numValue)
+                        }
+                      }}
                     />
                   </FormControl>
                   <FormDescription>Your current annual salary</FormDescription>
@@ -167,7 +173,13 @@ export function EmploymentInfoForm({ initialData, onUpdate, onSave }: Employment
                         type="number"
                         placeholder="80000"
                         {...field}
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                        onChange={(e) => {
+                          const value = e.target.value
+                          const numValue = value && value.trim() !== '' ? parseInt(value, 10) : 0
+                          if (!isNaN(numValue) || value === '') {
+                            field.onChange(numValue)
+                          }
+                        }}
                       />
                     </FormControl>
                     <FormDescription>Average of your highest 3 consecutive years of salary</FormDescription>
@@ -191,7 +203,13 @@ export function EmploymentInfoForm({ initialData, onUpdate, onSave }: Employment
                         placeholder="15"
                         step="0.1"
                         {...field}
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                        onChange={(e) => {
+                          const value = e.target.value
+                          const numValue = value && value.trim() !== '' ? parseFloat(value) : 0
+                          if (!isNaN(numValue) || value === '') {
+                            field.onChange(numValue)
+                          }
+                        }}
                       />
                     </FormControl>
                     <FormDescription>Total years of creditable service</FormDescription>

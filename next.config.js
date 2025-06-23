@@ -13,6 +13,31 @@ const nextConfig = {
     cssChunking: 'strict',
   },
 
+  // Exclude development routes from production builds
+  async rewrites() {
+    const isDevelopment = process.env.NODE_ENV === 'development'
+
+    if (!isDevelopment) {
+      // In production, redirect dev routes to 404
+      return {
+        beforeFiles: [
+          {
+            source: '/dev/:path*',
+            destination: '/404',
+          },
+        ],
+        afterFiles: [],
+        fallback: [],
+      }
+    }
+
+    return {
+      beforeFiles: [],
+      afterFiles: [],
+      fallback: [],
+    }
+  },
+
 
   
   // Security headers
@@ -64,10 +89,20 @@ const nextConfig = {
     formats: ['image/webp', 'image/avif'],
   },
   
-  // Webpack configuration temporarily disabled for debugging
-  // webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
-  //   return config
-  // },
+  // Webpack configuration to exclude dev routes in production
+  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+    // Exclude development files from production builds
+    if (!dev && process.env.NODE_ENV === 'production') {
+      config.plugins.push(
+        new webpack.IgnorePlugin({
+          resourceRegExp: /^\.\/dev\/.*$/,
+          contextRegExp: /app$/,
+        })
+      )
+    }
+
+    return config
+  },
   
   // Additional configuration can be added here
 }

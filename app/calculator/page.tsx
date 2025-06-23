@@ -29,7 +29,7 @@ export default function CalculatorPage() {
     name: "Massachusetts State Pension Calculator",
     description:
       "Calculate your Massachusetts state employee pension benefits and determine the optimal time to retire.",
-    url: "https://mapensionestimator.gov/calculator",
+    url: "https://www.masspension.com/calculator",
     category: "Retirement Calculator",
     mainEntity: {
       "@type": "FinancialProduct",

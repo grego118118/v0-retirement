@@ -234,17 +234,119 @@ export function getMinimumRetirementAge(group: RetirementGroup): number {
  */
 export function validateRetirementGroup(group: string | undefined): RetirementGroup {
   if (!group) return 'Group 1'
-  
+
   const normalizedGroup = group.trim()
   if (['Group 1', 'Group 2', 'Group 3', 'Group 4'].includes(normalizedGroup)) {
     return normalizedGroup as RetirementGroup
   }
-  
+
   // Handle numeric formats
   if (['1', '2', '3', '4'].includes(normalizedGroup)) {
     return `Group ${normalizedGroup}` as RetirementGroup
   }
-  
+
   console.warn('Invalid retirement group provided:', group, 'defaulting to Group 1')
   return 'Group 1'
+}
+
+/**
+ * Standardized pension calculation interface for comparison tool
+ */
+export interface StandardizedPensionInput {
+  retirementGroup: string
+  retirementAge: number
+  yearsOfService: number
+  averageSalary: number
+  membershipDate: string
+  retirementOption: 'A' | 'B' | 'C'
+  beneficiaryAge?: number
+}
+
+export interface StandardizedPensionResult {
+  annualBenefit: number
+  monthlyBenefit: number
+  benefitFactor: number
+  eligible: boolean
+  eligibilityMessage?: string
+}
+
+/**
+ * Calculate standardized pension for comparison with existing calculator
+ */
+export function calculateStandardizedPension(input: StandardizedPensionInput): StandardizedPensionResult {
+  const {
+    retirementGroup,
+    retirementAge,
+    yearsOfService,
+    averageSalary,
+    membershipDate,
+    retirementOption,
+    beneficiaryAge
+  } = input
+
+  try {
+    // Convert group format
+    const groupKey = retirementGroup.replace(' ', '_').toUpperCase()
+
+    // Determine service entry
+    const memberDate = new Date(membershipDate)
+    const serviceEntry = memberDate >= new Date('2012-04-02') ? 'after_2012' : 'before_2012'
+
+    // Check eligibility
+    const eligibility = checkEligibility(retirementAge, yearsOfService, groupKey, serviceEntry)
+
+    if (!eligibility.eligible) {
+      return {
+        annualBenefit: 0,
+        monthlyBenefit: 0,
+        benefitFactor: 0,
+        eligible: false,
+        eligibilityMessage: eligibility.message
+      }
+    }
+
+    // Get benefit factor
+    const benefitFactor = getBenefitFactor(retirementAge, groupKey, serviceEntry, yearsOfService)
+
+    // Calculate base pension
+    let annualBenefit = averageSalary * yearsOfService * benefitFactor
+
+    // Apply 80% cap
+    const maxBenefit = averageSalary * 0.8
+    if (annualBenefit > maxBenefit) {
+      annualBenefit = maxBenefit
+    }
+
+    // Apply retirement option adjustments (simplified for comparison)
+    if (retirementOption === 'B') {
+      // Age-based reduction for Option B
+      let reductionPercent = 0.01 // 1% base reduction
+      if (retirementAge >= 60 && retirementAge < 70) {
+        reductionPercent = 0.01 + ((retirementAge - 50) / 20) * 0.04 // Interpolate between 1% and 5%
+      } else if (retirementAge >= 70) {
+        reductionPercent = 0.05 // 5% max reduction
+      }
+      annualBenefit = annualBenefit * (1 - reductionPercent)
+    } else if (retirementOption === 'C' && beneficiaryAge) {
+      // Simplified Option C reduction (would need full lookup table for exact match)
+      const reductionPercent = 0.10 // Approximate 10% reduction
+      annualBenefit = annualBenefit * (1 - reductionPercent)
+    }
+
+    return {
+      annualBenefit: Math.round(annualBenefit),
+      monthlyBenefit: Math.round(annualBenefit / 12),
+      benefitFactor,
+      eligible: true
+    }
+  } catch (error) {
+    console.error('Error in calculateStandardizedPension:', error)
+    return {
+      annualBenefit: 0,
+      monthlyBenefit: 0,
+      benefitFactor: 0,
+      eligible: false,
+      eligibilityMessage: 'Calculation error'
+    }
+  }
 }

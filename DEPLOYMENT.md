@@ -115,7 +115,7 @@ This comprehensive guide covers the complete production deployment infrastructur
    ```bash
    # Required environment variables (set in App Platform dashboard)
    NODE_ENV=production
-   NEXTAUTH_URL=https://your-domain.com
+   NEXTAUTH_URL=https://www.masspension.com
    NEXTAUTH_SECRET=your-super-secure-secret
    DATABASE_URL=postgresql://username:password@host:port/database
    REDIS_URL=redis://username:password@host:port
@@ -242,7 +242,7 @@ bash scripts/deploy.sh production
 npm run test:smoke
 
 # Check health
-curl -f https://yourdomain.com/api/health
+curl -f https://www.masspension.com/api/health
 ```
 
 ## 📋 **Environment Configuration**

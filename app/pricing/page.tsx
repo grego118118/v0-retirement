@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Crown, Calculator, Users, Building } from "lucide-react"
 import Link from "next/link"
+import { ResponsiveAd, PremiumAlternative } from "@/components/ads/adsense"
 
 export const metadata = generateSEOMetadata({
   title: "Pricing | Massachusetts Pension Estimator",
@@ -43,6 +44,12 @@ export default function PricingPage() {
 
         {/* Main Pricing Section */}
         <PricingSection />
+
+        {/* AdSense Ad for Free Users */}
+        <div className="my-16">
+          <ResponsiveAd className="flex justify-center" />
+          <PremiumAlternative />
+        </div>
 
         {/* Enterprise Section */}
         <div className="mt-20">

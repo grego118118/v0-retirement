@@ -40,7 +40,7 @@ Or use this online generator: https://generate-secret.vercel.app/32
 6. Set the application type to "Web application"
 7. Add authorized redirect URIs:
    - `http://localhost:3000/api/auth/callback/google` (for development)
-   - `https://yourdomain.com/api/auth/callback/google` (for production)
+   - `https://www.masspension.com/api/auth/callback/google` (for production)
 8. Copy the Client ID and Client Secret to your `.env.local` file
 
 ## 3. GitHub OAuth Setup
@@ -49,8 +49,8 @@ Or use this online generator: https://generate-secret.vercel.app/32
 2. Click "New OAuth App"
 3. Fill in the application details:
    - Application name: "Massachusetts Pension Estimator"
-   - Homepage URL: `http://localhost:3000` (for development)
-   - Authorization callback URL: `http://localhost:3000/api/auth/callback/github`
+   - Homepage URL: `https://www.masspension.com` (for production) or `http://localhost:3000` (for development)
+   - Authorization callback URL: `https://www.masspension.com/api/auth/callback/github` (for production) or `http://localhost:3000/api/auth/callback/github` (for development)
 4. Click "Register application"
 5. Copy the Client ID and generate a Client Secret
 6. Add both to your `.env.local` file

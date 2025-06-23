@@ -120,6 +120,16 @@ export function CombinedCalculationWizard({
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
+  // Safe number parsing that preserves user input precision
+  const parseNumberInput = (value: string, isInteger: boolean = false): number => {
+    if (!value || value.trim() === '') return 0
+
+    const parsed = isInteger ? parseInt(value, 10) : parseFloat(value)
+
+    // Return 0 for invalid inputs, but preserve valid numbers exactly
+    return isNaN(parsed) ? 0 : parsed
+  }
+
   // Load user profile data
   useEffect(() => {
     const loadUserProfile = async () => {
@@ -838,12 +848,12 @@ export function CombinedCalculationWizard({
               value={personalInfo.birthYear || ''}
               onChange={(e) => {
                 const value = e.target.value
-                const numValue = value ? parseInt(value) : 0
+                const numValue = parseNumberInput(value, true)
                 updateWizardData({
                   personalInfo: {
                     ...personalInfo,
-                    birthYear: numValue,
-                    currentAge: numValue > 0 ? new Date().getFullYear() - numValue : 0
+                    birthYear: numValue
+                    // Removed automatic currentAge calculation to preserve user input
                   }
                 })
               }}
@@ -968,13 +978,16 @@ export function CombinedCalculationWizard({
               value={pensionData.yearsOfService || ''}
               onChange={(e) => {
                 const value = e.target.value
-                const numValue = value ? parseFloat(value) : 0
-                updateWizardData({
-                  pensionData: {
-                    ...pensionData,
-                    yearsOfService: numValue
-                  }
-                })
+                const numValue = value && value.trim() !== '' ? parseFloat(value) : 0
+                // Only update if the parsed value is valid or if the field is being cleared
+                if (!isNaN(numValue) || value === '') {
+                  updateWizardData({
+                    pensionData: {
+                      ...pensionData,
+                      yearsOfService: numValue
+                    }
+                  })
+                }
               }}
               className={errors['pensionData.yearsOfService'] ? "border-red-500" : ""}
             />
@@ -993,13 +1006,16 @@ export function CombinedCalculationWizard({
               value={pensionData.averageSalary || ''}
               onChange={(e) => {
                 const value = e.target.value
-                const numValue = value ? parseFloat(value) : 0
-                updateWizardData({
-                  pensionData: {
-                    ...pensionData,
-                    averageSalary: numValue
-                  }
-                })
+                const numValue = value && value.trim() !== '' ? parseInt(value, 10) : 0
+                // Only update if the parsed value is valid or if the field is being cleared
+                if (!isNaN(numValue) || value === '') {
+                  updateWizardData({
+                    pensionData: {
+                      ...pensionData,
+                      averageSalary: numValue
+                    }
+                  })
+                }
               }}
               className={errors['pensionData.averageSalary'] ? "border-red-500" : ""}
             />
@@ -1065,13 +1081,16 @@ export function CombinedCalculationWizard({
               value={pensionData.pensionRetirementAge || ''}
               onChange={(e) => {
                 const value = e.target.value
-                const numValue = value ? parseInt(value) : 0
-                updateWizardData({
-                  pensionData: {
-                    ...pensionData,
-                    pensionRetirementAge: numValue
-                  }
-                })
+                const numValue = value && value.trim() !== '' ? parseInt(value, 10) : 0
+                // Only update if the parsed value is valid or if the field is being cleared
+                if (!isNaN(numValue) || value === '') {
+                  updateWizardData({
+                    pensionData: {
+                      ...pensionData,
+                      pensionRetirementAge: numValue
+                    }
+                  })
+                }
               }}
               className={errors['pensionData.pensionRetirementAge'] ? "border-red-500" : ""}
             />
@@ -1199,7 +1218,7 @@ export function CombinedCalculationWizard({
               value={socialSecurityData.fullRetirementBenefit || ''}
               onChange={(e) => {
                 const value = e.target.value
-                const numValue = value ? parseFloat(value) : 0
+                const numValue = parseNumberInput(value, true)
                 updateWizardData({
                   socialSecurityData: {
                     ...socialSecurityData,
@@ -1272,7 +1291,7 @@ export function CombinedCalculationWizard({
                 onChange={(e) => updateWizardData({
                   socialSecurityData: {
                     ...socialSecurityData,
-                    spouseFullRetirementBenefit: parseFloat(e.target.value) || 0
+                    spouseFullRetirementBenefit: parseNumberInput(e.target.value, true)
                   }
                 })}
               />
@@ -1347,7 +1366,7 @@ export function CombinedCalculationWizard({
               onChange={(e) => updateWizardData({
                 incomeData: {
                   ...incomeData,
-                  otherRetirementIncome: parseFloat(e.target.value) || 0
+                  otherRetirementIncome: parseNumberInput(e.target.value, true)
                 }
               })}
             />
@@ -1382,7 +1401,7 @@ export function CombinedCalculationWizard({
                   onChange={(e) => updateWizardData({
                     incomeData: {
                       ...incomeData,
-                      rothIRABalance: parseFloat(e.target.value) || 0
+                      rothIRABalance: parseNumberInput(e.target.value, true)
                     }
                   })}
                 />
@@ -1416,7 +1435,7 @@ export function CombinedCalculationWizard({
                   onChange={(e) => updateWizardData({
                     incomeData: {
                       ...incomeData,
-                      traditional401kBalance: parseFloat(e.target.value) || 0
+                      traditional401kBalance: parseNumberInput(e.target.value, true)
                     }
                   })}
                 />
@@ -1509,7 +1528,7 @@ export function CombinedCalculationWizard({
               onChange={(e) => updateWizardData({
                 preferences: {
                   ...preferences,
-                  retirementIncomeGoal: parseFloat(e.target.value) || 0
+                  retirementIncomeGoal: parseNumberInput(e.target.value, true)
                 }
               })}
             />

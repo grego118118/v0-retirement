@@ -8,6 +8,7 @@ set -euo pipefail
 # Configuration
 ENVIRONMENT="${1:-production}"
 BASE_URL="${TEST_URL:-http://localhost:3000}"
+# For production testing, set TEST_URL=https://www.masspension.com
 TIMEOUT=30
 
 # Colors for output

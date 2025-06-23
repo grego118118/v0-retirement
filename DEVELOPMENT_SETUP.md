@@ -42,6 +42,9 @@ Edit `.env.local` with your configuration:
 NEXTAUTH_URL=http://localhost:3000
 NEXTAUTH_SECRET=your-secret-here
 
+# Production authentication (for reference)
+# NEXTAUTH_URL=https://www.masspension.com
+
 # OAuth providers (at least one required)
 GOOGLE_CLIENT_ID=your-google-client-id
 GOOGLE_CLIENT_SECRET=your-google-client-secret

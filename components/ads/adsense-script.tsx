@@ -1,0 +1,79 @@
+"use client"
+
+import { useEffect } from "react"
+import Script from "next/script"
+import { useSubscriptionStatus } from "@/hooks/use-subscription"
+
+export function AdSenseScript() {
+  const { isPremium } = useSubscriptionStatus()
+  const publisherId = process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID || "ca-pub-8456317857596950"
+
+  // Don't load AdSense script for premium users or in development
+  if (isPremium || process.env.NODE_ENV === 'development') {
+    return null
+  }
+
+  return (
+    <Script
+      async
+      src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${publisherId}`}
+      crossOrigin="anonymous"
+      strategy="afterInteractive"
+      onLoad={() => {
+        console.log('AdSense script loaded successfully')
+      }}
+      onError={(e) => {
+        console.error('Failed to load AdSense script:', e)
+      }}
+    />
+  )
+}
+
+// Alternative component that loads the script only when needed
+export function AdSenseScriptLoader() {
+  const { isPremium, subscriptionStatus } = useSubscriptionStatus()
+
+  useEffect(() => {
+    // Don't load for premium users
+    if (isPremium) {
+      return
+    }
+
+    // Don't load in development
+    if (process.env.NODE_ENV === 'development') {
+      return
+    }
+
+    // Check if script is already loaded
+    if (document.querySelector('script[src*="adsbygoogle.js"]')) {
+      return
+    }
+
+    // Create and load the AdSense script
+    const publisherId = process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID || "ca-pub-8456317857596950"
+    const script = document.createElement('script')
+    script.async = true
+    script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${publisherId}`
+    script.crossOrigin = 'anonymous'
+    
+    script.onload = () => {
+      console.log('AdSense script loaded dynamically')
+    }
+    
+    script.onerror = () => {
+      console.error('Failed to load AdSense script dynamically')
+    }
+
+    document.head.appendChild(script)
+
+    // Cleanup function
+    return () => {
+      const existingScript = document.querySelector('script[src*="adsbygoogle.js"]')
+      if (existingScript) {
+        existingScript.remove()
+      }
+    }
+  }, [isPremium, subscriptionStatus])
+
+  return null
+}

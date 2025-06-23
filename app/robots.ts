@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: ["/api/", "/admin/"],
     },
-    sitemap: "https://mapensionestimator.gov/sitemap.xml",
+    sitemap: "https://www.masspension.com/sitemap.xml",
   }
 }

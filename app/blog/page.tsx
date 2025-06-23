@@ -9,6 +9,7 @@ import { generateSEOMetadata } from "@/components/seo/metadata"
 import { blogPosts } from "@/lib/blog-data"
 import { ResponsiveBlogImage } from "@/components/blog/blog-image"
 import { CalculatorCTA } from "@/components/blog/calculator-cta"
+import { ResponsiveAd, PremiumAlternative } from "@/components/ads/adsense"
 
 export const metadata: Metadata = generateSEOMetadata({
   title: "Retirement Planning Blog | Massachusetts Pension Estimator",
@@ -112,6 +113,12 @@ export default function BlogPage() {
         {/* Calculator CTA */}
         <div className="mb-12">
           <CalculatorCTA variant="featured" />
+        </div>
+
+        {/* AdSense Ad for Free Users */}
+        <div className="mb-12">
+          <ResponsiveAd className="flex justify-center" />
+          <PremiumAlternative />
         </div>
 
         {/* Blog Posts Grid */}

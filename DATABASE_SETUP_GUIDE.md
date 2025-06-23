@@ -85,7 +85,7 @@ Should return:
 
 ### **3. Test Profile API**
 ```bash
-curl https://v0-mass-retire-new.vercel.app/api/profile
+curl https://www.masspension.com/api/profile
 ```
 Should return `401 Unauthorized` (not 500 error)
 

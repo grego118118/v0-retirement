@@ -287,3 +287,37 @@ export function analyzeCOLAImpactByPensionLevel() {
     }
   })
 }
+
+/**
+ * Calculate Massachusetts COLA for validation testing
+ * Implements the official 3% COLA on first $13,000 with $390 annual cap
+ */
+export function calculateMassachusettsCOLA(
+  basePension: number,
+  years: number = 1
+): { totalIncrease: number; finalAmount: number } {
+  const COLA_RATE = 0.03
+  const BASE_LIMIT = 13000
+  const ANNUAL_CAP = 390
+
+  if (!basePension || basePension <= 0 || !years || years <= 0) {
+    return { totalIncrease: 0, finalAmount: basePension || 0 }
+  }
+
+  let totalIncrease = 0
+  let currentPension = basePension
+
+  for (let year = 1; year <= years; year++) {
+    // Apply COLA rate only to the portion up to the base limit
+    const eligibleAmount = Math.min(currentPension, BASE_LIMIT)
+    const colaIncrease = Math.min(eligibleAmount * COLA_RATE, ANNUAL_CAP)
+
+    totalIncrease += colaIncrease
+    currentPension += colaIncrease
+  }
+
+  return {
+    totalIncrease,
+    finalAmount: currentPension
+  }
+}

@@ -87,6 +87,9 @@ DATABASE_URL="file:./dev.db"
 # Authentication
 NEXTAUTH_URL="http://localhost:3000"
 NEXTAUTH_SECRET="your-secret-key"
+
+# Production Authentication
+# NEXTAUTH_URL="https://www.masspension.com"
 GOOGLE_CLIENT_ID="your-google-client-id"
 GOOGLE_CLIENT_SECRET="your-google-client-secret"
 ```

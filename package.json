@@ -24,7 +24,9 @@
     "deploy:production": "bash scripts/deploy.sh production",
     "backup:db": "bash scripts/backup-cron.sh",
     "migrate:postgres": "node scripts/migrate-to-postgres.js",
-    "health:check": "curl -f http://localhost:3000/api/health || exit 1"
+    "health:check": "curl -f http://localhost:3000/api/health || exit 1",
+    "validate-calculations": "tsx scripts/validate-calculations.ts",
+    "validate-calculations:critical": "tsx scripts/validate-calculations.ts --critical"
   },
   "dependencies": {
     "@auth/core": "0.34.2",
@@ -109,6 +111,7 @@
     "postcss": "^8",
     "tailwindcss": "^3.4.17",
     "ts-jest": "^29.1.2",
+    "tsx": "^4.7.0",
     "typescript": "^5",
     "uuid": "^11.1.0"
   }

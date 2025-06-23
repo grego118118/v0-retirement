@@ -267,7 +267,7 @@ deploy_application() {
 check_application_health() {
     log "Performing application health check..."
     
-    local health_url="http://localhost:3000/api/health"
+    local health_url="${HEALTH_CHECK_URL:-http://localhost:3000/api/health}"
     local max_attempts=30
     local attempt=1
     
