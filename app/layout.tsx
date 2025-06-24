@@ -46,20 +46,16 @@ export default function RootLayout({
         <link rel="preconnect" href="https://vitals.vercel-analytics.com" />
 
         {/* Google AdSense verification meta tag - Alternative verification method */}
-        {process.env.NODE_ENV === 'production' && (
-          <meta name="google-adsense-account" content={process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID || 'ca-pub-8456317857596950'} />
-        )}
+        <meta name="google-adsense-account" content="ca-pub-8456317857596950" />
 
         {/* Google AdSense verification script - Always present for Google verification */}
-        {process.env.NODE_ENV === 'production' && (
-          <Script
-            async
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID || 'ca-pub-8456317857596950'}`}
-            crossOrigin="anonymous"
-            strategy="afterInteractive"
-            id="adsense-verification-script"
-          />
-        )}
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8456317857596950"
+          crossOrigin="anonymous"
+          strategy="beforeInteractive"
+          id="adsense-verification-script"
+        />
         <meta name="format-detection" content="telephone=no" />
         {/* Disable automatic CSS preloading that causes warnings */}
         <meta name="next-head-count" content="0" />
