@@ -10,7 +10,7 @@ import Script from "next/script"
 import { Toaster } from "@/components/ui/sonner"
 import { ResourceOptimizer } from "@/components/layout/resource-optimizer"
 import { SubscriptionListener } from "@/components/layout/subscription-listener"
-import { AdSenseScript } from "@/components/ads/adsense-script"
+import { AdSenseInitializer } from "@/components/ads/adsense-initializer"
 import { Analytics } from "@vercel/analytics/next"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -58,17 +58,6 @@ export default function RootLayout({
             crossOrigin="anonymous"
             strategy="afterInteractive"
             id="adsense-verification-script"
-            onLoad={() => {
-              console.log('AdSense script loaded successfully from layout')
-              // Initialize adsbygoogle array
-              if (typeof window !== 'undefined') {
-                window.adsbygoogle = window.adsbygoogle || []
-                console.log('AdSense adsbygoogle array initialized:', window.adsbygoogle.length)
-              }
-            }}
-            onError={(e) => {
-              console.error('Failed to load AdSense script from layout:', e)
-            }}
           />
         )}
         <meta name="format-detection" content="telephone=no" />
@@ -149,6 +138,7 @@ export default function RootLayout({
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <ResourceOptimizer />
             <SubscriptionListener />
+            <AdSenseInitializer />
             <div className="flex min-h-screen flex-col">
               <Header />
               <main className="flex-1">{children}</main>
