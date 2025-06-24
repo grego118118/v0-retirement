@@ -5,11 +5,17 @@ import Script from "next/script"
 import { useSubscriptionStatus } from "@/hooks/use-subscription"
 
 export function AdSenseScript() {
-  const { isPremium } = useSubscriptionStatus()
+  const { isPremium, subscriptionStatus } = useSubscriptionStatus()
   const publisherId = process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID || "ca-pub-8456317857596950"
 
-  // Don't load AdSense script for premium users or in development
-  if (isPremium || process.env.NODE_ENV === 'development') {
+  // Don't load AdSense script in development
+  if (process.env.NODE_ENV === 'development') {
+    return null
+  }
+
+  // Don't load AdSense script for confirmed premium users
+  // But allow loading during 'loading' state to ensure script loads for free users
+  if (isPremium && subscriptionStatus !== 'loading') {
     return null
   }
 
@@ -34,13 +40,14 @@ export function AdSenseScriptLoader() {
   const { isPremium, subscriptionStatus } = useSubscriptionStatus()
 
   useEffect(() => {
-    // Don't load for premium users
-    if (isPremium) {
+    // Don't load in development
+    if (process.env.NODE_ENV === 'development') {
       return
     }
 
-    // Don't load in development
-    if (process.env.NODE_ENV === 'development') {
+    // Don't load for confirmed premium users
+    // But allow loading during 'loading' state to ensure script loads for free users
+    if (isPremium && subscriptionStatus !== 'loading') {
       return
     }
 

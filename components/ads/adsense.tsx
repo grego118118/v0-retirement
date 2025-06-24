@@ -34,13 +34,14 @@ export function AdSense({
   const publisherId = process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID || "ca-pub-8456317857596950"
 
   useEffect(() => {
-    // Don't show ads to premium users
-    if (isPremium) {
+    // Don't load ads in development mode
+    if (process.env.NODE_ENV === 'development') {
       return
     }
 
-    // Don't load ads in development mode
-    if (process.env.NODE_ENV === 'development') {
+    // Don't show ads to confirmed premium users
+    // But allow loading during 'loading' state to ensure ads load for free users
+    if (isPremium && subscriptionStatus !== 'loading') {
       return
     }
 
@@ -63,11 +64,6 @@ export function AdSense({
     }
   }, [isPremium, subscriptionStatus])
 
-  // Don't render anything for premium users
-  if (isPremium) {
-    return null
-  }
-
   // Don't render in development
   if (process.env.NODE_ENV === 'development') {
     return (
@@ -77,6 +73,12 @@ export function AdSense({
         <p className="text-xs">Ads only show in production for free users</p>
       </div>
     )
+  }
+
+  // Don't render anything for confirmed premium users
+  // But allow rendering during 'loading' state to ensure ads load for free users
+  if (isPremium && subscriptionStatus !== 'loading') {
+    return null
   }
 
   return (
