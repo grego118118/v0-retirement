@@ -11,6 +11,7 @@ import { Toaster } from "@/components/ui/sonner"
 import { ResourceOptimizer } from "@/components/layout/resource-optimizer"
 import { SubscriptionListener } from "@/components/layout/subscription-listener"
 import { AdSenseScript } from "@/components/ads/adsense-script"
+import { Analytics } from "@vercel/analytics/next"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -40,6 +41,9 @@ export default function RootLayout({
         {/* AdSense preconnect for better performance */}
         <link rel="preconnect" href="https://pagead2.googlesyndication.com" />
         <link rel="preconnect" href="https://googleads.g.doubleclick.net" />
+        {/* Vercel Analytics preconnect for better performance */}
+        <link rel="preconnect" href="https://vitals.vercel-insights.com" />
+        <link rel="preconnect" href="https://vitals.vercel-analytics.com" />
         <meta name="format-detection" content="telephone=no" />
         {/* Disable automatic CSS preloading that causes warnings */}
         <meta name="next-head-count" content="0" />
@@ -70,6 +74,8 @@ export default function RootLayout({
                       const allowedDomains = [
                         'vercel.live',
                         'va.vercel-scripts.com',
+                        'vitals.vercel-insights.com',
+                        'vitals.vercel-analytics.com',
                         'apis.google.com',
                         'accounts.google.com',
                         'js.stripe.com',
@@ -123,6 +129,7 @@ export default function RootLayout({
               <Footer />
             </div>
             <Toaster />
+            <Analytics />
           </ThemeProvider>
         </SessionProvider>
       </body>
