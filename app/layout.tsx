@@ -56,8 +56,19 @@ export default function RootLayout({
             async
             src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID || 'ca-pub-8456317857596950'}`}
             crossOrigin="anonymous"
-            strategy="beforeInteractive"
+            strategy="afterInteractive"
             id="adsense-verification-script"
+            onLoad={() => {
+              console.log('AdSense script loaded successfully from layout')
+              // Initialize adsbygoogle array
+              if (typeof window !== 'undefined') {
+                window.adsbygoogle = window.adsbygoogle || []
+                console.log('AdSense adsbygoogle array initialized:', window.adsbygoogle.length)
+              }
+            }}
+            onError={(e) => {
+              console.error('Failed to load AdSense script from layout:', e)
+            }}
           />
         )}
         <meta name="format-detection" content="telephone=no" />
@@ -138,7 +149,6 @@ export default function RootLayout({
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <ResourceOptimizer />
             <SubscriptionListener />
-            <AdSenseScript />
             <div className="flex min-h-screen flex-col">
               <Header />
               <main className="flex-1">{children}</main>

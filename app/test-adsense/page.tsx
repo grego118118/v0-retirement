@@ -93,6 +93,38 @@ export default function TestAdSensePage() {
         <PremiumAlternative />
       </div>
 
+      {/* Manual Ad Test */}
+      <div className="bg-green-50 p-6 rounded-lg mb-8">
+        <h2 className="text-xl font-semibold mb-4">Manual Ad Test</h2>
+        <p className="mb-4">Manual ad slot for testing:</p>
+        <div id="manual-ad-test" className="border border-green-300 p-4 rounded min-h-[250px] bg-white">
+          <ins
+            className="adsbygoogle"
+            style={{ display: "block" }}
+            data-ad-client="ca-pub-8456317857596950"
+            data-ad-slot="4567890123"
+            data-ad-format="auto"
+            data-full-width-responsive="true"
+          />
+        </div>
+        <button
+          onClick={() => {
+            try {
+              if (typeof window !== 'undefined') {
+                window.adsbygoogle = window.adsbygoogle || []
+                window.adsbygoogle.push({})
+                console.log('Manual ad push executed, array length:', window.adsbygoogle.length)
+              }
+            } catch (error) {
+              console.error('Manual ad push error:', error)
+            }
+          }}
+          className="mt-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+        >
+          Manually Initialize Ad
+        </button>
+      </div>
+
       {/* Manual Script Check */}
       <div className="bg-red-50 p-6 rounded-lg">
         <h2 className="text-xl font-semibold mb-4">Manual Script Check</h2>
@@ -107,7 +139,16 @@ export default function TestAdSensePage() {
 
             if (typeof window !== 'undefined' && window.adsbygoogle) {
               console.log('adsbygoogle array length:', window.adsbygoogle.length)
+            } else {
+              console.log('adsbygoogle not found on window')
             }
+
+            // Check for ad elements
+            const adElements = document.querySelectorAll('.adsbygoogle')
+            console.log('Ad elements found:', adElements.length)
+            adElements.forEach((el, index) => {
+              console.log(`Ad element ${index + 1}:`, el)
+            })
           }}
           className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
         >

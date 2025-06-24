@@ -51,14 +51,24 @@ export function AdSense({
     }
 
     try {
-      // Initialize adsbygoogle array if it doesn't exist
-      if (typeof window !== 'undefined') {
-        window.adsbygoogle = window.adsbygoogle || []
-        
-        // Push the ad configuration
-        window.adsbygoogle.push({})
-        isAdLoaded.current = true
+      // Wait for the AdSense script to load before initializing ads
+      const checkAdSenseReady = () => {
+        if (typeof window !== 'undefined' && window.adsbygoogle) {
+          // Initialize adsbygoogle array if it doesn't exist
+          window.adsbygoogle = window.adsbygoogle || []
+
+          // Push the ad configuration
+          window.adsbygoogle.push({})
+          isAdLoaded.current = true
+          console.log('AdSense ad initialized successfully')
+        } else {
+          // Retry after a short delay if AdSense isn't ready yet
+          setTimeout(checkAdSenseReady, 100)
+        }
       }
+
+      // Start checking for AdSense readiness
+      checkAdSenseReady()
     } catch (error) {
       console.error('AdSense error:', error)
     }
@@ -80,6 +90,14 @@ export function AdSense({
   if (isPremium && subscriptionStatus !== 'loading') {
     return null
   }
+
+  console.log('AdSense component rendering:', {
+    adSlot,
+    publisherId,
+    isPremium,
+    subscriptionStatus,
+    nodeEnv: process.env.NODE_ENV
+  })
 
   return (
     <div className={className} ref={adRef}>
@@ -132,12 +150,15 @@ export function SidebarAd({ className = "my-4" }: { className?: string }) {
 }
 
 export function ResponsiveAd({ className = "my-4" }: { className?: string }) {
+  const adSlot = process.env.NEXT_PUBLIC_ADSENSE_RESPONSIVE_SLOT || "4567890123"
+  console.log('ResponsiveAd rendering with slot:', adSlot)
+
   return (
     <AdSense
-      adSlot={process.env.NEXT_PUBLIC_ADSENSE_RESPONSIVE_SLOT || "4567890123"}
+      adSlot={adSlot}
       adFormat="auto"
       className={className}
-      style={{ display: "block" }}
+      style={{ display: "block", minHeight: "250px", backgroundColor: "#f9f9f9" }}
       fullWidthResponsive={true}
     />
   )
