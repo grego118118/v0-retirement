@@ -11,32 +11,38 @@ export function AdSenseInitializer() {
 
       // Check if the script is already loaded
       const checkScriptLoaded = () => {
-        const script = document.querySelector('#adsense-verification-script') ||
-                      document.querySelector('script[src*="adsbygoogle"]')
+        const scriptElement = document.querySelector('#adsense-verification-script') ||
+                             document.querySelector('script[src*="adsbygoogle"]')
 
-        if (script) {
-          console.log('AdSense script found in DOM:', script.src || 'no src')
+        if (scriptElement) {
+          // Type check and assertion to HTMLScriptElement for proper TypeScript typing
+          if (scriptElement instanceof HTMLScriptElement) {
+            const script = scriptElement
+            console.log('AdSense script found in DOM:', script.src || 'no src')
 
-          // If script is already loaded, initialize immediately
-          if (script.readyState === 'complete' || script.readyState === 'loaded') {
-            console.log('AdSense script already loaded')
-            if (typeof window !== 'undefined') {
-              window.adsbygoogle = window.adsbygoogle || []
-              console.log('AdSense adsbygoogle array ready:', window.adsbygoogle.length)
-            }
-          } else {
-            // Listen for script load events
-            script.addEventListener('load', () => {
-              console.log('AdSense script loaded successfully from initializer')
+            // If script is already loaded, initialize immediately
+            if (script.readyState === 'complete' || script.readyState === 'loaded') {
+              console.log('AdSense script already loaded')
               if (typeof window !== 'undefined') {
                 window.adsbygoogle = window.adsbygoogle || []
                 console.log('AdSense adsbygoogle array ready:', window.adsbygoogle.length)
               }
-            })
+            } else {
+              // Listen for script load events
+              script.addEventListener('load', () => {
+                console.log('AdSense script loaded successfully from initializer')
+                if (typeof window !== 'undefined') {
+                  window.adsbygoogle = window.adsbygoogle || []
+                  console.log('AdSense adsbygoogle array ready:', window.adsbygoogle.length)
+                }
+              })
 
-            script.addEventListener('error', (e) => {
-              console.error('Failed to load AdSense script from initializer:', e)
-            })
+              script.addEventListener('error', (e) => {
+                console.error('Failed to load AdSense script from initializer:', e)
+              })
+            }
+          } else {
+            console.log('Found element but it is not a script element:', scriptElement.tagName)
           }
         } else {
           // Retry after a short delay if script isn't found yet
