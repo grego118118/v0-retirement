@@ -20,30 +20,24 @@ export function AdSenseInitializer() {
             const script = scriptElement
             console.log('AdSense script found in DOM:', script.src || 'no src')
 
-            // Check if script is already loaded by checking if adsbygoogle exists
-            if (typeof window !== 'undefined' && window.adsbygoogle && window.adsbygoogle.loaded) {
-              console.log('AdSense script already loaded')
-              window.adsbygoogle = window.adsbygoogle || []
-              console.log('AdSense adsbygoogle array ready:', window.adsbygoogle.length)
-            } else {
-              // Listen for script load events
-              script.addEventListener('load', () => {
-                console.log('AdSense script loaded successfully from initializer')
-                if (typeof window !== 'undefined') {
-                  window.adsbygoogle = window.adsbygoogle || []
-                  console.log('AdSense adsbygoogle array ready:', window.adsbygoogle.length)
-                }
-              })
-
-              script.addEventListener('error', (e) => {
-                console.error('Failed to load AdSense script from initializer:', e)
-              })
-
-              // Also initialize immediately in case the script loads before event listeners
+            // Always set up event listeners and initialize immediately
+            // Listen for script load events
+            script.addEventListener('load', () => {
+              console.log('AdSense script loaded successfully from initializer')
               if (typeof window !== 'undefined') {
                 window.adsbygoogle = window.adsbygoogle || []
-                console.log('AdSense adsbygoogle array initialized immediately')
+                console.log('AdSense adsbygoogle array ready:', window.adsbygoogle.length)
               }
+            })
+
+            script.addEventListener('error', (e) => {
+              console.error('Failed to load AdSense script from initializer:', e)
+            })
+
+            // Initialize immediately - this handles cases where script loads quickly
+            if (typeof window !== 'undefined') {
+              window.adsbygoogle = window.adsbygoogle || []
+              console.log('AdSense adsbygoogle array initialized immediately')
             }
           } else {
             console.log('Found element but it is not a script element:', scriptElement.tagName)
