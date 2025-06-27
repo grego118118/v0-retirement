@@ -152,11 +152,23 @@ export default function ResourcesPage() {
 
         {/* Tabbed Resources */}
         <Tabs defaultValue="official" className="w-full">
-          <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full mb-6">
-            <TabsTrigger value="official">Official Resources</TabsTrigger>
-            <TabsTrigger value="planning">Retirement Planning</TabsTrigger>
-            <TabsTrigger value="financial">Financial Resources</TabsTrigger>
-            <TabsTrigger value="education">Educational Materials</TabsTrigger>
+          <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full mb-6 h-auto p-1">
+            <TabsTrigger value="official" className="text-xs sm:text-sm px-2 sm:px-3 py-2">
+              <span className="hidden sm:inline">Official Resources</span>
+              <span className="sm:hidden">Official</span>
+            </TabsTrigger>
+            <TabsTrigger value="planning" className="text-xs sm:text-sm px-2 sm:px-3 py-2">
+              <span className="hidden sm:inline">Retirement Planning</span>
+              <span className="sm:hidden">Planning</span>
+            </TabsTrigger>
+            <TabsTrigger value="financial" className="text-xs sm:text-sm px-2 sm:px-3 py-2">
+              <span className="hidden sm:inline">Financial Resources</span>
+              <span className="sm:hidden">Financial</span>
+            </TabsTrigger>
+            <TabsTrigger value="education" className="text-xs sm:text-sm px-2 sm:px-3 py-2">
+              <span className="hidden sm:inline">Educational Materials</span>
+              <span className="sm:hidden">Education</span>
+            </TabsTrigger>
           </TabsList>
 
           {/* Official Resources Tab */}

@@ -327,10 +327,13 @@ export default function DashboardPage() {
         {/* Main Dashboard Content - Simplified Layout */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <TabsList className="grid grid-cols-3 w-full sm:w-auto">
-              <TabsTrigger value="overview" className="px-6 py-3">Overview</TabsTrigger>
-              <TabsTrigger value="calculations" className="px-6 py-3">Calculations</TabsTrigger>
-              <TabsTrigger value="profile" className="px-6 py-3">Profile</TabsTrigger>
+            <TabsList className="grid grid-cols-3 w-full sm:w-auto h-auto">
+              <TabsTrigger value="overview" className="px-4 sm:px-6 py-3 text-sm sm:text-base min-h-[44px]">Overview</TabsTrigger>
+              <TabsTrigger value="calculations" className="px-4 sm:px-6 py-3 text-sm sm:text-base min-h-[44px]">
+                <span className="hidden sm:inline">Calculations</span>
+                <span className="sm:hidden">Calc</span>
+              </TabsTrigger>
+              <TabsTrigger value="profile" className="px-4 sm:px-6 py-3 text-sm sm:text-base min-h-[44px]">Profile</TabsTrigger>
             </TabsList>
 
             {/* Quick Refresh Button */}

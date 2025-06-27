@@ -168,18 +168,21 @@ export function ChartShowcase({
 
       {/* Chart Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="projections" className="flex items-center gap-2">
-            <TrendingUp className="h-4 w-4" />
-            Benefit Projections
+        <TabsList className="grid w-full grid-cols-3 h-auto p-1">
+          <TabsTrigger value="projections" className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 py-2">
+            <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">Benefit Projections</span>
+            <span className="sm:hidden">Projections</span>
           </TabsTrigger>
-          <TabsTrigger value="comparisons" className="flex items-center gap-2">
-            <BarChart3 className="h-4 w-4" />
-            Income Comparison
+          <TabsTrigger value="comparisons" className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 py-2">
+            <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">Income Comparison</span>
+            <span className="sm:hidden">Comparison</span>
           </TabsTrigger>
-          <TabsTrigger value="breakdown" className="flex items-center gap-2">
-            <PieChart className="h-4 w-4" />
-            Income Breakdown
+          <TabsTrigger value="breakdown" className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 py-2">
+            <PieChart className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">Income Breakdown</span>
+            <span className="sm:hidden">Breakdown</span>
           </TabsTrigger>
         </TabsList>
 

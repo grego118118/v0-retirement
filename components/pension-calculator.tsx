@@ -1390,12 +1390,27 @@ export default function PensionCalculator() {
 
                 <div className="mt-8">
                   <Tabs defaultValue="projection" className="w-full">
-                    <TabsList className="grid w-full grid-cols-5">
-                      <TabsTrigger value="projection">Projection Table</TabsTrigger>
-                      <TabsTrigger value="details">Calculation Details</TabsTrigger>
-                      <TabsTrigger value="social-security">Social Security</TabsTrigger>
-                      <TabsTrigger value="combined">Combined Analysis</TabsTrigger>
-                      <TabsTrigger value="msrb-test">MSRB Test</TabsTrigger>
+                    <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1 h-auto p-1">
+                      <TabsTrigger value="projection" className="text-xs sm:text-sm px-2 sm:px-3 py-2">
+                        <span className="hidden sm:inline">Projection Table</span>
+                        <span className="sm:hidden">Projection</span>
+                      </TabsTrigger>
+                      <TabsTrigger value="details" className="text-xs sm:text-sm px-2 sm:px-3 py-2">
+                        <span className="hidden sm:inline">Calculation Details</span>
+                        <span className="sm:hidden">Details</span>
+                      </TabsTrigger>
+                      <TabsTrigger value="social-security" className="text-xs sm:text-sm px-2 sm:px-3 py-2 col-span-2 sm:col-span-1">
+                        <span className="hidden lg:inline">Social Security</span>
+                        <span className="lg:hidden">Social Sec.</span>
+                      </TabsTrigger>
+                      <TabsTrigger value="combined" className="text-xs sm:text-sm px-2 sm:px-3 py-2 col-span-2 sm:col-span-1">
+                        <span className="hidden lg:inline">Combined Analysis</span>
+                        <span className="lg:hidden">Combined</span>
+                      </TabsTrigger>
+                      <TabsTrigger value="msrb-test" className="text-xs sm:text-sm px-2 sm:px-3 py-2 col-span-2 sm:col-span-1">
+                        <span className="hidden sm:inline">MSRB Test</span>
+                        <span className="sm:hidden">MSRB</span>
+                      </TabsTrigger>
                     </TabsList>
                     <TabsContent value="projection" className="pt-4">
                       {calculationResult.projectionData && calculationResult.projectionData.rows.length > 0 ? (

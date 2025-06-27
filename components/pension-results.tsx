@@ -102,11 +102,14 @@ export default function PensionResults({ result }: PensionResultsProps) {
       </div>
 
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="cola">COLA Adjustments</TabsTrigger>
-          <TabsTrigger value="projections">Projections</TabsTrigger>
-          <TabsTrigger value="scenarios">Scenarios</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-1 h-auto p-1">
+          <TabsTrigger value="overview" className="text-sm px-3 py-2">Overview</TabsTrigger>
+          <TabsTrigger value="cola" className="text-sm px-3 py-2">
+            <span className="hidden sm:inline">COLA Adjustments</span>
+            <span className="sm:hidden">COLA</span>
+          </TabsTrigger>
+          <TabsTrigger value="projections" className="text-sm px-3 py-2">Projections</TabsTrigger>
+          <TabsTrigger value="scenarios" className="text-sm px-3 py-2">Scenarios</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6 mt-6">

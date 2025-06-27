@@ -94,12 +94,12 @@ export default function SearchPage() {
             </div>
 
             <Tabs defaultValue="all" className="w-full">
-              <TabsList className="w-full grid grid-cols-5 mb-6">
-                <TabsTrigger value="all">All Results</TabsTrigger>
-                <TabsTrigger value="pages">Pages</TabsTrigger>
-                <TabsTrigger value="blog">Blog</TabsTrigger>
-                <TabsTrigger value="resources">Resources</TabsTrigger>
-                <TabsTrigger value="faq">FAQ</TabsTrigger>
+              <TabsList className="w-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1 h-auto p-1 mb-6">
+                <TabsTrigger value="all" className="text-xs sm:text-sm px-2 sm:px-3 py-2">All Results</TabsTrigger>
+                <TabsTrigger value="pages" className="text-xs sm:text-sm px-2 sm:px-3 py-2">Pages</TabsTrigger>
+                <TabsTrigger value="blog" className="text-xs sm:text-sm px-2 sm:px-3 py-2">Blog</TabsTrigger>
+                <TabsTrigger value="resources" className="text-xs sm:text-sm px-2 sm:px-3 py-2 col-span-2 sm:col-span-1">Resources</TabsTrigger>
+                <TabsTrigger value="faq" className="text-xs sm:text-sm px-2 sm:px-3 py-2 col-span-2 sm:col-span-1">FAQ</TabsTrigger>
               </TabsList>
 
               <TabsContent value="all" className="space-y-4">

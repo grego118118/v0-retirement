@@ -127,10 +127,16 @@ export function CombinedIncomeAnalysis({ pensionData, socialSecurityData }: Comb
           </Alert>
 
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="overview">Income Overview</TabsTrigger>
-              <TabsTrigger value="scenarios">Scenarios</TabsTrigger>
-              <TabsTrigger value="breakdown">Income Breakdown</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-3 h-auto p-1">
+              <TabsTrigger value="overview" className="text-sm px-3 py-2">
+                <span className="hidden sm:inline">Income Overview</span>
+                <span className="sm:hidden">Overview</span>
+              </TabsTrigger>
+              <TabsTrigger value="scenarios" className="text-sm px-3 py-2">Scenarios</TabsTrigger>
+              <TabsTrigger value="breakdown" className="text-sm px-3 py-2">
+                <span className="hidden sm:inline">Income Breakdown</span>
+                <span className="sm:hidden">Breakdown</span>
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
