@@ -98,10 +98,43 @@ const OPTION_B_REDUCTION_RATE = 0.01  // 1.0% reduction (MSRB validated)
 // - Projection table (informational only): Member gets FULL pension, survivor gets 66.67% of full
 // The specific calculation is what users see for actual benefit calculations
 
+// TypeScript types for Option C factors
+type AgeCombinationFactors = {
+  // Known MSRB-validated combinations
+  "55-53": number;
+  "56-54": number;
+  "57-55": number;
+  "58-56": number;
+  "59-57": number;
+  "55-55": number;
+  "65-55": number;
+  "65-65": number;
+  "70-65": number;
+  "70-70": number;
+  default: number;
+  // Index signature for dynamic lookups
+  [key: string]: number | undefined;
+}
+
+type AgeSpecificFactors = {
+  55: number;
+  56: number;
+  57: number;
+  58: number;
+  59: number;
+  default: number;
+  // Index signature for dynamic lookups
+  [key: number]: number | undefined;
+}
+
 // Option C reduction factors - UNIVERSAL across all retirement groups
 // Based on official MSRB Option C Factor Table and calculator validation
 // Key format: "memberAge-beneficiaryAge"
-const OPTION_C_FACTORS = {
+const OPTION_C_FACTORS: {
+  projection: number;
+  ageCombinations: AgeCombinationFactors;
+  ageSpecific: AgeSpecificFactors;
+} = {
   // For projection scenarios (informational only): No reduction to member
   projection: 1.0,  // No reduction
 
