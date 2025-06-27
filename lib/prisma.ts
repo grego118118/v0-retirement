@@ -4,8 +4,7 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
 }
 
-// Enhanced Prisma configuration for Vercel serverless environment
-// Fixes "prepared statement already exists" error (PostgreSQL error 42P05)
+// Simplified Prisma configuration to fix "prepared statement already exists" errors
 const createPrismaClient = () => {
   const databaseUrl = process.env.DATABASE_URL
 
@@ -13,44 +12,28 @@ const createPrismaClient = () => {
     throw new Error('DATABASE_URL environment variable is not set')
   }
 
-  // For Supabase + Vercel serverless: Use transaction pooling to completely avoid prepared statements
-  const isSupabase = databaseUrl.includes('supabase.com') || databaseUrl.includes('supabase.co')
-  const isVercel = process.env.VERCEL || process.env.VERCEL_ENV
-
-  let connectionUrl = databaseUrl
-  if (isSupabase && isVercel) {
-    // Use transaction pooling mode to avoid prepared statement conflicts entirely
-    // This is more aggressive than session pooling but prevents the error
-    const separator = databaseUrl.includes('?') ? '&' : '?'
-    connectionUrl = `${databaseUrl}${separator}pgbouncer=true&pool_mode=transaction&connection_limit=1`
-  }
-
-  console.log('Prisma connecting with URL:', connectionUrl.replace(/:[^:@]*@/, ':***@'))
+  console.log('Prisma connecting with URL:', databaseUrl.replace(/:[^:@]*@/, ':***@'))
 
   return new PrismaClient({
     datasources: {
       db: {
-        url: connectionUrl
+        url: databaseUrl
       }
     },
-    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+    log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
   })
 }
 
-// In serverless environments, create a new client for each request to avoid conflicts
+// Use global singleton in development to prevent multiple instances
+// Create new instances in production/serverless environments
+const isProduction = process.env.NODE_ENV === 'production'
 const isServerless = process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME
-const shouldUseGlobal = !isServerless && process.env.NODE_ENV !== 'production'
 
-export const prisma = shouldUseGlobal
-  ? (globalForPrisma.prisma ?? createPrismaClient())
+export const prisma = (!isProduction && !isServerless)
+  ? (globalForPrisma.prisma ?? (globalForPrisma.prisma = createPrismaClient()))
   : createPrismaClient()
 
-// Only cache in development, not in serverless production
-if (shouldUseGlobal) {
-  globalForPrisma.prisma = prisma
-}
-
-// Enhanced connection cleanup for serverless environments
+// Connection cleanup for proper resource management
 if (typeof window === 'undefined') {
   // Server-side only: ensure connections are properly closed
   process.on('beforeExit', async () => {
@@ -61,12 +44,13 @@ if (typeof window === 'undefined') {
     }
   })
 
-  // Additional cleanup for serverless
-  if (isServerless) {
-    process.on('SIGTERM', async () => {
+  process.on('SIGTERM', async () => {
+    try {
       await prisma.$disconnect()
-    })
-  }
+    } catch (error) {
+      console.error('Error disconnecting Prisma on SIGTERM:', error)
+    }
+  })
 }
 
 export default prisma

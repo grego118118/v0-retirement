@@ -45,6 +45,8 @@ import { toast } from "sonner"
 import Link from "next/link"
 import { SocialSecurityCalculator } from "@/components/social-security/social-security-calculator"
 import { CombinedRetirementCalculator } from "@/components/combined-retirement-calculator"
+import { CalculatorChart } from "@/components/calculator/calculator-chart"
+import { MSRBTestValidator } from "@/components/msrb-test-validator"
 
 // Helper functions for date format conversion
 const convertISOToDateInput = (isoDate: string | null | undefined): string => {
@@ -111,6 +113,7 @@ export default function PensionCalculator() {
 
   const [showNotification, setShowNotification] = useState(false)
   const [isFormDirty, setIsFormDirty] = useState(false)
+  const [isHydrated, setIsHydrated] = useState(false)
 
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -119,10 +122,25 @@ export default function PensionCalculator() {
   const [showSaveDialog, setShowSaveDialog] = useState(false)
   const [savedMessage, setSavedMessage] = useState("")
   const { data: session } = useSession()
-  const { saveCalculation: saveCalculationToDb, profile: userProfile, fetchProfile, saveProfile } = useRetirementData()
-  
-  // Move subscription status hook to top level
-  const { canSaveCalculations, maxSavedCalculations, savedCalculationsCount, isPremium } = useSubscriptionStatus()
+
+  // Use safe hook calls with error handling
+  const retirementData = useRetirementData()
+  const subscriptionStatus = useSubscriptionStatus()
+
+  // Safely destructure with fallbacks
+  const {
+    saveCalculation: saveCalculationToDb,
+    profile: userProfile,
+    fetchProfile,
+    saveProfile
+  } = retirementData || {}
+
+  const {
+    canSaveCalculations = true,
+    maxSavedCalculations = 3,
+    savedCalculationsCount = 0,
+    isPremium = false
+  } = subscriptionStatus || {}
 
   const [errors, setErrors] = useState<string[]>([])
   const [eligibilityWarning, setEligibilityWarning] = useState("")
@@ -141,7 +159,15 @@ export default function PensionCalculator() {
     setSocialSecurityResults(data)
   }
 
+  // Hydration effect
   useEffect(() => {
+    setIsHydrated(true)
+  }, [])
+
+  useEffect(() => {
+    // Prevent hydration issues by checking if we're in the browser
+    if (typeof window === 'undefined' || !isHydrated) return
+
     try {
       // Try session storage first (for current session), then localStorage (for persistence)
       const sessionData = sessionStorage.getItem(SESSION_STORAGE_KEY)
@@ -534,6 +560,7 @@ export default function PensionCalculator() {
         formData.retirementOption,
         enteredAge,
         formData.beneficiaryAge,
+        group,
       )
 
       const finalAnnualPension = optionResult.pension
@@ -1293,7 +1320,21 @@ export default function PensionCalculator() {
             ) : showResults && calculationResult ? (
               <>
                 <PensionResults result={calculationResult} />
-                
+
+                {/* Interactive Retirement Benefits Chart */}
+                <div className="mt-8">
+                  <CalculatorChart
+                    calculationData={{
+                      averageSalary: calculationResult.details.averageSalary,
+                      group: calculationResult.details.group,
+                      age: calculationResult.details.age,
+                      yearsOfService: calculationResult.details.yearsOfService,
+                      serviceEntry: formData.serviceEntryDate
+                    }}
+                    className="mb-6"
+                  />
+                </div>
+
                 {/* Save Calculation Button */}
                 <div className="mt-6 flex flex-col items-center space-y-4">
                   {!session ? (
@@ -1349,11 +1390,12 @@ export default function PensionCalculator() {
 
                 <div className="mt-8">
                   <Tabs defaultValue="projection" className="w-full">
-                    <TabsList className="grid w-full grid-cols-4">
+                    <TabsList className="grid w-full grid-cols-5">
                       <TabsTrigger value="projection">Projection Table</TabsTrigger>
                       <TabsTrigger value="details">Calculation Details</TabsTrigger>
                       <TabsTrigger value="social-security">Social Security</TabsTrigger>
                       <TabsTrigger value="combined">Combined Analysis</TabsTrigger>
+                      <TabsTrigger value="msrb-test">MSRB Test</TabsTrigger>
                     </TabsList>
                     <TabsContent value="projection" className="pt-4">
                       {calculationResult.projectionData && calculationResult.projectionData.rows.length > 0 ? (
@@ -1460,6 +1502,18 @@ export default function PensionCalculator() {
                           }}
                         />
                       </PremiumGate>
+                    </TabsContent>
+                    <TabsContent value="msrb-test" className="pt-4">
+                      <MSRBTestValidator
+                        formData={{
+                          age: calculationResult.details.age,
+                          yearsOfService: calculationResult.details.yearsOfService,
+                          group: calculationResult.details.group,
+                          averageSalary: calculationResult.details.averageSalary,
+                          retirementOption: formData.retirementOption,
+                          beneficiaryAge: formData.beneficiaryAge
+                        }}
+                      />
                     </TabsContent>
                   </Tabs>
                 </div>
@@ -1571,6 +1625,22 @@ export default function PensionCalculator() {
   }
 
   const summaryData = getSummaryData()
+
+  // Show loading state during hydration
+  if (!isHydrated) {
+    return (
+      <div className="w-full max-w-4xl mx-auto p-4">
+        <Card className="shadow-lg">
+          <CardContent className="p-8">
+            <div className="flex flex-col items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
+              <p className="text-muted-foreground">Loading calculator...</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   return (
     <>
@@ -1924,7 +1994,7 @@ export default function PensionCalculator() {
             <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4 mb-4">
               <div>
                 <h2 className="text-lg lg:text-xl xl:text-2xl font-semibold text-slate-900 dark:text-slate-100">
-                  Massachusetts Pension Estimator
+                  Mass Pension Calculator
                 </h2>
                 <p className="text-sm lg:text-base text-muted-foreground mt-1">
                   Complete all steps to calculate your retirement benefits

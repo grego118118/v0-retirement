@@ -105,35 +105,8 @@ const getSalaryGuidance = (group: string, yearsOfService: number) => {
   return salaryRanges[group as keyof typeof salaryRanges]?.[experience] || salaryRanges['1'][experience]
 }
 
-// Simple calculation for live preview
-const calculateBasicPensionEstimate = (data: Partial<EssentialInfoData>) => {
-  if (!data.averageSalary || !data.yearsOfService || !data.retirementGroup) {
-    return { monthlyPension: 0, isProjected: false }
-  }
-
-  // Calculate projected years if retirement age is provided
-  let projectedYears = data.yearsOfService
-  let isProjected = false
-
-  if (data.currentAge && data.plannedRetirementAge && data.plannedRetirementAge > data.currentAge) {
-    const additionalYears = data.plannedRetirementAge - data.currentAge
-    projectedYears = data.yearsOfService + additionalYears
-    isProjected = true
-  }
-
-  // Use basic 2.2% factor for quick estimate
-  const basicFactor = 0.022
-  const annualPension = data.averageSalary * projectedYears * basicFactor
-
-  // Apply 80% cap
-  const maxPension = data.averageSalary * 0.8
-  const cappedPension = Math.min(annualPension, maxPension)
-
-  return {
-    monthlyPension: Math.round(cappedPension / 12),
-    isProjected
-  }
-}
+// Use the official MSRB calculation from smart-defaults for consistency
+import { calculateBasicPensionEstimate } from '@/lib/wizard/smart-defaults'
 
 export function EssentialInformationStep({ data, onChange, errors }: EssentialInformationStepProps) {
   const [showSalaryGuidance, setShowSalaryGuidance] = useState(false)

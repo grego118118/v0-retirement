@@ -1,0 +1,29 @@
+<svg width="200" height="48" viewBox="0 0 200 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle for icon -->
+  <rect x="4" y="4" width="40" height="40" rx="8" fill="#3b82f6" />
+  
+  <!-- Financial/Retirement Icon - Stylized building with growth arrow -->
+  <g transform="translate(12, 12)">
+    <!-- Building base representing stability -->
+    <rect x="2" y="16" width="4" height="8" fill="white" opacity="0.95"/>
+    <rect x="7" y="12" width="4" height="12" fill="white" opacity="0.95"/>
+    <rect x="12" y="8" width="4" height="16" fill="white" opacity="0.95"/>
+    <rect x="17" y="4" width="4" height="20" fill="white" opacity="0.95"/>
+    
+    <!-- Growth arrow -->
+    <path d="M18 6 L22 2 L22 4 L24 4 L24 6 L22 6 L22 8 Z" fill="#34d399" />
+  </g>
+  
+  <!-- Main Text: "Mass Pension" -->
+  <text x="56" y="20" font-family="system-ui, -apple-system, sans-serif" font-size="18" font-weight="700" fill="white">
+    Mass
+  </text>
+  <text x="56" y="36" font-family="system-ui, -apple-system, sans-serif" font-size="18" font-weight="700" fill="white">
+    Pension
+  </text>
+  
+  <!-- Subtle tagline -->
+  <text x="140" y="28" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="400" fill="white" opacity="0.8">
+    Massachusetts Retirement
+  </text>
+</svg>

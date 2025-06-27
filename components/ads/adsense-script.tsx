@@ -1,12 +1,22 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import Script from "next/script"
 import { useSubscriptionStatus } from "@/hooks/use-subscription"
 
 export function AdSenseScript() {
   const { isPremium, subscriptionStatus } = useSubscriptionStatus()
+  const [isClient, setIsClient] = useState(false)
   const publisherId = process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID || "ca-pub-8456317857596950"
+
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  // Don't render anything during SSR to prevent hydration mismatch
+  if (!isClient) {
+    return null
+  }
 
   // Don't load AdSense script in development
   if (process.env.NODE_ENV === 'development') {
@@ -38,8 +48,16 @@ export function AdSenseScript() {
 // Alternative component that loads the script only when needed
 export function AdSenseScriptLoader() {
   const { isPremium, subscriptionStatus } = useSubscriptionStatus()
+  const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  useEffect(() => {
+    // Only run on client side after hydration
+    if (!isClient || typeof window === 'undefined') return
+
     // Don't load in development
     if (process.env.NODE_ENV === 'development') {
       return
@@ -62,11 +80,11 @@ export function AdSenseScriptLoader() {
     script.async = true
     script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${publisherId}`
     script.crossOrigin = 'anonymous'
-    
+
     script.onload = () => {
       console.log('AdSense script loaded dynamically')
     }
-    
+
     script.onerror = () => {
       console.error('Failed to load AdSense script dynamically')
     }
@@ -80,7 +98,7 @@ export function AdSenseScriptLoader() {
         existingScript.remove()
       }
     }
-  }, [isPremium, subscriptionStatus])
+  }, [isClient, isPremium, subscriptionStatus])
 
   return null
 }

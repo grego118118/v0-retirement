@@ -40,7 +40,9 @@ import {
   Clock
 } from "lucide-react"
 import { CombinedCalculationData, WizardProgress, WIZARD_STEPS, ValidationRule } from "@/lib/wizard/wizard-types"
-import { calculateAnnualPension, getBenefitFactor, generateProjectionTable } from "@/lib/pension-calculations"
+import { calculateAnnualPension, getBenefitFactor, generateProjectionTable, calculatePensionWithOption } from "@/lib/pension-calculations";
+import { calculateRetirementBenefitsProjection, ProjectionParameters } from "@/lib/retirement-benefits-projection"
+import { RetirementBenefitsProjection } from "@/components/retirement-benefits-projection"
 
 // Validation schemas for each step
 const personalInfoSchema = z.object({
@@ -119,6 +121,8 @@ export function CombinedCalculationWizard({
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const hasInitializedRef = useRef(false)
+  const sessionIdRef = useRef<string | null>(null)
 
   // Safe number parsing that preserves user input precision
   const parseNumberInput = (value: string, isInteger: boolean = false): number => {
@@ -145,12 +149,28 @@ export function CombinedCalculationWizard({
           setUserProfile(profile)
 
           // Pre-populate wizard data from profile
-          const currentAge = profile.dateOfBirth ?
-            new Date().getFullYear() - new Date(profile.dateOfBirth).getFullYear() : 0
+          // Fix: Use proper date parsing to avoid timezone issues
+          const currentAge = profile.dateOfBirth ? (() => {
+            const birthDate = new Date(profile.dateOfBirth)
+            // Use local timezone to get the correct year
+            const birthYear = birthDate.getFullYear()
+            // If the parsed year seems wrong (timezone issue), extract from string
+            const dateStr = profile.dateOfBirth.toString()
+            const yearFromString = dateStr.match(/(\d{4})/)
+            const correctBirthYear = yearFromString ? parseInt(yearFromString[1]) : birthYear
+            return new Date().getFullYear() - correctBirthYear
+          })() : 0
 
           const initialData: Partial<CombinedCalculationData> = {
             personalInfo: {
-              birthYear: profile.dateOfBirth ? new Date(profile.dateOfBirth).getFullYear() : 0,
+              birthYear: profile.dateOfBirth ? (() => {
+                const birthDate = new Date(profile.dateOfBirth)
+                const birthYear = birthDate.getFullYear()
+                // If the parsed year seems wrong (timezone issue), extract from string
+                const dateStr = profile.dateOfBirth.toString()
+                const yearFromString = dateStr.match(/(\d{4})/)
+                return yearFromString ? parseInt(yearFromString[1]) : birthYear
+              })() : 0,
               retirementGoalAge: profile.plannedRetirementAge || 65,
               lifeExpectancy: 85,
               filingStatus: 'single',
@@ -159,7 +179,7 @@ export function CombinedCalculationWizard({
             pensionData: {
               yearsOfService: profile.yearsOfService || 0,
               averageSalary: profile.averageHighest3Years || profile.currentSalary || 0,
-              retirementGroup: profile.retirementGroup || '1',
+              retirementGroup: (profile.retirementGroup || '1') as '1' | '2' | '3' | '4',
               serviceEntry: 'before_2012' as const, // Default to before_2012, user can change
               pensionRetirementAge: profile.plannedRetirementAge || 65,
               beneficiaryAge: undefined,
@@ -210,7 +230,7 @@ export function CombinedCalculationWizard({
 
   // Initialize wizard data structure from saved state and profile
   useEffect(() => {
-    if (session?.user?.id && !isLoadingProfile) {
+    if (session?.user?.id && !isLoadingProfile && !hasInitializedRef.current) {
       // Always try to load saved wizard state from localStorage
       const savedData = localStorage.getItem(`wizard-data-${session.user.id}`)
 
@@ -220,19 +240,35 @@ export function CombinedCalculationWizard({
           const parsed = JSON.parse(savedData)
           setWizardData(parsed.data || {})
           setCurrentStep(parsed.currentStep || 0)
+          hasInitializedRef.current = true
           console.log('Resumed wizard from saved state:', parsed)
         } catch (error) {
           console.error("Failed to load saved wizard data:", error)
         }
-      } else if (userProfile && Object.keys(wizardData).length === 0) {
+      } else if (userProfile) {
         // Initialize from user profile if no saved data
         const initialData: Partial<CombinedCalculationData> = {
           personalInfo: {
-            birthYear: userProfile.dateOfBirth ? new Date(userProfile.dateOfBirth).getFullYear() : 0,
+            birthYear: userProfile.dateOfBirth ? (() => {
+              const birthDate = new Date(userProfile.dateOfBirth)
+              const birthYear = birthDate.getFullYear()
+              // If the parsed year seems wrong (timezone issue), extract from string
+              const dateStr = userProfile.dateOfBirth.toString()
+              const yearFromString = dateStr.match(/(\d{4})/)
+              return yearFromString ? parseInt(yearFromString[1]) : birthYear
+            })() : 0,
             retirementGoalAge: 65,
             lifeExpectancy: 85,
             filingStatus: 'single' as const,
-            currentAge: userProfile.dateOfBirth ? new Date().getFullYear() - new Date(userProfile.dateOfBirth).getFullYear() : 0
+            currentAge: userProfile.dateOfBirth ? (() => {
+              const birthDate = new Date(userProfile.dateOfBirth)
+              const birthYear = birthDate.getFullYear()
+              // If the parsed year seems wrong (timezone issue), extract from string
+              const dateStr = userProfile.dateOfBirth.toString()
+              const yearFromString = dateStr.match(/(\d{4})/)
+              const correctBirthYear = yearFromString ? parseInt(yearFromString[1]) : birthYear
+              return new Date().getFullYear() - correctBirthYear
+            })() : 0
           },
           pensionData: {
             yearsOfService: userProfile.yearsOfService || 0,
@@ -275,14 +311,21 @@ export function CombinedCalculationWizard({
         }
 
         setWizardData(initialData)
+        hasInitializedRef.current = true
         console.log('Initialized wizard from user profile:', initialData)
       }
     }
-  }, [resumeToken, session?.user?.id, isLoadingProfile, userProfile, wizardData])
+  }, [resumeToken, session?.user?.id, isLoadingProfile, userProfile])
+
+  // Update session ID ref when session changes
+  if (session?.user?.id && sessionIdRef.current !== session.user.id) {
+    sessionIdRef.current = session.user.id
+  }
 
   // Debounced auto-save function
   const debouncedAutoSave = useCallback((data: Partial<CombinedCalculationData>, step: number) => {
-    if (!session?.user?.id) return
+    const sessionId = sessionIdRef.current
+    if (!sessionId) return
 
     // Clear existing timeout
     if (saveTimeoutRef.current) {
@@ -301,8 +344,8 @@ export function CombinedCalculationWizard({
           data: data,
           savedAt: new Date().toISOString()
         }
-        localStorage.setItem(`wizard-data-${session.user.id}`, JSON.stringify(saveData))
-        localStorage.setItem(`wizard-state-${session.user.id}`, `step-${step}`)
+        localStorage.setItem(`wizard-data-${sessionId}`, JSON.stringify(saveData))
+        localStorage.setItem(`wizard-state-${sessionId}`, `step-${step}`)
 
         setSaveStatus('saved')
         setLastSaved(new Date())
@@ -323,11 +366,11 @@ export function CombinedCalculationWizard({
         }, 3000)
       }
     }, 1500)
-  }, [session?.user?.id])
+  }, [])
 
   // Auto-save wizard progress with debouncing
   useEffect(() => {
-    if (session?.user?.id && Object.keys(wizardData).length > 0) {
+    if (sessionIdRef.current && Object.keys(wizardData).length > 0) {
       debouncedAutoSave(wizardData, currentStep)
     }
 
@@ -337,7 +380,7 @@ export function CombinedCalculationWizard({
         clearTimeout(saveTimeoutRef.current)
       }
     }
-  }, [wizardData, currentStep, session?.user?.id, debouncedAutoSave])
+  }, [wizardData, currentStep])
 
   const progress: WizardProgress = {
     stepNumber: currentStep + 1,
@@ -498,38 +541,33 @@ export function CombinedCalculationWizard({
     const { averageSalary, yearsOfService, retirementGroup, retirementOption, serviceEntry, pensionRetirementAge, beneficiaryAge } = pensionData
     const retirementAge = pensionRetirementAge || personalInfo.retirementGoalAge || 65
 
-    // Use proper MSRB calculation methodology
+    // Use proper MSRB calculation methodology from the /calculator component
     try {
-      const group = `GROUP_${retirementGroup}` as const
-      const userServiceEntry = serviceEntry || "before_2012" // Use user selection or default
+      const group = `GROUP_${pensionData.retirementGroup || '1'}`;
+      const userServiceEntry = serviceEntry || "before_2012";
 
-      // Filter retirement option to only include supported options
-      const supportedOption = (retirementOption === "A" || retirementOption === "B" || retirementOption === "C")
-        ? retirementOption
-        : "A"
+      const benefitFactor = getBenefitFactor(retirementAge, group, userServiceEntry, yearsOfService);
+      if (benefitFactor === 0) return 0;
 
-      const annualBenefit = calculateAnnualPension(
-        averageSalary,
+      let baseAnnualPension = averageSalary * benefitFactor * yearsOfService;
+      const maxPensionAllowed = averageSalary * 0.8;
+
+      if (baseAnnualPension > maxPensionAllowed) {
+        baseAnnualPension = maxPensionAllowed;
+      }
+
+      const optionResult = calculatePensionWithOption(
+        baseAnnualPension,
+        retirementOption,
         retirementAge,
-        yearsOfService,
-        supportedOption,
-        group,
-        userServiceEntry,
-        beneficiaryAge?.toString()
-      )
+        pensionData.beneficiaryAge?.toString() || "",
+        group
+      );
 
-      return annualBenefit / 12 // Return monthly benefit
+      return optionResult.pension / 12; // Return monthly benefit
     } catch (error) {
       console.error('Error calculating pension benefit:', error)
-
-      // Fallback to proper MSRB benefit factors
-      const group = `GROUP_${retirementGroup}` as const
-      const userServiceEntry = serviceEntry || "before_2012" // Use user selection or default
-      const benefitFactor = getBenefitFactor(retirementAge, group, userServiceEntry, yearsOfService)
-      const annualBenefit = averageSalary * yearsOfService * benefitFactor
-      const maxBenefit = averageSalary * 0.8 // 80% cap
-
-      return Math.min(annualBenefit, maxBenefit) / 12
+      return 0
     }
   }
 
@@ -717,7 +755,35 @@ export function CombinedCalculationWizard({
     }
   }
 
-  // Generate retirement projection data for chart
+  // Generate enhanced retirement projection data with benefit progression and COLA
+  const generateEnhancedRetirementProjection = () => {
+    const pensionData = wizardData.pensionData
+    const personalInfo = wizardData.personalInfo
+    const socialSecurityData = wizardData.socialSecurityData
+
+    if (!pensionData || !personalInfo) return []
+
+    // Build projection parameters using the same function as the main calculator
+    const projectionParams: ProjectionParameters = {
+      currentAge: personalInfo.currentAge || 0,
+      plannedRetirementAge: pensionData.pensionRetirementAge || 65,
+      currentYearsOfService: pensionData.yearsOfService || 0,
+      averageSalary: pensionData.averageSalary || 0,
+      retirementGroup: `GROUP_${pensionData.retirementGroup || '1'}`,
+      serviceEntry: pensionData.serviceEntry || 'before_2012',
+      pensionOption: (pensionData.retirementOption || 'A') as "A" | "B" | "C",
+      beneficiaryAge: pensionData.beneficiaryAge?.toString() || "",
+      socialSecurityClaimingAge: socialSecurityData?.selectedClaimingAge || 67,
+      socialSecurityFullBenefit: (socialSecurityData?.fullRetirementBenefit || 0) * 12, // Convert to annual
+      projectionEndAge: 80,
+      includeCOLA: true,
+      colaRate: 0.03
+    }
+
+    return calculateRetirementBenefitsProjection(projectionParams)
+  }
+
+  // Legacy function for backward compatibility (simplified projection)
   const generateRetirementProjection = () => {
     const pensionData = wizardData.pensionData
     const personalInfo = wizardData.personalInfo
@@ -849,11 +915,13 @@ export function CombinedCalculationWizard({
               onChange={(e) => {
                 const value = e.target.value
                 const numValue = parseNumberInput(value, true)
+                // Calculate current age from birth year
+                const currentAge = numValue > 0 ? new Date().getFullYear() - numValue : 0
                 updateWizardData({
                   personalInfo: {
                     ...personalInfo,
-                    birthYear: numValue
-                    // Removed automatic currentAge calculation to preserve user input
+                    birthYear: numValue,
+                    currentAge: currentAge
                   }
                 })
               }}
@@ -865,7 +933,7 @@ export function CombinedCalculationWizard({
           <div className="space-y-2">
             <Label htmlFor="retirementGoalAge" className="flex items-center gap-2">
               <Target className="h-4 w-4" />
-              Planned Retirement Age
+              General Retirement Goal Age
             </Label>
             <Input
               id="retirementGoalAge"
@@ -968,7 +1036,7 @@ export function CombinedCalculationWizard({
           <div className="space-y-2">
             <Label htmlFor="yearsOfService" className="flex items-center gap-2">
               <Briefcase className="h-4 w-4" />
-              Years of Service
+              Current Years of Service
             </Label>
             <Input
               id="yearsOfService"
@@ -992,6 +1060,9 @@ export function CombinedCalculationWizard({
               className={errors['pensionData.yearsOfService'] ? "border-red-500" : ""}
             />
             {errors['pensionData.yearsOfService'] && <p className="text-sm text-red-500">{errors['pensionData.yearsOfService']}</p>}
+            <p className="text-sm text-muted-foreground">
+              Your current years of service. The projection will calculate your years at retirement.
+            </p>
           </div>
 
           <div className="space-y-2">
@@ -1072,7 +1143,7 @@ export function CombinedCalculationWizard({
           <div className="space-y-2">
             <Label htmlFor="pensionRetirementAge" className="flex items-center gap-2">
               <Calendar className="h-4 w-4" />
-              Pension Retirement Age
+              Massachusetts Pension Start Age
             </Label>
             <Input
               id="pensionRetirementAge"
@@ -1106,7 +1177,7 @@ export function CombinedCalculationWizard({
               })()
             )}
             <p className="text-sm text-muted-foreground">
-              Age when you plan to start receiving your pension benefits (may differ from Social Security claiming age).
+              Age when you plan to start receiving your Massachusetts state pension benefits. This is different from your Social Security claiming age.
             </p>
           </div>
 
@@ -1173,7 +1244,7 @@ export function CombinedCalculationWizard({
             <AlertDescription>
               Estimated monthly pension: ${Math.round(calculatePensionBenefit()).toLocaleString()}
               <br />
-              Based on {pensionData.yearsOfService} years of service and ${pensionData.averageSalary.toLocaleString()} average salary.
+              Based on {pensionData.yearsOfService} current years of service and ${pensionData.averageSalary.toLocaleString()} average salary.
             </AlertDescription>
           </Alert>
         )}
@@ -1232,7 +1303,7 @@ export function CombinedCalculationWizard({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="selectedClaimingAge">Planned Claiming Age</Label>
+            <Label htmlFor="selectedClaimingAge">Social Security Claiming Age</Label>
             <Select
               value={socialSecurityData.selectedClaimingAge?.toString() || '67'}
               onValueChange={(value) => updateWizardData({
@@ -1798,7 +1869,7 @@ export function CombinedCalculationWizard({
             <CardContent>
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span>Years of Service:</span>
+                  <span>Current Years of Service:</span>
                   <span className="font-semibold">{pensionData.yearsOfService}</span>
                 </div>
                 <div className="flex justify-between">
@@ -1810,7 +1881,7 @@ export function CombinedCalculationWizard({
                   <span className="font-semibold">Group {pensionData.retirementGroup}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Pension Retirement Age:</span>
+                  <span>Pension Start Age:</span>
                   <span className="font-semibold">{pensionData.pensionRetirementAge}</span>
                 </div>
                 <div className="flex justify-between">
@@ -1847,7 +1918,7 @@ export function CombinedCalculationWizard({
                   <span className="font-semibold">${socialSecurityData.fullRetirementBenefit?.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Claiming Age:</span>
+                  <span>SS Claiming Age:</span>
                   <span className="font-semibold">{socialSecurityData.selectedClaimingAge}</span>
                 </div>
                 <div className="flex justify-between">
@@ -1899,146 +1970,24 @@ export function CombinedCalculationWizard({
           </Card>
         </div>
 
-        {/* Retirement Age Projection Chart */}
-        <Card className="mt-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5" />
-              Retirement Benefits Projection
-            </CardTitle>
-            <CardDescription>
-              Projected monthly benefits from current age to 80 based on your inputs
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {(() => {
-                const projectionData = generateRetirementProjection()
+        {/* Enhanced Retirement Benefits Projection */}
+        <div className="mt-8">
+          {(() => {
+            const enhancedProjectionData = generateEnhancedRetirementProjection()
+            const pensionAge = wizardData.pensionData?.pensionRetirementAge || 65
+            const ssAge = wizardData.socialSecurityData?.selectedClaimingAge || 67
 
-                if (projectionData.length === 0) {
-                  return (
-                    <div className="text-center py-8 text-muted-foreground">
-                      Complete all steps to see your retirement projection
-                    </div>
-                  )
-                }
+            return (
+              <RetirementBenefitsProjection
+                projectionYears={enhancedProjectionData}
+                pensionRetirementAge={pensionAge}
+                socialSecurityClaimingAge={ssAge}
+              />
+            )
+          })()}
+        </div>
 
-                // Find key ages for highlighting
-                const currentAge = wizardData.personalInfo?.currentAge || 0
-                const pensionAge = wizardData.pensionData?.pensionRetirementAge || 65
-                const ssAge = wizardData.socialSecurityData?.selectedClaimingAge || 67
 
-                return (
-                  <div className="space-y-4">
-                    {/* Chart Legend */}
-                    <div className="flex flex-wrap gap-4 text-sm">
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 bg-green-500 rounded"></div>
-                        <span>Pension Benefits</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 bg-blue-500 rounded"></div>
-                        <span>Social Security Benefits</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 bg-purple-500 rounded"></div>
-                        <span>Total Monthly Income</span>
-                      </div>
-                    </div>
-
-                    {/* Projection Table */}
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-sm">
-                        <thead>
-                          <tr className="border-b">
-                            <th className="text-left p-2">Age</th>
-                            <th className="text-right p-2">Pension</th>
-                            <th className="text-right p-2">Social Security</th>
-                            <th className="text-right p-2">Total Monthly</th>
-                            <th className="text-right p-2">Total Annual</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {projectionData.filter((_, index) => index % 2 === 0).map((row) => (
-                            <tr
-                              key={row.age}
-                              className={`border-b hover:bg-muted/50 ${
-                                row.age === pensionAge || row.age === ssAge
-                                  ? 'bg-blue-50 dark:bg-blue-950/20 font-semibold'
-                                  : ''
-                              }`}
-                            >
-                              <td className="p-2">
-                                {row.age}
-                                {row.age === pensionAge && (
-                                  <Badge variant="outline" className="ml-2 text-xs">Pension</Badge>
-                                )}
-                                {row.age === ssAge && (
-                                  <Badge variant="outline" className="ml-2 text-xs">SS</Badge>
-                                )}
-                              </td>
-                              <td className="text-right p-2 text-green-600">
-                                ${row.pensionMonthly.toLocaleString()}
-                              </td>
-                              <td className="text-right p-2 text-blue-600">
-                                ${row.socialSecurityMonthly.toLocaleString()}
-                              </td>
-                              <td className="text-right p-2 font-semibold text-purple-600">
-                                ${row.totalMonthly.toLocaleString()}
-                              </td>
-                              <td className="text-right p-2 text-muted-foreground">
-                                ${row.totalAnnual.toLocaleString()}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-
-                    {/* Key Insights */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-                      <div className="bg-green-50 dark:bg-green-950/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
-                        <div className="text-sm font-medium text-green-800 dark:text-green-200">
-                          Pension Starts
-                        </div>
-                        <div className="text-lg font-bold text-green-600">
-                          Age {pensionAge}
-                        </div>
-                        <div className="text-sm text-green-600">
-                          ${projectionData.find(p => p.age === pensionAge)?.pensionMonthly.toLocaleString() || '0'}/month
-                        </div>
-                      </div>
-
-                      <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
-                        <div className="text-sm font-medium text-blue-800 dark:text-blue-200">
-                          Social Security Starts
-                        </div>
-                        <div className="text-lg font-bold text-blue-600">
-                          Age {ssAge}
-                        </div>
-                        <div className="text-sm text-blue-600">
-                          ${projectionData.find(p => p.age === ssAge)?.socialSecurityMonthly.toLocaleString() || '0'}/month
-                        </div>
-                      </div>
-
-                      <div className="bg-purple-50 dark:bg-purple-950/20 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
-                        <div className="text-sm font-medium text-purple-800 dark:text-purple-200">
-                          Peak Monthly Income
-                        </div>
-                        <div className="text-lg font-bold text-purple-600">
-                          ${Math.max(...projectionData.map(p => p.totalMonthly)).toLocaleString()}
-                        </div>
-                        <div className="text-sm text-purple-600">
-                          When both benefits active
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )
-              })()}
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">

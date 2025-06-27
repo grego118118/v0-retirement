@@ -6,23 +6,56 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { Footer } from "@/components/layout/footer"
 import { Header } from "@/components/layout/header"
 import { SessionProvider } from "@/components/auth/session-provider"
+import { ProfileProvider } from "@/contexts/profile-context"
 import Script from "next/script"
 import { Toaster } from "@/components/ui/sonner"
 import { ResourceOptimizer } from "@/components/layout/resource-optimizer"
 import { SubscriptionListener } from "@/components/layout/subscription-listener"
 import { AdSenseInitializer } from "@/components/ads/adsense-initializer"
+import { TrustedTypesSetup } from "@/components/layout/trusted-types-setup"
 import { Analytics } from "@vercel/analytics/next"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: {
-    default: "Massachusetts Pension Estimator",
-    template: "%s | Massachusetts Pension Estimator",
+    default: "Mass Pension - Massachusetts Retirement Calculator",
+    template: "%s | Mass Pension",
   },
-  description: "Estimate your Massachusetts state employee pension benefits and determine the optimal time to retire.",
+  description: "Calculate your Massachusetts state employee pension benefits with official MSRB formulas. Comprehensive retirement planning for Groups 1-4 with COLA projections.",
   generator: 'v0.dev',
   metadataBase: new URL(process.env.NEXTAUTH_URL || 'https://www.masspension.com'),
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+    ],
+  },
+  openGraph: {
+    title: 'Mass Pension - Massachusetts Retirement Calculator',
+    description: 'Calculate your Massachusetts state employee pension benefits with official MSRB formulas.',
+    url: 'https://www.masspension.com',
+    siteName: 'Mass Pension',
+    images: [
+      {
+        url: '/images/og-image.svg',
+        width: 1200,
+        height: 630,
+        alt: 'Mass Pension - Massachusetts Retirement Calculator',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Mass Pension - Massachusetts Retirement Calculator',
+    description: 'Calculate your Massachusetts state employee pension benefits with official MSRB formulas.',
+    images: ['/images/og-image.svg'],
+  },
 }
 
 export default function RootLayout({
@@ -47,15 +80,6 @@ export default function RootLayout({
 
         {/* Google AdSense verification meta tag - Alternative verification method */}
         <meta name="google-adsense-account" content="ca-pub-8456317857596950" />
-
-        {/* Google AdSense verification script - Always present for Google verification */}
-        <Script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8456317857596950"
-          crossOrigin="anonymous"
-          strategy="beforeInteractive"
-          id="adsense-verification-script"
-        />
         <meta name="format-detection" content="telephone=no" />
         {/* Disable automatic CSS preloading that causes warnings */}
         <meta name="next-head-count" content="0" />
@@ -65,76 +89,15 @@ export default function RootLayout({
           src="/trusted-types-polyfill.js"
           strategy="beforeInteractive"
         />
-
-
-        {/* Enhanced Trusted Types Policy for Next.js and third-party scripts */}
-        <Script
-          id="trusted-types-policy"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              if (typeof window !== 'undefined' && window.trustedTypes && window.trustedTypes.createPolicy) {
-                try {
-                  // Create a comprehensive default policy
-                  window.trustedTypes.createPolicy('default', {
-                    createHTML: (string) => {
-                      // Allow all HTML for now (can be restricted later)
-                      return string;
-                    },
-                    createScriptURL: (string) => {
-                      // Allow trusted script URLs
-                      const allowedDomains = [
-                        'vercel.live',
-                        'va.vercel-scripts.com',
-                        'vitals.vercel-insights.com',
-                        'vitals.vercel-analytics.com',
-                        'apis.google.com',
-                        'accounts.google.com',
-                        'js.stripe.com',
-                        'checkout.stripe.com',
-                        'pagead2.googlesyndication.com',
-                        'googleads.g.doubleclick.net',
-                        'tpc.googlesyndication.com',
-                        window.location.origin
-                      ];
-
-                      try {
-                        const url = new URL(string, window.location.origin);
-                        if (allowedDomains.some(domain => url.hostname.includes(domain))) {
-                          return string;
-                        }
-                      } catch (e) {
-                        // If URL parsing fails, allow relative URLs
-                        if (!string.includes('://')) {
-                          return string;
-                        }
-                      }
-
-                      console.warn('Blocked script URL:', string);
-                      return string; // Allow for now, log for debugging
-                    },
-                    createScript: (string) => {
-                      // Allow all scripts for now (Next.js, Vercel Live, etc.)
-                      return string;
-                    },
-                  });
-                } catch (e) {
-                  // Policy might already exist
-                  if (e.name !== 'NotAllowedError') {
-                    console.log('Trusted Types policy creation:', e.message);
-                  }
-                }
-              }
-            `,
-          }}
-        />
       </head>
       <body className={inter.className}>
         <SessionProvider>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <ProfileProvider>
+            <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <ResourceOptimizer />
             <SubscriptionListener />
             <AdSenseInitializer />
+            <TrustedTypesSetup />
             <div className="flex min-h-screen flex-col">
               <Header />
               <main className="flex-1">{children}</main>
@@ -143,6 +106,7 @@ export default function RootLayout({
             <Toaster />
             <Analytics />
           </ThemeProvider>
+          </ProfileProvider>
         </SessionProvider>
       </body>
     </html>

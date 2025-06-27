@@ -26,7 +26,11 @@
     "migrate:postgres": "node scripts/migrate-to-postgres.js",
     "health:check": "curl -f http://localhost:3000/api/health || exit 1",
     "validate-calculations": "tsx scripts/validate-calculations.ts",
-    "validate-calculations:critical": "tsx scripts/validate-calculations.ts --critical"
+    "validate-calculations:critical": "tsx scripts/validate-calculations.ts --critical",
+    "test:msrb": "node pension-calculation-audit.js",
+    "test:msrb-jest": "jest tests/msrb-validation.test.js",
+    "validate:msrb": "npm run test:msrb && echo '✅ All MSRB validations passed'",
+    "validate:all": "npm run validate-calculations && npm run validate:msrb"
   },
   "dependencies": {
     "@auth/core": "0.34.2",
@@ -110,6 +114,7 @@
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
     "postcss": "^8",
+    "puppeteer": "^24.10.2",
     "tailwindcss": "^3.4.17",
     "ts-jest": "^29.1.2",
     "tsx": "^4.7.0",

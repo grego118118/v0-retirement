@@ -254,13 +254,14 @@ function getFieldDisplayName(field: string): string {
 // Enhanced preview with breakdown (for future use)
 export function DetailedCalculationPreview({ data, className = "" }: LiveCalculationPreviewProps) {
   const preview = calculateBasicPensionEstimate(data)
-  
+
   if (!preview || !data.averageSalary || !data.yearsOfService) return null
-  
-  const basicFactor = 0.022 // Simplified factor for preview
-  const annualBeforeCap = data.averageSalary * data.yearsOfService * basicFactor
+
+  // Note: The preview now uses official MSRB calculations from calculateBasicPensionEstimate
+  // This ensures consistency with the main calculation logic
+  const annualPension = preview.monthlyPension * 12
   const cap = data.averageSalary * 0.8
-  const isCapped = annualBeforeCap > cap
+  const isCapped = annualPension >= cap
   
   return (
     <Card className={`bg-blue-50 border-blue-200 ${className}`}>

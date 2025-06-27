@@ -1,4 +1,5 @@
 import { generateSEOMetadata } from "@/components/seo/metadata"
+import { CalculatorStructuredData } from "@/components/seo/structured-data"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -77,7 +78,13 @@ const ssaResources = [
 
 export default function SocialSecurityPage() {
   return (
-    <div className="container mx-auto py-8 px-4">
+    <>
+      {/* AI-optimized structured data for Social Security calculator */}
+      <CalculatorStructuredData
+        pageUrl="https://www.masspension.com/social-security"
+        calculatorType="comparison"
+      />
+      <div className="container mx-auto py-8 px-4">
       <div className="text-center mb-12">
         <Badge className="mb-4 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
           <DollarSign className="mr-1 h-3 w-3" />
@@ -323,5 +330,6 @@ export default function SocialSecurityPage() {
         </CardContent>
       </Card>
     </div>
+    </>
   )
-} 
+}

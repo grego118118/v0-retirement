@@ -260,7 +260,7 @@ export function getFieldHelpText(
 }
 
 /**
- * Calculate basic pension estimate for live preview
+ * Calculate basic pension estimate for live preview using official MSRB methodology
  * Note: Uses CURRENT years of service and projects to retirement age
  */
 export function calculateBasicPensionEstimate(data: Partial<EssentialInfoData>): {
@@ -282,7 +282,37 @@ export function calculateBasicPensionEstimate(data: Partial<EssentialInfoData>):
     isProjected = true
   }
 
-  // Use basic 2.2% factor for quick estimate (actual calculation uses complex factor tables)
+  // Use official MSRB calculation methodology instead of simplified factor
+  try {
+    // Import the official calculation function
+    const { getBenefitFactor } = require('@/lib/pension-calculations')
+
+    const group = `GROUP_${data.retirementGroup}` as const
+    const serviceEntry = data.serviceEntry || 'before_2012'
+    const retirementAge = data.plannedRetirementAge || 65
+
+    // Get official MSRB benefit factor
+    const benefitFactor = getBenefitFactor(retirementAge, group, serviceEntry, projectedYears)
+
+    if (benefitFactor > 0) {
+      // Calculate using official methodology
+      const annualPension = data.averageSalary * projectedYears * benefitFactor
+
+      // Apply 80% cap
+      const maxPension = data.averageSalary * 0.8
+      const cappedPension = Math.min(annualPension, maxPension)
+
+      return {
+        monthlyPension: Math.round(cappedPension / 12),
+        projectedYearsAtRetirement: Math.round(projectedYears * 10) / 10, // Round to 1 decimal
+        isProjected
+      }
+    }
+  } catch (error) {
+    console.warn('Failed to use official MSRB calculation, falling back to basic estimate:', error)
+  }
+
+  // Fallback to basic estimate if official calculation fails
   const basicFactor = 0.022
   const annualPension = data.averageSalary * projectedYears * basicFactor
 

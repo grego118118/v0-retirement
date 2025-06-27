@@ -1,20 +1,90 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import Script from "next/script"
 import type { Metadata } from "next"
 
+// AI-optimized metadata for better search engine understanding
 export const metadata: Metadata = {
-  title: "FAQ | Massachusetts Pension Estimator",
-  description: "Frequently asked questions about Massachusetts state employee pensions and retirement benefits.",
+  title: "Massachusetts State Employee Retirement FAQ - Pension Calculator Questions Answered",
+  description: "Frequently asked questions about Massachusetts state employee retirement benefits, pension calculations, COLA adjustments, and retirement options A, B, C. Get answers to common MSRB questions with official calculation methods.",
+  keywords: "Massachusetts retirement FAQ, state employee pension questions, MSRB calculator help, retirement benefits explained, pension calculation formula, COLA Massachusetts",
+  openGraph: {
+    title: "Massachusetts Retirement FAQ - Common Pension Questions Answered",
+    description: "Get answers to frequently asked questions about Massachusetts state employee retirement benefits, pension calculations, and retirement planning.",
+    type: "website"
+  }
 }
 
 export default function FAQPage() {
+  // Structured data for AI search engines
+  const faqStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How do I calculate my Massachusetts state employee pension?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Use the formula: Average Salary × Years of Service × Benefit Factor. The benefit factor ranges from 2.0% to 2.5% depending on your retirement group (1-4) and age at retirement. The maximum pension is capped at 80% of your average salary."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What are the different Massachusetts retirement groups?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Group 1: General employees (minimum age 60). Group 2: Certain public safety (minimum age 55). Group 3: State Police (any age with 20+ years). Group 4: Public safety/corrections (minimum age 50). Each group has different benefit factors and retirement ages."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does Massachusetts COLA work for retirees?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Massachusetts applies a 3% Cost of Living Adjustment (COLA) annually to the first $13,000 of your pension, with a maximum increase of $390 per year ($32.50 per month). COLA starts the first year after retirement and compounds annually."
+        }
+      }
+    ]
+  }
+
   return (
-    <div className="container py-12">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold tracking-tight mb-2">Frequently Asked Questions</h1>
-        <p className="text-muted-foreground mb-8">
-          Find answers to common questions about Massachusetts state pensions
-        </p>
+    <>
+      {/* Structured Data for AI Search Engines */}
+      <Script
+        id="faq-structured-data"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqStructuredData) }}
+      />
+
+      <div className="container py-12">
+        <div className="max-w-3xl mx-auto">
+          {/* AI-optimized header with quick answer */}
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold tracking-tight mb-4">
+              Massachusetts State Employee Retirement FAQ
+            </h1>
+            <p className="text-xl text-muted-foreground mb-6">
+              Get answers to frequently asked questions about Massachusetts state employee retirement benefits,
+              pension calculations, COLA adjustments, and retirement planning options.
+            </p>
+
+            {/* Quick Answer Box for AI */}
+            <Card className="bg-blue-50 border-blue-200 mb-8">
+              <CardHeader>
+                <CardTitle className="text-blue-900">Quick Answer: Pension Calculation Formula</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-blue-800 text-lg font-semibold">
+                  Average Salary × Years of Service × Benefit Factor = Annual Pension
+                </p>
+                <p className="text-blue-700 mt-2">
+                  Benefit factors: 2.0%-2.5% based on group and age. Maximum: 80% of salary.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
 
         <div className="space-y-6">
           <Card>
@@ -246,5 +316,6 @@ export default function FAQPage() {
         </div>
       </div>
     </div>
+    </>
   )
 }

@@ -45,7 +45,7 @@ export function generateSEOMetadata({
       title,
       description,
       url,
-      siteName: "Massachusetts Pension Estimator",
+      siteName: "Mass Pension",
       locale: "en_US",
       type: "website",
       images: [

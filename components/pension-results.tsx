@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import { Download, Printer, Crown, TrendingUp, DollarSign, Calendar, Info, AlertTriangle } from "lucide-react"
+import { Download, Printer, Crown, TrendingUp, DollarSign, Calendar, Info, AlertTriangle, Calculator } from "lucide-react"
 import { motion } from "framer-motion"
 import { PremiumBadge } from "@/components/premium/premium-gate"
 import { useSubscriptionStatus } from "@/hooks/use-subscription"
@@ -19,6 +19,8 @@ import {
 import { formatCurrency } from "@/lib/utils"
 import Link from "next/link"
 import { ResponsiveAd, PremiumAlternative } from "@/components/ads/adsense"
+import { calculateRetirementBenefitsProjection, ProjectionParameters } from "@/lib/retirement-benefits-projection"
+import { RetirementBenefitsProjection } from "@/components/retirement-benefits-projection"
 
 interface PensionResultsProps {
   result: {
@@ -401,6 +403,31 @@ export default function PensionResults({ result }: PensionResultsProps) {
                   Any changes to COLA structure would require legislative approval and are not guaranteed.
                 </AlertDescription>
               </Alert>
+
+              {/* Enhanced Projection Notice */}
+              <Card className="bg-blue-50 border-blue-200">
+                <CardContent className="pt-6">
+                  <div className="flex items-start gap-3">
+                    <TrendingUp className="h-5 w-5 text-blue-600 mt-0.5" />
+                    <div>
+                      <h4 className="font-semibold text-blue-800 mb-2">
+                        Enhanced Retirement Benefits Projection
+                      </h4>
+                      <p className="text-sm text-blue-700 mb-3">
+                        For a comprehensive year-by-year breakdown including benefit factor progression,
+                        COLA adjustments, and Social Security integration, use our Combined Calculation Wizard.
+                      </p>
+                      <Link
+                        href="/wizard"
+                        className="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-800"
+                      >
+                        <Calculator className="h-4 w-4" />
+                        Try the Combined Wizard
+                      </Link>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </CardContent>
           </Card>
         </TabsContent>

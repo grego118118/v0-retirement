@@ -8,7 +8,7 @@ import Link from "next/link"
 import { ResponsiveAd, PremiumAlternative } from "@/components/ads/adsense"
 
 export const metadata = generateSEOMetadata({
-  title: "Pricing | Massachusetts Pension Estimator",
+  title: "Pricing | Mass Pension",
   description: "Choose the perfect plan for your Massachusetts state pension planning needs. Start free or upgrade to Premium for advanced features.",
   path: "/pricing",
 })

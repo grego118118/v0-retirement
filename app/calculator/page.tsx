@@ -1,12 +1,13 @@
 import { Suspense } from "react"
 import { generateSEOMetadata } from "@/components/seo/metadata"
+import { CalculatorStructuredData } from "@/components/seo/structured-data"
 import Script from "next/script"
 import PensionCalculatorWrapper from "@/components/pension-calculator-wrapper"
 import { Skeleton } from "@/components/ui/skeleton"
 import { AuthDisabledNotice } from "@/components/auth-disabled-notice"
 
 export const metadata = generateSEOMetadata({
-  title: "Pension Calculator | Massachusetts Pension Estimator",
+  title: "Pension Calculator | Mass Pension",
   description:
     "Calculate your Massachusetts state employee pension benefits with our free calculator. Estimate your retirement income based on age, service years, and salary.",
   path: "/calculator",
@@ -17,32 +18,18 @@ export const metadata = generateSEOMetadata({
     "pension estimator",
     "retirement benefits calculator",
     "state employee retirement",
-    "MA pension calculation",
+    "Mass pension calculation",
   ],
 })
 
 export default function CalculatorPage() {
-  // Structured data for SEO
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "FinancialCalculator",
-    name: "Massachusetts State Pension Calculator",
-    description:
-      "Calculate your Massachusetts state employee pension benefits and determine the optimal time to retire.",
-    url: "https://www.masspension.com/calculator",
-    category: "Retirement Calculator",
-    mainEntity: {
-      "@type": "FinancialProduct",
-      name: "Massachusetts State Pension",
-      category: "Retirement Benefits",
-    },
-  }
-
   return (
     <>
-      <Script id="calculator-structured-data" type="application/ld+json">
-        {JSON.stringify(structuredData)}
-      </Script>
+      {/* Enhanced AI-optimized structured data */}
+      <CalculatorStructuredData
+        pageUrl="https://www.masspension.com/calculator"
+        calculatorType="pension"
+      />
 
       <div className="py-8 px-4">
         <div className="container mx-auto max-w-6xl">

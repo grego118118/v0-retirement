@@ -4,14 +4,17 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useRetirementData } from "@/hooks/use-retirement-data"
 import { getBenefitFactor, calculatePensionWithOption } from "@/lib/pension-calculations"
-import { BenefitProjectionChart, type BenefitProjectionData } from "@/components/charts"
+import { calculateMassachusettsCOLA } from "@/lib/pension/ma-cola-calculator"
 import { useProfile } from "@/contexts/profile-context"
 
-interface ChartData {
+interface RetirementTableData {
   age: number
   yearsOfService: number
   factor: number
   totalPercentage: number
+  basePension: number
+  colaAdjustment: number
+  totalPensionWithCOLA: number
   annualPension: number
   monthlyPension: number
   survivorAnnual: number
@@ -21,8 +24,8 @@ interface ChartData {
 
 export function RetirementChart() {
   console.log('🚀 RetirementChart: Component rendering')
-  const [chartData, setChartData] = useState<ChartData[]>([])
-  const [benefitData, setBenefitData] = useState<BenefitProjectionData[]>([])
+  const [tableData, setTableData] = useState<RetirementTableData[]>([])
+
   const { calculations } = useRetirementData()
   const { profile } = useProfile()
   console.log('📊 RetirementChart: Profile data:', profile)
@@ -42,32 +45,50 @@ export function RetirementChart() {
           'after_2012' : 'before_2012'
 
         // Convert group name to format expected by calculation functions
-        const groupCode = retirementGroup.toUpperCase().replace(' ', '_')
+        const groupCode = retirementGroup.startsWith('Group')
+          ? retirementGroup.toUpperCase().replace(' ', '_')
+          : `GROUP_${retirementGroup}`
 
-        // Generate data points - LIMIT to 8 data points for performance
-        const data: ChartData[] = []
-        const benefitProjections: BenefitProjectionData[] = []
+        console.log('🔧 RetirementChart: Group conversion:', {
+          originalGroup: retirementGroup,
+          convertedGroupCode: groupCode,
+          currentAge,
+          currentYOS,
+          averageSalary,
+          serviceEntry
+        })
+
+        // Generate comprehensive year-by-year data for all eligible retirement ages
+        const data: RetirementTableData[] = []
         const currentYear = new Date().getFullYear()
 
         // Determine starting age based on group
         let startAge = 55
-        if (groupCode === 'GROUP_1') startAge = Math.max(55, currentAge)
-        else if (groupCode === 'GROUP_2') startAge = Math.max(55, currentAge)
-        else if (groupCode === 'GROUP_3') startAge = Math.max(55, currentAge)
-        else if (groupCode === 'GROUP_4') startAge = Math.max(50, currentAge)
+        if (groupCode === 'GROUP_1') startAge = Math.max(60, currentAge) // Group 1 minimum age 60
+        else if (groupCode === 'GROUP_2') startAge = Math.max(55, currentAge) // Group 2 minimum age 55
+        else if (groupCode === 'GROUP_3') startAge = Math.max(55, currentAge) // Group 3 any age with 20+ years
+        else if (groupCode === 'GROUP_4') startAge = Math.max(50, currentAge) // Group 4 minimum age 50
 
         const MAX_PENSION_PERCENTAGE = 0.8 // 80% cap
         let age = startAge
-        const maxDataPoints = 8 // Limit for performance
-        let dataPointCount = 0
 
-        while (age <= Math.min(startAge + 15, 70) && dataPointCount < maxDataPoints) {
+        // Generate data for ALL eligible ages (not just every 2 years)
+        while (age <= 70) {
           const projectedYOS = currentYOS + (age - currentAge)
 
           // Get benefit factor using actual pension calculation logic
           const benefitFactor = getBenefitFactor(age, groupCode, serviceEntry, projectedYOS)
 
+          console.log(`🎯 RetirementChart: Age ${age} - Benefit factor:`, {
+            age,
+            groupCode,
+            serviceEntry,
+            projectedYOS,
+            benefitFactor
+          })
+
           if (benefitFactor === 0) {
+            console.log(`⚠️ RetirementChart: Skipping age ${age} - benefit factor is 0`)
             age++
             continue // Skip if not eligible
           }
@@ -85,17 +106,37 @@ export function RetirementChart() {
             totalBenefitPercentage = MAX_PENSION_PERCENTAGE
           }
 
-          // Simplified calculation - skip Option C for performance
-          const finalAnnualPension = baseAnnualPension
+          // Calculate Option C pension with proper reductions
+          // Use member age - 2 as default beneficiary age (common scenario)
+          const beneficiaryAge = (age - 2).toString()
+
+          // Apply Option C reduction using the same function as the wizard
+          const optionCResult = calculatePensionWithOption(
+            baseAnnualPension,
+            'C',
+            age,
+            beneficiaryAge
+          )
+
+          const finalAnnualPension = optionCResult.pension
           const monthlyPension = finalAnnualPension / 12
-          const survivorAnnual = finalAnnualPension * 0.667 // Simplified survivor calculation
+          const survivorAnnual = finalAnnualPension * 0.6667 // 66.67% survivor benefit for Option C
           const survivorMonthly = survivorAnnual / 12
+
+          // Calculate COLA adjustments for display
+          const yearsInRetirement = Math.max(0, age - currentAge)
+          const colaResult = calculateMassachusettsCOLA(finalAnnualPension, yearsInRetirement)
+          const colaAdjustment = colaResult.totalIncrease
+          const totalPensionWithCOLA = colaResult.finalAmount
 
           data.push({
             age,
             yearsOfService: projectedYOS,
             factor: benefitFactor * 100, // Convert to percentage for display
             totalPercentage: Number((totalBenefitPercentage * 100).toFixed(1)),
+            basePension: Number(finalAnnualPension.toFixed(2)),
+            colaAdjustment: Number(colaAdjustment.toFixed(2)),
+            totalPensionWithCOLA: Number(totalPensionWithCOLA.toFixed(2)),
             annualPension: Number(finalAnnualPension.toFixed(2)),
             monthlyPension: Number(monthlyPension.toFixed(2)),
             survivorAnnual: Number(survivorAnnual.toFixed(2)),
@@ -103,34 +144,19 @@ export function RetirementChart() {
             cappedAt80Percent
           })
 
-          // Create benefit projection data for enhanced chart
-          benefitProjections.push({
-            age,
-            year: currentYear + (age - currentAge),
-            pensionBenefit: finalAnnualPension,
-            socialSecurityBenefit: 0, // No SS until later
-            totalBenefit: finalAnnualPension,
-            notes: age === startAge ? 'Earliest retirement' :
-                   cappedAt80Percent ? '80% cap reached' : undefined,
-            percentage: totalBenefitPercentage * 100 // Add percentage to chart data
-          })
+          age++ // Increment by 1 to show ALL eligible ages
 
-          age += 2 // Skip every other year for performance
-          dataPointCount++
-
-          // Stop if we've reached 80% cap
+          // Stop if we've reached 80% cap and it's been applied
           if (cappedAt80Percent && totalBenefitPercentage >= MAX_PENSION_PERCENTAGE) {
             break
           }
         }
 
-        setChartData(data)
-        setBenefitData(benefitProjections)
+        setTableData(data)
       } catch (error) {
         console.error('Error calculating retirement projections:', error)
         // Set empty data on error
-        setChartData([])
-        setBenefitData([])
+        setTableData([])
       }
     }
 
@@ -141,24 +167,12 @@ export function RetirementChart() {
 
   return (
     <div className="space-y-6">
-      {/* Enhanced Interactive Chart */}
-      <BenefitProjectionChart
-        data={benefitData}
-        title="Retirement Benefit Projections by Age (80% Cap Applied)"
-        description="Annual pension benefits with 80% maximum cap and percentage display"
-        showCOLA={false}
-        chartType="line"
-        enableZoom={true}
-        enableBrush={false}
-        className="mb-6"
-      />
-
-      {/* Detailed Data Table */}
+      {/* Comprehensive Year-by-Year Retirement Calculations Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Detailed Retirement Calculations</CardTitle>
+          <CardTitle>Comprehensive Year-by-Year Retirement Calculations</CardTitle>
           <CardDescription>
-            Breakdown of pension calculations by retirement age with survivor benefits
+            Complete breakdown of pension calculations for all eligible retirement ages with Option C (Joint & Survivor 66.67%) reductions applied
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -179,7 +193,7 @@ export function RetirementChart() {
                 </tr>
               </thead>
               <tbody>
-                {chartData.map((row, index) => (
+                {tableData.map((row, index) => (
                   <tr
                     key={row.age}
                     className={`border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${

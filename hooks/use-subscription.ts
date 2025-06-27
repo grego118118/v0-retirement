@@ -38,7 +38,22 @@ export function useSubscriptionStatus() {
     savedCalculationsCount: 0
   })
 
+  // Add caching and debouncing to prevent excessive API calls
+  const [lastCheckTime, setLastCheckTime] = useState(0)
+  const [isChecking, setIsChecking] = useState(false)
+  const CACHE_DURATION = 30000 // 30 seconds cache
+  const MIN_CHECK_INTERVAL = 5000 // Minimum 5 seconds between checks
+
   const checkSubscription = async (forceRefresh = false) => {
+    // Prevent excessive API calls
+    const now = Date.now()
+    if (!forceRefresh && (isChecking || (now - lastCheckTime < MIN_CHECK_INTERVAL))) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('useSubscriptionStatus: Skipping check - too recent or already checking')
+      }
+      return
+    }
+
     if (!session?.user?.email) {
       if (process.env.NODE_ENV === 'development') {
         console.log('useSubscriptionStatus: No session or email')
@@ -50,6 +65,9 @@ export function useSubscriptionStatus() {
       })
       return
     }
+
+    setIsChecking(true)
+    setLastCheckTime(now)
 
     // Enhanced logging for debugging (development only)
     if (process.env.NODE_ENV === 'development' || forceRefresh) {
@@ -112,12 +130,14 @@ export function useSubscriptionStatus() {
         subscriptionStatus: 'free',
         savedCalculationsCount: 0
       })
+    } finally {
+      setIsChecking(false)
     }
   }
 
-  // Check subscription immediately when hook is called
+  // Check subscription immediately when hook is called (with caching)
   useEffect(() => {
-    if (session?.user?.email) {
+    if (session?.user?.email && (Date.now() - lastCheckTime > CACHE_DURATION)) {
       checkSubscription()
     }
   }, [session?.user?.id]) // Use user ID instead of email to prevent unnecessary re-renders

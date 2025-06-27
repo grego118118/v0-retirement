@@ -82,16 +82,16 @@ export function Header() {
             className="mr-2 md:mr-6 flex items-center space-x-2 flex-shrink-0 group"
             aria-label="Massachusetts Pension Calculator - Home"
           >
-            <div className="p-1.5 rounded-lg transition-all duration-300 group-hover:scale-110" style={{ background: 'var(--mrs-gradient-primary)' }}>
+            <div className="transition-all duration-300 group-hover:scale-110">
               <Image
-                src="/images/massachusetts-seal.svg"
-                alt="Massachusetts State Seal"
-                width={24}
-                height={24}
-                className="h-6 w-6 text-white"
+                src="/images/icon.svg"
+                alt="Mass Pension Logo"
+                width={32}
+                height={32}
+                className="h-8 w-8"
               />
             </div>
-            <span className="mrs-heading-3 text-sm md:text-base truncate font-semibold text-gray-800 dark:text-white">MA Pension</span>
+            <span className="mrs-heading-3 text-sm md:text-base truncate font-semibold text-gray-800 dark:text-white">Mass Pension</span>
           </Link>
           {/* Desktop Navigation */}
           <nav
@@ -216,16 +216,16 @@ export function Header() {
             {/* Mobile Menu Header */}
             <div className="flex items-center justify-between p-4 border-b border-gray-200/80 dark:border-gray-700/80 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm">
               <div className="flex items-center space-x-2">
-                <div className="p-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 shadow-sm">
+                <div className="rounded-lg shadow-sm">
                   <Image
-                    src="/images/massachusetts-seal.svg"
-                    alt="Massachusetts State Seal"
-                    width={20}
-                    height={20}
-                    className="h-5 w-5 text-white"
+                    src="/images/icon.svg"
+                    alt="Mass Pension Logo"
+                    width={24}
+                    height={24}
+                    className="h-6 w-6"
                   />
                 </div>
-                <span className="font-semibold text-gray-900 dark:text-white">MA Pension</span>
+                <span className="font-semibold text-gray-900 dark:text-white">Mass Pension</span>
               </div>
               <Button
                 variant="ghost"

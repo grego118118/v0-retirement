@@ -180,7 +180,7 @@ export default function SearchPage() {
           </>
         ) : (
           <div className="text-center py-12">
-            <h2 className="text-xl font-semibold mb-2">Search the Massachusetts Pension Estimator</h2>
+            <h2 className="text-xl font-semibold mb-2">Search Mass Pension</h2>
             <p className="text-muted-foreground mb-6">
               Enter keywords above to search for retirement information, pension calculations, and resources.
             </p>

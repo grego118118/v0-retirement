@@ -1,57 +1,127 @@
 #!/usr/bin/env node
 
 /**
- * Test script to verify our calculations match official MSRB results
- * Based on the screenshots provided showing discrepancies
+ * MSRB Calculation Accuracy Test Suite
+ * Tests specific Group 2 scenarios with varying years of service and survivor ages
+ * Based on official MSRB calculator results
  */
 
 // Import the calculation functions
-const { 
-  getBenefitFactor, 
+const {
+  getBenefitFactor,
   calculatePensionWithOption,
-  checkEligibility 
+  checkEligibility
 } = require('./lib/pension-calculations.ts');
 
-console.log('🧪 Testing MSRB Calculation Accuracy...\n');
+console.log('🧪 Testing MSRB Calculation Accuracy - Group 2 Scenarios...\n');
 
-// Test data from the screenshots
-const testScenario = {
-  age: 55,
-  yearsOfService: 31.0,
-  group: "GROUP_2",
-  serviceEntry: "before_2012", // Assuming before April 2, 2012 based on 31 years of service
-  averageSalary: 95000,
-  retirementOption: "C",
-  beneficiaryAge: "55"
+// Test scenarios with varying years of service and survivor ages
+const testScenarios = [
+  {
+    name: "Scenario 1",
+    age: 56,
+    yearsOfService: 32,
+    survivorAge: 54,
+    group: "GROUP_2",
+    serviceEntry: "before_2012",
+    averageSalary: 95000,
+    expectedBenefitFactor: 0.021, // 2.1%
+    msrbResults: {
+      optionA: 63840.00,
+      optionB: 63201.60,
+      optionC: 59071.15,
+      survivor: 39380.77
+    }
+  },
+  {
+    name: "Scenario 2",
+    age: 57,
+    yearsOfService: 33,
+    survivorAge: 55,
+    group: "GROUP_2",
+    serviceEntry: "before_2012",
+    averageSalary: 95000,
+    expectedBenefitFactor: 0.022, // 2.2%
+    msrbResults: {
+      optionA: 68970.00,
+      optionB: 68280.30,
+      optionC: 63514.47,
+      survivor: 42342.98
+    }
+  },
+  {
+    name: "Scenario 3",
+    age: 58,
+    yearsOfService: 34,
+    survivorAge: 56,
+    group: "GROUP_2",
+    serviceEntry: "before_2012",
+    averageSalary: 95000,
+    expectedBenefitFactor: 0.023, // 2.3%
+    msrbResults: {
+      optionA: 74290.00,
+      optionB: 73547.10,
+      optionC: 68071.93,
+      survivor: 45381.28
+    }
+  },
+  {
+    name: "Scenario 4",
+    age: 59,
+    yearsOfService: 34,
+    survivorAge: 57,
+    group: "GROUP_2",
+    serviceEntry: "before_2012",
+    averageSalary: 95000,
+    expectedBenefitFactor: 0.024, // 2.4%
+    msrbResults: {
+      optionA: 76000.00,
+      optionB: 75240.00,
+      optionC: 69274.00,
+      survivor: 46182.67
+    }
+  }
+];
+
+// MSRB Official Results for age 55 (reference scenario)
+const msrbReferenceResults = {
+  55: {
+    optionA: 58900.00,
+    optionB: 58311.00,
+    optionC: 54747.55,
+    survivor: 36498.37
+  }
 };
 
-console.log('📊 Test Scenario (from MSRB screenshots):');
-console.log(`   Age at Retirement: ${testScenario.age}`);
-console.log(`   Years of Service: ${testScenario.yearsOfService}`);
-console.log(`   Employee Group: ${testScenario.group}`);
-console.log(`   Average Salary: $${testScenario.averageSalary.toLocaleString()}`);
-console.log(`   Retirement Option: ${testScenario.retirementOption}`);
-console.log(`   Beneficiary Age: ${testScenario.beneficiaryAge}`);
+console.log('📊 Testing Age Range 55-59 for Group 2 Calculations');
+console.log('=' .repeat(60));
 
-console.log('\n🎯 MSRB Official Results:');
-console.log('   Option A: $58,900.00 annual / $4,908.33 monthly');
-console.log('   Option B: $58,311.00 annual / $4,859.25 monthly');
-console.log('   Option C: $54,747.55 annual / $4,562.30 monthly');
-console.log('   Survivor: $36,498.37 annual / $3,041.53 monthly');
+// Run tests for each age
+for (const age of testAges) {
+  const testScenario = {
+    ...baseTestScenario,
+    age: age,
+    beneficiaryAge: age.toString()
+  };
 
-console.log('\n🔍 Our Calculation Analysis:');
+  console.log(`\n🔍 Testing Age ${age}:`);
+  console.log(`   Years of Service: ${testScenario.yearsOfService}`);
+  console.log(`   Employee Group: ${testScenario.group}`);
+  console.log(`   Average Salary: $${testScenario.averageSalary.toLocaleString()}`);
+  console.log(`   Retirement Option: ${testScenario.retirementOption}`);
+  console.log(`   Beneficiary Age: ${testScenario.beneficiaryAge}`);
 
-// Test 1: Check eligibility
-console.log('\n1️⃣ Eligibility Check:');
-try {
-  const eligibility = checkEligibility(testScenario.age, testScenario.yearsOfService, testScenario.group, testScenario.serviceEntry);
-  console.log(`   ✅ Eligible: ${eligibility.eligible}`);
-  if (!eligibility.eligible) {
-    console.log(`   ❌ Message: ${eligibility.message}`);
+  // Test 1: Check eligibility
+  console.log('\n  1️⃣ Eligibility Check:');
+  try {
+    const eligibility = checkEligibility(testScenario.age, testScenario.yearsOfService, testScenario.group, testScenario.serviceEntry);
+    console.log(`     ✅ Eligible: ${eligibility.eligible}`);
+    if (!eligibility.eligible) {
+      console.log(`     ❌ Message: ${eligibility.message}`);
+    }
+  } catch (error) {
+    console.log(`     ❌ Error checking eligibility: ${error.message}`);
   }
-} catch (error) {
-  console.log(`   ❌ Error checking eligibility: ${error.message}`);
-}
 
 // Test 2: Get benefit factor
 console.log('\n2️⃣ Benefit Factor:');

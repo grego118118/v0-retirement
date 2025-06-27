@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useSubscriptionStatus } from "@/hooks/use-subscription"
 
 interface AdSenseProps {
@@ -31,9 +31,17 @@ export function AdSense({
   const { isPremium, subscriptionStatus } = useSubscriptionStatus()
   const adRef = useRef<HTMLDivElement>(null)
   const isAdLoaded = useRef(false)
+  const [isClient, setIsClient] = useState(false)
   const publisherId = process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID || "ca-pub-8456317857596950"
 
   useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  useEffect(() => {
+    // Only run on client side after hydration
+    if (!isClient || typeof window === 'undefined') return
+
     // Don't load ads in development mode
     if (process.env.NODE_ENV === 'development') {
       return
@@ -72,7 +80,12 @@ export function AdSense({
     } catch (error) {
       console.error('AdSense error:', error)
     }
-  }, [isPremium, subscriptionStatus])
+  }, [isClient, isPremium, subscriptionStatus])
+
+  // Don't render anything during SSR to prevent hydration mismatch
+  if (!isClient) {
+    return null
+  }
 
   // Don't render in development
   if (process.env.NODE_ENV === 'development') {

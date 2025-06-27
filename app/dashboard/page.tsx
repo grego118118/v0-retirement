@@ -30,6 +30,7 @@ import {
   Calculator
 } from "lucide-react"
 import { BannerAd, PremiumAlternative } from "@/components/ads/adsense"
+import { RetirementChart } from "@/components/dashboard/retirement-chart"
 
 interface UserProfile {
   fullName?: string
@@ -351,6 +352,11 @@ export default function DashboardPage() {
               retirementDate={retirementDate}
               className="mb-8"
             />
+
+            {/* Retirement Benefit Projection Chart - Full Width Feature */}
+            <div className="mb-8">
+              <RetirementChart />
+            </div>
 
             {/* Two-Column Layout for Better Organization */}
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">

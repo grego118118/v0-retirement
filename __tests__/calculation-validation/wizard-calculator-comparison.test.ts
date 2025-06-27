@@ -141,13 +141,13 @@ const PENSION_OPTION_SCENARIOS = [
     expectedPension: 49500
   },
   {
-    name: "Option B - Age 65 reduction", 
+    name: "Option B - Age 65 reduction",
     basePension: 60000,
     option: "B",
     memberAge: 65,
     beneficiaryAge: "",
-    expectedReduction: 0.04, // 4% reduction (interpolated)
-    expectedPension: 57600
+    expectedReduction: 0.01, // 1% reduction (MSRB validated)
+    expectedPension: 59400
   },
   {
     name: "Option C - 55/55 survivor benefit",

@@ -1,4 +1,5 @@
 import { Metadata } from "next"
+import { CalculatorStructuredData } from "@/components/seo/structured-data"
 
 export const metadata: Metadata = {
   title: "Dashboard | Massachusetts Pension Estimator",
@@ -27,8 +28,15 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="dashboard-layout">
-      {children}
-    </div>
+    <>
+      {/* AI-optimized structured data for dashboard */}
+      <CalculatorStructuredData
+        pageUrl="https://www.masspension.com/dashboard"
+        calculatorType="pension"
+      />
+      <div className="dashboard-layout">
+        {children}
+      </div>
+    </>
   )
 }
