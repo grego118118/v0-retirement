@@ -127,10 +127,12 @@ type AgeSpecificFactors = {
   [key: number]: number | undefined;
 }
 
-// Option C reduction factors - UNIVERSAL across all retirement groups
+// Option C reduction factors - GROUP-SPECIFIC based on MSRB validation
 // Based on official MSRB Option C Factor Table and calculator validation
 // Key format: "memberAge-beneficiaryAge"
-const OPTION_C_FACTORS: {
+
+// Universal factors (used by GROUP_2, GROUP_3, GROUP_4)
+const UNIVERSAL_OPTION_C_FACTORS: {
   projection: number;
   ageCombinations: AgeCombinationFactors;
   ageSpecific: AgeSpecificFactors;
@@ -138,7 +140,7 @@ const OPTION_C_FACTORS: {
   // For projection scenarios (informational only): No reduction to member
   projection: 1.0,  // No reduction
 
-  // Universal age combination lookup table (applies to ALL groups: GROUP_1, GROUP_2, GROUP_3, GROUP_4)
+  // Universal age combination lookup table (applies to GROUP_2, GROUP_3, GROUP_4)
   ageCombinations: {
     // MSRB-validated combinations (member 2 years older than beneficiary)
     "55-53": 0.9295,  // 7.05% reduction - MSRB validated
@@ -166,6 +168,54 @@ const OPTION_C_FACTORS: {
     58: 0.9163,  // 8.37% reduction - MSRB validated
     59: 0.9115,  // 8.85% reduction - MSRB validated (corrected)
     default: 0.9295  // 7.05% reduction (fallback)
+  }
+}
+
+// GROUP_1-specific Option C factors (different from universal factors)
+const GROUP_1_OPTION_C_FACTORS: {
+  projection: number;
+  ageCombinations: AgeCombinationFactors;
+  ageSpecific: AgeSpecificFactors;
+} = {
+  // For projection scenarios (informational only): No reduction to member
+  projection: 1.0,  // No reduction
+
+  // GROUP_1-specific age combination lookup table
+  ageCombinations: {
+    // MSRB-validated GROUP_1 combinations
+    "55-53": 0.9295,  // 7.05% reduction - MSRB validated (same as universal for this combination)
+    "56-54": 0.9253,  // 7.47% reduction - MSRB validated
+    "57-55": 0.9209,  // 7.91% reduction - MSRB validated
+    "58-56": 0.9163,  // 8.37% reduction - MSRB validated
+    "59-57": 0.9115,  // 8.85% reduction - MSRB validated
+    "60-58": 0.9065,  // 9.35% reduction - MSRB validated (GROUP_1 specific)
+    "62-60": 0.8958,  // 10.42% reduction - MSRB validated (GROUP_1 specific)
+
+    // MSRB calculator behavior
+    "55-55": 0.9295,  // 7.05% reduction - MSRB calculator validated
+    "65-55": 0.84,    // 16% reduction - MSRB official table
+    "65-65": 0.89,    // 11% reduction - MSRB official table
+    "70-65": 0.83,    // 17% reduction - MSRB official table
+    "70-70": 0.86,    // 14% reduction - MSRB official table
+
+    // Default fallback for GROUP_1
+    default: 0.9065   // 9.35% reduction (GROUP_1 fallback)
+  },
+
+  // GROUP_1 age-specific factors (for backward compatibility when beneficiary age not provided)
+  ageSpecific: {
+    55: 0.9295,  // 7.05% reduction - MSRB validated (same as universal for age 55)
+    56: 0.9253,  // 7.47% reduction - MSRB validated
+    57: 0.9209,  // 7.91% reduction - MSRB validated
+    58: 0.9163,  // 8.37% reduction - MSRB validated
+    59: 0.9115,  // 8.85% reduction - MSRB validated
+    60: 0.9065,  // 9.35% reduction - MSRB validated (GROUP_1 specific)
+    61: 0.9100,  // 9.0% reduction - estimated
+    62: 0.8958,  // 10.42% reduction - MSRB validated (GROUP_1 specific)
+    63: 0.9200,  // 8.0% reduction - estimated
+    64: 0.9250,  // 7.5% reduction - estimated
+    65: 0.9300,  // 7.0% reduction - estimated
+    default: 0.9065  // 9.35% reduction (GROUP_1 fallback)
   }
 }
 
@@ -281,14 +331,16 @@ export function calculatePensionWithOption(
     const parsedBeneficiaryAge = Number.parseInt(beneficiaryAgeStr)
     const roundedBeneficiaryAge = !isNaN(parsedBeneficiaryAge) ? Math.round(parsedBeneficiaryAge) : roundedMemberAge
 
-    // Use universal Option C factors (same for all retirement groups)
+    // Use group-specific Option C factors
+    const optionCFactors = group === "GROUP_1" ? GROUP_1_OPTION_C_FACTORS : UNIVERSAL_OPTION_C_FACTORS
+
     // Try age combination lookup first (systematic approach)
     const lookupKey = `${roundedMemberAge}-${roundedBeneficiaryAge}`
-    let reductionFactor = OPTION_C_FACTORS.ageCombinations[lookupKey]
+    let reductionFactor = optionCFactors.ageCombinations[lookupKey]
 
     // Fallback to age-specific if no combination found
     if (!reductionFactor) {
-      reductionFactor = OPTION_C_FACTORS.ageSpecific[roundedMemberAge] || OPTION_C_FACTORS.ageSpecific.default
+      reductionFactor = optionCFactors.ageSpecific[roundedMemberAge] || optionCFactors.ageSpecific.default
     }
 
     finalPension = basePension * reductionFactor  // Member gets age-specific reduced pension
