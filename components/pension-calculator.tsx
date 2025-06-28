@@ -1313,30 +1313,132 @@ export default function PensionCalculator() {
         return (
           <div>
             {isCalculating ? (
-              <div className="flex flex-col items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
-                <p className="text-muted-foreground">Calculating your pension estimate...</p>
+              <div className="flex flex-col items-center justify-center py-8 sm:py-12">
+                <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-primary mb-3 sm:mb-4"></div>
+                <p className="text-sm sm:text-base text-muted-foreground">Calculating your pension estimate...</p>
               </div>
             ) : showResults && calculationResult ? (
-              <>
-                <PensionResults result={calculationResult} />
+              <div className="space-y-6 sm:space-y-8">
+                {/* Mobile-First Layout: Calculator Form First, Results Below */}
+                <div className="lg:hidden">
+                  {/* Mobile: Show calculator form first */}
+                  <div className="mb-6">
+                    <Card className="border-0 shadow-md bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-900/20">
+                      <CardContent className="p-4 sm:p-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100">
+                            Recalculate with Different Values
+                          </h3>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentStep(1)}
+                            className="text-xs sm:text-sm min-h-[44px] px-3 sm:px-4 touch-manipulation"
+                          >
+                            <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                            <span className="hidden sm:inline">Edit Values</span>
+                            <span className="sm:hidden">Edit</span>
+                          </Button>
+                        </div>
+                        <p className="text-sm text-blue-700 dark:text-blue-300">
+                          Want to try different scenarios? Go back to modify your inputs and see how they affect your pension.
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </div>
 
-                {/* Interactive Retirement Benefits Chart */}
-                <div className="mt-8">
-                  <CalculatorChart
-                    calculationData={{
-                      averageSalary: calculationResult.details.averageSalary,
-                      group: calculationResult.details.group,
-                      age: calculationResult.details.age,
-                      yearsOfService: calculationResult.details.yearsOfService,
-                      serviceEntry: formData.serviceEntryDate
-                    }}
-                    className="mb-6"
-                  />
+                  {/* Mobile: Results section below */}
+                  <PensionResults result={calculationResult} />
+
+                  {/* Mobile: Chart below results */}
+                  <div className="mt-6">
+                    <CalculatorChart
+                      calculationData={{
+                        averageSalary: calculationResult.details.averageSalary,
+                        group: calculationResult.details.group,
+                        age: calculationResult.details.age,
+                        yearsOfService: calculationResult.details.yearsOfService,
+                        serviceEntry: formData.serviceEntryDate
+                      }}
+                      className="mb-4 sm:mb-6"
+                    />
+                  </div>
                 </div>
 
-                {/* Save Calculation Button */}
-                <div className="mt-6 flex flex-col items-center space-y-4">
+                {/* Desktop Layout: Side-by-side or traditional layout */}
+                <div className="hidden lg:block">
+                  <PensionResults result={calculationResult} />
+
+                  {/* Interactive Retirement Benefits Chart */}
+                  <div className="mt-8">
+                    <CalculatorChart
+                      calculationData={{
+                        averageSalary: calculationResult.details.averageSalary,
+                        group: calculationResult.details.group,
+                        age: calculationResult.details.age,
+                        yearsOfService: calculationResult.details.yearsOfService,
+                        serviceEntry: formData.serviceEntryDate
+                      }}
+                      className="mb-6"
+                    />
+                  </div>
+                </div>
+
+                {/* Mobile: Save Calculation Button */}
+                <div className="lg:hidden mt-6 flex flex-col items-center space-y-4">
+                  {!session ? (
+                    <div className="text-center">
+                      <Button disabled className="gap-2 min-h-[44px] px-4 touch-manipulation">
+                        <Save className="h-4 w-4" />
+                        <span className="text-sm">Save Calculation</span>
+                      </Button>
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        Sign in to save calculations
+                      </p>
+                    </div>
+                  ) : !canSaveCalculations && !isPremium ? (
+                    <div className="text-center space-y-3">
+                      <div className="relative">
+                        <Button disabled className="gap-2 min-h-[44px] px-4 touch-manipulation">
+                          <Save className="h-4 w-4" />
+                          <span className="text-sm">Save Calculation</span>
+                        </Button>
+                        <Badge className="absolute -top-2 -right-2 bg-amber-500 hover:bg-amber-600">
+                          <Crown className="mr-1 h-3 w-3" />
+                          Premium
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground px-4 text-center">
+                        You've reached the limit of {maxSavedCalculations} saved calculations for free accounts.
+                      </p>
+                      <Button size="sm" asChild className="min-h-[44px] touch-manipulation">
+                        <Link href="/subscribe">
+                          <Crown className="mr-2 h-4 w-4" />
+                          <span className="text-sm">Upgrade for Unlimited Saves</span>
+                        </Link>
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="text-center">
+                      <Button
+                        onClick={() => setShowSaveDialog(true)}
+                        variant="default"
+                        className="gap-2 min-h-[44px] px-4 touch-manipulation"
+                      >
+                        <Save className="h-4 w-4" />
+                        <span className="text-sm">Save Calculation</span>
+                      </Button>
+                      {!isPremium && (
+                        <p className="mt-2 text-sm text-muted-foreground">
+                          {savedCalculationsCount}/{maxSavedCalculations} saved calculations used
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Desktop: Save Calculation Button */}
+                <div className="hidden lg:flex mt-6 flex-col items-center space-y-4">
                   {!session ? (
                     <div className="text-center">
                       <Button disabled className="gap-2">
@@ -1388,26 +1490,42 @@ export default function PensionCalculator() {
                   )}
                 </div>
 
-                <div className="mt-8">
+                {/* Mobile-Optimized Tabs */}
+                <div className="mt-6 sm:mt-8">
                   <Tabs defaultValue="projection" className="w-full">
                     <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1 h-auto p-1">
-                      <TabsTrigger value="projection" className="text-xs sm:text-sm px-2 sm:px-3 py-2">
+                      <TabsTrigger
+                        value="projection"
+                        className="min-h-[44px] text-xs sm:text-sm px-2 sm:px-3 py-2 touch-manipulation"
+                      >
                         <span className="hidden sm:inline">Projection Table</span>
                         <span className="sm:hidden">Projection</span>
                       </TabsTrigger>
-                      <TabsTrigger value="details" className="text-xs sm:text-sm px-2 sm:px-3 py-2">
+                      <TabsTrigger
+                        value="details"
+                        className="min-h-[44px] text-xs sm:text-sm px-2 sm:px-3 py-2 touch-manipulation"
+                      >
                         <span className="hidden sm:inline">Calculation Details</span>
                         <span className="sm:hidden">Details</span>
                       </TabsTrigger>
-                      <TabsTrigger value="social-security" className="text-xs sm:text-sm px-2 sm:px-3 py-2 col-span-2 sm:col-span-1">
+                      <TabsTrigger
+                        value="social-security"
+                        className="min-h-[44px] text-xs sm:text-sm px-2 sm:px-3 py-2 col-span-2 sm:col-span-1 touch-manipulation"
+                      >
                         <span className="hidden lg:inline">Social Security</span>
                         <span className="lg:hidden">Social Sec.</span>
                       </TabsTrigger>
-                      <TabsTrigger value="combined" className="text-xs sm:text-sm px-2 sm:px-3 py-2 col-span-2 sm:col-span-1">
+                      <TabsTrigger
+                        value="combined"
+                        className="min-h-[44px] text-xs sm:text-sm px-2 sm:px-3 py-2 col-span-2 sm:col-span-1 touch-manipulation"
+                      >
                         <span className="hidden lg:inline">Combined Analysis</span>
                         <span className="lg:hidden">Combined</span>
                       </TabsTrigger>
-                      <TabsTrigger value="msrb-test" className="text-xs sm:text-sm px-2 sm:px-3 py-2 col-span-2 sm:col-span-1">
+                      <TabsTrigger
+                        value="msrb-test"
+                        className="min-h-[44px] text-xs sm:text-sm px-2 sm:px-3 py-2 col-span-2 sm:col-span-1 touch-manipulation"
+                      >
                         <span className="hidden sm:inline">MSRB Test</span>
                         <span className="sm:hidden">MSRB</span>
                       </TabsTrigger>
@@ -1533,7 +1651,23 @@ export default function PensionCalculator() {
                   </Tabs>
                 </div>
 
-                <div className="mt-8 flex justify-center">
+                {/* Mobile: Start New Calculation Button */}
+                <div className="lg:hidden mt-6 sm:mt-8 flex justify-center">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setCurrentStep(0)
+                      setShowResults(false)
+                      window.scrollTo({ top: 0, behavior: "smooth" })
+                    }}
+                    className="min-h-[44px] px-4 touch-manipulation"
+                  >
+                    <span className="text-sm">Start New Calculation</span>
+                  </Button>
+                </div>
+
+                {/* Desktop: Start New Calculation Button */}
+                <div className="hidden lg:flex mt-8 justify-center">
                   <Button
                     variant="outline"
                     onClick={() => {
@@ -1545,12 +1679,16 @@ export default function PensionCalculator() {
                     Start New Calculation
                   </Button>
                 </div>
-              </>
+              </div>
             ) : (
-              <div className="text-center py-12">
-                <Button onClick={calculatePension} size="lg" className="gap-2">
-                  <Calculator className="h-5 w-5" />
-                  Calculate Pension
+              <div className="text-center py-8 sm:py-12">
+                <Button
+                  onClick={calculatePension}
+                  size="lg"
+                  className="gap-2 min-h-[44px] px-6 touch-manipulation"
+                >
+                  <Calculator className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <span className="text-sm sm:text-base">Calculate Pension</span>
                 </Button>
               </div>
             )}
@@ -1659,77 +1797,384 @@ export default function PensionCalculator() {
 
   return (
     <>
-      {/* Comprehensive Data Summary Section */}
-      <div className="space-y-6 mb-8">
-        {/* Header Card with Progress */}
-        <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-900/20">
-          <CardContent className="p-6">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-              <div>
-                <h2 className="text-2xl font-bold text-blue-900 dark:text-blue-100 mb-2">
-                  Calculation Summary
-                </h2>
-                <p className="text-blue-700 dark:text-blue-300 text-sm">
-                  Review your inputs and estimated benefits below
-                </p>
-              </div>
-              <div className="flex flex-col items-end gap-2">
-                <div className="text-right">
-                  <div className="text-sm text-blue-600 dark:text-blue-400 font-medium">
-                    Form Completion
-                  </div>
-                  <div className="text-2xl font-bold text-blue-900 dark:text-blue-100">
-                    {summaryData.completionPercentage}%
+      {/* Mobile-First Layout: Calculator Form First */}
+      <div className="lg:hidden">
+        {/* Mobile: Calculator Form Card - Appears First */}
+        <Card className="shadow-lg rounded-xl overflow-hidden mb-6">
+          <CardContent className="p-0">
+            {/* Mobile Progress bar */}
+            <div className="bg-gradient-to-r from-muted/30 to-muted/20 p-4 border-b">
+              <div className="flex flex-col gap-3 mb-3">
+                <div>
+                  <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+                    Mass Pension Calculator
+                  </h2>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Complete all steps to calculate your retirement benefits
+                  </p>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">
+                    Step {currentStep + 1} of {steps.length}
+                  </span>
+                  <div className="text-right">
+                    <div className="text-xs text-muted-foreground">Progress</div>
+                    <div className="text-lg font-bold text-primary">
+                      {Math.round(((currentStep + 1) / steps.length) * 100)}%
+                    </div>
                   </div>
                 </div>
-                <Progress
-                  value={summaryData.completionPercentage}
-                  className="w-32 h-2"
-                  aria-label={`Form completion progress: ${summaryData.completionPercentage}%`}
-                />
+              </div>
+              <Progress
+                value={((currentStep + 1) / steps.length) * 100}
+                className="h-2 mb-3"
+                aria-label={`Step ${currentStep + 1} of ${steps.length}: ${Math.round(((currentStep + 1) / steps.length) * 100)}% complete`}
+              />
+              <div className="grid grid-cols-3 gap-1">
+                {steps.map((step, index) => (
+                  <div
+                    key={step.id}
+                    className={`text-xs text-center p-2 rounded-lg transition-all duration-200 ${
+                      index === currentStep
+                        ? "text-primary font-medium bg-primary/10 border border-primary/20"
+                        : index < currentStep
+                        ? "text-green-600 dark:text-green-400 font-medium bg-green-50 dark:bg-green-950/20"
+                        : "text-muted-foreground bg-muted/20"
+                    }`}
+                  >
+                    <div className="flex items-center justify-center gap-1">
+                      {index < currentStep && (
+                        <CheckCircle className="h-3 w-3" />
+                      )}
+                      {index === currentStep && (
+                        <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                      )}
+                      <span>{index + 1}</span>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
+
+            {/* Mobile Step content */}
+            <div className="p-4 min-h-[400px]">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentStep}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="h-full"
+                >
+                  {currentStep === 0 && (
+                    <div className="mb-4">
+                      <EligibilityInfo />
+                    </div>
+                  )}
+                  <div className="space-y-4">
+                    {renderStepContent()}
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+
+              {errors.length > 0 && (
+                <div className="mt-4">
+                  {errors.map((error, index) => (
+                    <Alert variant="destructive" key={index} className="mb-2">
+                      <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                  ))}
+                </div>
+              )}
+
+              {eligibilityWarning && (
+                <Alert className="mt-4 bg-yellow-50 border-yellow-200 text-yellow-800 dark:bg-yellow-900/20 dark:border-yellow-900/30 dark:text-yellow-600">
+                  <AlertDescription>{eligibilityWarning}</AlertDescription>
+                </Alert>
+              )}
+            </div>
+
+            {/* Mobile Navigation buttons */}
+            {currentStep < 2 && (
+              <div className="p-4 bg-gradient-to-r from-muted/20 to-muted/10 border-t flex flex-col gap-3">
+                <div className="flex gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={prevStep}
+                    disabled={currentStep === 0 || isTransitioning}
+                    className="min-h-[44px] px-4 touch-manipulation"
+                  >
+                    {isTransitioning ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                    ) : (
+                      <ArrowLeft className="mr-2 h-4 w-4" />
+                    )}
+                    <span className="text-sm">Back</span>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={clearSavedData}
+                    title="Clear saved data"
+                    disabled={isTransitioning}
+                    className="min-h-[44px] px-3 touch-manipulation"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="h-4 w-4"
+                    >
+                      <path d="M3 6h18"></path>
+                      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                      <line x1="10" y1="11" x2="10" y2="17"></line>
+                      <line x1="14" y1="11" x2="14" y2="17"></line>
+                    </svg>
+                  </Button>
+                </div>
+
+                <div className="flex gap-3">
+                  {currentStep < 1 ? (
+                    <Button
+                      onClick={nextStep}
+                      disabled={isTransitioning || validationInProgress}
+                      className="flex-1 min-h-[44px] shadow-lg hover:shadow-xl transition-all duration-200 touch-manipulation"
+                    >
+                      {isTransitioning || validationInProgress ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                          <span className="text-sm">
+                            {validationInProgress ? "Validating..." : "Loading..."}
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-sm">Continue</span>
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </>
+                      )}
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={calculatePension}
+                      className="flex-1 gap-2 min-h-[44px] bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-200 touch-manipulation"
+                      disabled={isTransitioning || validationInProgress}
+                    >
+                      {isTransitioning || validationInProgress ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+                          <span className="text-sm">Validating...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Calculator className="h-4 w-4" />
+                          <span className="text-sm font-medium">Calculate Pension</span>
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
-        {/* Quick Actions Bar */}
+        {/* Mobile: Data Summary Below Calculator */}
         {summaryData.completionPercentage > 0 && (
-          <Card className="border-0 shadow-lg bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/20 dark:to-purple-900/20">
-            <CardContent className="p-4">
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
-                    <CheckCircle className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-                  </div>
+          <div className="space-y-4 mb-6">
+            {/* Header Card with Progress */}
+            <Card className="border-0 shadow-md bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-900/20">
+              <CardContent className="p-4">
+                <div className="flex flex-col gap-3">
                   <div>
-                    <div
-                      className="font-medium text-indigo-900 dark:text-indigo-100"
-                      role="heading"
-                      aria-level={3}
-                    >
-                      {summaryData.completionPercentage === 100 ? 'Ready to Calculate!' : 'Keep Going!'}
-                    </div>
-                    <p className="text-sm text-indigo-700 dark:text-indigo-300">
-                      {summaryData.completionPercentage === 100
-                        ? 'All fields completed - proceed to calculate your pension'
-                        : `${8 - Math.round((summaryData.completionPercentage / 100) * 8)} more fields to complete`
-                      }
+                    <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100">
+                      Calculation Summary
+                    </h3>
+                    <p className="text-blue-700 dark:text-blue-300 text-sm">
+                      Review your inputs and estimated benefits
                     </p>
                   </div>
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-blue-600 dark:text-blue-400 font-medium">
+                      Form Completion
+                    </div>
+                    <div className="text-xl font-bold text-blue-900 dark:text-blue-100">
+                      {summaryData.completionPercentage}%
+                    </div>
+                  </div>
+                  <Progress
+                    value={summaryData.completionPercentage}
+                    className="h-2"
+                    aria-label={`Form completion progress: ${summaryData.completionPercentage}%`}
+                  />
                 </div>
-                {summaryData.completionPercentage === 100 && (
-                  <Button
-                    onClick={() => setCurrentStep(2)}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white"
-                  >
-                    <Calculator className="h-4 w-4 mr-2" />
-                    Calculate Now
-                  </Button>
-                )}
+              </CardContent>
+            </Card>
+
+            {/* Mobile: Quick Actions Bar */}
+            <Card className="border-0 shadow-md bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/20 dark:to-purple-900/20">
+              <CardContent className="p-4">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
+                      <CheckCircle className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                    </div>
+                    <div className="text-center">
+                      <div
+                        className="font-medium text-indigo-900 dark:text-indigo-100"
+                        role="heading"
+                        aria-level={3}
+                      >
+                        {summaryData.completionPercentage === 100 ? 'Ready to Calculate!' : 'Keep Going!'}
+                      </div>
+                      <p className="text-sm text-indigo-700 dark:text-indigo-300">
+                        {summaryData.completionPercentage === 100
+                          ? 'All fields completed - proceed to calculate your pension'
+                          : `${8 - Math.round((summaryData.completionPercentage / 100) * 8)} more fields to complete`
+                        }
+                      </p>
+                    </div>
+                  </div>
+                  {summaryData.completionPercentage === 100 && (
+                    <Button
+                      onClick={() => setCurrentStep(2)}
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white min-h-[44px] px-4 touch-manipulation"
+                    >
+                      <Calculator className="h-4 w-4 mr-2" />
+                      <span className="text-sm">Calculate Now</span>
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Mobile: Compact Data Summary Grid */}
+            <div className="grid grid-cols-1 gap-4">
+              {/* Personal Information Card - Mobile */}
+              <Card className="border-0 shadow-md bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-900/20">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                        <svg className="h-4 w-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                      </div>
+                      <h4 className="font-medium text-green-900 dark:text-green-100">Personal Info</h4>
+                    </div>
+                    <div className={`w-2.5 h-2.5 rounded-full ${
+                      formData.age && formData.yearsOfService && formData.group && formData.serviceEntryDate
+                        ? 'bg-green-500' : 'bg-gray-300'
+                    }`} title={
+                      formData.age && formData.yearsOfService && formData.group && formData.serviceEntryDate
+                        ? 'Complete' : 'Incomplete'
+                    } />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-green-700 dark:text-green-300">Age:</span>
+                      <span className="text-sm font-medium text-green-900 dark:text-green-100">
+                        {summaryData.age || 'Not set'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-green-700 dark:text-green-300">Service:</span>
+                      <span className="text-sm font-medium text-green-900 dark:text-green-100">
+                        {summaryData.yearsOfService || 'Not set'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-green-700 dark:text-green-300">Group:</span>
+                      <span className="text-sm font-medium text-green-900 dark:text-green-100">
+                        {formData.group ? formData.group.replace('GROUP_', 'Group ') : 'Not selected'}
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Desktop Layout: Traditional Layout */}
+      <div className="hidden lg:block">
+        {/* Comprehensive Data Summary Section */}
+        <div className="space-y-6 mb-8">
+          {/* Header Card with Progress */}
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-900/20">
+            <CardContent className="p-6">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <div>
+                  <h2 className="text-2xl font-bold text-blue-900 dark:text-blue-100 mb-2">
+                    Calculation Summary
+                  </h2>
+                  <p className="text-blue-700 dark:text-blue-300 text-sm">
+                    Review your inputs and estimated benefits below
+                  </p>
+                </div>
+                <div className="flex flex-col items-end gap-2">
+                  <div className="text-right">
+                    <div className="text-sm text-blue-600 dark:text-blue-400 font-medium">
+                      Form Completion
+                    </div>
+                    <div className="text-2xl font-bold text-blue-900 dark:text-blue-100">
+                      {summaryData.completionPercentage}%
+                    </div>
+                  </div>
+                  <Progress
+                    value={summaryData.completionPercentage}
+                    className="w-32 h-2"
+                    aria-label={`Form completion progress: ${summaryData.completionPercentage}%`}
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>
-        )}
+
+          {/* Quick Actions Bar */}
+          {summaryData.completionPercentage > 0 && (
+            <Card className="border-0 shadow-lg bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/20 dark:to-purple-900/20">
+              <CardContent className="p-4">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
+                      <CheckCircle className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                    </div>
+                    <div>
+                      <div
+                        className="font-medium text-indigo-900 dark:text-indigo-100"
+                        role="heading"
+                        aria-level={3}
+                      >
+                        {summaryData.completionPercentage === 100 ? 'Ready to Calculate!' : 'Keep Going!'}
+                      </div>
+                      <p className="text-sm text-indigo-700 dark:text-indigo-300">
+                        {summaryData.completionPercentage === 100
+                          ? 'All fields completed - proceed to calculate your pension'
+                          : `${8 - Math.round((summaryData.completionPercentage / 100) * 8)} more fields to complete`
+                        }
+                      </p>
+                    </div>
+                  </div>
+                  {summaryData.completionPercentage === 100 && (
+                    <Button
+                      onClick={() => setCurrentStep(2)}
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                    >
+                      <Calculator className="h-4 w-4 mr-2" />
+                      Calculate Now
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
         {/* Data Summary Grid - Enhanced for Desktop */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -2000,9 +2445,10 @@ export default function PensionCalculator() {
             </div>
           </CardContent>
         </Card>
-      </div>
+        </div>
 
-      <Card className="shadow-lg rounded-xl overflow-hidden">
+        {/* Desktop Calculator Form */}
+        <Card className="shadow-lg rounded-xl overflow-hidden">
         <CardContent className="p-0">
           {/* Enhanced Progress bar for desktop */}
           <div className="bg-gradient-to-r from-muted/30 to-muted/20 p-4 lg:p-6 xl:p-8 border-b">
@@ -2202,6 +2648,7 @@ export default function PensionCalculator() {
           )}
         </CardContent>
       </Card>
+      </div>
 
       {/* Save Calculation Dialog */}
       <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
