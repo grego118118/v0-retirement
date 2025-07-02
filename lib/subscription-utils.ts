@@ -83,13 +83,14 @@ export async function getUserSubscriptionInfo(userEmail: string): Promise<{
     if (isStripeConfigured) {
       try {
         console.log(`🔄 Checking Stripe subscription for ${userEmail}`)
-        // TODO: Fix StripeService.getCustomerByEmail method
-        const customer = null // await StripeService.getCustomerByEmail(userEmail)
+        // First get customer ID, then get customer with subscriptions
+        const customerId = await StripeService.createOrGetCustomer(userEmail)
+        const customer = await StripeService.getCustomerWithSubscriptions(customerId)
 
-        if (customer && (customer as any).subscriptions?.length > 0) {
-          const activeSubscription = (customer as any).subscriptions.find((sub: any) =>
+        if (customer && customer.subscriptions.length > 0) {
+          const activeSubscription = customer.subscriptions.find(sub =>
             isSubscriptionActive(sub.status)
-          ) || (customer as any).subscriptions[0]
+          ) || customer.subscriptions[0]
 
           subscriptionData = {
             isPremium: isSubscriptionActive(activeSubscription.status),

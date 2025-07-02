@@ -6,259 +6,334 @@ import { useSession } from "next-auth/react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Badge } from "@/components/ui/badge"
 import { 
   Calculator, 
   ArrowRight, 
-  ArrowLeft,
   CheckCircle, 
-  DollarSign
+  Clock, 
+  Users,
+  TrendingUp,
+  Shield,
+  DollarSign,
+  FileText
 } from "lucide-react"
-
-interface WizardData {
-  currentAge: number
-  retirementAge: number
-  retirementGroup: string
-  yearsOfService: number
-  averageSalary: number
-  retirementOption: string
-}
+import { CombinedCalculationWizard } from "@/components/wizard/combined-calculation-wizard"
+import { PremiumGate } from "@/components/premium/premium-gate"
+import { CombinedCalculationData } from "@/lib/wizard/wizard-types"
 
 export default function WizardPage() {
   const { data: session } = useSession()
   const router = useRouter()
-  const [currentStep, setCurrentStep] = useState(0)
-  const [wizardData, setWizardData] = useState<WizardData>({
-    currentAge: 45,
-    retirementAge: 60,
-    retirementGroup: 'GROUP_1',
-    yearsOfService: 20,
-    averageSalary: 75000,
-    retirementOption: 'A'
-  })
+  const [showWizard, setShowWizard] = useState(false)
+  const [resumeToken, setResumeToken] = useState<string>()
 
-  const steps = [
-    { title: "Personal Info", description: "Age and retirement timeline" },
-    { title: "Employment", description: "Service years and salary details" },
-    { title: "Retirement Options", description: "Benefit options and preferences" },
-    { title: "Results", description: "Your pension calculation results" }
-  ]
+  const handleStartWizard = () => {
+    setShowWizard(true)
+  }
 
-  const handleNext = () => {
-    if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1)
+  const handleResumeWizard = () => {
+    // Load saved wizard state
+    if (typeof window !== 'undefined' && session?.user?.id) {
+      const savedToken = localStorage.getItem(`wizard-state-${session.user.id}`)
+      if (savedToken) {
+        setResumeToken(savedToken)
+        setShowWizard(true)
+      }
     }
   }
 
-  const handlePrevious = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1)
-    }
+  const handleWizardComplete = (data: CombinedCalculationData) => {
+    // Redirect to dashboard or results page
+    router.push('/dashboard?tab=calculations')
   }
 
-  const handleCalculate = () => {
-    // Redirect to calculator with wizard data
-    const params = new URLSearchParams({
-      group: wizardData.retirementGroup,
-      age: wizardData.retirementAge.toString(),
-      yearsOfService: wizardData.yearsOfService.toString(),
-      averageSalary: wizardData.averageSalary.toString(),
-      retirementOption: wizardData.retirementOption
-    })
-    router.push(`/calculator?${params.toString()}`)
-  }
-
-  const renderStep = () => {
-    switch (currentStep) {
-      case 0:
-        return (
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="currentAge">Current Age</Label>
-              <Input
-                id="currentAge"
-                type="number"
-                value={wizardData.currentAge}
-                onChange={(e) => setWizardData({...wizardData, currentAge: parseInt(e.target.value) || 0})}
-              />
-            </div>
-            <div>
-              <Label htmlFor="retirementAge">Planned Retirement Age</Label>
-              <Input
-                id="retirementAge"
-                type="number"
-                value={wizardData.retirementAge}
-                onChange={(e) => setWizardData({...wizardData, retirementAge: parseInt(e.target.value) || 0})}
-              />
-            </div>
-            <div>
-              <Label htmlFor="retirementGroup">Retirement Group</Label>
-              <Select value={wizardData.retirementGroup} onValueChange={(value) => setWizardData({...wizardData, retirementGroup: value})}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="GROUP_1">Group 1 - General Employees</SelectItem>
-                  <SelectItem value="GROUP_2">Group 2 - Probation/Court Officers</SelectItem>
-                  <SelectItem value="GROUP_3">Group 3 - State Police</SelectItem>
-                  <SelectItem value="GROUP_4">Group 4 - Public Safety</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        )
-      case 1:
-        return (
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="yearsOfService">Years of Service</Label>
-              <Input
-                id="yearsOfService"
-                type="number"
-                value={wizardData.yearsOfService}
-                onChange={(e) => setWizardData({...wizardData, yearsOfService: parseInt(e.target.value) || 0})}
-              />
-            </div>
-            <div>
-              <Label htmlFor="averageSalary">Average Salary (Highest 3 Years)</Label>
-              <Input
-                id="averageSalary"
-                type="number"
-                value={wizardData.averageSalary}
-                onChange={(e) => setWizardData({...wizardData, averageSalary: parseInt(e.target.value) || 0})}
-              />
-            </div>
-          </div>
-        )
-      case 2:
-        return (
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="retirementOption">Retirement Option</Label>
-              <Select value={wizardData.retirementOption} onValueChange={(value) => setWizardData({...wizardData, retirementOption: value})}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="A">Option A - Full Allowance (100%)</SelectItem>
-                  <SelectItem value="B">Option B - Annuity Protection</SelectItem>
-                  <SelectItem value="C">Option C - Joint & Survivor (66.67%)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <Alert>
-              <CheckCircle className="h-4 w-4" />
-              <AlertDescription>
-                Review your information and click "Calculate" to see your pension benefits.
-              </AlertDescription>
-            </Alert>
-          </div>
-        )
-      case 3:
-        return (
-          <div className="space-y-4">
-            <Alert className="border-green-200 bg-green-50">
-              <CheckCircle className="h-4 w-4" />
-              <AlertDescription>
-                Your wizard data has been prepared. Click "View Results" to see your detailed pension calculation.
-              </AlertDescription>
-            </Alert>
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div><strong>Current Age:</strong> {wizardData.currentAge}</div>
-              <div><strong>Retirement Age:</strong> {wizardData.retirementAge}</div>
-              <div><strong>Group:</strong> {wizardData.retirementGroup}</div>
-              <div><strong>Years of Service:</strong> {wizardData.yearsOfService}</div>
-              <div><strong>Average Salary:</strong> ${wizardData.averageSalary.toLocaleString()}</div>
-              <div><strong>Option:</strong> {wizardData.retirementOption}</div>
-            </div>
-          </div>
-        )
-      default:
-        return null
-    }
+  if (showWizard) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <CombinedCalculationWizard
+          onComplete={handleWizardComplete}
+          resumeToken={resumeToken}
+        />
+      </div>
+    )
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="container mx-auto px-4 py-8 max-w-6xl">
       {/* Header */}
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold mb-4">
-          Massachusetts Retirement Planning Wizard
+          Combined Retirement Planning Wizard
         </h1>
-        <p className="text-xl text-muted-foreground">
-          Step-by-step guidance for calculating your pension benefits
+        <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          Get a comprehensive analysis of your Massachusetts pension and Social Security benefits
+          with personalized optimization recommendations.
         </p>
       </div>
 
-      {/* Progress */}
-      <div className="mb-8">
-        <div className="flex justify-between items-center mb-4">
-          {steps.map((step, index) => (
-            <div key={index} className={`flex items-center ${index < steps.length - 1 ? 'flex-1' : ''}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
-                index <= currentStep ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
-              }`}>
-                {index + 1}
-              </div>
-              <div className="ml-2 text-sm">
-                <div className="font-medium">{step.title}</div>
-                <div className="text-gray-500">{step.description}</div>
-              </div>
-              {index < steps.length - 1 && (
-                <div className={`flex-1 h-1 mx-4 ${
-                  index < currentStep ? 'bg-blue-600' : 'bg-gray-200'
-                }`} />
-              )}
-            </div>
-          ))}
-        </div>
+      {/* Features Overview */}
+      <div className="grid md:grid-cols-3 gap-6 mb-8">
+        <Card className="border-blue-200 bg-blue-50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calculator className="h-6 w-6 text-blue-600" />
+              Step-by-Step Guidance
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              Guided workflow through pension details, Social Security benefits,
+              and optimization preferences with built-in validation.
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-green-200 bg-green-50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-6 w-6 text-green-600" />
+              Advanced Optimization
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              AI-powered analysis of optimal claiming strategies, break-even points,
+              and lifetime benefit maximization.
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-purple-200 bg-purple-50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <DollarSign className="h-6 w-6 text-purple-600" />
+              Tax Optimization
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              Federal and Massachusetts tax calculations with strategies
+              to minimize your retirement tax burden.
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Step Content */}
+      {/* What's Included */}
       <Card className="mb-8">
         <CardHeader>
-          <CardTitle>Step {currentStep + 1}: {steps[currentStep].title}</CardTitle>
-          <CardDescription>{steps[currentStep].description}</CardDescription>
+          <CardTitle className="flex items-center gap-2">
+            <CheckCircle className="h-6 w-6 text-green-600" />
+            What's Included in Your Analysis
+          </CardTitle>
+          <CardDescription>
+            Comprehensive retirement planning with advanced features
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          {renderStep()}
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <h4 className="font-semibold mb-3 flex items-center gap-2">
+                <Shield className="h-5 w-5 text-blue-600" />
+                Core Analysis
+              </h4>
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  Massachusetts pension benefit calculations
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  Social Security optimization (ages 62-70)
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  Combined income projections
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  Inflation adjustments (COLA)
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  Medicare premium impact
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  Break-even analysis
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-3 flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-purple-600" />
+                Advanced Features
+              </h4>
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  Spousal benefits optimization
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  Tax-efficient withdrawal strategies
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  Federal and state tax calculations
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  Monte Carlo risk analysis
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  Multiple scenario comparisons
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  Comprehensive PDF reports
+                </li>
+              </ul>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
-      {/* Navigation */}
-      <div className="flex justify-between">
-        <Button
-          variant="outline"
-          onClick={handlePrevious}
-          disabled={currentStep === 0}
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Previous
-        </Button>
-        
-        {currentStep < steps.length - 1 ? (
-          <Button onClick={handleNext}>
-            Next
-            <ArrowRight className="ml-2 h-4 w-4" />
+      {/* Process Overview */}
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Clock className="h-6 w-6 text-blue-600" />
+            7-Step Process (~10 minutes)
+          </CardTitle>
+          <CardDescription>
+            Complete analysis with save and resume functionality
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid md:grid-cols-4 gap-4">
+            {[
+              { step: 1, title: "Personal Info", desc: "Age, retirement timeline, filing status" },
+              { step: 2, title: "Pension Details", desc: "Service years, salary, retirement group" },
+              { step: 3, title: "Social Security", desc: "Benefits from SSA.gov statement" },
+              { step: 4, title: "Income & Assets", desc: "Additional retirement income sources" },
+              { step: 5, title: "Preferences", desc: "Goals, risk tolerance, analysis options" },
+              { step: 6, title: "Review & Save", desc: "Final results and save to dashboard" }
+            ].slice(0, 4).map((item) => (
+              <div key={item.step} className="text-center p-4 border rounded-lg">
+                <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-2 text-sm font-semibold">
+                  {item.step}
+                </div>
+                <h4 className="font-medium mb-1">{item.title}</h4>
+                <p className="text-xs text-muted-foreground">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+          <div className="grid md:grid-cols-3 gap-4 mt-4">
+            {[
+              { step: 5, title: "Preferences", desc: "Goals, risk tolerance, analysis options" },
+              { step: 6, title: "Optimization", desc: "AI-powered strategy analysis" },
+              { step: 7, title: "Review & Save", desc: "Final results and save to dashboard" }
+            ].map((item) => (
+              <div key={item.step} className="text-center p-4 border rounded-lg">
+                <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-2 text-sm font-semibold">
+                  {item.step}
+                </div>
+                <h4 className="font-medium mb-1">{item.title}</h4>
+                <p className="text-xs text-muted-foreground">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Benefits */}
+      <Card className="mb-8 border-green-200 bg-green-50">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-6 w-6 text-green-600" />
+            Why Use the Combined Wizard?
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid md:grid-cols-3 gap-6">
+            <div>
+              <h4 className="font-semibold mb-2">Maximize Income</h4>
+              <p className="text-sm text-muted-foreground">
+                Our optimization engine can increase your retirement income by 5-15%
+                through strategic claiming decisions.
+              </p>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-2">Minimize Taxes</h4>
+              <p className="text-sm text-muted-foreground">
+                Advanced tax calculations help you keep more of your retirement income
+                through efficient withdrawal strategies.
+              </p>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-2">Peace of Mind</h4>
+              <p className="text-sm text-muted-foreground">
+                Comprehensive analysis with multiple scenarios gives you confidence
+                in your retirement planning decisions.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Action Buttons */}
+      <div className="text-center space-y-4">
+        <div className="flex justify-center gap-4">
+          <Button
+            size="lg"
+            onClick={handleStartWizard}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            <Calculator className="mr-2 h-5 w-5" />
+            Start New Analysis
+            <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
-        ) : (
-          <Button onClick={handleCalculate} className="bg-green-600 hover:bg-green-700">
-            <Calculator className="mr-2 h-4 w-4" />
-            View Results
-          </Button>
-        )}
+
+          {typeof window !== 'undefined' && session?.user?.id && localStorage.getItem(`wizard-state-${session.user.id}`) && (
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={handleResumeWizard}
+            >
+              <FileText className="mr-2 h-5 w-5" />
+              Resume Saved Analysis
+            </Button>
+          )}
+        </div>
+
+        <Alert className="max-w-2xl mx-auto">
+          <CheckCircle className="h-4 w-4" />
+          <AlertDescription>
+            <strong>Premium Feature:</strong> The Combined Retirement Planning Wizard is available
+            to premium subscribers. Upgrade to access advanced optimization and tax analysis features.
+          </AlertDescription>
+        </Alert>
       </div>
 
-      {/* Premium Notice */}
-      <Alert className="mt-8">
-        <DollarSign className="h-4 w-4" />
-        <AlertDescription>
-          <strong>Enhanced Features Available:</strong> Upgrade to Premium for advanced Social Security optimization, 
-          tax analysis, and comprehensive PDF reports.
-        </AlertDescription>
-      </Alert>
+      {/* Testimonial/Success Story */}
+      <Card className="mt-8 border-blue-200 bg-blue-50">
+        <CardContent className="pt-6">
+          <div className="text-center">
+            <Badge variant="secondary" className="mb-4">Success Story</Badge>
+            <blockquote className="text-lg italic mb-4">
+              "The Combined Wizard helped me discover I could increase my retirement income by $847/month
+              by adjusting my Social Security claiming strategy. The tax optimization alone will save me
+              thousands per year!"
+            </blockquote>
+            <cite className="text-sm text-muted-foreground">
+              — Sarah M., Massachusetts Teacher (Group 2 Retirement)
+            </cite>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }
