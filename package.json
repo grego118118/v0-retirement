@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "postinstall": "prisma generate",
     "prebuild": "node scripts/setup-build.js",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "build:full": "prisma generate && node --require ./polyfill-node.js ./node_modules/next/dist/bin/next build",
     "start": "node --require ./polyfill-node.js ./node_modules/next/dist/bin/next start",
     "lint": "next lint",
