@@ -25,8 +25,8 @@ import {
   checkEligibility,
   calculateAnnualPension
 } from "@/lib/pension-calculations"
-import { PDFExportSection } from "@/components/pdf/pdf-export-button"
-import { PensionCalculationData } from "@/lib/pdf/pdf-generator"
+// import { PDFExportSection } from "@/components/pdf/pdf-export-button"
+// import { PensionCalculationData } from "@/lib/pdf/pdf-generator"
 
 interface EssentialInfoData {
   birthYear: number
@@ -546,7 +546,7 @@ export function EnhancedCalculationPreview({ data, onChange, className = "" }: E
                 </CardContent>
               </Card>
 
-              {/* PDF Export Section */}
+              {/* PDF Export Section - Temporarily disabled for production
               <PDFExportSection
                 pensionData={{
                   currentAge: calculation.currentAge,
@@ -565,6 +565,7 @@ export function EnhancedCalculationPreview({ data, onChange, className = "" }: E
                 } as PensionCalculationData}
                 className="mt-6"
               />
+              */}
 
               {/* Calculation Notes */}
               <div className="text-xs text-gray-600 space-y-1">

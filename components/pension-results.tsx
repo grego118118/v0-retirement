@@ -21,8 +21,8 @@ import Link from "next/link"
 import { ResponsiveAd, PremiumAlternative } from "@/components/ads/adsense"
 import { calculateRetirementBenefitsProjection, ProjectionParameters } from "@/lib/retirement-benefits-projection"
 import { RetirementBenefitsProjection } from "@/components/retirement-benefits-projection"
-import { PDFExportButton } from "@/components/pdf/pdf-export-button"
-import { PensionCalculationData } from "@/lib/pdf/pdf-generator"
+// import { PDFExportButton } from "@/components/pdf/pdf-export-button"
+// import { PensionCalculationData } from "@/lib/pdf/pdf-generator"
 
 interface PensionResultsProps {
   result: {
@@ -89,6 +89,7 @@ export default function PensionResults({ result }: PensionResultsProps) {
             <Printer className="h-4 w-4 mr-2" />
             Print
           </Button>
+          {/* PDF Export temporarily disabled for production
           <PDFExportButton
             data={{
               currentAge: result.details.age,
@@ -129,6 +130,7 @@ export default function PensionResults({ result }: PensionResultsProps) {
             variant="outline"
             size="sm"
           />
+          */}
         </div>
       </div>
 
