@@ -1,393 +1,255 @@
 "use client"
 
-import { useState, useMemo } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useRetirementData } from "@/hooks/use-retirement-data"
-import { formatDate, formatCurrency } from "@/lib/utils"
-import { EnhancedCalculationCard } from "./enhanced-calculation-card"
-import { CalculationAnalysisModal } from "./calculation-analysis-modal"
-import { EditCalculationModal } from "./edit-calculation-modal"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
-  Trash2,
-  Eye,
-  ArrowRight,
-  Heart,
+  Calculator,
   Calendar,
   DollarSign,
-  Star,
-  Loader2,
-  Search,
-  Filter,
-  SortAsc,
-  SortDesc,
-  Grid,
-  List,
-  Plus
+  Users,
+  Plus,
+  Eye,
+  Trash2,
+  AlertCircle
 } from "lucide-react"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+import Link from "next/link"
 
-type SortOption = 'date' | 'name' | 'income' | 'age'
-type ViewMode = 'grid' | 'list'
+interface SavedCalculation {
+  id: string
+  calculationName: string | null
+  retirementDate: string
+  retirementAge: number
+  yearsOfService: number
+  averageSalary: number
+  retirementGroup: string
+  retirementOption: string
+  monthlyBenefit: number
+  annualBenefit: number
+  createdAt: string
+  updatedAt: string
+}
 
 export function SavedCalculations() {
-  const router = useRouter()
-  const { calculations, deleteCalculation, updateCalculation, loading } = useRetirementData()
+  const { data: session } = useSession()
+  const [calculations, setCalculations] = useState<SavedCalculation[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  // Debug calculations in SavedCalculations component
-  console.log("SavedCalculations: received data:", {
-    calculations: calculations,
-    calculationsLength: calculations?.length,
-    loading: loading,
-    calculationsType: typeof calculations,
-    isArray: Array.isArray(calculations)
-  })
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [calculationToDelete, setCalculationToDelete] = useState<string | null>(null)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [sortBy, setSortBy] = useState<SortOption>('date')
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
-  const [filterGroup, setFilterGroup] = useState<string>('all')
-  const [viewMode, setViewMode] = useState<ViewMode>('grid')
-
-  // Analysis modal state
-  const [analysisModalOpen, setAnalysisModalOpen] = useState(false)
-  const [selectedCalculation, setSelectedCalculation] = useState<any>(null)
-  const [analysisLoading, setAnalysisLoading] = useState(false)
-
-  // Edit modal state
-  const [editModalOpen, setEditModalOpen] = useState(false)
-  const [calculationToEdit, setCalculationToEdit] = useState<any>(null)
-
-  // Filtered and sorted calculations
-  const filteredAndSortedCalculations = useMemo(() => {
-    if (!calculations || !Array.isArray(calculations)) {
-      console.log("SavedCalculations: calculations is not an array:", calculations)
-      return []
+  useEffect(() => {
+    if (session?.user) {
+      fetchCalculations()
     }
+  }, [session])
 
-    let filtered = calculations.filter(calc => {
-      // Search filter
-      const matchesSearch = !searchTerm ||
-        calc.calculationName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        calc.notes?.toLowerCase().includes(searchTerm.toLowerCase())
+  const fetchCalculations = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch('/api/retirement/calculations')
 
-      // Group filter
-      const matchesGroup = filterGroup === 'all' ||
-        calc.retirementGroup === filterGroup ||
-        (filterGroup === 'favorites' && calc.isFavorite)
-
-      return matchesSearch && matchesGroup
-    })
-
-    // Sort calculations
-    filtered.sort((a, b) => {
-      let aValue: any, bValue: any
-
-      switch (sortBy) {
-        case 'date':
-          aValue = new Date(a.createdAt || 0).getTime()
-          bValue = new Date(b.createdAt || 0).getTime()
-          break
-        case 'name':
-          aValue = a.calculationName?.toLowerCase() || ''
-          bValue = b.calculationName?.toLowerCase() || ''
-          break
-        case 'income':
-          aValue = a.monthlyBenefit + (a.socialSecurityData?.selectedMonthlyBenefit || 0)
-          bValue = b.monthlyBenefit + (b.socialSecurityData?.selectedMonthlyBenefit || 0)
-          break
-        case 'age':
-          aValue = a.retirementAge
-          bValue = b.retirementAge
-          break
-        default:
-          return 0
+      if (!response.ok) {
+        throw new Error('Failed to fetch calculations')
       }
 
-      if (sortOrder === 'asc') {
-        return aValue > bValue ? 1 : -1
-      } else {
-        return aValue < bValue ? 1 : -1
+      const data = await response.json()
+      setCalculations(data.calculations || [])
+    } catch (err) {
+      console.error('Error fetching calculations:', err)
+      setError('Unable to load saved calculations. Please try again later.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const deleteCalculation = async (id: string) => {
+    try {
+      const response = await fetch(`/api/retirement/calculations/${id}`, {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        setCalculations(calculations.filter(calc => calc.id !== id))
       }
+    } catch (err) {
+      console.error('Error deleting calculation:', err)
+    }
+  }
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount)
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
     })
-
-    return filtered
-  }, [calculations, searchTerm, sortBy, sortOrder, filterGroup])
-
-  const handleDelete = async (id: string) => {
-    setCalculationToDelete(id)
-    setDeleteDialogOpen(true)
   }
 
-  const confirmDelete = async () => {
-    if (calculationToDelete) {
-      await deleteCalculation(calculationToDelete)
-      setDeleteDialogOpen(false)
-      setCalculationToDelete(null)
+  const getGroupLabel = (group: string) => {
+    const groupLabels: Record<string, string> = {
+      'GROUP_1': 'Group 1',
+      'GROUP_2': 'Group 2',
+      'GROUP_3': 'Group 3',
+      'GROUP_4': 'Group 4'
     }
+    return groupLabels[group] || group
   }
 
-  const handleView = async (id: string) => {
-    setAnalysisLoading(true)
-    const calculation = calculations.find(calc => calc.id === id)
-    if (calculation) {
-      setSelectedCalculation(calculation)
-      setAnalysisModalOpen(true)
-    }
-    setAnalysisLoading(false)
-  }
-
-  const handleEdit = (id: string) => {
-    const calculation = calculations.find(calc => calc.id === id)
-    if (calculation) {
-      setCalculationToEdit(calculation)
-      setEditModalOpen(true)
-    }
-  }
-
-  const handleCloseAnalysisModal = () => {
-    setAnalysisModalOpen(false)
-    setSelectedCalculation(null)
-  }
-
-  const handleCloseEditModal = () => {
-    setEditModalOpen(false)
-    setCalculationToEdit(null)
-  }
-
-  const handleSaveEdit = async (id: string, updates: any) => {
-    await updateCalculation(id, updates)
-    handleCloseEditModal()
-  }
-
-  const handleToggleFavorite = async (id: string) => {
-    const calculation = calculations.find(calc => calc.id === id)
-    if (calculation) {
-      await updateCalculation(id, { isFavorite: !calculation.isFavorite })
-    }
-  }
-
-  const getOptionDescription = (option: string) => {
-    switch (option) {
-      case 'A': return 'Maximum Allowance'
-      case 'B': return 'Annuity Protection'
-      case 'C': return 'Joint Survivor'
-      default: return option
-    }
-  }
-
-  // Show loading skeleton while data is being fetched
-  if (loading && (!calculations || calculations.length === 0)) {
+  if (loading) {
     return (
-      <div className="space-y-3">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="p-4 rounded-lg border bg-card">
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex-1">
-                <Skeleton className="h-4 w-32 mb-1" />
-                <Skeleton className="h-3 w-24" />
-              </div>
-              <Skeleton className="h-5 w-16" />
-            </div>
-            <div className="grid grid-cols-2 gap-3 mb-3">
-              <Skeleton className="h-12 w-full" />
-              <Skeleton className="h-12 w-full" />
-            </div>
-            <div className="flex gap-2">
-              <Skeleton className="h-8 flex-1" />
-              <Skeleton className="h-8 w-8" />
-            </div>
+      <div className="space-y-4">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="animate-pulse">
+            <div className="h-32 bg-gray-200 rounded-lg"></div>
           </div>
         ))}
       </div>
     )
   }
 
-  if (!calculations || calculations.length === 0) {
+  if (error) {
     return (
-      <div className="text-center py-8">
-        <div className="mb-4">
-          <div className="h-12 w-12 rounded-full bg-muted mx-auto flex items-center justify-center mb-3">
-            <Calendar className="h-6 w-6 text-muted-foreground" />
-          </div>
-          <h3 className="font-medium mb-2">No saved calculations yet</h3>
-          <p className="text-sm text-muted-foreground mb-4">
-            Create your first pension calculation to compare different retirement scenarios.
+      <Alert className="border-red-200 bg-red-50">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
+    )
+  }
+
+  if (calculations.length === 0) {
+    return (
+      <Card className="text-center py-8">
+        <CardContent>
+          <Calculator className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold mb-2">No Saved Calculations</h3>
+          <p className="text-gray-600 mb-4">
+            Start by creating your first retirement calculation to see your pension benefits.
           </p>
-        </div>
-        <Button onClick={() => router.push("/calculator")}>
-          Create New Calculation <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
-      </div>
+          <div className="space-y-2">
+            <Link href="/calculator">
+              <Button>
+                <Calculator className="mr-2 h-4 w-4" />
+                Start Calculator
+              </Button>
+            </Link>
+            <Link href="/wizard">
+              <Button variant="outline">
+                <Plus className="mr-2 h-4 w-4" />
+                Use Wizard
+              </Button>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
     )
   }
 
   return (
     <div className="space-y-4">
-      {/* Controls Bar */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        {/* Search */}
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search calculations..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-
-        {/* Filters */}
-        <div className="flex gap-2">
-          <Select value={filterGroup} onValueChange={setFilterGroup}>
-            <SelectTrigger className="w-32">
-              <SelectValue placeholder="Filter" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Groups</SelectItem>
-              <SelectItem value="favorites">Favorites</SelectItem>
-              <SelectItem value="1">Group 1</SelectItem>
-              <SelectItem value="2">Group 2</SelectItem>
-              <SelectItem value="3">Group 3</SelectItem>
-              <SelectItem value="4">Group 4</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
-            <SelectTrigger className="w-32">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="date">Date</SelectItem>
-              <SelectItem value="name">Name</SelectItem>
-              <SelectItem value="income">Income</SelectItem>
-              <SelectItem value="age">Age</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-          >
-            {sortOrder === 'asc' ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />}
-          </Button>
-
-          <div className="flex border rounded-md">
-            <Button
-              variant={viewMode === 'grid' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setViewMode('grid')}
-              className="rounded-r-none"
-            >
-              <Grid className="h-4 w-4" />
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-semibold">Your Calculations ({calculations.length})</h3>
+        <div className="space-x-2">
+          <Link href="/calculator">
+            <Button size="sm">
+              <Calculator className="mr-2 h-4 w-4" />
+              New Calculation
             </Button>
-            <Button
-              variant={viewMode === 'list' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setViewMode('list')}
-              className="rounded-l-none"
-            >
-              <List className="h-4 w-4" />
+          </Link>
+          <Link href="/wizard">
+            <Button size="sm" variant="outline">
+              <Plus className="mr-2 h-4 w-4" />
+              Use Wizard
             </Button>
-          </div>
+          </Link>
         </div>
       </div>
 
-      {/* Results Summary */}
-      <div className="flex items-center justify-between text-sm text-muted-foreground">
-        <span>
-          {filteredAndSortedCalculations.length} of {calculations.length} calculations
-          {searchTerm && ` matching "${searchTerm}"`}
-        </span>
-        <Button variant="outline" size="sm" onClick={() => router.push('/wizard')}>
-          <Plus className="h-4 w-4 mr-1" />
-          New Analysis
-        </Button>
+      <div className="grid gap-4">
+        {calculations.map((calc) => (
+          <Card key={calc.id} className="hover:shadow-md transition-shadow">
+            <CardHeader className="pb-3">
+              <div className="flex justify-between items-start">
+                <div>
+                  <CardTitle className="text-lg">
+                    {calc.calculationName || `Calculation ${calc.id.slice(-6)}`}
+                  </CardTitle>
+                  <CardDescription>
+                    Created {formatDate(calc.createdAt)}
+                  </CardDescription>
+                </div>
+                <Badge variant="outline">
+                  {getGroupLabel(calc.retirementGroup)}
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-blue-600" />
+                  <div>
+                    <div className="text-sm text-gray-600">Retirement Age</div>
+                    <div className="font-semibold">{calc.retirementAge}</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Users className="h-4 w-4 text-green-600" />
+                  <div>
+                    <div className="text-sm text-gray-600">Years of Service</div>
+                    <div className="font-semibold">{calc.yearsOfService}</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <DollarSign className="h-4 w-4 text-purple-600" />
+                  <div>
+                    <div className="text-sm text-gray-600">Average Salary</div>
+                    <div className="font-semibold">{formatCurrency(calc.averageSalary)}</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Calculator className="h-4 w-4 text-orange-600" />
+                  <div>
+                    <div className="text-sm text-gray-600">Monthly Benefit</div>
+                    <div className="font-semibold text-green-600">{formatCurrency(calc.monthlyBenefit)}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center">
+                <div className="text-sm text-gray-600">
+                  Option {calc.retirementOption} • Annual: {formatCurrency(calc.annualBenefit)}
+                </div>
+                <div className="space-x-2">
+                  <Link href={`/calculator?id=${calc.id}`}>
+                    <Button size="sm" variant="outline">
+                      <Eye className="mr-2 h-4 w-4" />
+                      View
+                    </Button>
+                  </Link>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => deleteCalculation(calc.id)}
+                    className="text-red-600 hover:text-red-700"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
-
-      {/* Calculations Display */}
-      {filteredAndSortedCalculations.length === 0 ? (
-        <div className="text-center py-12">
-          <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-semibold mb-2">No calculations found</h3>
-          <p className="text-muted-foreground mb-4">
-            {searchTerm || filterGroup !== 'all'
-              ? 'Try adjusting your search or filters'
-              : 'Create your first retirement analysis to get started'
-            }
-          </p>
-          <Button onClick={() => router.push('/wizard')}>
-            <Plus className="mr-2 h-4 w-4" />
-            Create New Analysis
-          </Button>
-        </div>
-      ) : (
-        <ScrollArea className="h-[600px]">
-          <div className={viewMode === 'grid'
-            ? "grid grid-cols-1 lg:grid-cols-2 gap-4"
-            : "space-y-4"
-          }>
-            {filteredAndSortedCalculations.map((calc) => (
-              <EnhancedCalculationCard
-                key={calc.id}
-                calculation={calc}
-                onView={handleView}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                onToggleFavorite={handleToggleFavorite}
-                isExpanded={viewMode === 'list'}
-              />
-            ))}
-          </div>
-        </ScrollArea>
-      )}
-
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Calculation</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this calculation? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Analysis Modal */}
-      <CalculationAnalysisModal
-        isOpen={analysisModalOpen}
-        onClose={handleCloseAnalysisModal}
-        calculation={selectedCalculation}
-        loading={analysisLoading}
-      />
-
-      {/* Edit Modal */}
-      <EditCalculationModal
-        isOpen={editModalOpen}
-        onClose={handleCloseEditModal}
-        calculation={calculationToEdit}
-        onSave={handleSaveEdit}
-      />
     </div>
   )
-} 
+}
