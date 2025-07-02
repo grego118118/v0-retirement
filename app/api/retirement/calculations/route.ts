@@ -227,12 +227,29 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    return NextResponse.json({
+    const response = {
       calculations: parsedCalculations,
       total,
       limit,
       offset,
+    }
+
+    console.log('API Response structure:', {
+      calculationsCount: response.calculations.length,
+      total: response.total,
+      limit: response.limit,
+      offset: response.offset,
+      sampleCalculation: response.calculations[0] ? {
+        id: response.calculations[0].id,
+        calculationName: response.calculations[0].calculationName,
+        monthlyBenefit: response.calculations[0].monthlyBenefit,
+        hasSSData: !!response.calculations[0].socialSecurityData
+      } : null
     })
+
+    console.log('Complete API Response being sent to frontend:', JSON.stringify(response, null, 2))
+
+    return NextResponse.json(response)
   } catch (error) {
     console.error("Error fetching calculations:", error)
     return NextResponse.json(

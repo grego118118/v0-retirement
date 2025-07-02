@@ -68,51 +68,38 @@ export function RetirementCountdown({ retirementDate, className = "" }: Retireme
         const minutes = totalMinutes % 60
         const hours = totalHours % 24
 
-        // More accurate year/month calculation using actual dates
+        // More accurate year/month/day calculation using date arithmetic
         let years = 0
         let months = 0
         let days = 0
 
-        // Create a working date starting from now
-        const workingDate = new Date(now)
+        // Start with the current date
+        let currentDate = new Date(now)
 
-        // Calculate years
-        while (workingDate.getFullYear() < target.getFullYear() ||
-               (workingDate.getFullYear() === target.getFullYear() &&
-                workingDate.getMonth() < target.getMonth()) ||
-               (workingDate.getFullYear() === target.getFullYear() &&
-                workingDate.getMonth() === target.getMonth() &&
-                workingDate.getDate() < target.getDate())) {
+        // Calculate full years
+        let tempDate = new Date(currentDate)
+        tempDate.setFullYear(tempDate.getFullYear() + 1)
 
-          const nextYear = new Date(workingDate)
-          nextYear.setFullYear(nextYear.getFullYear() + 1)
-
-          if (nextYear <= target) {
-            years++
-            workingDate.setFullYear(workingDate.getFullYear() + 1)
-          } else {
-            break
-          }
+        while (tempDate <= target) {
+          years++
+          currentDate.setFullYear(currentDate.getFullYear() + 1)
+          tempDate = new Date(currentDate)
+          tempDate.setFullYear(tempDate.getFullYear() + 1)
         }
 
-        // Calculate months
-        while (workingDate.getMonth() < target.getMonth() ||
-               (workingDate.getMonth() === target.getMonth() &&
-                workingDate.getDate() < target.getDate())) {
+        // Calculate full months
+        tempDate = new Date(currentDate)
+        tempDate.setMonth(tempDate.getMonth() + 1)
 
-          const nextMonth = new Date(workingDate)
-          nextMonth.setMonth(nextMonth.getMonth() + 1)
-
-          if (nextMonth <= target) {
-            months++
-            workingDate.setMonth(workingDate.getMonth() + 1)
-          } else {
-            break
-          }
+        while (tempDate <= target) {
+          months++
+          currentDate.setMonth(currentDate.getMonth() + 1)
+          tempDate = new Date(currentDate)
+          tempDate.setMonth(tempDate.getMonth() + 1)
         }
 
         // Calculate remaining days
-        days = Math.floor((target.getTime() - workingDate.getTime()) / (1000 * 60 * 60 * 24))
+        days = Math.floor((target.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24))
 
         return {
           years,

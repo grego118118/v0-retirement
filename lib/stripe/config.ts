@@ -98,7 +98,7 @@ export const PREMIUM_FEATURES = {
   },
   pdf_reports: {
     name: 'PDF Report Generation',
-    description: 'Comprehensive retirement planning reports with detailed analysis',
+    description: 'Professional PDF reports with comprehensive retirement analysis and calculations',
     required: true,
     freeLimit: 0,
     premiumUnlimited: true
@@ -266,20 +266,44 @@ export function getUserSubscriptionType(user: {
   return 'oauth_free'
 }
 
-export function isUserPremium(userType: UserSubscriptionType): boolean {
-  return USER_TYPES[userType].isPremium
+export function isUserPremium(userType: UserSubscriptionType | string | undefined): boolean {
+  // Handle undefined, null, or invalid userType values
+  if (!userType || typeof userType !== 'string') {
+    return false
+  }
+
+  // Check if userType is a valid key in USER_TYPES
+  if (!(userType in USER_TYPES)) {
+    console.warn(`Invalid userType: ${userType}. Defaulting to free tier.`)
+    return false
+  }
+
+  const userConfig = USER_TYPES[userType as UserSubscriptionType]
+  return userConfig?.isPremium || false
 }
 
-export function getUserLimits(userType: UserSubscriptionType) {
-  return USER_TYPES[userType].limits
+export function getUserLimits(userType: UserSubscriptionType | string | undefined) {
+  // Handle undefined, null, or invalid userType values
+  if (!userType || typeof userType !== 'string' || !(userType in USER_TYPES)) {
+    return FREE_TIER_LIMITS // Default to free tier limits
+  }
+
+  const userConfig = USER_TYPES[userType as UserSubscriptionType]
+  return userConfig?.limits || FREE_TIER_LIMITS
 }
 
-export function getUserFeatures(userType: UserSubscriptionType): string[] {
-  return [...USER_TYPES[userType].features]
+export function getUserFeatures(userType: UserSubscriptionType | string | undefined): string[] {
+  // Handle undefined, null, or invalid userType values
+  if (!userType || typeof userType !== 'string' || !(userType in USER_TYPES)) {
+    return [...FREE_TIER_LIMITS.features] // Default to free tier features
+  }
+
+  const userConfig = USER_TYPES[userType as UserSubscriptionType]
+  return [...(userConfig?.features || FREE_TIER_LIMITS.features)]
 }
 
 export function canAccessFeature(
-  userType: UserSubscriptionType,
+  userType: UserSubscriptionType | string | undefined,
   feature: keyof typeof PREMIUM_FEATURES,
   currentUsage: number = 0
 ): PremiumFeatureCheck {

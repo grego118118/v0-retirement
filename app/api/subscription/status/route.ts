@@ -181,18 +181,21 @@ function getDevelopmentSubscriptionData(userEmail: string, user: any, calculatio
 
   const isPremium = dbSubscriptionActive || inMemoryPremium || inFallbackUsers
 
-  console.log(`Checking premium status for ${userEmail}:`)
+  console.log(`🔍 Checking premium status for ${userEmail}:`)
   console.log(`- Database subscription status: ${user?.subscriptionStatus || 'none'}`)
   console.log(`- Database subscription plan: ${user?.subscriptionPlan || 'none'}`)
   console.log(`- In FALLBACK_PREMIUM_USERS: ${inFallbackUsers}`)
+  console.log(`- FALLBACK_PREMIUM_USERS array:`, FALLBACK_PREMIUM_USERS)
   console.log(`- In in-memory premium store: ${inMemoryPremium}`)
   console.log(`- Final isPremium result: ${isPremium}`)
+  console.log(`- Environment: ${process.env.NODE_ENV}`)
+  console.log(`- PDF Testing Enabled: ${process.env.ENABLE_PDF_TESTING}`)
 
   // Use database values if available, otherwise fall back to defaults
   const subscriptionStatus = isPremium ? (user?.subscriptionStatus || 'active') : 'inactive'
   const subscriptionPlan = isPremium ? (user?.subscriptionPlan || 'monthly') : 'free'
 
-  return {
+  const result = {
     isPremium,
     subscriptionStatus: subscriptionStatus as any,
     subscriptionPlan: subscriptionPlan as any,
@@ -207,6 +210,9 @@ function getDevelopmentSubscriptionData(userEmail: string, user: any, calculatio
       pdfReports: user?.pdfReports || 0,
     }
   }
+
+  console.log(`📊 Final subscription response:`, result)
+  return result
 }
 
 function getUsageLimits(plan: SubscriptionPlan) {

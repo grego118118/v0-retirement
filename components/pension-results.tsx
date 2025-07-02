@@ -21,6 +21,8 @@ import Link from "next/link"
 import { ResponsiveAd, PremiumAlternative } from "@/components/ads/adsense"
 import { calculateRetirementBenefitsProjection, ProjectionParameters } from "@/lib/retirement-benefits-projection"
 import { RetirementBenefitsProjection } from "@/components/retirement-benefits-projection"
+import { PDFExportButton } from "@/components/pdf/pdf-export-button"
+import { PensionCalculationData } from "@/lib/pdf/pdf-generator"
 
 interface PensionResultsProps {
   result: {
@@ -75,7 +77,7 @@ export default function PensionResults({ result }: PensionResultsProps) {
       transition={{ duration: 0.5 }}
       className="space-y-6"
     >
-      {/* Header with print button */}
+      {/* Header with export buttons */}
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-center">Your Estimated Pension</h2>
         <div className="flex gap-2">
@@ -87,6 +89,46 @@ export default function PensionResults({ result }: PensionResultsProps) {
             <Printer className="h-4 w-4 mr-2" />
             Print
           </Button>
+          <PDFExportButton
+            data={{
+              currentAge: result.details.age,
+              plannedRetirementAge: result.details.age, // Using current age as placeholder
+              retirementGroup: result.details.group,
+              serviceEntry: 'before_2012', // Default - could be enhanced
+              averageSalary: result.details.averageSalary,
+              yearsOfService: result.details.yearsOfService,
+              projectedYearsAtRetirement: result.details.yearsOfService,
+              basePension: result.details.baseAnnualPension,
+              benefitFactor: result.details.basePercentage / result.details.yearsOfService,
+              totalBenefitPercentage: result.details.basePercentage,
+              cappedAt80Percent: result.details.cappedBase,
+              options: {
+                A: {
+                  annual: result.annualPension,
+                  monthly: result.monthlyPension,
+                  description: `Option A: Full Allowance (100%)`
+                },
+                B: {
+                  annual: result.annualPension * 0.99,
+                  monthly: result.monthlyPension * 0.99,
+                  description: `Option B: Annuity Protection (1% reduction)`,
+                  reduction: 0.01
+                },
+                C: {
+                  annual: result.annualPension * 0.9295,
+                  monthly: result.monthlyPension * 0.9295,
+                  description: `Option C: Joint & Survivor (66.67%)`,
+                  reduction: 0.0705,
+                  survivorAnnual: result.survivorAnnualPension || result.annualPension * 0.9295 * 0.6667,
+                  survivorMonthly: result.survivorMonthlyPension || result.monthlyPension * 0.9295 * 0.6667
+                }
+              },
+              calculationDate: new Date()
+            } as PensionCalculationData}
+            reportType="pension"
+            variant="outline"
+            size="sm"
+          />
         </div>
       </div>
 

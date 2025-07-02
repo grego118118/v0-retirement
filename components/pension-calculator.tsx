@@ -85,6 +85,17 @@ const steps = [
 const STORAGE_KEY = "ma-pension-calculator-data"
 const SESSION_STORAGE_KEY = "ma-pension-calculator-session"
 
+// Helper function to get default retirement age by group (for auto-population)
+const getDefaultRetirementAge = (group: string): number => {
+  switch (group) {
+    case 'GROUP_1': return 60 // Group 1: Default to minimum eligible age
+    case 'GROUP_2': return 55 // Group 2: Default to minimum eligible age
+    case 'GROUP_3': return 55 // Group 3: Keep existing default (practical age)
+    case 'GROUP_4': return 50 // Group 4: Default to minimum eligible age
+    default: return 60
+  }
+}
+
 export default function PensionCalculator() {
   const [currentStep, setCurrentStep] = useState(0)
   const [formData, setFormData] = useState({
@@ -283,7 +294,21 @@ export default function PensionCalculator() {
       // Ensure string values are never undefined/null
       sanitizedValue = value !== undefined && value !== null ? String(value) : ""
     }
-    const updatedData = { ...formData, [name]: sanitizedValue }
+
+    let updatedData = { ...formData, [name]: sanitizedValue }
+
+    // Auto-populate retirement age when group changes
+    if (name === 'group' && typeof value === 'string') {
+      const defaultAge = getDefaultRetirementAge(value)
+      // Only update age if it's empty or matches a previous group's default
+      if (!formData.age ||
+          formData.age === '' ||
+          formData.age === '65' ||
+          formData.age === getDefaultRetirementAge(formData.group || 'GROUP_1').toString()) {
+        updatedData = { ...updatedData, age: defaultAge.toString() }
+      }
+    }
+
     setFormData(updatedData)
     setIsFormDirty(true)
     saveToStorage(updatedData)
@@ -749,7 +774,7 @@ export default function PensionCalculator() {
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent className="max-w-xs">
-                            <p>Enter your age at the time you plan to retire. This affects your benefit factor.</p>
+                            <p>Enter your age at the time you plan to retire. Minimum eligible ages: Group 1 (60), Group 2 (55), Group 3 (any age with 20+ years), Group 4 (50). This affects your benefit factor.</p>
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
@@ -830,10 +855,10 @@ export default function PensionCalculator() {
                         <SelectValue placeholder="Select group" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="GROUP_1">Group I (General Employees)</SelectItem>
-                        <SelectItem value="GROUP_2">Group II (Certain Hazardous Positions)</SelectItem>
-                        <SelectItem value="GROUP_3">Group III (State Police)</SelectItem>
-                        <SelectItem value="GROUP_4">Group IV (Police Officers and Firefighters)</SelectItem>
+                        <SelectItem value="GROUP_1">Group I (General Employees) - min. age 60</SelectItem>
+                        <SelectItem value="GROUP_2">Group II (Probation/Court Officers) - min. age 55</SelectItem>
+                        <SelectItem value="GROUP_3">Group III (State Police) - any age with 20+ years</SelectItem>
+                        <SelectItem value="GROUP_4">Group IV (Public Safety/Corrections) - min. age 50</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

@@ -1,17 +1,39 @@
+"use client"
+
+import { useSearchParams } from 'next/navigation'
 import { generateSEOMetadata } from "@/components/seo/metadata"
 import { PricingSection } from "@/components/pricing/pricing-section"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Crown, Calculator, Users, Building } from "lucide-react"
+import { Crown, Calculator, Users, Building, FileText, Download } from "lucide-react"
 import Link from "next/link"
 import { ResponsiveAd, PremiumAlternative } from "@/components/ads/adsense"
 
-export const metadata = generateSEOMetadata({
-  title: "Pricing | Mass Pension",
-  description: "Choose the perfect plan for your Massachusetts state pension planning needs. Start free or upgrade to Premium for advanced features.",
-  path: "/pricing",
-})
+// Feature-specific messaging
+const featureMessages = {
+  'pdf-reports': {
+    badge: 'PDF Reports',
+    icon: FileText,
+    title: 'Unlock Professional PDF Reports',
+    description: 'Generate comprehensive retirement analysis reports with official calculations, projections, and professional formatting.',
+    highlight: 'You were trying to access PDF generation - a Premium feature.'
+  },
+  'wizard': {
+    badge: 'Retirement Wizard',
+    icon: Calculator,
+    title: 'Access the Complete Retirement Wizard',
+    description: 'Step-by-step guided analysis combining pension and Social Security benefits with optimization recommendations.',
+    highlight: 'You were trying to access the retirement wizard - a Premium feature.'
+  },
+  'default': {
+    badge: 'Flexible Pricing',
+    icon: Calculator,
+    title: 'Choose Your Perfect Plan',
+    description: 'Start free with basic pension calculations, or unlock advanced features with Premium. Enterprise solutions available for organizations.',
+    highlight: null
+  }
+}
 
 const businessFeatures = [
   "White-label pension calculator",
@@ -25,20 +47,34 @@ const businessFeatures = [
 ]
 
 export default function PricingPage() {
+  const searchParams = useSearchParams()
+  const feature = searchParams.get('feature') || 'default'
+  const featureConfig = featureMessages[feature as keyof typeof featureMessages] || featureMessages.default
+  const FeatureIcon = featureConfig.icon
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       <div className="container mx-auto py-16 px-4">
+        {/* Feature-specific highlight banner */}
+        {featureConfig.highlight && (
+          <div className="mb-8 p-4 bg-amber-50 border border-amber-200 rounded-lg text-center">
+            <div className="flex items-center justify-center gap-2 text-amber-800">
+              <FeatureIcon className="w-5 h-5" />
+              <span className="font-medium">{featureConfig.highlight}</span>
+            </div>
+          </div>
+        )}
+
         <div className="text-center mb-16">
           <Badge className="mb-4 bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">
-            <Calculator className="mr-1 h-3 w-3" />
-            Flexible Pricing
+            <FeatureIcon className="mr-1 h-3 w-3" />
+            {featureConfig.badge}
           </Badge>
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
-            Choose Your Perfect Plan
+            {featureConfig.title}
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Start free with basic pension calculations, or unlock advanced features with Premium. 
-            Enterprise solutions available for organizations.
+            {featureConfig.description}
           </p>
         </div>
 

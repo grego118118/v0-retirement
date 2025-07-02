@@ -21,6 +21,7 @@ import {
   Target
 } from "lucide-react"
 import { generateSEOMetadata } from "@/components/seo/metadata"
+import { NewsletterSignup } from "@/components/email/newsletter-signup"
 import Script from "next/script"
 
 export const metadata = generateSEOMetadata({
@@ -79,11 +80,7 @@ export default function Home() {
               <div className="flex items-center gap-2">
                 <Badge className="bg-green-500/20 text-green-100 border-green-400/30">
                   <Shield className="w-3 h-3 mr-1" />
-                  Trusted by 10,000+ MA Employees
-                </Badge>
-                <Badge className="bg-amber-500/20 text-amber-100 border-amber-400/30">
-                  <Star className="w-3 h-3 mr-1" />
-                  #1 MA Pension Tool
+                  Massachusetts Retirement Calculator
                 </Badge>
               </div>
 
@@ -103,16 +100,12 @@ export default function Home() {
               {/* Social Proof */}
               <div className="flex items-center gap-4 text-blue-200">
                 <div className="flex items-center gap-1">
-                  <Users className="w-4 h-4" />
-                  <span className="text-sm">10,000+ users</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Star className="w-4 h-4 text-yellow-400" />
-                  <span className="text-sm">4.9/5 rating</span>
-                </div>
-                <div className="flex items-center gap-1">
                   <Shield className="w-4 h-4" />
                   <span className="text-sm">Bank-level security</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Calculator className="w-4 h-4" />
+                  <span className="text-sm">MSRB-accurate calculations</span>
                 </div>
               </div>
 
@@ -208,6 +201,23 @@ export default function Home() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Newsletter Signup Section */}
+      <section className="py-16 bg-gradient-to-br from-gray-50 to-blue-50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-2xl mx-auto">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                Stay Ahead of Your Retirement
+              </h2>
+              <p className="text-lg text-gray-600">
+                Get exclusive Massachusetts retirement planning insights, COLA updates, and calculator enhancements delivered to your inbox.
+              </p>
+            </div>
+            <NewsletterSignup variant="default" />
           </div>
         </div>
       </section>

@@ -27,10 +27,10 @@ const testimonials = [
   {
     name: "Sarah M.",
     role: "MA State Teacher",
-    quote: "The Premium features helped me optimize my retirement date and save an extra $15,000 per year in benefits!"
+    quote: "The Premium features helped me optimize my retirement date and maximize my benefits!"
   },
   {
-    name: "John D.", 
+    name: "John D.",
     role: "Highway Department",
     quote: "Being able to compare different scenarios side-by-side was invaluable for my retirement planning."
   },
@@ -214,11 +214,6 @@ export default function SubscribePage() {
           {testimonials.map((testimonial, index) => (
             <Card key={index}>
               <CardContent className="pt-6">
-                <div className="flex mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                  ))}
-                </div>
                 <p className="text-sm text-muted-foreground mb-4">
                   "{testimonial.quote}"
                 </p>

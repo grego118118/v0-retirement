@@ -11,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useRetirementData } from "@/hooks/use-retirement-data"
 import { formatDate, formatCurrency } from "@/lib/utils"
 import { EnhancedCalculationCard } from "./enhanced-calculation-card"
+import { CalculationAnalysisModal } from "./calculation-analysis-modal"
+import { EditCalculationModal } from "./edit-calculation-modal"
 import {
   Trash2,
   Eye,
@@ -45,6 +47,15 @@ type ViewMode = 'grid' | 'list'
 export function SavedCalculations() {
   const router = useRouter()
   const { calculations, deleteCalculation, updateCalculation, loading } = useRetirementData()
+
+  // Debug calculations in SavedCalculations component
+  console.log("SavedCalculations: received data:", {
+    calculations: calculations,
+    calculationsLength: calculations?.length,
+    loading: loading,
+    calculationsType: typeof calculations,
+    isArray: Array.isArray(calculations)
+  })
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [calculationToDelete, setCalculationToDelete] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
@@ -53,8 +64,22 @@ export function SavedCalculations() {
   const [filterGroup, setFilterGroup] = useState<string>('all')
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
 
+  // Analysis modal state
+  const [analysisModalOpen, setAnalysisModalOpen] = useState(false)
+  const [selectedCalculation, setSelectedCalculation] = useState<any>(null)
+  const [analysisLoading, setAnalysisLoading] = useState(false)
+
+  // Edit modal state
+  const [editModalOpen, setEditModalOpen] = useState(false)
+  const [calculationToEdit, setCalculationToEdit] = useState<any>(null)
+
   // Filtered and sorted calculations
   const filteredAndSortedCalculations = useMemo(() => {
+    if (!calculations || !Array.isArray(calculations)) {
+      console.log("SavedCalculations: calculations is not an array:", calculations)
+      return []
+    }
+
     let filtered = calculations.filter(calc => {
       // Search filter
       const matchesSearch = !searchTerm ||
@@ -117,12 +142,37 @@ export function SavedCalculations() {
     }
   }
 
-  const handleView = (id: string) => {
-    router.push(`/calculator?load=${id}`)
+  const handleView = async (id: string) => {
+    setAnalysisLoading(true)
+    const calculation = calculations.find(calc => calc.id === id)
+    if (calculation) {
+      setSelectedCalculation(calculation)
+      setAnalysisModalOpen(true)
+    }
+    setAnalysisLoading(false)
   }
 
   const handleEdit = (id: string) => {
-    router.push(`/wizard?edit=${id}`)
+    const calculation = calculations.find(calc => calc.id === id)
+    if (calculation) {
+      setCalculationToEdit(calculation)
+      setEditModalOpen(true)
+    }
+  }
+
+  const handleCloseAnalysisModal = () => {
+    setAnalysisModalOpen(false)
+    setSelectedCalculation(null)
+  }
+
+  const handleCloseEditModal = () => {
+    setEditModalOpen(false)
+    setCalculationToEdit(null)
+  }
+
+  const handleSaveEdit = async (id: string, updates: any) => {
+    await updateCalculation(id, updates)
+    handleCloseEditModal()
   }
 
   const handleToggleFavorite = async (id: string) => {
@@ -299,6 +349,7 @@ export function SavedCalculations() {
                 calculation={calc}
                 onView={handleView}
                 onEdit={handleEdit}
+                onDelete={handleDelete}
                 onToggleFavorite={handleToggleFavorite}
                 isExpanded={viewMode === 'list'}
               />
@@ -321,6 +372,22 @@ export function SavedCalculations() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Analysis Modal */}
+      <CalculationAnalysisModal
+        isOpen={analysisModalOpen}
+        onClose={handleCloseAnalysisModal}
+        calculation={selectedCalculation}
+        loading={analysisLoading}
+      />
+
+      {/* Edit Modal */}
+      <EditCalculationModal
+        isOpen={editModalOpen}
+        onClose={handleCloseEditModal}
+        calculation={calculationToEdit}
+        onSave={handleSaveEdit}
+      />
     </div>
   )
 } 

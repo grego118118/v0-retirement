@@ -1,3 +1,7 @@
+import { prisma } from '@/lib/prisma'
+import { StripeService } from '@/lib/stripe/service'
+import { isSubscriptionActive, getUserSubscriptionType, type UserSubscriptionType } from '@/lib/stripe/config'
+
 // Simple in-memory store for demo premium users
 // In production, this would be in a database
 let premiumUsers = new Set<string>([
@@ -8,6 +12,13 @@ let premiumUsers = new Set<string>([
 
 // Simple in-memory store for canceled users (for demo)
 let canceledUsers = new Set<string>()
+
+// Fallback premium users for development (when Stripe is not configured)
+const FALLBACK_PREMIUM_USERS = [
+  'premium@example.com',
+  'test@premium.com',
+  'grego118@gmail.com'
+]
 
 // Function to add a user to premium (used by checkout)
 export function addPremiumUser(email: string) {
@@ -34,4 +45,132 @@ export function isPremiumUser(email: string) {
   console.log('All premium users:', Array.from(premiumUsers))
   console.log('All canceled users:', Array.from(canceledUsers))
   return isUserPremium
+}
+
+/**
+ * Comprehensive function to determine user subscription status
+ * This replicates the logic from the subscription status API
+ * for use in server-side routes like PDF generation
+ */
+export async function getUserSubscriptionInfo(userEmail: string): Promise<{
+  isPremium: boolean
+  userType: UserSubscriptionType
+  subscriptionPlan: string
+  subscriptionStatus: string
+}> {
+  console.log(`🔍 getUserSubscriptionInfo: Checking subscription for ${userEmail}`)
+
+  try {
+    // Get user from database
+    let user = await prisma.user.findUnique({
+      where: { email: userEmail }
+    })
+
+    if (!user) {
+      console.log(`📝 Creating new user for ${userEmail}`)
+      user = await prisma.user.create({
+        data: {
+          email: userEmail,
+          name: userEmail.split('@')[0]
+        }
+      })
+    }
+
+    // Check if Stripe is configured and try to get subscription data
+    const isStripeConfigured = !!process.env.STRIPE_SECRET_KEY
+    let subscriptionData: any = null
+
+    if (isStripeConfigured) {
+      try {
+        console.log(`🔄 Checking Stripe subscription for ${userEmail}`)
+        // TODO: Fix StripeService.getCustomerByEmail method
+        const customer = null // await StripeService.getCustomerByEmail(userEmail)
+
+        if (customer && (customer as any).subscriptions?.length > 0) {
+          const activeSubscription = (customer as any).subscriptions.find((sub: any) =>
+            isSubscriptionActive(sub.status)
+          ) || (customer as any).subscriptions[0]
+
+          subscriptionData = {
+            isPremium: isSubscriptionActive(activeSubscription.status),
+            subscriptionStatus: activeSubscription.status,
+            subscriptionPlan: activeSubscription.plan,
+          }
+          console.log(`✅ Found Stripe subscription:`, subscriptionData)
+        } else {
+          console.log(`❌ No Stripe subscription found for ${userEmail}`)
+        }
+      } catch (error) {
+        console.error('❌ Error fetching Stripe subscription:', error)
+        // Will fall back to development mode below
+      }
+    } else {
+      console.log('⚠️ Stripe not configured, using development mode')
+    }
+
+    // If no Stripe subscription found, use development/fallback logic
+    if (!subscriptionData) {
+      console.log(`🔄 Using development subscription logic for ${userEmail}`)
+
+      // Check multiple sources for premium status:
+      // 1. Database subscription status (most authoritative)
+      // 2. In-memory premium users store (for immediate demo access)
+      // 3. Fallback premium users array (for development)
+      const inFallbackUsers = FALLBACK_PREMIUM_USERS.includes(userEmail)
+      const inMemoryPremium = isPremiumUser(userEmail)
+      const dbSubscriptionActive = user?.subscriptionStatus === 'active'
+
+      const isPremium = dbSubscriptionActive || inMemoryPremium || inFallbackUsers
+
+      console.log(`🔍 Development premium check for ${userEmail}:`, {
+        inFallbackUsers,
+        inMemoryPremium,
+        dbSubscriptionActive,
+        finalIsPremium: isPremium
+      })
+
+      // Use database values if available, otherwise fall back to defaults
+      const subscriptionStatus = isPremium ? (user?.subscriptionStatus || 'active') : 'inactive'
+      const subscriptionPlan = isPremium ? (user?.subscriptionPlan || 'monthly') : 'free'
+
+      subscriptionData = {
+        isPremium,
+        subscriptionStatus,
+        subscriptionPlan,
+      }
+    }
+
+    // Determine userType based on subscription data
+    let userType: UserSubscriptionType = 'oauth_free'
+    if (subscriptionData.isPremium) {
+      if (subscriptionData.subscriptionPlan === 'monthly') {
+        userType = 'stripe_monthly'
+      } else if (subscriptionData.subscriptionPlan === 'annual') {
+        userType = 'stripe_annual'
+      } else {
+        userType = 'oauth_premium' // Grandfathered users
+      }
+    }
+
+    const result = {
+      isPremium: subscriptionData.isPremium,
+      userType,
+      subscriptionPlan: subscriptionData.subscriptionPlan,
+      subscriptionStatus: subscriptionData.subscriptionStatus
+    }
+
+    console.log(`✅ Final subscription info for ${userEmail}:`, result)
+    return result
+
+  } catch (error) {
+    console.error(`❌ Error in getUserSubscriptionInfo for ${userEmail}:`, error)
+
+    // Fallback to free tier on error
+    return {
+      isPremium: false,
+      userType: 'oauth_free',
+      subscriptionPlan: 'free',
+      subscriptionStatus: 'inactive'
+    }
+  }
 }

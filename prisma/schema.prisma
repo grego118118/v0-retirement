@@ -165,4 +165,19 @@ model EmailLog {
   @@index([type])
 }
 
+// Newsletter Subscriber - tracks newsletter subscriptions
+model NewsletterSubscriber {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  isActive      Boolean  @default(true)
+  subscribedAt  DateTime @default(now())
+  unsubscribedAt DateTime?
+  source        String?  // 'website', 'calculator', 'social', etc.
+  preferences   String?  // JSON string for email preferences
+
+  @@index([email])
+  @@index([subscribedAt])
+  @@index([isActive])
+}
+
 

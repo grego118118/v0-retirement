@@ -3,11 +3,12 @@
  * Displays comprehensive year-by-year breakdown of retirement benefits
  */
 
-import React from 'react'
+import React, { useState, useMemo } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { TrendingUp, DollarSign, Calendar, AlertCircle } from "lucide-react"
+import { Checkbox } from "@/components/ui/checkbox"
+import { TrendingUp, DollarSign, Calendar, AlertCircle, BarChart3 } from "lucide-react"
 import { ProjectionYear, getProjectionSummary } from "@/lib/retirement-benefits-projection"
 
 interface RetirementBenefitsProjectionProps {
@@ -23,6 +24,23 @@ export function RetirementBenefitsProjection({
   socialSecurityClaimingAge,
   className = ""
 }: RetirementBenefitsProjectionProps) {
+  // State for controlling extended projections display
+  const [showExtendedProjections, setShowExtendedProjections] = useState(false)
+
+  // Filter projection data based on toggle state
+  const filteredProjectionYears = useMemo(() => {
+    if (!projectionYears || projectionYears.length === 0) return []
+
+    if (showExtendedProjections) {
+      // Show all projection years when toggle is ON
+      return projectionYears
+    } else {
+      // Show only the specific retirement age when toggle is OFF
+      const targetYear = projectionYears.find(year => year.age === pensionRetirementAge)
+      return targetYear ? [targetYear] : projectionYears.slice(0, 1) // Fallback to first year if exact match not found
+    }
+  }, [projectionYears, pensionRetirementAge, showExtendedProjections])
+
   if (!projectionYears || projectionYears.length === 0) {
     return (
       <Card className={className}>
@@ -45,7 +63,17 @@ export function RetirementBenefitsProjection({
     )
   }
 
+  // Calculate summary based on the original data for accurate statistics
   const summary = getProjectionSummary(projectionYears)
+
+  // Calculate filtered summary for display when toggle is off
+  const filteredSummary = useMemo(() => {
+    if (showExtendedProjections || !filteredProjectionYears.length) {
+      return summary
+    }
+    // For single year display, create a simplified summary
+    return getProjectionSummary(filteredProjectionYears)
+  }, [summary, filteredProjectionYears, showExtendedProjections])
   
   return (
     <Card className={className}>
@@ -55,23 +83,57 @@ export function RetirementBenefitsProjection({
           Retirement Benefits Projection
         </CardTitle>
         <CardDescription>
-          Year-by-year breakdown showing pension benefit progression, COLA adjustments, and Social Security integration
+          {showExtendedProjections
+            ? "Year-by-year breakdown showing pension benefit progression, COLA adjustments, and Social Security integration"
+            : `Retirement benefits calculation for your planned retirement at age ${pensionRetirementAge}`
+          }
         </CardDescription>
+
+        {/* Toggle Control for Extended Projections */}
+        <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+          <div className="flex items-start gap-3">
+            <Checkbox
+              id="show-extended-projections"
+              checked={showExtendedProjections}
+              onCheckedChange={(checked) => setShowExtendedProjections(checked === true)}
+              className="mt-1"
+              aria-describedby="extended-projections-description"
+            />
+            <div className="space-y-1">
+              <label
+                htmlFor="show-extended-projections"
+                className="text-sm font-medium text-blue-800 dark:text-blue-200 cursor-pointer flex items-center gap-2"
+              >
+                <BarChart3 className="h-4 w-4" />
+                Show year-by-year projections to 80% benefit cap
+              </label>
+              <p
+                id="extended-projections-description"
+                className="text-xs text-blue-700 dark:text-blue-300"
+              >
+                {showExtendedProjections
+                  ? "Displaying comprehensive projections from your retirement age until maximum benefits are reached"
+                  : "Enable to see detailed year-by-year benefit progression and COLA adjustments over time"
+                }
+              </p>
+            </div>
+          </div>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
           {/* Summary Statistics */}
-          {summary && (
+          {filteredSummary && (
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="bg-green-50 dark:bg-green-950/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
                 <div className="text-sm font-medium text-green-800 dark:text-green-200">
                   Initial Monthly Pension
                 </div>
                 <div className="text-lg font-bold text-green-600">
-                  ${summary.initialMonthlyPension.toLocaleString()}
+                  ${filteredSummary.initialMonthlyPension.toLocaleString()}
                 </div>
                 <div className="text-xs text-green-600">
-                  Age {summary.startAge}
+                  Age {filteredSummary.startAge}
                 </div>
               </div>
               
@@ -80,7 +142,7 @@ export function RetirementBenefitsProjection({
                   Peak Monthly Income
                 </div>
                 <div className="text-lg font-bold text-blue-600">
-                  ${summary.peakMonthlyIncome.toLocaleString()}
+                  ${filteredSummary.peakMonthlyIncome.toLocaleString()}
                 </div>
                 <div className="text-xs text-blue-600">
                   Pension + Social Security
@@ -92,7 +154,7 @@ export function RetirementBenefitsProjection({
                   Total COLA Benefit
                 </div>
                 <div className="text-lg font-bold text-purple-600">
-                  ${summary.totalCOLABenefit.toLocaleString()}
+                  ${filteredSummary.totalCOLABenefit.toLocaleString()}
                 </div>
                 <div className="text-xs text-purple-600">
                   Cumulative increase
@@ -104,16 +166,19 @@ export function RetirementBenefitsProjection({
                   Projection Years
                 </div>
                 <div className="text-lg font-bold text-orange-600">
-                  {summary.totalProjectionYears}
+                  {filteredSummary.totalProjectionYears}
                 </div>
                 <div className="text-xs text-orange-600">
-                  Ages {summary.startAge}-{summary.endAge}
+                  {showExtendedProjections
+                    ? `Ages ${filteredSummary.startAge}-${filteredSummary.endAge}`
+                    : `Age ${filteredSummary.startAge} (Target Retirement)`
+                  }
                 </div>
               </div>
             </div>
           )}
 
-          {/* 80% Cap Warning */}
+          {/* 80% Cap Warning - Show if original data has cap, regardless of toggle state */}
           {summary?.cappedAt80Percent && (
             <div className="bg-amber-50 dark:bg-amber-950/20 p-4 rounded-lg border border-amber-200 dark:border-amber-800">
               <div className="flex items-start gap-3">
@@ -146,7 +211,7 @@ export function RetirementBenefitsProjection({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {projectionYears.map((year) => (
+                {filteredProjectionYears.map((year) => (
                   <TableRow
                     key={year.age}
                     className={`hover:bg-muted/50 ${

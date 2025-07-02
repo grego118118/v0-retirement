@@ -2,7 +2,6 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth/auth-options"
 import { prisma } from "@/lib/prisma"
-import { v4 as uuidv4 } from "uuid"
 
 export async function GET() {
   try {
@@ -12,11 +11,23 @@ export async function GET() {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
     }
 
-    // Use Prisma to fetch calculations - for now return empty array since we don't have the table structure
-    // This should be replaced with proper Prisma model when the calculations table is set up
-    const calculations: any[] = []
+    // Fetch calculations using Prisma
+    const calculations = await prisma.retirementCalculation.findMany({
+      where: {
+        userId: session.user.id
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    })
 
-    return NextResponse.json(calculations)
+    // Transform the data to include parsed socialSecurityData
+    const transformedCalculations = calculations.map(calc => ({
+      ...calc,
+      socialSecurityData: calc.socialSecurityData ? JSON.parse(calc.socialSecurityData) : null
+    }))
+
+    return NextResponse.json(transformedCalculations)
   } catch (error) {
     console.error("Error fetching calculations:", error)
     return NextResponse.json({ message: "Failed to fetch calculations" }, { status: 500 })
@@ -32,13 +43,36 @@ export async function POST(request: Request) {
     }
 
     const data = await request.json()
-    const calculationId = data.id || uuidv4()
 
-    // For now, just return success since we need to set up the proper Prisma model
-    // This should be replaced with proper Prisma operations when the calculations table is set up
-    console.log("Calculation data received:", data)
+    // Create calculation using Prisma
+    const calculation = await prisma.retirementCalculation.create({
+      data: {
+        userId: session.user.id,
+        calculationName: data.calculationName || `Calculation ${new Date().toLocaleDateString()}`,
+        retirementDate: new Date(data.retirementDate),
+        retirementAge: data.retirementAge,
+        yearsOfService: data.yearsOfService,
+        averageSalary: data.averageSalary,
+        retirementGroup: data.retirementGroup,
+        benefitPercentage: data.benefitPercentage,
+        retirementOption: data.retirementOption,
+        monthlyBenefit: data.monthlyBenefit,
+        annualBenefit: data.annualBenefit,
+        benefitReduction: data.benefitReduction,
+        survivorBenefit: data.survivorBenefit,
+        notes: data.notes,
+        isFavorite: data.isFavorite || false,
+        socialSecurityData: data.socialSecurityData ? JSON.stringify(data.socialSecurityData) : null,
+      }
+    })
 
-    return NextResponse.json({ id: calculationId, success: true })
+    // Transform the response to include parsed socialSecurityData
+    const responseCalculation = {
+      ...calculation,
+      socialSecurityData: calculation.socialSecurityData ? JSON.parse(calculation.socialSecurityData) : null,
+    }
+
+    return NextResponse.json({ id: calculation.id, calculation: responseCalculation, success: true })
   } catch (error) {
     console.error("Error saving calculation:", error)
     return NextResponse.json({ message: "Failed to save calculation" }, { status: 500 })

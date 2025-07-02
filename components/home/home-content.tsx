@@ -36,11 +36,7 @@ export function HomeContent() {
               <div className="flex items-center gap-2">
                 <Badge className="bg-green-500/20 text-green-100 border-green-400/30">
                   <Shield className="w-3 h-3 mr-1" />
-                  Trusted by 10,000+ MA Employees
-                </Badge>
-                <Badge className="bg-amber-500/20 text-amber-100 border-amber-400/30">
-                  <Star className="w-3 h-3 mr-1" />
-                  #1 MA Pension Tool
+                  Massachusetts Retirement Calculator
                 </Badge>
               </div>
 
@@ -60,16 +56,12 @@ export function HomeContent() {
               {/* Social Proof */}
               <div className="flex items-center gap-4 text-blue-200">
                 <div className="flex items-center gap-1">
-                  <Users className="w-4 h-4" />
-                  <span className="text-sm">10,000+ users</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Star className="w-4 h-4 text-yellow-400" />
-                  <span className="text-sm">4.9/5 rating</span>
-                </div>
-                <div className="flex items-center gap-1">
                   <Shield className="w-4 h-4" />
                   <span className="text-sm">Bank-level security</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Calculator className="w-4 h-4" />
+                  <span className="text-sm">MSRB-accurate calculations</span>
                 </div>
               </div>
 

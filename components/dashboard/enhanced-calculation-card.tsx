@@ -20,7 +20,8 @@ import {
   ChevronDown,
   ChevronUp,
   CheckCircle,
-  Target
+  Target,
+  Trash2
 } from "lucide-react"
 import { formatCurrency, formatDate, parseDate } from "@/lib/utils"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
@@ -60,16 +61,18 @@ interface EnhancedCalculationCardProps {
   calculation: RetirementCalculation
   onView?: (id: string) => void
   onEdit?: (id: string) => void
+  onDelete?: (id: string) => void
   onToggleFavorite?: (id: string) => void
   isExpanded?: boolean
 }
 
-export function EnhancedCalculationCard({ 
-  calculation, 
-  onView, 
-  onEdit, 
+export function EnhancedCalculationCard({
+  calculation,
+  onView,
+  onEdit,
+  onDelete,
   onToggleFavorite,
-  isExpanded: initialExpanded = false 
+  isExpanded: initialExpanded = false
 }: EnhancedCalculationCardProps) {
   const [isExpanded, setIsExpanded] = useState(initialExpanded)
 
@@ -341,7 +344,7 @@ export function EnhancedCalculationCard({
             onClick={() => calculation.id && onView?.(calculation.id)}
             disabled={!calculation.id}
           >
-            <Eye className="h-4 w-4" />
+            <Eye className="h-4 w-4 mr-2" />
             <span className="text-sm">View Analysis</span>
           </Button>
           <Button
@@ -351,9 +354,28 @@ export function EnhancedCalculationCard({
             onClick={() => calculation.id && onEdit?.(calculation.id)}
             disabled={!calculation.id}
           >
-            <Edit className="h-3 w-3 mr-2" />
-            <span className="text-xs sm:text-sm">Edit Scenario</span>
+            <Edit className="h-4 w-4 mr-2" />
+            <span className="text-sm">Edit Scenario</span>
           </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="default"
+                  className="sm:w-auto w-full shadow-sm hover:shadow-md transition-all duration-200 border-slate-200 dark:border-slate-700 hover:border-red-300 dark:hover:border-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 min-h-[44px] px-3"
+                  onClick={() => calculation.id && onDelete?.(calculation.id)}
+                  disabled={!calculation.id}
+                >
+                  <Trash2 className="h-4 w-4 text-red-600 dark:text-red-400" />
+                  <span className="sr-only">Delete calculation</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                Delete this calculation
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </CardContent>
     </Card>
