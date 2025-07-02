@@ -1,5 +1,6 @@
 "use client"
 
+import { Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { generateSEOMetadata } from "@/components/seo/metadata"
 import { PricingSection } from "@/components/pricing/pricing-section"
@@ -46,7 +47,8 @@ const businessFeatures = [
   "API access for integrations"
 ]
 
-export default function PricingPage() {
+// Component that uses useSearchParams - needs to be wrapped in Suspense
+function PricingContent() {
   const searchParams = useSearchParams()
   const feature = searchParams.get('feature') || 'default'
   const featureConfig = featureMessages[feature as keyof typeof featureMessages] || featureMessages.default
@@ -271,4 +273,33 @@ export default function PricingPage() {
       </div>
     </div>
   )
-} 
+}
+
+// Loading fallback component
+function PricingPageFallback() {
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+      <div className="container mx-auto py-16 px-4">
+        <div className="text-center mb-16">
+          <div className="animate-pulse">
+            <div className="h-6 w-32 bg-gray-200 rounded mx-auto mb-4"></div>
+            <div className="h-12 w-96 bg-gray-200 rounded mx-auto mb-4"></div>
+            <div className="h-6 w-64 bg-gray-200 rounded mx-auto"></div>
+          </div>
+        </div>
+        <div className="animate-pulse">
+          <div className="h-96 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Main page component with Suspense boundary
+export default function PricingPage() {
+  return (
+    <Suspense fallback={<PricingPageFallback />}>
+      <PricingContent />
+    </Suspense>
+  )
+}
