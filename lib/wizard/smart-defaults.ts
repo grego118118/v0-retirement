@@ -7,22 +7,38 @@ import { EssentialInfoData } from './wizard-types-v2'
 
 // Eligibility rules for retirement age suggestions
 const ELIGIBILITY_RULES = {
-  '1': { 
-    before_2012: { minAge: 55, minYears: 20, fullBenefitAge: 65 },
-    after_2012: { minAge: 60, minYears: 10, fullBenefitAge: 67 }
+  '1': {
+    before_2012: { minAge: 55, minYears: 20, fullBenefitAge: 65, defaultAge: 60 },
+    after_2012: { minAge: 60, minYears: 10, fullBenefitAge: 67, defaultAge: 60 }
   },
-  '2': { 
-    before_2012: { minAge: 55, minYears: 20, fullBenefitAge: 60 },
-    after_2012: { minAge: 57, minYears: 10, fullBenefitAge: 62 }
+  '2': {
+    before_2012: { minAge: 55, minYears: 20, fullBenefitAge: 60, defaultAge: 55 },
+    after_2012: { minAge: 55, minYears: 10, fullBenefitAge: 62, defaultAge: 55 }
   },
-  '3': { 
-    any: { minAge: 45, minYears: 20, fullBenefitAge: 55 }
+  '3': {
+    any: { minAge: 45, minYears: 20, fullBenefitAge: 55, defaultAge: 55 }
   },
-  '4': { 
-    before_2012: { minAge: 50, minYears: 20, fullBenefitAge: 55 },
-    after_2012: { minAge: 52, minYears: 10, fullBenefitAge: 57 }
+  '4': {
+    before_2012: { minAge: 50, minYears: 20, fullBenefitAge: 55, defaultAge: 50 },
+    after_2012: { minAge: 50, minYears: 10, fullBenefitAge: 57, defaultAge: 50 }
   }
 } as const
+
+/**
+ * Get default retirement age for auto-population based on group eligibility
+ */
+export function getDefaultRetirementAge(
+  group: '1' | '2' | '3' | '4',
+  serviceEntry?: 'before_2012' | 'after_2012'
+): number {
+  const rules = ELIGIBILITY_RULES[group]
+  if (!rules) return 60
+
+  const groupRules = 'any' in rules ? rules.any : rules[serviceEntry || 'before_2012']
+  if (!groupRules) return 60
+
+  return groupRules.defaultAge
+}
 
 // Salary guidance ranges by group and experience level
 const SALARY_RANGES = {

@@ -43,10 +43,6 @@ const mockCalculationData: CombinedCalculationData = {
     estimatedMedicarePremiums: 2000
   },
   preferences: {
-    riskTolerance: 'moderate',
-    inflationScenario: 'moderate',
-    includeTaxOptimization: true,
-    includeMonteCarloAnalysis: true,
     retirementIncomeGoal: 6000
   }
 }

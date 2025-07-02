@@ -515,8 +515,8 @@ export function WizardV2Dev({ onClose }: WizardV2DevProps) {
   
   // Check if can skip to results (minimum data available)
   const canSkipToResults = () => {
-    const data = wizardData.essentialInfo || {}
-    return !!(data.retirementGroup && data.yearsOfService && data.averageSalary)
+    const data = wizardData.essentialInfo
+    return !!(data?.retirementGroup && data?.yearsOfService && data?.averageSalary)
   }
   
   // Development controls
@@ -929,7 +929,7 @@ export function WizardV2Dev({ onClose }: WizardV2DevProps) {
   const clearData = () => {
     // CRITICAL FIX: Clear all three states
     setUserInputValues({})
-    setWizardData({ essentialInfo: {} })
+    setWizardData({})
     setSmartDefaultsState({})
     setCalculationData({})
     setErrors({})

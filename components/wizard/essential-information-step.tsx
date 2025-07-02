@@ -7,15 +7,17 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
-import { 
-  Calendar, 
-  User, 
-  Briefcase, 
-  DollarSign, 
+import { SalaryProjectionDisplay } from "@/components/wizard/salary-projection-display"
+import {
+  Calendar,
+  User,
+  Briefcase,
+  DollarSign,
   Calculator,
   CheckCircle,
   Lightbulb,
-  Target
+  Target,
+  ExternalLink
 } from "lucide-react"
 
 interface EssentialInfoData {
@@ -480,10 +482,49 @@ export function EssentialInformationStep({ data, onChange, errors }: EssentialIn
                   </AlertDescription>
                 </Alert>
               )}
+
+              {/* Massachusetts Open Checkbook Link */}
+              <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="flex items-start gap-2">
+                  <div className="flex-shrink-0 mt-0.5">
+                    <ExternalLink className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <div className="text-sm">
+                    <p className="text-blue-800 font-medium mb-1">
+                      Need help finding your salary information?
+                    </p>
+                    <p className="text-blue-700 mb-2">
+                      Use the official Massachusetts state resource to verify your current salary information for more accurate pension calculations.
+                    </p>
+                    <a
+                      href="https://cthrupayroll.mass.gov/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 hover:underline font-medium transition-colors"
+                      aria-label="Open Massachusetts Statewide Payroll Database in a new tab to look up your current salary"
+                    >
+                      Look up your salary in the Massachusetts Statewide Payroll Database
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </CardContent>
       </Card>
+
+      {/* Salary Projection Display */}
+      {data.averageSalary && data.averageSalary > 0 && (
+        <SalaryProjectionDisplay
+          currentSalary={data.averageSalary}
+          plannedRetirementAge={data.plannedRetirementAge}
+          currentAge={data.currentAge}
+          birthYear={data.birthYear}
+          className="mt-6"
+          showDetails={true}
+        />
+      )}
 
       {/* Smart Defaults Section */}
       <Card>

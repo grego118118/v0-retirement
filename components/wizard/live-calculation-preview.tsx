@@ -260,8 +260,12 @@ export function DetailedCalculationPreview({ data, className = "" }: LiveCalcula
   // Note: The preview now uses official MSRB calculations from calculateBasicPensionEstimate
   // This ensures consistency with the main calculation logic
   const annualPension = preview.monthlyPension * 12
+  const annualBeforeCap = annualPension
   const cap = data.averageSalary * 0.8
   const isCapped = annualPension >= cap
+
+  // Calculate basic factor for display (fallback calculation)
+  const basicFactor = (data.yearsOfService || 0) * 0.025
   
   return (
     <Card className={`bg-blue-50 border-blue-200 ${className}`}>

@@ -19,12 +19,14 @@ import {
 } from "lucide-react"
 
 // Import the official MSRB calculation functions
-import { 
-  getBenefitFactor, 
+import {
+  getBenefitFactor,
   calculatePensionWithOption,
   checkEligibility,
   calculateAnnualPension
 } from "@/lib/pension-calculations"
+import { PDFExportSection } from "@/components/pdf/pdf-export-button"
+import { PensionCalculationData } from "@/lib/pdf/pdf-generator"
 
 interface EssentialInfoData {
   birthYear: number
@@ -543,6 +545,26 @@ export function EnhancedCalculationPreview({ data, onChange, className = "" }: E
                   </div>
                 </CardContent>
               </Card>
+
+              {/* PDF Export Section */}
+              <PDFExportSection
+                pensionData={{
+                  currentAge: calculation.currentAge,
+                  plannedRetirementAge: calculation.plannedRetirementAge,
+                  retirementGroup: data.retirementGroup || 'GROUP_2',
+                  serviceEntry: data.serviceEntry || 'before_2012',
+                  averageSalary: data.averageSalary || 0,
+                  yearsOfService: calculation.currentYearsOfService,
+                  projectedYearsAtRetirement: calculation.projectedYearsOfService,
+                  basePension: calculation.basePension,
+                  benefitFactor: calculation.benefitFactor,
+                  totalBenefitPercentage: calculation.totalBenefitPercentage,
+                  cappedAt80Percent: calculation.cappedAt80Percent,
+                  options: calculation.options,
+                  calculationDate: new Date()
+                } as PensionCalculationData}
+                className="mt-6"
+              />
 
               {/* Calculation Notes */}
               <div className="text-xs text-gray-600 space-y-1">

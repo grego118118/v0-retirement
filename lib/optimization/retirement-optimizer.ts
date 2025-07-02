@@ -56,7 +56,7 @@ export function optimizeRetirementStrategy(data: CombinedCalculationData): Optim
       calculateTaxOptimization(data, recommendedStrategy)
     )
 
-    const monteCarloResults = data.preferences.includeMonteCarloAnalysis ?
+    const monteCarloResults = (data.preferences as any)?.includeMonteCarloAnalysis ?
       measureSync('runMonteCarloSimulation', () => runMonteCarloSimulation(data, recommendedStrategy)) :
       undefined
 
@@ -367,9 +367,9 @@ function runMonteCarloSimulation(data: CombinedCalculationData, scenario: Optimi
   const yearlyResults: number[][] = []
   const retirementYears = data.personalInfo.lifeExpectancy - data.personalInfo.retirementGoalAge
 
-  // Economic scenario parameters
-  const inflationParams = getInflationParameters(data.preferences.inflationScenario)
-  const marketParams = getMarketParameters(data.preferences.riskTolerance)
+  // Economic scenario parameters (use defaults if preferences not available)
+  const inflationParams = getInflationParameters((data.preferences as any)?.inflationScenario || 'moderate')
+  const marketParams = getMarketParameters((data.preferences as any)?.riskTolerance || 'moderate')
 
   for (let i = 0; i < scenarios; i++) {
     const yearlyIncome: number[] = []

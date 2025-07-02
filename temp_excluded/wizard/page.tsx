@@ -220,8 +220,7 @@ export default function WizardPage() {
               { step: 3, title: "Social Security", desc: "Benefits from SSA.gov statement" },
               { step: 4, title: "Income & Assets", desc: "Additional retirement income sources" },
               { step: 5, title: "Preferences", desc: "Goals, risk tolerance, analysis options" },
-              { step: 6, title: "Optimization", desc: "AI-powered strategy analysis" },
-              { step: 7, title: "Review & Save", desc: "Final results and save to dashboard" }
+              { step: 6, title: "Review & Save", desc: "Final results and save to dashboard" }
             ].slice(0, 4).map((item) => (
               <div key={item.step} className="text-center p-4 border rounded-lg">
                 <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-2 text-sm font-semibold">

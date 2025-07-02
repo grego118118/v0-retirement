@@ -31,14 +31,14 @@ export function SavedCalculations() {
 
     try {
       setIsLoading(true)
-      const response = await fetch("/api/calculations")
+      const response = await fetch("/api/retirement/calculations?limit=20")
 
       if (!response.ok) {
         throw new Error("Failed to fetch calculations")
       }
 
       const data = await response.json()
-      setCalculations(data || [])
+      setCalculations(data.calculations || [])
     } catch (error) {
       console.error("Error fetching calculations:", error)
       toast({
@@ -62,7 +62,7 @@ export function SavedCalculations() {
   const handleDelete = async (id: string) => {
     try {
       setDeletingId(id)
-      const response = await fetch(`/api/calculations/${id}`, {
+      const response = await fetch(`/api/retirement/calculations/${id}`, {
         method: "DELETE",
       })
 

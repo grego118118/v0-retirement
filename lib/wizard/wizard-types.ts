@@ -82,10 +82,6 @@ export interface CombinedCalculationData {
   
   // Goals and Preferences
   preferences: {
-    riskTolerance: 'conservative' | 'moderate' | 'aggressive'
-    inflationScenario: 'conservative' | 'moderate' | 'optimistic'
-    includeTaxOptimization: boolean
-    includeMonteCarloAnalysis: boolean
     retirementIncomeGoal: number
   }
 }
@@ -202,14 +198,8 @@ export const WIZARD_STEPS: WizardStep[] = [
   },
   {
     id: 'preferences',
-    title: 'Goals & Preferences',
-    description: 'Your retirement goals and risk preferences',
-    isComplete: false
-  },
-  {
-    id: 'optimization',
-    title: 'Analysis & Optimization',
-    description: 'Review optimized retirement strategy recommendations',
+    title: 'Retirement Goals',
+    description: 'Set your target monthly retirement income goal',
     isComplete: false
   },
   {
