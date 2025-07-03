@@ -17,6 +17,7 @@ import {
   AlertCircle
 } from "lucide-react"
 import Link from "next/link"
+import { CalculationAnalysisModal } from "./calculation-analysis-modal"
 
 interface SavedCalculation {
   id: string
@@ -38,6 +39,8 @@ export function SavedCalculations() {
   const [calculations, setCalculations] = useState<SavedCalculation[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [selectedCalculation, setSelectedCalculation] = useState<any>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   useEffect(() => {
     if (session?.user) {
@@ -76,6 +79,33 @@ export function SavedCalculations() {
     } catch (err) {
       console.error('Error deleting calculation:', err)
     }
+  }
+
+  const handleViewCalculation = (calculation: SavedCalculation) => {
+    // Convert SavedCalculation to RetirementCalculation format for the modal
+    const retirementCalculation = {
+      id: calculation.id,
+      calculationName: calculation.calculationName,
+      retirementDate: calculation.retirementDate,
+      retirementAge: calculation.retirementAge,
+      yearsOfService: calculation.yearsOfService,
+      averageSalary: calculation.averageSalary,
+      retirementGroup: calculation.retirementGroup,
+      benefitPercentage: (calculation.monthlyBenefit * 12) / calculation.averageSalary * 100, // Calculate benefit percentage
+      retirementOption: calculation.retirementOption,
+      monthlyBenefit: calculation.monthlyBenefit,
+      annualBenefit: calculation.annualBenefit,
+      createdAt: calculation.createdAt,
+      updatedAt: calculation.updatedAt
+    }
+
+    setSelectedCalculation(retirementCalculation as any)
+    setIsModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+    setSelectedCalculation(null)
   }
 
   const formatCurrency = (amount: number) => {
@@ -229,12 +259,14 @@ export function SavedCalculations() {
                   Option {calc.retirementOption} • Annual: {formatCurrency(calc.annualBenefit)}
                 </div>
                 <div className="space-x-2">
-                  <Link href={`/calculator?id=${calc.id}`}>
-                    <Button size="sm" variant="outline">
-                      <Eye className="mr-2 h-4 w-4" />
-                      View
-                    </Button>
-                  </Link>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleViewCalculation(calc)}
+                  >
+                    <Eye className="mr-2 h-4 w-4" />
+                    View
+                  </Button>
                   <Button
                     size="sm"
                     variant="outline"
@@ -250,6 +282,13 @@ export function SavedCalculations() {
           </Card>
         ))}
       </div>
+
+      {/* Detailed Analysis Modal */}
+      <CalculationAnalysisModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        calculation={selectedCalculation}
+      />
     </div>
   )
 }
