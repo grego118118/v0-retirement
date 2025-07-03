@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { formatCurrency, formatDate } from "@/lib/utils"
+import { useToast } from "@/hooks/use-toast"
 import { 
   calculatePensionWithOption, 
   getBenefitFactor,
@@ -75,15 +76,16 @@ interface CalculationAnalysisModalProps {
   loading?: boolean
 }
 
-export function CalculationAnalysisModal({ 
-  isOpen, 
-  onClose, 
-  calculation, 
-  loading = false 
+export function CalculationAnalysisModal({
+  isOpen,
+  onClose,
+  calculation,
+  loading = false
 }: CalculationAnalysisModalProps) {
   const [analysisData, setAnalysisData] = useState<any>(null)
   const [analysisLoading, setAnalysisLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const { toast } = useToast()
 
   // Calculate detailed analysis when calculation changes
   useEffect(() => {
@@ -184,14 +186,141 @@ export function CalculationAnalysisModal({
     }
   }
 
-  const handleExport = () => {
-    // TODO: Implement export functionality
-    console.log("Export analysis data:", analysisData)
+  const handleExport = async () => {
+    if (!analysisData || !calculation) {
+      toast({
+        title: "Export Failed",
+        description: "No analysis data available to export",
+        variant: "destructive",
+      })
+      return
+    }
+
+    try {
+      // Create CSV data for export
+      const csvData = [
+        ['Massachusetts Retirement Analysis Export'],
+        ['Generated on:', new Date().toLocaleDateString()],
+        [''],
+        ['Basic Information'],
+        ['Calculation Name:', calculation.calculationName || 'Unnamed Calculation'],
+        ['Retirement Age:', calculation.retirementAge.toString()],
+        ['Years of Service:', calculation.yearsOfService.toString()],
+        ['Average Salary:', `$${calculation.averageSalary.toLocaleString()}`],
+        ['Retirement Group:', calculation.retirementGroup],
+        [''],
+        ['Pension Options'],
+        ['Option A - Monthly:', `$${analysisData.pensionOptions.optionA.monthly.toLocaleString()}`],
+        ['Option A - Annual:', `$${analysisData.pensionOptions.optionA.annual.toLocaleString()}`],
+        ['Option B - Monthly:', `$${analysisData.pensionOptions.optionB.monthly.toLocaleString()}`],
+        ['Option B - Annual:', `$${analysisData.pensionOptions.optionB.annual.toLocaleString()}`],
+        ['Option C - Monthly:', `$${analysisData.pensionOptions.optionC.monthly.toLocaleString()}`],
+        ['Option C - Annual:', `$${analysisData.pensionOptions.optionC.annual.toLocaleString()}`],
+        [''],
+        ['COLA Information'],
+        ['COLA Rate:', `${analysisData.colaInfo.rate}%`],
+        ['Annual Cap:', `$${analysisData.colaInfo.annualCap.toLocaleString()}`],
+        ['First Year COLA:', `$${analysisData.colaProjections.firstYear.toLocaleString()}`],
+        ['Five Year COLA:', `$${analysisData.colaProjections.fiveYear.toLocaleString()}`],
+        ['Ten Year COLA:', `$${analysisData.colaProjections.tenYear.toLocaleString()}`]
+      ]
+
+      // Convert to CSV string
+      const csvContent = csvData.map(row => row.join(',')).join('\n')
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+
+      link.setAttribute('href', url)
+      link.setAttribute('download', `MA_Retirement_Analysis_${calculation.calculationName?.replace(/[^a-zA-Z0-9]/g, '_') || 'Export'}_${new Date().toISOString().split('T')[0]}.csv`)
+      link.style.visibility = 'hidden'
+
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+
+      toast({
+        title: "Export Successful",
+        description: "Analysis data has been downloaded as CSV",
+      })
+
+    } catch (error) {
+      console.error('Export error:', error)
+      toast({
+        title: "Export Failed",
+        description: "There was an error exporting your analysis data",
+        variant: "destructive",
+      })
+    }
   }
 
-  const handleShare = () => {
-    // TODO: Implement share functionality
-    console.log("Share analysis data:", analysisData)
+  const handleShare = async () => {
+    if (!analysisData || !calculation) {
+      toast({
+        title: "Share Failed",
+        description: "No analysis data available to share",
+        variant: "destructive",
+      })
+      return
+    }
+
+    try {
+      // Create shareable URL with calculation ID
+      const shareUrl = `${window.location.origin}/calculator?shared=${calculation.id}`
+
+      // Create share text
+      const shareText = `Check out my Massachusetts Retirement Analysis:
+
+Retirement Age: ${calculation.retirementAge}
+Monthly Pension (Option A): $${analysisData.pensionOptions.optionA.monthly.toLocaleString()}
+Annual Pension (Option A): $${analysisData.pensionOptions.optionA.annual.toLocaleString()}
+
+View full analysis: ${shareUrl}`
+
+      // Try to use Web Share API if available
+      if (navigator.share) {
+        await navigator.share({
+          title: 'Massachusetts Retirement Analysis',
+          text: shareText,
+          url: shareUrl,
+        })
+
+        toast({
+          title: "Shared Successfully",
+          description: "Analysis has been shared",
+        })
+      } else {
+        // Fallback to clipboard
+        await navigator.clipboard.writeText(shareText)
+
+        toast({
+          title: "Copied to Clipboard",
+          description: "Share text has been copied to your clipboard",
+        })
+      }
+
+    } catch (error) {
+      console.error('Share error:', error)
+
+      // Final fallback - just copy the URL
+      try {
+        const shareUrl = `${window.location.origin}/calculator?shared=${calculation.id}`
+        await navigator.clipboard.writeText(shareUrl)
+
+        toast({
+          title: "URL Copied",
+          description: "Analysis URL has been copied to your clipboard",
+        })
+      } catch (clipboardError) {
+        toast({
+          title: "Share Failed",
+          description: "Unable to share or copy analysis data",
+          variant: "destructive",
+        })
+      }
+    }
   }
 
   if (loading || analysisLoading) {

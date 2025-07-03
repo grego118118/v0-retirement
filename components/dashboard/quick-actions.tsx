@@ -92,8 +92,60 @@ export function QuickActions({
   ]
 
   const secondaryActions = [
+    {
+      id: 'export-data',
+      title: 'Export Data',
+      description: 'Download calculations as CSV',
+      icon: Download,
+      color: 'bg-gradient-to-r from-purple-500 to-purple-600',
+      hoverColor: 'hover:from-purple-600 hover:to-purple-700',
+      textColor: 'text-white',
+      action: async () => {
+        if (latestCalculation) {
+          try {
+            // Create CSV data for the latest calculation
+            const csvData = [
+              ['Massachusetts Retirement Data Export'],
+              ['Generated on:', new Date().toLocaleDateString()],
+              [''],
+              ['Latest Calculation Summary'],
+              ['Calculation ID:', latestCalculation.id],
+              ['Created:', new Date(latestCalculation.createdAt).toLocaleDateString()],
+              [''],
+              ['Dashboard Statistics'],
+              ['Total Calculations:', calculationStats.totalCalculations.toString()],
+              ['Last Calculation Date:', calculationStats.lastCalculationDate],
+              ['Retirement Readiness:', calculationStats.retirementReadiness],
+              [''],
+              ['Note: For detailed calculation data, use the Export button on individual calculations.']
+            ]
 
+            // Convert to CSV string
+            const csvContent = csvData.map(row => row.join(',')).join('\n')
 
+            // Create and download file
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+            const link = document.createElement('a')
+            const url = URL.createObjectURL(blob)
+
+            link.setAttribute('href', url)
+            link.setAttribute('download', `MA_Retirement_Dashboard_Export_${new Date().toISOString().split('T')[0]}.csv`)
+            link.style.visibility = 'hidden'
+
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+
+            console.log('Dashboard data exported successfully')
+          } catch (error) {
+            console.error('Export failed:', error)
+          }
+        }
+      },
+      premium: false,
+      disabled: !hasCalculations,
+      priority: 'medium'
+    },
     {
       id: 'share-analysis',
       title: 'Share Analysis',
@@ -102,10 +154,40 @@ export function QuickActions({
       color: 'bg-gradient-to-r from-teal-500 to-teal-600',
       hoverColor: 'hover:from-teal-600 hover:to-teal-700',
       textColor: 'text-white',
-      action: () => {
+      action: async () => {
         if (latestCalculation) {
-          // TODO: Implement sharing functionality
-          console.log('Share calculation:', latestCalculation.id)
+          try {
+            // Create shareable URL
+            const shareUrl = `${window.location.origin}/calculator?shared=${latestCalculation.id}`
+
+            // Create share text
+            const shareText = `Check out my Massachusetts Retirement Analysis! View my pension calculation and retirement planning details.`
+
+            // Try to use Web Share API if available
+            if (navigator.share) {
+              await navigator.share({
+                title: 'Massachusetts Retirement Analysis',
+                text: shareText,
+                url: shareUrl,
+              })
+            } else {
+              // Fallback to clipboard
+              await navigator.clipboard.writeText(`${shareText}\n\n${shareUrl}`)
+
+              // Show success message (you may want to add toast notification here)
+              console.log('Share URL copied to clipboard:', shareUrl)
+            }
+          } catch (error) {
+            console.error('Share failed:', error)
+            // Fallback - just copy the URL
+            try {
+              const shareUrl = `${window.location.origin}/calculator?shared=${latestCalculation.id}`
+              await navigator.clipboard.writeText(shareUrl)
+              console.log('Share URL copied to clipboard as fallback:', shareUrl)
+            } catch (clipboardError) {
+              console.error('Clipboard access failed:', clipboardError)
+            }
+          }
         }
       },
       premium: true,

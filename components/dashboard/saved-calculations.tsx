@@ -14,11 +14,14 @@ import {
   Plus,
   Eye,
   Trash2,
-  AlertCircle
+  AlertCircle,
+  Download,
+  Share2
 } from "lucide-react"
 import Link from "next/link"
 import { CalculationAnalysisModal } from "./calculation-analysis-modal"
 import { useRetirementDataContext } from "@/contexts/retirement-data-context"
+import { useToast } from "@/hooks/use-toast"
 
 interface SavedCalculation {
   id: string
@@ -40,6 +43,7 @@ export function SavedCalculations() {
   const { calculations: hookCalculations, loading, error, fetchCalculations } = useRetirementDataContext()
   const [selectedCalculation, setSelectedCalculation] = useState<any>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const { toast } = useToast()
 
   // Convert hook calculations to component format with proper type safety
   const calculations = hookCalculations.map(calc => ({
@@ -76,6 +80,122 @@ export function SavedCalculations() {
       }
     } catch (err) {
       console.error('Error deleting calculation:', err)
+    }
+  }
+
+  const exportCalculation = async (calc: any) => {
+    try {
+      // Create CSV data for the calculation
+      const csvData = [
+        ['Massachusetts Retirement Calculation Export'],
+        ['Generated on:', new Date().toLocaleDateString()],
+        [''],
+        ['Basic Information'],
+        ['Calculation Name:', calc.calculationName || 'Unnamed Calculation'],
+        ['Created:', new Date(calc.createdAt).toLocaleDateString()],
+        ['Retirement Age:', calc.retirementAge.toString()],
+        ['Years of Service:', calc.yearsOfService.toString()],
+        ['Average Salary:', `$${calc.averageSalary.toLocaleString()}`],
+        ['Retirement Group:', calc.retirementGroup],
+        ['Retirement Option:', calc.retirementOption],
+        [''],
+        ['Calculated Benefits'],
+        ['Monthly Benefit:', `$${calc.monthlyBenefit.toLocaleString()}`],
+        ['Annual Benefit:', `$${calc.annualBenefit.toLocaleString()}`],
+        ['Benefit Reduction:', `${calc.benefitReduction || 0}%`],
+        ['Survivor Benefit:', `$${calc.survivorBenefit || 0}`],
+        [''],
+        ['Notes'],
+        [calc.notes || 'No additional notes']
+      ]
+
+      // Convert to CSV string
+      const csvContent = csvData.map(row => row.join(',')).join('\n')
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+
+      link.setAttribute('href', url)
+      link.setAttribute('download', `MA_Retirement_${calc.calculationName?.replace(/[^a-zA-Z0-9]/g, '_') || 'Calculation'}_${new Date().toISOString().split('T')[0]}.csv`)
+      link.style.visibility = 'hidden'
+
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+
+      toast({
+        title: "Export Successful",
+        description: "Calculation data has been downloaded as CSV",
+      })
+
+    } catch (error) {
+      console.error('Export error:', error)
+      toast({
+        title: "Export Failed",
+        description: "There was an error exporting your calculation",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const shareCalculation = async (calc: any) => {
+    try {
+      // Create shareable URL
+      const shareUrl = `${window.location.origin}/calculator?shared=${calc.id}`
+
+      // Create share text
+      const shareText = `Check out my Massachusetts Retirement Calculation:
+
+${calc.calculationName || 'My Retirement Plan'}
+Retirement Age: ${calc.retirementAge}
+Monthly Benefit: $${calc.monthlyBenefit.toLocaleString()}
+Annual Benefit: $${calc.annualBenefit.toLocaleString()}
+
+View full calculation: ${shareUrl}`
+
+      // Try to use Web Share API if available
+      if (navigator.share) {
+        await navigator.share({
+          title: 'Massachusetts Retirement Calculation',
+          text: shareText,
+          url: shareUrl,
+        })
+
+        toast({
+          title: "Shared Successfully",
+          description: "Calculation has been shared",
+        })
+      } else {
+        // Fallback to clipboard
+        await navigator.clipboard.writeText(shareText)
+
+        toast({
+          title: "Copied to Clipboard",
+          description: "Share text has been copied to your clipboard",
+        })
+      }
+
+    } catch (error) {
+      console.error('Share error:', error)
+
+      // Final fallback - just copy the URL
+      try {
+        const shareUrl = `${window.location.origin}/calculator?shared=${calc.id}`
+        await navigator.clipboard.writeText(shareUrl)
+
+        toast({
+          title: "URL Copied",
+          description: "Calculation URL has been copied to your clipboard",
+        })
+      } catch (clipboardError) {
+        toast({
+          title: "Share Failed",
+          description: "Unable to share or copy calculation data",
+          variant: "destructive",
+        })
+      }
     }
   }
 
@@ -256,7 +376,7 @@ export function SavedCalculations() {
                 <div className="text-sm text-gray-600">
                   Option {calc.retirementOption} • Annual: {formatCurrency(calc.annualBenefit)}
                 </div>
-                <div className="space-x-2">
+                <div className="flex flex-wrap gap-2">
                   <Button
                     size="sm"
                     variant="outline"
@@ -268,8 +388,27 @@ export function SavedCalculations() {
                   <Button
                     size="sm"
                     variant="outline"
+                    onClick={() => exportCalculation(calc)}
+                    title="Export calculation as CSV"
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    Export
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => shareCalculation(calc)}
+                    title="Share calculation"
+                  >
+                    <Share2 className="mr-2 h-4 w-4" />
+                    Share
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
                     onClick={() => deleteCalculation(calc.id)}
                     className="text-red-600 hover:text-red-700"
+                    title="Delete calculation"
                   >
                     <Trash2 className="mr-2 h-4 w-4" />
                     Delete
