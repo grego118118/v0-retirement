@@ -113,9 +113,9 @@ export function QuickActions({
               ['Created:', new Date(latestCalculation.createdAt).toLocaleDateString()],
               [''],
               ['Dashboard Statistics'],
-              ['Total Calculations:', calculationStats.totalCalculations.toString()],
-              ['Last Calculation Date:', calculationStats.lastCalculationDate],
-              ['Retirement Readiness:', calculationStats.retirementReadiness],
+              ['Total Calculations:', calculationStats?.totalCalculations?.toString() || '0'],
+              ['Last Calculation Date:', calculationStats?.lastCalculationDate || 'N/A'],
+              ['Retirement Readiness:', calculationStats?.retirementReadiness || 'unknown'],
               [''],
               ['Note: For detailed calculation data, use the Export button on individual calculations.']
             ]
