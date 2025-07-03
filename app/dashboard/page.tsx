@@ -11,7 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { QuickActions } from "@/components/dashboard/quick-actions"
 import { SavedCalculations } from "@/components/dashboard/saved-calculations"
-import { useRetirementData } from "@/hooks/use-retirement-data"
+import { RetirementDataProvider, useRetirementDataContext } from "@/contexts/retirement-data-context"
 import { useSubscriptionStatus } from "@/hooks/use-subscription"
 import { formatDate, formatCurrency, parseDate } from "@/lib/utils"
 import { RetirementCountdown } from "@/components/countdown/retirement-countdown"
@@ -54,11 +54,11 @@ interface CalculationStats {
   retirementReadiness: 'on-track' | 'needs-attention' | 'excellent'
 }
 
-export default function DashboardPage() {
+function DashboardContent() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const { isPremium } = useSubscriptionStatus()
-  const { calculations, loading: calculationsLoading, fetchCalculations } = useRetirementData()
+  const { calculations, loading: calculationsLoading, fetchCalculations } = useRetirementDataContext()
   
   const [userProfile, setUserProfile] = useState<UserProfile>({})
   const [profileLoading, setProfileLoading] = useState(true)
@@ -694,5 +694,13 @@ function DashboardSkeleton() {
       </div>
       <CalculationsDebug />
     </div>
+  )
+}
+
+export default function DashboardPage() {
+  return (
+    <RetirementDataProvider>
+      <DashboardContent />
+    </RetirementDataProvider>
   )
 }

@@ -683,7 +683,7 @@ export function useRetirementData() {
     if (session?.user) {
       fetchCalculations()
     }
-  }, [session?.user?.id, fetchCalculations]) // Include fetchCalculations in dependencies
+  }, [session?.user?.id]) // Only depend on user ID to prevent infinite re-renders
 
   // Save or update retirement profile
   const saveProfile = useCallback(async (profileData: RetirementProfile) => {

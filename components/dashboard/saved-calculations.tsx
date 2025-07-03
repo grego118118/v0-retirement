@@ -18,6 +18,7 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { CalculationAnalysisModal } from "./calculation-analysis-modal"
+import { useRetirementDataContext } from "@/contexts/retirement-data-context"
 
 interface SavedCalculation {
   id: string
@@ -36,36 +37,32 @@ interface SavedCalculation {
 
 export function SavedCalculations() {
   const { data: session } = useSession()
-  const [calculations, setCalculations] = useState<SavedCalculation[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const { calculations: hookCalculations, loading, error, fetchCalculations } = useRetirementDataContext()
   const [selectedCalculation, setSelectedCalculation] = useState<any>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  useEffect(() => {
-    if (session?.user) {
-      fetchCalculations()
-    }
-  }, [session])
+  // Convert hook calculations to component format with proper type safety
+  const calculations = hookCalculations.map(calc => ({
+    id: calc.id || '',
+    calculationName: calc.calculationName || '',
+    retirementDate: calc.retirementDate,
+    retirementAge: calc.retirementAge,
+    yearsOfService: calc.yearsOfService,
+    averageSalary: calc.averageSalary,
+    retirementGroup: calc.retirementGroup,
+    retirementOption: calc.retirementOption,
+    monthlyBenefit: calc.monthlyBenefit,
+    annualBenefit: calc.annualBenefit,
+    benefitReduction: calc.benefitReduction,
+    survivorBenefit: calc.survivorBenefit,
+    notes: calc.notes,
+    isFavorite: calc.isFavorite,
+    createdAt: calc.createdAt || '',
+    updatedAt: calc.updatedAt || '',
+    socialSecurityData: calc.socialSecurityData
+  })).filter(calc => calc.id) // Filter out any calculations without valid IDs
 
-  const fetchCalculations = async () => {
-    try {
-      setLoading(true)
-      const response = await fetch('/api/retirement/calculations')
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch calculations')
-      }
-
-      const data = await response.json()
-      setCalculations(data.calculations || [])
-    } catch (err) {
-      console.error('Error fetching calculations:', err)
-      setError('Unable to load saved calculations. Please try again later.')
-    } finally {
-      setLoading(false)
-    }
-  }
+  // No need for useEffect or fetchCalculations - using data from useRetirementData hook
 
   const deleteCalculation = async (id: string) => {
     try {
@@ -74,7 +71,8 @@ export function SavedCalculations() {
       })
 
       if (response.ok) {
-        setCalculations(calculations.filter(calc => calc.id !== id))
+        // Refresh calculations from the hook
+        fetchCalculations()
       }
     } catch (err) {
       console.error('Error deleting calculation:', err)

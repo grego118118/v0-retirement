@@ -1,11 +1,11 @@
 "use client"
 
-import { useRetirementData } from "@/hooks/use-retirement-data"
+import { useRetirementDataContext } from "@/contexts/retirement-data-context"
 import { useSession } from "next-auth/react"
 
 export function CalculationsDebug() {
   const { data: session, status } = useSession()
-  const { calculations, loading, error } = useRetirementData()
+  const { calculations, loading, error } = useRetirementDataContext()
 
   // Force console logs to appear in server logs by making API calls
   const debugInfo = {

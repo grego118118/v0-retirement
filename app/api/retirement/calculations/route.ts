@@ -251,9 +251,37 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(response)
   } catch (error) {
-    console.error("Error fetching calculations:", error)
+    // Enhanced error logging for debugging
+    console.error("=== CALCULATIONS API ERROR ===")
+    console.error("Error type:", error?.constructor?.name)
+    console.error("Error message:", error instanceof Error ? error.message : String(error))
+    console.error("Error stack:", error instanceof Error ? error.stack : 'No stack trace')
+    console.error("Session user ID:", (await getServerSession(authOptions))?.user?.id)
+    console.error("Database URL configured:", !!process.env.DATABASE_URL)
+    console.error("Prisma client available:", typeof prisma)
+
+    // Check if it's a database connection error
+    if (error instanceof Error) {
+      if (error.message.includes('connect') || error.message.includes('timeout')) {
+        console.error("DATABASE CONNECTION ERROR detected")
+        return NextResponse.json(
+          { error: "Database connection error. Please try again." },
+          { status: 503 }
+        )
+      } else if (error.message.includes('prepared statement')) {
+        console.error("PREPARED STATEMENT ERROR detected")
+        return NextResponse.json(
+          { error: "Database query error. Please try again." },
+          { status: 503 }
+        )
+      }
+    }
+
     return NextResponse.json(
-      { error: "Failed to fetch calculations" },
+      {
+        error: "Failed to fetch calculations",
+        details: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined
+      },
       { status: 500 }
     )
   }
