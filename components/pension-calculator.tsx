@@ -32,7 +32,7 @@ import { useSearchParams, useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { useRetirementData } from "@/hooks/use-retirement-data"
 import { useSubscriptionStatus } from "@/hooks/use-subscription"
-import { PremiumGate } from "@/components/premium/premium-gate"
+import { EnhancedPremiumGate } from "@/components/premium/enhanced-premium-gate"
 import {
   Dialog,
   DialogContent,
@@ -46,7 +46,7 @@ import Link from "next/link"
 import { SocialSecurityCalculator } from "@/components/social-security/social-security-calculator"
 import { CombinedRetirementCalculator } from "@/components/combined-retirement-calculator"
 import { CalculatorChart } from "@/components/calculator/calculator-chart"
-import { MSRBTestValidator } from "@/components/msrb-test-validator"
+
 
 // Helper functions for date format conversion
 const convertISOToDateInput = (isoDate: string | null | undefined): string => {
@@ -1547,13 +1547,7 @@ export default function PensionCalculator() {
                         <span className="hidden lg:inline">Combined Analysis</span>
                         <span className="lg:hidden">Combined</span>
                       </TabsTrigger>
-                      <TabsTrigger
-                        value="msrb-test"
-                        className="min-h-[44px] text-xs sm:text-sm px-2 sm:px-3 py-2 col-span-2 sm:col-span-1 touch-manipulation"
-                      >
-                        <span className="hidden sm:inline">MSRB Test</span>
-                        <span className="sm:hidden">MSRB</span>
-                      </TabsTrigger>
+
                     </TabsList>
                     <TabsContent value="projection" className="pt-4">
                       {calculationResult.projectionData && calculationResult.projectionData.rows.length > 0 ? (
@@ -1607,7 +1601,7 @@ export default function PensionCalculator() {
                       </Card>
                     </TabsContent>
                     <TabsContent value="social-security" className="pt-4">
-                      <PremiumGate
+                      <EnhancedPremiumGate
                         feature="social_security"
                         title="Social Security Integration"
                         description="Add Social Security benefits to get your complete retirement income picture"
@@ -1638,10 +1632,10 @@ export default function PensionCalculator() {
                             estimatedBenefit: userProfile?.estimatedSocialSecurityBenefit || 0
                           }}
                         />
-                      </PremiumGate>
+                      </EnhancedPremiumGate>
                     </TabsContent>
                     <TabsContent value="combined" className="pt-4">
-                      <PremiumGate
+                      <EnhancedPremiumGate
                         feature="social_security"
                         title="Combined Income Analysis"
                         description="See your pension and Social Security benefits combined with optimization suggestions"
@@ -1659,20 +1653,9 @@ export default function PensionCalculator() {
                             fullRetirementAge: 67,
                           }}
                         />
-                      </PremiumGate>
+                      </EnhancedPremiumGate>
                     </TabsContent>
-                    <TabsContent value="msrb-test" className="pt-4">
-                      <MSRBTestValidator
-                        formData={{
-                          age: calculationResult.details.age,
-                          yearsOfService: calculationResult.details.yearsOfService,
-                          group: calculationResult.details.group,
-                          averageSalary: calculationResult.details.averageSalary,
-                          retirementOption: formData.retirementOption,
-                          beneficiaryAge: formData.beneficiaryAge
-                        }}
-                      />
-                    </TabsContent>
+
                   </Tabs>
                 </div>
 

@@ -107,7 +107,7 @@ export async function GET() {
     }
 
     const authConfigured = authConfig.googleClientId && authConfig.googleClientSecret && authConfig.nextAuthSecret
-    
+
     if (authConfigured) {
       addTest('NextAuth Configuration', 'pass', 'NextAuth properly configured', authConfig)
     } else {
@@ -115,6 +115,37 @@ export async function GET() {
     }
   } catch (error) {
     addTest('NextAuth Configuration', 'fail', `Error checking NextAuth config: ${error instanceof Error ? error.message : 'Unknown'}`)
+  }
+
+  // Test 8: Database Schema Check
+  try {
+    const tablesQuery = `
+      SELECT table_name
+      FROM information_schema.tables
+      WHERE table_schema = 'public'
+      ORDER BY table_name
+    `
+
+    const tables = await prisma.$queryRawUnsafe(tablesQuery) as Array<{table_name: string}>
+    const tableNames = tables.map(t => t.table_name)
+
+    const expectedTables = ['User', 'Account', 'Session', 'RetirementProfile', 'RetirementCalculation', 'EmailLog', 'NewsletterSubscriber']
+    const missingTables = expectedTables.filter(table => !tableNames.includes(table))
+
+    if (missingTables.length === 0) {
+      addTest('Database Schema', 'pass', `All ${expectedTables.length} required tables exist`, {
+        existingTables: tableNames,
+        allTablesPresent: true
+      })
+    } else {
+      addTest('Database Schema', 'fail', `Missing ${missingTables.length} tables: ${missingTables.join(', ')}`, {
+        existingTables: tableNames,
+        missingTables: missingTables,
+        expectedTables: expectedTables
+      })
+    }
+  } catch (error) {
+    addTest('Database Schema', 'fail', `Error checking database schema: ${error instanceof Error ? error.message : 'Unknown'}`)
   }
 
   // Determine overall status

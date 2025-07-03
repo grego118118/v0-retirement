@@ -69,7 +69,8 @@ export function EnhancedPremiumGate({
         if (response.ok) {
           const data = await response.json()
           setSubscriptionData(data)
-          console.log(`EnhancedPremiumGate [${feature}]: isPremium=${data.isPremium}, subscriptionStatus=${data.subscriptionStatus}`)
+          console.log(`EnhancedPremiumGate [${feature}]: isPremium=${data.isPremium}, subscriptionStatus=${data.subscriptionStatus}, userEmail=${session?.user?.email}`)
+          console.log(`EnhancedPremiumGate [${feature}]: Full subscription data:`, data)
         }
       } catch (error) {
         console.error('Failed to check subscription status:', error)
@@ -192,16 +193,38 @@ export function EnhancedPremiumGate({
     )
   }
 
-  // Authenticated users always get premium access
-  if (session?.user) {
+  // Fallback premium users (for development and testing)
+  const FALLBACK_PREMIUM_USERS = [
+    'premium@example.com',
+    'test@premium.com',
+    'grego118@gmail.com'
+  ]
+
+  // Check if user is in fallback premium list
+  const isFallbackPremium = session?.user?.email && FALLBACK_PREMIUM_USERS.includes(session.user.email)
+
+  // Debug logging for premium access decision
+  console.log(`EnhancedPremiumGate [${feature}] Access Decision:`, {
+    hasSession: !!session?.user,
+    userEmail: session?.user?.email,
+    isPremium: subscriptionData?.isPremium,
+    isFallbackPremium,
+    featureRequired: featureConfig.required,
+    upgradeRequired: featureConfig.required && !subscriptionData?.isPremium && !isFallbackPremium,
+    isLimitReached: subscriptionData ? checkUsageLimit(feature, subscriptionData) : false
+  })
+
+  // Give access to fallback premium users immediately
+  if (isFallbackPremium) {
+    console.log(`EnhancedPremiumGate [${feature}]: Granting access to fallback premium user: ${session?.user?.email}`)
     return <>{children}</>
   }
 
-  // Check if feature requires premium and user doesn't have it
-  const upgradeRequired = featureConfig.required && !subscriptionData.isPremium
+  // Check if feature requires premium and user doesn't have it (including fallback premium users)
+  const upgradeRequired = featureConfig.required && !subscriptionData.isPremium && !isFallbackPremium
 
-  // Check usage limits for free users
-  const isLimitReached = checkUsageLimit(feature, subscriptionData)
+  // Check usage limits for free users (fallback premium users have no limits)
+  const isLimitReached = !isFallbackPremium && checkUsageLimit(feature, subscriptionData)
 
   // Show premium content if user has access and hasn't reached limits
   if (!upgradeRequired && !isLimitReached) {
