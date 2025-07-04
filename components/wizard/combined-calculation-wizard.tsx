@@ -54,7 +54,7 @@ import { RetirementBenefitsProjection } from "@/components/retirement-benefits-p
 import { SalaryProjectionDisplay } from "@/components/wizard/salary-projection-display"
 import { calculateSalaryProjection, getRetirementDateForProjection } from "@/lib/salary-projection"
 import { PDFExportSection } from "@/components/pdf/pdf-export-button"
-import { CombinedCalculationData as PDFCombinedCalculationData } from "@/lib/pdf/pdf-generator"
+
 import Link from "next/link"
 
 // Validation schemas for each step
@@ -2224,59 +2224,69 @@ export function CombinedCalculationWizard({
 
 
         {/* PDF Export Section */}
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6 mt-8">
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <h3 className="text-lg font-semibold text-blue-900 flex items-center gap-2">
-                <FileText className="w-5 h-5" />
-                Professional PDF Reports
-                <Crown className="w-4 h-4 text-amber-500" />
-              </h3>
-              <p className="text-sm text-blue-700 mt-1">
-                Download comprehensive retirement analysis reports with official calculations and projections.
-              </p>
-            </div>
-          </div>
+        {(() => {
+          // Create pension data structure for PDF generation
+          const pensionData = wizardData.pensionData
+          const personalInfo = wizardData.personalInfo
 
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="space-y-2">
-              <h4 className="font-medium text-blue-900">Basic Pension Report</h4>
-              <p className="text-xs text-blue-600 mb-3">
-                Detailed pension calculations with all retirement options and MSRB-accurate results.
-              </p>
-              <Button variant="outline" size="sm" disabled>
-                <Lock className="w-4 h-4 mr-2" />
-                Generate PDF Report
-                <Crown className="w-4 h-4 ml-2 text-amber-500" />
-              </Button>
-            </div>
+          if (!pensionData || !personalInfo) {
+            return null
+          }
 
-            <div className="space-y-2">
-              <h4 className="font-medium text-blue-900">Comprehensive Analysis</h4>
-              <p className="text-xs text-blue-600 mb-3">
-                Complete retirement plan including pension, Social Security, and additional income sources.
-              </p>
-              <Button variant="default" size="sm" disabled>
-                <Lock className="w-4 h-4 mr-2" />
-                Generate PDF Report
-                <Crown className="w-4 h-4 ml-2 text-amber-500" />
-              </Button>
-            </div>
-          </div>
+          const pensionCalculationData = {
+            currentAge: personalInfo.currentAge || 0,
+            plannedRetirementAge: pensionData.pensionRetirementAge || 65,
+            retirementGroup: `Group ${pensionData.retirementGroup || '1'}`,
+            serviceEntry: pensionData.serviceEntry || 'before_2012',
+            averageSalary: pensionData.averageSalary || 0,
+            yearsOfService: pensionData.yearsOfService || 0,
+            projectedYearsAtRetirement: pensionData.yearsOfService || 0,
+            basePension: calculatePensionBenefit(true) * 12, // Convert monthly to annual
+            benefitFactor: getBenefitFactor(
+              pensionData.pensionRetirementAge || 65,
+              `GROUP_${pensionData.retirementGroup || '1'}`,
+              pensionData.serviceEntry || 'before_2012',
+              pensionData.yearsOfService || 0
+            ),
+            totalBenefitPercentage: getBenefitFactor(
+              pensionData.pensionRetirementAge || 65,
+              `GROUP_${pensionData.retirementGroup || '1'}`,
+              pensionData.serviceEntry || 'before_2012',
+              pensionData.yearsOfService || 0
+            ) * (pensionData.yearsOfService || 0),
+            cappedAt80Percent: false, // Calculate if needed
+            options: {
+              A: {
+                annual: calculatePensionBenefit(true) * 12,
+                monthly: calculatePensionBenefit(true),
+                description: 'Option A: Full Allowance (100%)'
+              },
+              B: {
+                annual: calculatePensionBenefit(true) * 12 * 0.99, // Approximate 1% reduction
+                monthly: calculatePensionBenefit(true) * 0.99,
+                description: 'Option B: Annuity Protection (1% reduction)',
+                reduction: 0.01
+              },
+              C: {
+                annual: calculatePensionBenefit(true) * 12 * 0.93, // Approximate reduction for Option C
+                monthly: calculatePensionBenefit(true) * 0.93,
+                description: 'Option C: Joint & Survivor (66.67%)',
+                reduction: 0.07,
+                survivorAnnual: calculatePensionBenefit(true) * 12 * 0.6667,
+                survivorMonthly: calculatePensionBenefit(true) * 0.6667,
+                beneficiaryAge: pensionData.beneficiaryAge
+              }
+            },
+            calculationDate: new Date().toISOString()
+          }
 
-          <div className="mt-4 pt-4 border-t border-blue-200">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-blue-600">
-                Unlock unlimited PDF reports with Premium
-              </span>
-              <Button size="sm" asChild>
-                <Link href="/pricing">
-                  View Plans
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </div>
+          return (
+            <PDFExportSection
+              pensionData={pensionCalculationData}
+              className="mt-8"
+            />
+          )
+        })()}
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">

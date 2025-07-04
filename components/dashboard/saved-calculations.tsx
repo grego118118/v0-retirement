@@ -85,7 +85,15 @@ export function SavedCalculations() {
 
   const exportCalculation = async (calc: any) => {
     try {
-      // Create CSV data for the calculation
+      // Helper function to safely format currency values
+      const safeCurrency = (value: any): string => {
+        if (value === null || value === undefined || isNaN(Number(value))) {
+          return '$0'
+        }
+        return `$${Number(value).toLocaleString()}`
+      }
+
+      // Create CSV data for the calculation with null safety
       const csvData = [
         ['Massachusetts Retirement Calculation Export'],
         ['Generated on:', new Date().toLocaleDateString()],
@@ -93,17 +101,17 @@ export function SavedCalculations() {
         ['Basic Information'],
         ['Calculation Name:', calc.calculationName || 'Unnamed Calculation'],
         ['Created:', new Date(calc.createdAt).toLocaleDateString()],
-        ['Retirement Age:', calc.retirementAge.toString()],
-        ['Years of Service:', calc.yearsOfService.toString()],
-        ['Average Salary:', `$${calc.averageSalary.toLocaleString()}`],
-        ['Retirement Group:', calc.retirementGroup],
-        ['Retirement Option:', calc.retirementOption],
+        ['Retirement Age:', (calc.retirementAge || 0).toString()],
+        ['Years of Service:', (calc.yearsOfService || 0).toString()],
+        ['Average Salary:', safeCurrency(calc.averageSalary)],
+        ['Retirement Group:', calc.retirementGroup || 'Unknown'],
+        ['Retirement Option:', calc.retirementOption || 'Unknown'],
         [''],
         ['Calculated Benefits'],
-        ['Monthly Benefit:', `$${calc.monthlyBenefit.toLocaleString()}`],
-        ['Annual Benefit:', `$${calc.annualBenefit.toLocaleString()}`],
+        ['Monthly Benefit:', safeCurrency(calc.monthlyBenefit)],
+        ['Annual Benefit:', safeCurrency(calc.annualBenefit)],
         ['Benefit Reduction:', `${calc.benefitReduction || 0}%`],
-        ['Survivor Benefit:', `$${calc.survivorBenefit || 0}`],
+        ['Survivor Benefit:', safeCurrency(calc.survivorBenefit)],
         [''],
         ['Notes'],
         [calc.notes || 'No additional notes']

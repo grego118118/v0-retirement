@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  serverExternalPackages: ['@prisma/client', 'prisma', 'puppeteer'],
+  serverExternalPackages: ['@prisma/client', 'prisma'],
+
+  // Configure ES Module support for React-PDF
+  // transpilePackages: ['@react-pdf/renderer'], // Commented out to avoid conflict
 
   // Production optimizations (disabled for development)
   // output: 'standalone',
@@ -106,6 +109,39 @@ const nextConfig = {
 
   // Webpack configuration for production builds
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+    // Configure React-PDF ES Module handling
+    config.resolve.extensionAlias = {
+      '.js': ['.js', '.ts', '.tsx'],
+      '.jsx': ['.jsx', '.tsx'],
+    }
+
+    // Handle React-PDF ES modules - don't externalize for server
+    // Let webpack bundle it properly instead
+    if (isServer) {
+      // Ensure React-PDF is bundled with the server
+      config.externals = config.externals || []
+      // Remove any existing externalization of react-pdf
+      config.externals = config.externals.filter(external => {
+        if (typeof external === 'string') {
+          return !external.includes('@react-pdf')
+        }
+        if (typeof external === 'object') {
+          return !('@react-pdf/renderer' in external)
+        }
+        return true
+      })
+
+      // Add fallbacks for Node.js modules that React-PDF might need
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        canvas: false,
+        fs: false,
+        path: false,
+        os: false,
+        crypto: false,
+      }
+    }
+
     // Only apply minimal changes in production
     if (!dev && process.env.NODE_ENV === 'production') {
       // Use production stub for wizard-v2-dev component if needed

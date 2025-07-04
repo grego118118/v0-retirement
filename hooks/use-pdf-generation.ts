@@ -6,12 +6,44 @@ import { useRouter } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
 import {
   PensionCalculationData,
-  CombinedCalculationData,
-  PDFGenerationOptions,
-  generatePDFFilename,
-  downloadPDF
-} from '@/lib/pdf/pdf-generator'
+  PDFGenerationOptions
+} from '@/lib/pdf/puppeteer-pdf-generator'
 import { canAccessFeature, isUserPremium } from '@/lib/stripe/config'
+
+// Utility functions for PDF generation
+function generatePDFFilename(
+  reportType: 'pension' | 'combined',
+  userName?: string
+): string {
+  const dateStr = new Date().toISOString().split('T')[0]
+  const userStr = userName ? userName.replace(/[^a-zA-Z0-9]/g, '_') : 'User'
+
+  return reportType === 'pension'
+    ? `MA_Pension_Report_${userStr}_${dateStr}.pdf`
+    : `MA_Retirement_Analysis_${userStr}_${dateStr}.pdf`
+}
+
+function downloadPDF(blob: Blob, filename: string): void {
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  link.style.display = 'none'
+
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+
+  // Clean up the URL object
+  URL.revokeObjectURL(url)
+}
+
+// Combined calculation data interface (for compatibility)
+interface CombinedCalculationData {
+  pensionData: PensionCalculationData
+  socialSecurityData?: any
+  additionalIncome?: any
+}
 
 interface UsePDFGenerationOptions {
   onSuccess?: (filename: string) => void
@@ -298,26 +330,9 @@ export function usePDFGeneration(options: UsePDFGenerationOptions = {}) {
 
         blob = await response.blob()
       } else {
-        // Use client-side generation (fallback)
-        const { 
-          generatePensionCalculationPDF, 
-          generateCombinedRetirementPDF 
-        } = await import('@/lib/pdf/pdf-generator')
-
-        const fullOptions: PDFGenerationOptions = {
-          reportType: reportType === 'pension' ? 'basic' : 'combined',
-          includeCharts: true,
-          includeCOLAProjections: true,
-          includeScenarioComparison: reportType === 'combined',
-          watermark: isPremium ? undefined : 'PREMIUM PREVIEW',
-          ...pdfOptions
-        }
-
-        if (reportType === 'pension') {
-          blob = await generatePensionCalculationPDF(data as PensionCalculationData, fullOptions)
-        } else {
-          blob = await generateCombinedRetirementPDF(data as CombinedCalculationData, fullOptions)
-        }
+        // Client-side generation not supported with Puppeteer
+        // Always use server-side generation
+        throw new Error('PDF generation requires server-side processing. Please try again.')
       }
 
       // Download the PDF
