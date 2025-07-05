@@ -208,25 +208,42 @@ export function SavedCalculations() {
   }
 
   const exportCalculation = async (calc: any) => {
+    console.log('🔄 PDF Export: Starting export for calculation:', calc.id)
+
     try {
       // Check if user has premium access for PDF generation
+      console.log('🔄 PDF Export: Checking subscription status...')
       const subscriptionResponse = await fetch('/api/subscription/status')
+      console.log('🔄 PDF Export: Subscription response status:', subscriptionResponse.status)
+
+      if (!subscriptionResponse.ok) {
+        throw new Error(`Subscription check failed: ${subscriptionResponse.status}`)
+      }
+
       const subscriptionData = await subscriptionResponse.json()
+      console.log('🔄 PDF Export: Subscription data:', subscriptionData)
       const isPremium = subscriptionData.isPremium
 
       if (!isPremium) {
+        console.log('❌ PDF Export: User is not premium, redirecting to pricing')
         // Redirect non-premium users to pricing page
         window.location.href = '/pricing?feature=pdf-export&context=dashboard_export'
         return
       }
 
+      console.log('✅ PDF Export: Premium access confirmed')
+
       // Convert calculation data to proper PDF format with all required fields
+      console.log('🔄 PDF Export: Transforming calculation data...')
       const pensionData = transformCalculationForPDF(calc)
+      console.log('🔄 PDF Export: Transformed data:', pensionData)
 
       // Validate the transformed data has all required fields
       if (!pensionData.options || !pensionData.options.A || !pensionData.options.B || !pensionData.options.C) {
         throw new Error('Failed to generate complete pension options data for PDF')
       }
+
+      console.log('✅ PDF Export: Data validation passed')
 
       // Show loading state
       toast({
@@ -234,6 +251,7 @@ export function SavedCalculations() {
         description: "Please wait while we create your retirement report",
       })
 
+      console.log('🔄 PDF Export: Calling PDF generation API...')
       // Call PDF generation API
       const pdfResponse = await fetch('/api/pdf/generate', {
         method: 'POST',
@@ -251,13 +269,20 @@ export function SavedCalculations() {
         })
       })
 
+      console.log('🔄 PDF Export: PDF API response status:', pdfResponse.status)
+
       if (!pdfResponse.ok) {
         const errorData = await pdfResponse.json()
+        console.error('❌ PDF Export: API error:', errorData)
         throw new Error(errorData.error || 'Failed to generate PDF')
       }
 
+      console.log('✅ PDF Export: PDF generated successfully, downloading...')
+
       // Download the PDF
       const pdfBlob = await pdfResponse.blob()
+      console.log('🔄 PDF Export: PDF blob size:', pdfBlob.size)
+
       const url = URL.createObjectURL(pdfBlob)
       const link = document.createElement('a')
 
@@ -272,16 +297,53 @@ export function SavedCalculations() {
       // Clean up
       URL.revokeObjectURL(url)
 
+      console.log('✅ PDF Export: Download completed successfully')
+
       toast({
         title: "PDF Export Successful",
         description: "Your retirement report has been downloaded",
       })
 
     } catch (error) {
-      console.error('PDF Export error:', error)
+      console.error('❌ PDF Export error:', error)
       toast({
         title: "PDF Export Failed",
         description: error instanceof Error ? error.message : "There was an error generating your PDF report",
+        variant: "destructive",
+      })
+    }
+  }
+
+  // Debug function to test PDF generation
+  const testPDFGeneration = async () => {
+    console.log('🧪 Testing PDF generation...')
+    try {
+      const response = await fetch('/api/test-pension-pdf')
+      console.log('🧪 Test PDF response status:', response.status)
+
+      if (response.ok) {
+        const blob = await response.blob()
+        console.log('🧪 Test PDF blob size:', blob.size)
+
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = 'test-pension-report.pdf'
+        link.click()
+        URL.revokeObjectURL(url)
+
+        toast({
+          title: "Test PDF Generated",
+          description: "Test PDF downloaded successfully",
+        })
+      } else {
+        throw new Error(`Test PDF failed: ${response.status}`)
+      }
+    } catch (error) {
+      console.error('🧪 Test PDF error:', error)
+      toast({
+        title: "Test PDF Failed",
+        description: error instanceof Error ? error.message : "Test PDF generation failed",
         variant: "destructive",
       })
     }
@@ -454,6 +516,9 @@ View full calculation: ${shareUrl}`
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">Your Calculations ({calculations.length})</h3>
         <div className="space-x-2">
+          <Button size="sm" variant="secondary" onClick={testPDFGeneration}>
+            🧪 Test PDF
+          </Button>
           <Link href="/calculator">
             <Button size="sm">
               <Calculator className="mr-2 h-4 w-4" />
