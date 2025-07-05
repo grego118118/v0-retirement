@@ -85,64 +85,88 @@ export function SavedCalculations() {
 
   const exportCalculation = async (calc: any) => {
     try {
-      // Helper function to safely format currency values
-      const safeCurrency = (value: any): string => {
-        if (value === null || value === undefined || isNaN(Number(value))) {
-          return '$0'
-        }
-        return `$${Number(value).toLocaleString()}`
+      // Check if user has premium access for PDF generation
+      const subscriptionResponse = await fetch('/api/subscription/status')
+      const subscriptionData = await subscriptionResponse.json()
+      const isPremium = subscriptionData.isPremium
+
+      if (!isPremium) {
+        // Redirect non-premium users to pricing page
+        window.location.href = '/pricing?feature=pdf-export&context=dashboard_export'
+        return
       }
 
-      // Create CSV data for the calculation with null safety
-      const csvData = [
-        ['Massachusetts Retirement Calculation Export'],
-        ['Generated on:', new Date().toLocaleDateString()],
-        [''],
-        ['Basic Information'],
-        ['Calculation Name:', calc.calculationName || 'Unnamed Calculation'],
-        ['Created:', new Date(calc.createdAt).toLocaleDateString()],
-        ['Retirement Age:', (calc.retirementAge || 0).toString()],
-        ['Years of Service:', (calc.yearsOfService || 0).toString()],
-        ['Average Salary:', safeCurrency(calc.averageSalary)],
-        ['Retirement Group:', calc.retirementGroup || 'Unknown'],
-        ['Retirement Option:', calc.retirementOption || 'Unknown'],
-        [''],
-        ['Calculated Benefits'],
-        ['Monthly Benefit:', safeCurrency(calc.monthlyBenefit)],
-        ['Annual Benefit:', safeCurrency(calc.annualBenefit)],
-        ['Benefit Reduction:', `${calc.benefitReduction || 0}%`],
-        ['Survivor Benefit:', safeCurrency(calc.survivorBenefit)],
-        [''],
-        ['Notes'],
-        [calc.notes || 'No additional notes']
-      ]
+      // Convert calculation data to PDF format
+      const pensionData = {
+        currentAge: calc.retirementAge - calc.yearsOfService, // Estimate current age
+        plannedRetirementAge: calc.retirementAge,
+        retirementGroup: calc.retirementGroup,
+        serviceEntry: 'before_2012', // Default - could be enhanced with actual data
+        averageSalary: calc.averageSalary,
+        yearsOfService: calc.yearsOfService,
+        retirementOption: calc.retirementOption,
+        monthlyBenefit: calc.monthlyBenefit,
+        annualBenefit: calc.annualBenefit,
+        benefitReduction: calc.benefitReduction || 0,
+        survivorBenefit: calc.survivorBenefit || 0,
+        calculationName: calc.calculationName || 'Retirement Analysis',
+        createdAt: calc.createdAt
+      }
 
-      // Convert to CSV string
-      const csvContent = csvData.map(row => row.join(',')).join('\n')
+      // Show loading state
+      toast({
+        title: "Generating PDF...",
+        description: "Please wait while we create your retirement report",
+      })
 
-      // Create and download file
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+      // Call PDF generation API
+      const pdfResponse = await fetch('/api/pdf/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          data: pensionData,
+          reportType: 'pension',
+          options: {
+            includeCharts: true,
+            includeCOLAProjections: true,
+            reportType: 'basic'
+          }
+        })
+      })
+
+      if (!pdfResponse.ok) {
+        const errorData = await pdfResponse.json()
+        throw new Error(errorData.error || 'Failed to generate PDF')
+      }
+
+      // Download the PDF
+      const pdfBlob = await pdfResponse.blob()
+      const url = URL.createObjectURL(pdfBlob)
       const link = document.createElement('a')
-      const url = URL.createObjectURL(blob)
 
-      link.setAttribute('href', url)
-      link.setAttribute('download', `MA_Retirement_${calc.calculationName?.replace(/[^a-zA-Z0-9]/g, '_') || 'Calculation'}_${new Date().toISOString().split('T')[0]}.csv`)
+      link.href = url
+      link.download = `MassPension_${calc.calculationName?.replace(/[^a-zA-Z0-9]/g, '_') || 'Retirement_Report'}_${new Date().toISOString().split('T')[0]}.pdf`
       link.style.visibility = 'hidden'
 
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
 
+      // Clean up
+      URL.revokeObjectURL(url)
+
       toast({
-        title: "Export Successful",
-        description: "Calculation data has been downloaded as CSV",
+        title: "PDF Export Successful",
+        description: "Your retirement report has been downloaded",
       })
 
     } catch (error) {
-      console.error('Export error:', error)
+      console.error('PDF Export error:', error)
       toast({
-        title: "Export Failed",
-        description: "There was an error exporting your calculation",
+        title: "PDF Export Failed",
+        description: error instanceof Error ? error.message : "There was an error generating your PDF report",
         variant: "destructive",
       })
     }
@@ -397,10 +421,10 @@ View full calculation: ${shareUrl}`
                     size="sm"
                     variant="outline"
                     onClick={() => exportCalculation(calc)}
-                    title="Export calculation as CSV"
+                    title="Generate PDF report (Premium feature)"
                   >
                     <Download className="mr-2 h-4 w-4" />
-                    Export
+                    Export PDF
                   </Button>
                   <Button
                     size="sm"
