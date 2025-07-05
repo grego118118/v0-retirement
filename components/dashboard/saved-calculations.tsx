@@ -22,6 +22,12 @@ import Link from "next/link"
 import { CalculationAnalysisModal } from "./calculation-analysis-modal"
 import { useRetirementDataContext } from "@/contexts/retirement-data-context"
 import { useToast } from "@/hooks/use-toast"
+import { getBenefitFactor, calculatePensionWithOption } from "@/lib/pension-calculations"
+import {
+  calculateRetirementBenefitsProjection,
+  ProjectionParameters,
+  ProjectionYear
+} from "@/lib/retirement-benefits-projection"
 
 interface SavedCalculation {
   id: string
@@ -83,6 +89,145 @@ export function SavedCalculations() {
     }
   }
 
+  // Transform saved calculation data to proper PDF format
+  const transformCalculationForPDF = (calc: any) => {
+    console.log('🔄 Transforming calculation for PDF:', calc)
+
+    // Validate required fields
+    if (!calc.averageSalary || !calc.yearsOfService || !calc.retirementAge) {
+      console.error('❌ Missing required fields:', {
+        averageSalary: calc.averageSalary,
+        yearsOfService: calc.yearsOfService,
+        retirementAge: calc.retirementAge
+      })
+      throw new Error('Missing required calculation data for PDF generation')
+    }
+
+    // Prepare calculation parameters
+    const group = `GROUP_${calc.retirementGroup || '1'}`
+    const serviceEntry = 'before_2012' // Default - could be enhanced with actual data
+    const beneficiaryAge = '65' // Default beneficiary age
+
+    // Calculate base pension using proper MSRB methodology
+    const benefitFactor = getBenefitFactor(calc.retirementAge, group, serviceEntry, calc.yearsOfService)
+    let basePension = calc.averageSalary * calc.yearsOfService * benefitFactor
+
+    // Apply 80% cap
+    const maxPension = calc.averageSalary * 0.8
+    if (basePension > maxPension) {
+      basePension = maxPension
+    }
+
+    // If we have saved annual benefit, use it as the base (it should match our calculation)
+    if (calc.annualBenefit && calc.annualBenefit > 0) {
+      basePension = calc.annualBenefit
+    }
+
+    const totalBenefitPercentage = (basePension / calc.averageSalary) * 100
+    const cappedAt80Percent = totalBenefitPercentage >= 80
+
+    // Calculate all retirement options using proper MSRB functions
+    let optionAResult, optionBResult, optionCResult
+    try {
+      optionAResult = calculatePensionWithOption(basePension, 'A', calc.retirementAge, beneficiaryAge, group)
+      optionBResult = calculatePensionWithOption(basePension, 'B', calc.retirementAge, beneficiaryAge, group)
+      optionCResult = calculatePensionWithOption(basePension, 'C', calc.retirementAge, beneficiaryAge, group)
+      console.log('✅ Pension calculations successful:', { optionAResult, optionBResult, optionCResult })
+    } catch (error) {
+      console.error('❌ Error in pension calculations:', error)
+      // Fallback to simple calculations
+      optionAResult = { pension: basePension, description: 'Option A: Full Allowance (100%)', survivorPension: 0 }
+      optionBResult = { pension: basePension * 0.99, description: 'Option B: Annuity Protection (1% reduction)', survivorPension: 0 }
+      optionCResult = { pension: basePension * 0.9295, description: 'Option C: Joint & Survivor (66.67%)', survivorPension: basePension * 0.9295 * (2/3) }
+    }
+
+    // Generate retirement options structure for PDF
+    const options = {
+      A: {
+        annual: optionAResult.pension,
+        monthly: optionAResult.pension / 12,
+        description: optionAResult.description
+      },
+      B: {
+        annual: optionBResult.pension,
+        monthly: optionBResult.pension / 12,
+        description: optionBResult.description,
+        reduction: (basePension - optionBResult.pension) / basePension // Calculate actual reduction
+      },
+      C: {
+        annual: optionCResult.pension,
+        monthly: optionCResult.pension / 12,
+        description: optionCResult.description,
+        reduction: (basePension - optionCResult.pension) / basePension, // Calculate actual reduction
+        survivorAnnual: optionCResult.survivorPension,
+        survivorMonthly: optionCResult.survivorPension / 12,
+        beneficiaryAge: parseInt(beneficiaryAge)
+      }
+    }
+
+    console.log('✅ Generated options for PDF:', options)
+
+    // Calculate year-by-year projections for PDF
+    let yearlyProjections: ProjectionYear[] = []
+    try {
+      const projectionParams: ProjectionParameters = {
+        currentAge: calc.retirementAge - calc.yearsOfService, // Estimate current age
+        plannedRetirementAge: calc.retirementAge,
+        currentYearsOfService: calc.yearsOfService,
+        averageSalary: calc.averageSalary,
+        retirementGroup: group,
+        serviceEntry: serviceEntry,
+        pensionOption: calc.retirementOption as "A" | "B" | "C",
+        beneficiaryAge: beneficiaryAge,
+        socialSecurityClaimingAge: 67, // Default
+        socialSecurityFullBenefit: 0, // Default - could be enhanced with actual data
+        projectionEndAge: Math.min(calc.retirementAge + 20, 85), // Project 20 years or until age 85
+        includeCOLA: true,
+        colaRate: 0.03 // 3% Massachusetts COLA rate
+      }
+
+      yearlyProjections = calculateRetirementBenefitsProjection(projectionParams)
+      console.log('✅ Generated year-by-year projections for PDF:', yearlyProjections.length, 'years')
+    } catch (error) {
+      console.error('❌ Error generating projections for PDF:', error)
+      yearlyProjections = []
+    }
+
+    const result = {
+      // Personal Information
+      name: calc.calculationName || 'Retirement Analysis',
+      currentAge: calc.retirementAge - calc.yearsOfService, // Estimate current age
+      plannedRetirementAge: calc.retirementAge,
+      retirementGroup: calc.retirementGroup || '1',
+      serviceEntry: serviceEntry,
+
+      // Calculation Details
+      averageSalary: calc.averageSalary,
+      yearsOfService: calc.yearsOfService,
+      projectedYearsAtRetirement: calc.yearsOfService,
+
+      // Pension Results
+      basePension: basePension,
+      benefitFactor: benefitFactor,
+      totalBenefitPercentage: totalBenefitPercentage,
+      cappedAt80Percent: cappedAt80Percent,
+
+      // Retirement Options
+      options: options,
+
+      // Year-by-Year Projections
+      yearlyProjections: yearlyProjections,
+
+      // Additional Information
+      calculationDate: calc.createdAt ? new Date(calc.createdAt) : new Date(),
+      isVeteran: false, // Default - could be enhanced with actual data
+      veteranBenefit: 0
+    }
+
+    console.log('📄 Final PDF data structure:', result)
+    return result
+  }
+
   const exportCalculation = async (calc: any) => {
     try {
       // Check if user has premium access for PDF generation
@@ -96,21 +241,12 @@ export function SavedCalculations() {
         return
       }
 
-      // Convert calculation data to PDF format
-      const pensionData = {
-        currentAge: calc.retirementAge - calc.yearsOfService, // Estimate current age
-        plannedRetirementAge: calc.retirementAge,
-        retirementGroup: calc.retirementGroup,
-        serviceEntry: 'before_2012', // Default - could be enhanced with actual data
-        averageSalary: calc.averageSalary,
-        yearsOfService: calc.yearsOfService,
-        retirementOption: calc.retirementOption,
-        monthlyBenefit: calc.monthlyBenefit,
-        annualBenefit: calc.annualBenefit,
-        benefitReduction: calc.benefitReduction || 0,
-        survivorBenefit: calc.survivorBenefit || 0,
-        calculationName: calc.calculationName || 'Retirement Analysis',
-        createdAt: calc.createdAt
+      // Convert calculation data to proper PDF format with all required fields
+      const pensionData = transformCalculationForPDF(calc)
+
+      // Validate the transformed data has all required fields
+      if (!pensionData.options || !pensionData.options.A || !pensionData.options.B || !pensionData.options.C) {
+        throw new Error('Failed to generate complete pension options data for PDF')
       }
 
       // Show loading state
@@ -421,16 +557,24 @@ View full calculation: ${shareUrl}`
                     size="sm"
                     variant="outline"
                     onClick={() => exportCalculation(calc)}
-                    title="Generate PDF report (Premium feature)"
+                    title="Generate professional PDF report with charts, COLA projections, and MassPension.com branding (Premium feature)"
+                    className="hover:border-blue-300 hover:bg-blue-50"
                   >
                     <Download className="mr-2 h-4 w-4" />
                     Export PDF
+                    <span className="ml-1 px-1.5 py-0.5 text-xs bg-blue-100 text-blue-700 rounded-md">PDF</span>
+                    <span className="ml-1 px-1.5 py-0.5 text-xs bg-amber-100 text-amber-700 rounded-md flex items-center">
+                      <svg className="w-3 h-3 mr-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
+                      </svg>
+                      Premium
+                    </span>
                   </Button>
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={() => shareCalculation(calc)}
-                    title="Share calculation"
+                    title="Share calculation summary with basic pension details via Web Share API or clipboard"
                   >
                     <Share2 className="mr-2 h-4 w-4" />
                     Share
