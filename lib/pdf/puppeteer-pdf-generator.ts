@@ -69,14 +69,14 @@ export class PuppeteerPDFGenerator {
         console.log('🔧 Configuring for Vercel serverless environment...')
 
         try {
-          // Try to use chrome-aws-lambda for Vercel
+          // Try to use @sparticuz/chromium for Vercel
           const chromium = await import('@sparticuz/chromium')
 
           launchOptions = {
             ...launchOptions,
-            executablePath: await chromium.executablePath(),
+            executablePath: await chromium.default.executablePath(),
             args: [
-              ...chromium.args,
+              ...chromium.default.args,
               '--no-sandbox',
               '--disable-setuid-sandbox',
               '--disable-dev-shm-usage',
