@@ -48,15 +48,84 @@ export class PuppeteerPDFGenerator {
     }
 
     console.log('🚀 Initializing Puppeteer browser...')
-    
+
     try {
-      this.browser = await puppeteer.launch({
+      // Configure for Vercel serverless environment
+      const isProduction = process.env.NODE_ENV === 'production'
+      const isVercel = process.env.VERCEL === '1'
+
+      console.log('🔧 Environment check:', { isProduction, isVercel })
+
+      let launchOptions: any = {
         headless: this.config.headless,
         args: this.config.args,
         timeout: this.config.timeout,
         ignoreDefaultArgs: ['--disable-extensions'],
         defaultViewport: null
+      }
+
+      // For Vercel production environment, use chrome-aws-lambda
+      if (isProduction && isVercel) {
+        console.log('🔧 Configuring for Vercel serverless environment...')
+
+        try {
+          // Try to use chrome-aws-lambda for Vercel
+          const chromium = await import('@sparticuz/chromium')
+
+          launchOptions = {
+            ...launchOptions,
+            executablePath: await chromium.executablePath(),
+            args: [
+              ...chromium.args,
+              '--no-sandbox',
+              '--disable-setuid-sandbox',
+              '--disable-dev-shm-usage',
+              '--disable-accelerated-2d-canvas',
+              '--no-first-run',
+              '--no-zygote',
+              '--disable-gpu',
+              '--disable-web-security',
+              '--disable-features=VizDisplayCompositor',
+              '--disable-background-timer-throttling',
+              '--disable-backgrounding-occluded-windows',
+              '--disable-renderer-backgrounding'
+            ]
+          }
+
+          console.log('✅ Using @sparticuz/chromium for Vercel')
+        } catch (chromiumError) {
+          console.warn('⚠️ Failed to load @sparticuz/chromium, falling back to regular Puppeteer:', chromiumError)
+
+          // Fallback: try to find Chrome in common Vercel paths
+          const possiblePaths = [
+            '/opt/google/chrome/chrome',
+            '/usr/bin/google-chrome-stable',
+            '/usr/bin/google-chrome',
+            '/usr/bin/chromium-browser',
+            '/usr/bin/chromium'
+          ]
+
+          for (const path of possiblePaths) {
+            try {
+              const fs = await import('fs')
+              if (fs.existsSync(path)) {
+                launchOptions.executablePath = path
+                console.log(`✅ Found Chrome at: ${path}`)
+                break
+              }
+            } catch (e) {
+              // Continue to next path
+            }
+          }
+        }
+      }
+
+      console.log('🚀 Launching browser with options:', {
+        executablePath: launchOptions.executablePath || 'default',
+        argsCount: launchOptions.args?.length || 0
       })
+
+      this.browser = await puppeteer.launch(launchOptions)
 
       console.log('✅ Puppeteer browser initialized successfully')
     } catch (error) {
