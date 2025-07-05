@@ -349,6 +349,98 @@ export function SavedCalculations() {
     }
   }
 
+  // Simple PDF test with minimal data
+  const testSimplePDF = async (calc: any) => {
+    console.log('🧪 Testing simple PDF with minimal data...')
+    try {
+      // Create minimal test data
+      const minimalData = {
+        name: calc.calculationName || 'Test Calculation',
+        currentAge: 45,
+        plannedRetirementAge: calc.retirementAge || 65,
+        retirementGroup: calc.retirementGroup || '1',
+        serviceEntry: 'before_2012',
+        yearsOfService: calc.yearsOfService || 20,
+        averageSalary: calc.averageSalary || 50000,
+        options: {
+          A: {
+            annual: 25000,
+            monthly: 2083,
+            description: 'Option A: Full Allowance (100%)'
+          },
+          B: {
+            annual: 24750,
+            monthly: 2063,
+            description: 'Option B: Annuity Protection (1% reduction)',
+            reduction: 1.0
+          },
+          C: {
+            annual: 23238,
+            monthly: 1936,
+            description: 'Option C: Joint & Survivor (66.67%)',
+            reduction: 7.05,
+            survivorAnnual: 15492,
+            survivorMonthly: 1291,
+            beneficiaryAge: 65
+          }
+        },
+        cola: {
+          rate: 3.0,
+          cap: 390,
+          description: '3% on first $13,000 annually'
+        },
+        yearlyProjections: []
+      }
+
+      console.log('🧪 Simple PDF data:', minimalData)
+
+      const response = await fetch('/api/pdf/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          data: minimalData,
+          reportType: 'pension',
+          options: {
+            includeCharts: true,
+            includeCOLAProjections: true,
+            reportType: 'basic'
+          }
+        })
+      })
+
+      console.log('🧪 Simple PDF response status:', response.status)
+
+      if (response.ok) {
+        const blob = await response.blob()
+        console.log('🧪 Simple PDF blob size:', blob.size)
+
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `Simple_Test_${new Date().toISOString().split('T')[0]}.pdf`
+        link.click()
+        URL.revokeObjectURL(url)
+
+        toast({
+          title: "Simple PDF Test Successful",
+          description: "Simple PDF generated and downloaded",
+        })
+      } else {
+        const errorData = await response.json()
+        throw new Error(errorData.error || `Simple PDF failed: ${response.status}`)
+      }
+    } catch (error) {
+      console.error('🧪 Simple PDF error:', error)
+      toast({
+        title: "Simple PDF Test Failed",
+        description: error instanceof Error ? error.message : "Simple PDF test failed",
+        variant: "destructive",
+      })
+    }
+  }
+
   const shareCalculation = async (calc: any) => {
     try {
       // Create shareable URL
@@ -613,6 +705,14 @@ View full calculation: ${shareUrl}`
                       </svg>
                       Premium
                     </span>
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => testSimplePDF(calc)}
+                    title="Test simple PDF generation with minimal data"
+                  >
+                    🧪 Simple PDF
                   </Button>
                   <Button
                     size="sm"
