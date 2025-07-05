@@ -23,11 +23,12 @@ import { CalculationAnalysisModal } from "./calculation-analysis-modal"
 import { useRetirementDataContext } from "@/contexts/retirement-data-context"
 import { useToast } from "@/hooks/use-toast"
 import { getBenefitFactor, calculatePensionWithOption } from "@/lib/pension-calculations"
-import {
-  calculateRetirementBenefitsProjection,
-  ProjectionParameters,
-  ProjectionYear
-} from "@/lib/retirement-benefits-projection"
+// Temporarily removed year-by-year projections to fix production API issues
+// import {
+//   calculateRetirementBenefitsProjection,
+//   ProjectionParameters,
+//   ProjectionYear
+// } from "@/lib/retirement-benefits-projection"
 
 interface SavedCalculation {
   id: string
@@ -167,31 +168,9 @@ export function SavedCalculations() {
 
     console.log('✅ Generated options for PDF:', options)
 
-    // Calculate year-by-year projections for PDF
-    let yearlyProjections: ProjectionYear[] = []
-    try {
-      const projectionParams: ProjectionParameters = {
-        currentAge: calc.retirementAge - calc.yearsOfService, // Estimate current age
-        plannedRetirementAge: calc.retirementAge,
-        currentYearsOfService: calc.yearsOfService,
-        averageSalary: calc.averageSalary,
-        retirementGroup: group,
-        serviceEntry: serviceEntry,
-        pensionOption: calc.retirementOption as "A" | "B" | "C",
-        beneficiaryAge: beneficiaryAge,
-        socialSecurityClaimingAge: 67, // Default
-        socialSecurityFullBenefit: 0, // Default - could be enhanced with actual data
-        projectionEndAge: Math.min(calc.retirementAge + 20, 85), // Project 20 years or until age 85
-        includeCOLA: true,
-        colaRate: 0.03 // 3% Massachusetts COLA rate
-      }
-
-      yearlyProjections = calculateRetirementBenefitsProjection(projectionParams)
-      console.log('✅ Generated year-by-year projections for PDF:', yearlyProjections.length, 'years')
-    } catch (error) {
-      console.error('❌ Error generating projections for PDF:', error)
-      yearlyProjections = []
-    }
+    // Temporarily removed year-by-year projections to fix production API issues
+    // Year-by-year projections will be re-added in a future update
+    const yearlyProjections: any[] = []
 
     const result = {
       // Personal Information

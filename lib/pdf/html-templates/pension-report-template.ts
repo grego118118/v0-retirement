@@ -47,19 +47,8 @@ export interface PensionCalculationData {
     monthlyPension: number
   }[]
 
-  // Year-by-Year Projections
-  yearlyProjections?: {
-    age: number
-    yearsOfService: number
-    pensionWithOption: number
-    colaAdjustment: number
-    totalPensionAnnual: number
-    totalPensionMonthly: number
-    socialSecurityAnnual: number
-    socialSecurityMonthly: number
-    combinedTotalAnnual: number
-    combinedTotalMonthly: number
-  }[]
+  // Year-by-Year Projections - Temporarily removed to fix production API issues
+  // yearlyProjections?: { ... }
 
   // Additional Information
   isVeteran?: boolean
@@ -544,68 +533,8 @@ export function generatePensionReportHTML(
     </div>
     ` : ''}
 
-    ${data.yearlyProjections && data.yearlyProjections.length > 0 ? `
-    <!-- Year-by-Year Projections -->
-    <div class="section page-break">
-        <div class="section-title">Year-by-Year Retirement Projections</div>
-        <p style="margin-bottom: 15px; color: #6b7280; font-size: 14px;">
-            Comprehensive projection showing pension growth with COLA adjustments over time
-        </p>
-
-        <!-- Projection Summary -->
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px;">
-            <div class="summary-box" style="text-align: center; padding: 15px;">
-                <div style="font-size: 12px; color: #6b7280; margin-bottom: 5px;">Projection Years</div>
-                <div style="font-size: 24px; font-weight: bold; color: #1e40af;">${data.yearlyProjections.length}</div>
-            </div>
-            <div class="summary-box" style="text-align: center; padding: 15px;">
-                <div style="font-size: 12px; color: #6b7280; margin-bottom: 5px;">Starting Monthly</div>
-                <div style="font-size: 24px; font-weight: bold; color: #059669;">${formatCurrency(data.yearlyProjections[0]?.totalPensionMonthly || 0)}</div>
-            </div>
-            <div class="summary-box" style="text-align: center; padding: 15px;">
-                <div style="font-size: 12px; color: #6b7280; margin-bottom: 5px;">Final Monthly</div>
-                <div style="font-size: 24px; font-weight: bold; color: #7c3aed;">${formatCurrency(data.yearlyProjections[data.yearlyProjections.length - 1]?.totalPensionMonthly || 0)}</div>
-            </div>
-            <div class="summary-box" style="text-align: center; padding: 15px;">
-                <div style="font-size: 12px; color: #6b7280; margin-bottom: 5px;">Total COLA Growth</div>
-                <div style="font-size: 24px; font-weight: bold; color: #d97706;">${formatCurrency(data.yearlyProjections[data.yearlyProjections.length - 1]?.colaAdjustment || 0)}</div>
-            </div>
-        </div>
-
-        <table class="cola-table">
-            <thead>
-                <tr>
-                    <th>Age</th>
-                    <th>Years of Service</th>
-                    <th>Base Pension</th>
-                    <th>COLA Adjustment</th>
-                    <th>Total Annual</th>
-                    <th>Monthly Pension</th>
-                    <th>Social Security</th>
-                    <th>Combined Monthly</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${data.yearlyProjections.slice(0, 15).map(year => `
-                <tr>
-                    <td>${year.age}</td>
-                    <td>${year.yearsOfService}</td>
-                    <td>${formatCurrency(year.pensionWithOption)}</td>
-                    <td style="color: #059669;">+${formatCurrency(year.colaAdjustment)}</td>
-                    <td style="font-weight: bold;">${formatCurrency(year.totalPensionAnnual)}</td>
-                    <td style="font-weight: bold;">${formatCurrency(year.totalPensionMonthly)}</td>
-                    <td style="color: #1e40af;">${formatCurrency(year.socialSecurityMonthly)}</td>
-                    <td style="font-weight: bold; color: #7c3aed;">${formatCurrency(year.combinedTotalMonthly)}</td>
-                </tr>
-                `).join('')}
-            </tbody>
-        </table>
-
-        <p style="margin-top: 15px; color: #6b7280; font-size: 12px; font-style: italic;">
-            * Projections shown for first 15 years. Full projections available in CSV export.
-        </p>
-    </div>
-    ` : ''}
+    <!-- Year-by-Year Projections - Temporarily removed to fix production API issues -->
+    <!-- Will be re-added in a future update with improved performance -->
 
     ${data.isVeteran && data.veteranBenefit ? `
     <!-- Veteran Benefits -->

@@ -21,11 +21,12 @@ import {
   calculateEnhancedMAPensionCOLAProjections,
   getCOLADisplayInfo 
 } from "@/lib/pension/ma-cola-calculator"
-import {
-  calculateRetirementBenefitsProjection,
-  ProjectionParameters,
-  ProjectionYear
-} from "@/lib/retirement-benefits-projection"
+// Temporarily removed year-by-year projections to fix production API issues
+// import {
+//   calculateRetirementBenefitsProjection,
+//   ProjectionParameters,
+//   ProjectionYear
+// } from "@/lib/retirement-benefits-projection"
 import {
   DollarSign,
   Calendar,
@@ -86,8 +87,9 @@ export function CalculationAnalysisModal({
   const [analysisData, setAnalysisData] = useState<any>(null)
   const [analysisLoading, setAnalysisLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [yearlyProjections, setYearlyProjections] = useState<ProjectionYear[]>([])
-  const [projectionsLoading, setProjectionsLoading] = useState(false)
+  // Temporarily removed year-by-year projections to fix production API issues
+  // const [yearlyProjections, setYearlyProjections] = useState<ProjectionYear[]>([])
+  // const [projectionsLoading, setProjectionsLoading] = useState(false)
   const { toast } = useToast()
 
   // Helper function to safely get nested properties
@@ -101,7 +103,8 @@ export function CalculationAnalysisModal({
   useEffect(() => {
     if (calculation && isOpen) {
       calculateDetailedAnalysis()
-      calculateYearByYearProjections()
+      // Temporarily removed year-by-year projections to fix production API issues
+      // calculateYearByYearProjections()
     }
   }, [calculation, isOpen])
 
@@ -158,7 +161,7 @@ export function CalculationAnalysisModal({
       if (calculation.socialSecurityData?.selectedClaimingAge && 
           calculation.socialSecurityData?.fullRetirementBenefit) {
         
-        const projectionParams: ProjectionParameters = {
+        const projectionParams: any = {
           currentAge: calculation.retirementAge - 1, // Approximate current age
           plannedRetirementAge: calculation.retirementAge,
           currentYearsOfService: calculation.yearsOfService,
@@ -174,7 +177,8 @@ export function CalculationAnalysisModal({
           colaRate: 0.03
         }
 
-        comprehensiveProjection = calculateRetirementBenefitsProjection(projectionParams)
+        // Temporarily removed year-by-year projections to fix production API issues
+        // comprehensiveProjection = calculateRetirementBenefitsProjection(projectionParams)
       }
 
       setAnalysisData({
@@ -197,42 +201,11 @@ export function CalculationAnalysisModal({
     }
   }
 
-  const calculateYearByYearProjections = async () => {
-    if (!calculation) return
-
-    setProjectionsLoading(true)
-    try {
-      // Prepare projection parameters
-      const projectionParams: ProjectionParameters = {
-        currentAge: calculation.retirementAge - calculation.yearsOfService, // Estimate current age
-        plannedRetirementAge: calculation.retirementAge,
-        currentYearsOfService: calculation.yearsOfService,
-        averageSalary: calculation.averageSalary,
-        retirementGroup: `GROUP_${calculation.retirementGroup}`,
-        serviceEntry: 'before_2012', // Default - could be enhanced with actual data
-        pensionOption: calculation.retirementOption as "A" | "B" | "C",
-        beneficiaryAge: '65', // Default beneficiary age
-        socialSecurityClaimingAge: calculation.socialSecurityData?.selectedClaimingAge || 67,
-        socialSecurityFullBenefit: (calculation.socialSecurityData?.selectedMonthlyBenefit || 0) * 12,
-        projectionEndAge: Math.min(calculation.retirementAge + 25, 85), // Project 25 years or until age 85
-        includeCOLA: true,
-        colaRate: 0.03 // 3% Massachusetts COLA rate
-      }
-
-      console.log('🔄 Calculating year-by-year projections with params:', projectionParams)
-
-      const projections = calculateRetirementBenefitsProjection(projectionParams)
-      setYearlyProjections(projections)
-
-      console.log('✅ Year-by-year projections calculated:', projections.length, 'years')
-
-    } catch (error) {
-      console.error('❌ Error calculating year-by-year projections:', error)
-      setYearlyProjections([])
-    } finally {
-      setProjectionsLoading(false)
-    }
-  }
+  // Temporarily removed year-by-year projections to fix production API issues
+  // const calculateYearByYearProjections = async () => {
+  //   if (!calculation) return
+  //   // ... projection calculation logic removed for production stability
+  // }
 
   const handleExport = async () => {
     if (!analysisData || !calculation) {
@@ -296,28 +269,8 @@ export function CalculationAnalysisModal({
         ['Ten Year COLA:', safeCurrency(safeGet(analysisData, 'colaProjections.tenYear'))]
       ]
 
-      // Add year-by-year projections if available
-      if (yearlyProjections && yearlyProjections.length > 0) {
-        csvData.push(
-          [''],
-          ['Year-by-Year Retirement Projections'],
-          ['Age', 'Years of Service', 'Base Pension', 'COLA Adjustment', 'Total Annual Pension', 'Monthly Pension', 'Social Security Annual', 'Combined Annual', 'Combined Monthly']
-        )
-
-        yearlyProjections.forEach(year => {
-          csvData.push([
-            year.age.toString(),
-            year.yearsOfService.toString(),
-            safeCurrency(year.pensionWithOption),
-            safeCurrency(year.colaAdjustment),
-            safeCurrency(year.totalPensionAnnual),
-            safeCurrency(year.totalPensionMonthly),
-            safeCurrency(year.socialSecurityAnnual),
-            safeCurrency(year.combinedTotalAnnual),
-            safeCurrency(year.combinedTotalMonthly)
-          ])
-        })
-      }
+      // Temporarily removed year-by-year projections to fix production API issues
+      // Year-by-year projections will be re-added in a future update
 
       // Convert to CSV string
       const csvContent = csvData.map(row => row.join(',')).join('\n')
@@ -519,11 +472,10 @@ View full analysis: ${shareUrl}`
 
         <ScrollArea className="flex-1 px-1">
           <Tabs defaultValue="overview" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="pension-options">Pension Options</TabsTrigger>
               <TabsTrigger value="cola-projections">COLA Projections</TabsTrigger>
-              <TabsTrigger value="yearly-projections">Year-by-Year</TabsTrigger>
               <TabsTrigger value="comprehensive">Full Analysis</TabsTrigger>
             </TabsList>
 
@@ -978,134 +930,8 @@ View full analysis: ${shareUrl}`
               </Card>
             </TabsContent>
 
-            {/* Year-by-Year Projections Tab */}
-            <TabsContent value="yearly-projections" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5 text-blue-600" />
-                    Year-by-Year Retirement Projections
-                  </CardTitle>
-                  <CardDescription>
-                    Comprehensive projection showing pension growth with COLA adjustments and Social Security benefits over time
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {projectionsLoading ? (
-                    <div className="space-y-4">
-                      <Skeleton className="h-8 w-full" />
-                      <Skeleton className="h-8 w-full" />
-                      <Skeleton className="h-8 w-full" />
-                    </div>
-                  ) : yearlyProjections.length > 0 ? (
-                    <div className="space-y-6">
-                      {/* Projection Summary */}
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
-                          <CardContent className="p-4">
-                            <div className="text-center">
-                              <p className="text-sm font-medium text-blue-600">Projection Years</p>
-                              <p className="text-2xl font-bold text-blue-700">{yearlyProjections.length}</p>
-                            </div>
-                          </CardContent>
-                        </Card>
-                        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
-                          <CardContent className="p-4">
-                            <div className="text-center">
-                              <p className="text-sm font-medium text-green-600">Starting Pension</p>
-                              <p className="text-2xl font-bold text-green-700">
-                                {formatCurrency(yearlyProjections[0]?.totalPensionMonthly || 0)}/mo
-                              </p>
-                            </div>
-                          </CardContent>
-                        </Card>
-                        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
-                          <CardContent className="p-4">
-                            <div className="text-center">
-                              <p className="text-sm font-medium text-purple-600">Final Pension</p>
-                              <p className="text-2xl font-bold text-purple-700">
-                                {formatCurrency(yearlyProjections[yearlyProjections.length - 1]?.totalPensionMonthly || 0)}/mo
-                              </p>
-                            </div>
-                          </CardContent>
-                        </Card>
-                        <Card className="bg-gradient-to-br from-amber-50 to-amber-100 border-amber-200">
-                          <CardContent className="p-4">
-                            <div className="text-center">
-                              <p className="text-sm font-medium text-amber-600">Total COLA Growth</p>
-                              <p className="text-2xl font-bold text-amber-700">
-                                {formatCurrency((yearlyProjections[yearlyProjections.length - 1]?.colaAdjustment || 0))}
-                              </p>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </div>
-
-                      {/* Projections Table */}
-                      <div className="overflow-x-auto">
-                        <table className="w-full border-collapse border border-gray-200 text-sm">
-                          <thead className="bg-gray-50">
-                            <tr>
-                              <th className="border border-gray-200 p-3 text-left">Age</th>
-                              <th className="border border-gray-200 p-3 text-right">Years of Service</th>
-                              <th className="border border-gray-200 p-3 text-right">Base Pension</th>
-                              <th className="border border-gray-200 p-3 text-right">COLA Adjustment</th>
-                              <th className="border border-gray-200 p-3 text-right">Total Annual</th>
-                              <th className="border border-gray-200 p-3 text-right">Monthly Pension</th>
-                              <th className="border border-gray-200 p-3 text-right">Social Security</th>
-                              <th className="border border-gray-200 p-3 text-right">Combined Monthly</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {yearlyProjections.map((year, index) => (
-                              <tr key={year.age} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                                <td className="border border-gray-200 p-3 font-medium">
-                                  {year.age}
-                                </td>
-                                <td className="border border-gray-200 p-3 text-right">
-                                  {year.yearsOfService}
-                                </td>
-                                <td className="border border-gray-200 p-3 text-right">
-                                  {formatCurrency(year.pensionWithOption)}
-                                </td>
-                                <td className="border border-gray-200 p-3 text-right text-green-600">
-                                  +{formatCurrency(year.colaAdjustment)}
-                                </td>
-                                <td className="border border-gray-200 p-3 text-right font-semibold">
-                                  {formatCurrency(year.totalPensionAnnual)}
-                                </td>
-                                <td className="border border-gray-200 p-3 text-right font-semibold">
-                                  {formatCurrency(year.totalPensionMonthly)}
-                                </td>
-                                <td className="border border-gray-200 p-3 text-right text-blue-600">
-                                  {formatCurrency(year.socialSecurityMonthly)}
-                                </td>
-                                <td className="border border-gray-200 p-3 text-right font-bold text-purple-600">
-                                  {formatCurrency(year.combinedTotalMonthly)}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-
-                      {/* Projection Notes */}
-                      <Alert>
-                        <AlertDescription>
-                          <strong>Projection Notes:</strong> These projections use Massachusetts COLA rules (3% on first $13,000 annually, max $390/year)
-                          and assume Social Security benefits begin at the selected claiming age. Actual benefits may vary based on future
-                          policy changes, salary adjustments, and economic conditions.
-                        </AlertDescription>
-                      </Alert>
-                    </div>
-                  ) : (
-                    <div className="text-center py-8">
-                      <p className="text-gray-500">No projection data available. Please ensure all calculation parameters are valid.</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
+            {/* Year-by-Year Projections Tab - Temporarily removed to fix production API issues */}
+            {/* Will be re-added in a future update with improved performance */}
 
             {/* Comprehensive Analysis Tab */}
             <TabsContent value="comprehensive" className="space-y-6">
