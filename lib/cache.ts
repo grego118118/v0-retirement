@@ -93,12 +93,7 @@ class MemoryCache {
     return deleted;
   }
 
-  clear(): void {
-    const entriesCleared = this.cache.size;
-    this.cache.clear();
-    this.stats.deletes += entriesCleared;
-    this.stats.totalEntries = 0;
-  }
+
 
   // Evict least recently used entry
   private evictLRU(): void {
@@ -162,6 +157,29 @@ class MemoryCache {
     return { size, estimatedMemoryMB };
   }
 
+  // Public method to get cache keys
+  keys(): IterableIterator<string> {
+    return this.cache.keys();
+  }
+
+  // Public method to get cache entry (for stale data access)
+  getEntry<T>(key: string): CacheEntry<T> | undefined {
+    return this.cache.get(key);
+  }
+
+  // Clear all cache entries
+  clear(): void {
+    this.cache.clear();
+    this.stats = {
+      hits: 0,
+      misses: 0,
+      sets: 0,
+      deletes: 0,
+      evictions: 0,
+      totalEntries: 0,
+    };
+  }
+
   // Destroy cache and cleanup
   destroy(): void {
     if (this.cleanupInterval) {
@@ -206,7 +224,7 @@ export async function withCache<T>(
     // If fallback is enabled, try to return stale data
     if (fallbackOnError) {
       // Look for any cached version, even if expired
-      const staleEntry = cache.cache.get(key);
+      const staleEntry = cache.getEntry<T>(key);
       if (staleEntry) {
         console.warn(`Using stale cache data for key "${key}" due to fetch error`);
         return staleEntry.data;
@@ -290,10 +308,10 @@ export function invalidateUserCache(userId: string): void {
 export function invalidateAllUserCaches(): void {
   // Get all keys and filter for user-specific ones
   const userKeys: string[] = [];
-  
-  for (const key of cache.cache.keys()) {
-    if (key.startsWith('profile:') || 
-        key.startsWith('calculations:') || 
+
+  for (const key of cache.keys()) {
+    if (key.startsWith('profile:') ||
+        key.startsWith('calculations:') ||
         key.startsWith('subscription:')) {
       userKeys.push(key);
     }
