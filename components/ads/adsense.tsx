@@ -225,22 +225,4 @@ export function PremiumAlternative({ className = "my-4" }: { className?: string 
   )
 }
 
-// Premium user alternative - shows upgrade prompt instead of ads
-export function PremiumAlternative({ className = "my-4" }: { className?: string }) {
-  const { isPremium } = useSubscriptionStatus()
-  
-  if (!isPremium) {
-    return null
-  }
 
-  return (
-    <div className={`bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4 text-center ${className}`}>
-      <p className="text-sm text-blue-700 font-medium">
-        ✨ Thank you for being a Premium subscriber!
-      </p>
-      <p className="text-xs text-blue-600 mt-1">
-        Enjoy an ad-free experience with all premium features.
-      </p>
-    </div>
-  )
-}
