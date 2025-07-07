@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
 import { useSubscriptionStatus } from "@/hooks/use-subscription"
 import { ResponsiveAd, PremiumAlternative } from "@/components/ads/adsense"
+import { AutoAds, AutoAdsPlaceholder, SmartAds } from "@/components/ads/auto-ads"
 
 export default function TestAdSensePage() {
   const { data: session } = useSession()
@@ -71,18 +72,54 @@ export default function TestAdSensePage() {
         </div>
       </div>
 
-      {/* Test Ad Placement */}
+      {/* Auto Ads Test */}
+      <div className="bg-white border-2 border-dashed border-blue-300 p-6 rounded-lg mb-8">
+        <h2 className="text-xl font-semibold mb-4">🚀 Auto Ads Test (NEW)</h2>
+        <p className="mb-4">Auto Ads should appear automatically anywhere on this page:</p>
+
+        <div className="bg-blue-50 p-4 rounded mb-4">
+          <p className="text-sm text-blue-800">
+            <strong>Auto Ads Benefits:</strong>
+          </p>
+          <ul className="text-sm text-blue-700 mt-2 list-disc list-inside">
+            <li>No ad unit IDs required</li>
+            <li>Automatic optimal placement</li>
+            <li>Works immediately if account approved</li>
+            <li>Higher revenue potential</li>
+          </ul>
+        </div>
+
+        <AutoAdsPlaceholder className="border border-blue-300 rounded" />
+        <AutoAds />
+
+        <p className="mt-4 text-sm text-blue-600">
+          Auto Ads are enabled and should appear automatically if your AdSense account is approved.
+        </p>
+      </div>
+
+      {/* Manual Ad Test */}
       <div className="bg-white border-2 border-dashed border-gray-300 p-6 rounded-lg mb-8">
-        <h2 className="text-xl font-semibold mb-4">Test Ad Placement</h2>
+        <h2 className="text-xl font-semibold mb-4">Manual Ad Test (Legacy)</h2>
         <p className="mb-4">This is where the ResponsiveAd component should render:</p>
-        
+
         <div className="border border-red-300 p-4 rounded">
           <ResponsiveAd className="min-h-[250px] bg-gray-50" />
         </div>
-        
+
         <p className="mt-4 text-sm text-gray-600">
-          If you're a free user in production, you should see an ad above. 
-          If you're premium or in development, you should see nothing or a placeholder.
+          Manual ads require real ad unit IDs. Currently using placeholder: {process.env.NEXT_PUBLIC_ADSENSE_RESPONSIVE_SLOT || "4567890123"}
+        </p>
+      </div>
+
+      {/* Smart Ads Test */}
+      <div className="bg-white border-2 border-dashed border-green-300 p-6 rounded-lg mb-8">
+        <h2 className="text-xl font-semibold mb-4">🧠 Smart Ads Test</h2>
+        <p className="mb-4">Combines Auto Ads with manual fallback:</p>
+
+        <SmartAds className="border border-green-300 rounded p-4" />
+
+        <p className="mt-4 text-sm text-green-600">
+          Smart Ads try Auto Ads first, then fall back to manual ads if needed.
         </p>
       </div>
 

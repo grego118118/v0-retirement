@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Crown, Calculator, Users, Building, FileText, Download } from "lucide-react"
 import Link from "next/link"
 import { ResponsiveAd, PremiumAlternative } from "@/components/ads/adsense"
+import { AutoAds, SmartAds } from "@/components/ads/auto-ads"
 
 // Feature-specific messaging
 const featureMessages = {
@@ -82,9 +83,18 @@ function PricingPageContent() {
         {/* Main Pricing Section */}
         <PricingSection />
 
-        {/* AdSense Ad for Free Users */}
+        {/* AdSense Ads for Free Users */}
         <div className="my-16">
-          <ResponsiveAd className="flex justify-center" />
+          {/* Auto Ads - Primary solution */}
+          <AutoAds />
+
+          {/* Smart Ads - Combines Auto + Manual */}
+          <SmartAds
+            className="flex justify-center mb-8"
+            fallbackSlot={process.env.NEXT_PUBLIC_ADSENSE_RESPONSIVE_SLOT}
+          />
+
+          {/* Premium Alternative for premium users */}
           <PremiumAlternative />
         </div>
 

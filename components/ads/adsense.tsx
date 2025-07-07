@@ -65,10 +65,21 @@ export function AdSense({
           // Initialize adsbygoogle array if it doesn't exist
           window.adsbygoogle = window.adsbygoogle || []
 
-          // Push the ad configuration
+          // Check if we're using a placeholder ad slot ID
+          const isPlaceholderSlot = /^[0-9]{10}$/.test(adSlot) &&
+            ['1234567890', '2345678901', '3456789012', '4567890123'].includes(adSlot)
+
+          if (isPlaceholderSlot) {
+            console.warn(`AdSense: Using placeholder ad slot ID "${adSlot}". Please configure real ad unit IDs in Google AdSense dashboard.`)
+            console.log('AdSense: Auto Ads should handle ad placement automatically.')
+            // Don't push placeholder ads, let Auto Ads handle it
+            return
+          }
+
+          // Push the ad configuration for real ad slots
           window.adsbygoogle.push({})
           isAdLoaded.current = true
-          console.log('AdSense ad initialized successfully')
+          console.log(`AdSense ad initialized successfully for slot: ${adSlot}`)
         } else {
           // Retry after a short delay if AdSense isn't ready yet
           setTimeout(checkAdSenseReady, 100)
@@ -80,7 +91,7 @@ export function AdSense({
     } catch (error) {
       console.error('AdSense error:', error)
     }
-  }, [isClient, isPremium, subscriptionStatus])
+  }, [isClient, isPremium, subscriptionStatus, adSlot])
 
   // Don't render anything during SSR to prevent hydration mismatch
   if (!isClient) {
@@ -174,6 +185,43 @@ export function ResponsiveAd({ className = "my-4" }: { className?: string }) {
       style={{ display: "block", minHeight: "250px", backgroundColor: "#f9f9f9" }}
       fullWidthResponsive={true}
     />
+  )
+}
+
+// Premium Alternative Component
+export function PremiumAlternative({ className = "my-4" }: { className?: string }) {
+  const { isPremium, subscriptionStatus } = useSubscriptionStatus()
+  const [isClient, setIsClient] = useState(false)
+
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  // Don't render anything during SSR
+  if (!isClient) {
+    return null
+  }
+
+  // Only show for premium users
+  if (!isPremium || subscriptionStatus === 'loading') {
+    return null
+  }
+
+  return (
+    <div className={`bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-lg p-6 text-center ${className}`}>
+      <div className="flex items-center justify-center mb-3">
+        <div className="bg-purple-100 p-2 rounded-full mr-3">
+          <svg className="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732L14.146 12.8l-1.179 4.456a1 1 0 01-1.934 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732L9.854 7.2l1.179-4.456A1 1 0 0112 2z" clipRule="evenodd" />
+          </svg>
+        </div>
+        <h3 className="text-lg font-semibold text-purple-800">Premium Experience</h3>
+      </div>
+      <p className="text-purple-700 text-sm">
+        Enjoy an ad-free experience with your Premium subscription.
+        Focus on your retirement planning without distractions.
+      </p>
+    </div>
   )
 }
 
