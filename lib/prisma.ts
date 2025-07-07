@@ -4,7 +4,7 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
 }
 
-// Simplified Prisma configuration to fix "prepared statement already exists" errors
+// Enhanced Prisma configuration with optimized connection pooling
 const createPrismaClient = () => {
   const databaseUrl = process.env.DATABASE_URL
 
@@ -20,7 +20,14 @@ const createPrismaClient = () => {
         url: databaseUrl
       }
     },
-    log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
+    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+    // Optimize connection pool settings
+    __internal: {
+      engine: {
+        connectTimeout: 60000, // 60 seconds
+        queryTimeout: 30000,   // 30 seconds
+      },
+    },
   })
 }
 
@@ -33,23 +40,44 @@ export const prisma = (!isProduction && !isServerless)
   ? (globalForPrisma.prisma ?? (globalForPrisma.prisma = createPrismaClient()))
   : createPrismaClient()
 
-// Connection cleanup for proper resource management
+// Enhanced connection cleanup for proper resource management
 if (typeof window === 'undefined') {
   // Server-side only: ensure connections are properly closed
-  process.on('beforeExit', async () => {
+  const gracefulShutdown = async (signal: string) => {
+    console.log(`Received ${signal}, closing database connections...`)
     try {
       await prisma.$disconnect()
+      console.log('Database connections closed successfully')
     } catch (error) {
-      console.error('Error disconnecting Prisma:', error)
+      console.error(`Error disconnecting Prisma on ${signal}:`, error)
     }
+  }
+
+  process.on('beforeExit', async () => {
+    await gracefulShutdown('beforeExit')
   })
 
   process.on('SIGTERM', async () => {
-    try {
-      await prisma.$disconnect()
-    } catch (error) {
-      console.error('Error disconnecting Prisma on SIGTERM:', error)
-    }
+    await gracefulShutdown('SIGTERM')
+    process.exit(0)
+  })
+
+  process.on('SIGINT', async () => {
+    await gracefulShutdown('SIGINT')
+    process.exit(0)
+  })
+
+  // Handle uncaught exceptions
+  process.on('uncaughtException', async (error) => {
+    console.error('Uncaught Exception:', error)
+    await gracefulShutdown('uncaughtException')
+    process.exit(1)
+  })
+
+  process.on('unhandledRejection', async (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason)
+    await gracefulShutdown('unhandledRejection')
+    process.exit(1)
   })
 }
 
