@@ -192,6 +192,64 @@ export default function TestAdSensePage() {
           Check Scripts in Console
         </button>
       </div>
+
+      {/* AdSense Manager Debug */}
+      <div className="bg-white border-2 border-dashed border-purple-300 p-6 rounded-lg mt-8">
+        <h2 className="text-xl font-semibold mb-4">🔧 AdSense Manager Debug</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <button
+            onClick={() => {
+              console.log('=== AdSense Manager Debug Info ===')
+              try {
+                const { getAdSenseManager } = require('@/lib/adsense-manager')
+                const manager = getAdSenseManager()
+                const debugInfo = manager.getDebugInfo()
+                console.log('Manager Debug Info:', debugInfo)
+                console.log('Script exists:', !!document.querySelector('script[src*="adsbygoogle.js"]'))
+                console.log('adsbygoogle array:', window.adsbygoogle)
+                console.log('All ins elements:', document.querySelectorAll('ins.adsbygoogle'))
+                console.log('===================================')
+              } catch (error) {
+                console.error('Debug error:', error)
+              }
+            }}
+            className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600"
+          >
+            Debug Manager Status
+          </button>
+
+          <button
+            onClick={() => {
+              console.log('=== Checking for Duplicate Auto Ads ===')
+              if (window.adsbygoogle) {
+                const autoAdsItems = window.adsbygoogle.filter(item =>
+                  item && typeof item === 'object' && item.enable_page_level_ads
+                )
+                console.log('Auto Ads attempts found:', autoAdsItems.length)
+                console.log('Auto Ads items:', autoAdsItems)
+                if (autoAdsItems.length > 1) {
+                  console.error('🚨 DUPLICATE AUTO ADS DETECTED! This causes the "Only one enable_page_level_ads allowed" error')
+                }
+              }
+              console.log('=====================================')
+            }}
+            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+          >
+            Check Duplicate Auto Ads
+          </button>
+        </div>
+
+        <div className="text-sm text-gray-600">
+          <p><strong>Manager Benefits:</strong></p>
+          <ul className="list-disc list-inside mt-2">
+            <li>✅ Prevents duplicate Auto Ads initialization</li>
+            <li>✅ Manages ad element lifecycle properly</li>
+            <li>✅ Handles "already have ads" errors</li>
+            <li>✅ Provides fallback for unfilled ads</li>
+            <li>✅ Centralized error handling and logging</li>
+          </ul>
+        </div>
+      </div>
     </div>
   )
 }

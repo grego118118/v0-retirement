@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import { useSubscriptionStatus } from "@/hooks/use-subscription"
+import { getAdSenseManager } from "@/lib/adsense-manager"
 
 interface AdSenseProps {
   adSlot: string
@@ -30,13 +31,19 @@ export function AdSense({
 }: AdSenseProps) {
   const { isPremium, subscriptionStatus } = useSubscriptionStatus()
   const adRef = useRef<HTMLDivElement>(null)
-  const isAdLoaded = useRef(false)
   const [isClient, setIsClient] = useState(false)
+  const elementId = useRef(`adsense-${Math.random().toString(36).substr(2, 9)}`)
+  const isInitialized = useRef(false)
   const publisherId = process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID || "ca-pub-8456317857596950"
 
   useEffect(() => {
     setIsClient(true)
   }, [])
+
+  // Reset initialization when slot changes
+  useEffect(() => {
+    isInitialized.current = false
+  }, [adSlot])
 
   useEffect(() => {
     // Only run on client side after hydration
@@ -48,50 +55,55 @@ export function AdSense({
     }
 
     // Don't show ads to confirmed premium users
-    // But allow loading during 'loading' state to ensure ads load for free users
     if (isPremium && subscriptionStatus !== 'loading') {
       return
     }
 
-    // Only load ads once per component instance
-    if (isAdLoaded.current) {
+    // Don't initialize if already done
+    if (isInitialized.current) {
       return
     }
 
-    try {
-      // Wait for the AdSense script to load before initializing ads
-      const checkAdSenseReady = () => {
-        if (typeof window !== 'undefined' && window.adsbygoogle) {
-          // Initialize adsbygoogle array if it doesn't exist
-          window.adsbygoogle = window.adsbygoogle || []
+    // Don't initialize if element ref is not available
+    if (!adRef.current) {
+      return
+    }
 
-          // Check if we're using a placeholder ad slot ID
-          const isPlaceholderSlot = /^[0-9]{10}$/.test(adSlot) &&
-            ['1234567890', '2345678901', '3456789012', '4567890123'].includes(adSlot)
+    const initializeAd = async () => {
+      try {
+        const manager = getAdSenseManager()
+        const element = adRef.current!
+        const id = elementId.current
 
-          if (isPlaceholderSlot) {
-            console.warn(`AdSense: Using placeholder ad slot ID "${adSlot}". Please configure real ad unit IDs in Google AdSense dashboard.`)
-            console.log('AdSense: Auto Ads should handle ad placement automatically.')
-            // Don't push placeholder ads, let Auto Ads handle it
-            return
-          }
+        // Register the ad element with the manager
+        manager.registerAdElement(id, element, adSlot)
 
-          // Push the ad configuration for real ad slots
-          window.adsbygoogle.push({})
-          isAdLoaded.current = true
-          console.log(`AdSense ad initialized successfully for slot: ${adSlot}`)
-        } else {
-          // Retry after a short delay if AdSense isn't ready yet
-          setTimeout(checkAdSenseReady, 100)
+        // Initialize the ad element
+        await manager.initializeAdElement(id)
+
+        isInitialized.current = true
+        console.log(`AdSense: Initialized ad element ${id} with slot ${adSlot}`)
+      } catch (error) {
+        console.error('AdSense: Failed to initialize ad element:', error)
+      }
+    }
+
+    initializeAd()
+  }, [isClient, isPremium, subscriptionStatus, adSlot])
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (isClient && typeof window !== 'undefined') {
+        try {
+          const manager = getAdSenseManager()
+          manager.cleanupAdElement(elementId.current)
+        } catch (error) {
+          console.error('AdSense: Cleanup error:', error)
         }
       }
-
-      // Start checking for AdSense readiness
-      checkAdSenseReady()
-    } catch (error) {
-      console.error('AdSense error:', error)
     }
-  }, [isClient, isPremium, subscriptionStatus, adSlot])
+  }, [isClient])
 
   // Don't render anything during SSR to prevent hydration mismatch
   if (!isClient) {

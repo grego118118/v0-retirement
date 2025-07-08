@@ -47,29 +47,28 @@ export function AutoAds() {
       return
     }
 
-    // Wait for AdSense script to be ready
-    const enableAutoAds = () => {
-      if (typeof window !== 'undefined' && window.adsbygoogle) {
-        try {
-          const publisherId = process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID || "ca-pub-8456317857596950"
-          
-          // Enable Auto Ads
-          window.adsbygoogle.push({
-            google_ad_client: publisherId,
-            enable_page_level_ads: true,
-            overlays: {
-              bottom: true
-            }
-          })
-          
-          setAutoAdsEnabled(true)
-          console.log('AutoAds: Successfully enabled Auto Ads for publisher:', publisherId)
-        } catch (error) {
-          console.error('AutoAds: Failed to enable Auto Ads:', error)
-        }
-      } else {
-        // Retry if AdSense script isn't ready yet
-        setTimeout(enableAutoAds, 500)
+    // Use centralized manager to enable Auto Ads
+    const enableAutoAds = async () => {
+      try {
+        const { getAdSenseManager } = await import('@/lib/adsense-manager')
+        const manager = getAdSenseManager()
+
+        // Update manager configuration
+        manager.updateConfig({
+          isPremium: isPremium && subscriptionStatus !== 'loading',
+          isDevelopment: process.env.NODE_ENV === 'development'
+        })
+
+        // Initialize Auto Ads via manager (prevents duplicates)
+        await manager.initialize({
+          enableAutoAds: true,
+          enableManualAds: false
+        })
+
+        setAutoAdsEnabled(true)
+        console.log('AutoAds: Successfully enabled via centralized manager')
+      } catch (error) {
+        console.error('AutoAds: Failed to enable Auto Ads:', error)
       }
     }
 
