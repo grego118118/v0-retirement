@@ -5,19 +5,38 @@ Allow: /
 Sitemap: https://www.masspension.com/sitemap.xml
 
 # Allow all search engines to crawl the site
-# Disallow admin and private areas
-Disallow: /api/
-Disallow: /admin/
+# Disallow admin, internal APIs, and private areas
+Disallow: /api/calculations/
+Disallow: /api/debug/
+Disallow: /api/health/
+Disallow: /api/newsletter/
+Disallow: /api/pdf/
+Disallow: /api/pension-calculation/
+Disallow: /api/profile/
+Disallow: /api/retirement/
+Disallow: /api/stripe/
+Disallow: /api/subscription/
+Disallow: /api/test*
+Disallow: /api/email/
+
+# Block auth APIs from crawling (they're for app functionality, not SEO)
+Disallow: /api/auth/
+
+# Block Next.js internal files
 Disallow: /_next/
+Disallow: /admin/
 Disallow: /debug/
 
 # Allow crawling of important content
 Allow: /calculator
+Allow: /wizard
+Allow: /dashboard
 Allow: /blog
 Allow: /resources
 Allow: /faq
 Allow: /about
 Allow: /contact
+Allow: /pricing
 
 # Crawl delay (optional - 1 second between requests)
 Crawl-delay: 1

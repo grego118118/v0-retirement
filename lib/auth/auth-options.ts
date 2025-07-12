@@ -74,7 +74,18 @@ export const authOptions: NextAuthOptions = {
       return session
     },
   },
-  // Add these critical environment variables
+  // Production-optimized configuration
   secret: process.env.NEXTAUTH_SECRET,
-  debug: process.env.NODE_ENV === "development",
+  debug: false, // Always disable debug in production to prevent _log endpoints
+  logger: {
+    error: (code, metadata) => {
+      console.error("NextAuth Error:", code, metadata)
+    },
+    warn: (code) => {
+      console.warn("NextAuth Warning:", code)
+    },
+    debug: () => {}, // Disable debug logging completely
+  },
+  // Ensure no internal endpoints are exposed
+  events: {},
 }
