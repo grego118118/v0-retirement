@@ -21,8 +21,8 @@ import {
   Target
 } from "lucide-react"
 import { generateSEOMetadata } from "@/components/seo/metadata"
+import { OrganizationStructuredData } from "@/components/seo/structured-data"
 import { NewsletterSignup } from "@/components/email/newsletter-signup"
-import Script from "next/script"
 
 export const metadata = generateSEOMetadata({
   title: "Massachusetts Pension Estimator | Retirement Planning for State Employees",
@@ -41,31 +41,9 @@ export const metadata = generateSEOMetadata({
 })
 
 export default function Home() {
-  // Structured data for SEO
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "WebApplication",
-    name: "Massachusetts Pension Estimator",
-    description:
-      "Calculate your Massachusetts state employee pension benefits and determine the optimal time to retire.",
-    applicationCategory: "FinanceApplication",
-    operatingSystem: "Web",
-    offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: "USD",
-    },
-    audience: {
-      "@type": "Audience",
-      audienceType: "Massachusetts State Employees",
-    },
-  };
-
   return (
     <div className="flex flex-col min-h-screen">
-      <Script id="structured-data" type="application/ld+json">
-        {JSON.stringify(structuredData)}
-      </Script>
+      <OrganizationStructuredData />
 
       {/* Hero Section - Conversion Optimized */}
       <section className="bg-gradient-to-br from-blue-600 via-indigo-700 to-purple-800 text-white py-20 md:py-28 relative overflow-hidden">

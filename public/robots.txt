@@ -1,0 +1,23 @@
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://www.masspension.com/sitemap.xml
+
+# Allow all search engines to crawl the site
+# Disallow admin and private areas
+Disallow: /api/
+Disallow: /admin/
+Disallow: /_next/
+Disallow: /debug/
+
+# Allow crawling of important content
+Allow: /calculator
+Allow: /blog
+Allow: /resources
+Allow: /faq
+Allow: /about
+Allow: /contact
+
+# Crawl delay (optional - 1 second between requests)
+Crawl-delay: 1

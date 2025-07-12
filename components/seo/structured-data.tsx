@@ -4,6 +4,7 @@
  */
 
 import Script from 'next/script'
+import React from 'react'
 
 interface CalculatorStructuredDataProps {
   pageUrl: string
@@ -105,6 +106,103 @@ export function CalculatorStructuredData({ pageUrl, calculatorType }: Calculator
   )
 }
 
+// Organization and Website structured data for homepage
+export function OrganizationStructuredData() {
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Mass Pension - Massachusetts Retirement Calculator",
+    "alternateName": "MassPension.com",
+    "url": "https://www.masspension.com",
+    "logo": "https://www.masspension.com/images/logo.png",
+    "description": "Comprehensive Massachusetts state employee pension calculator and retirement planning tools with MSRB-validated calculations.",
+    "foundingDate": "2024",
+    "knowsAbout": [
+      "Massachusetts State Retirement System",
+      "Pension Calculations",
+      "MSRB Regulations",
+      "Retirement Planning",
+      "State Employee Benefits",
+      "COLA Calculations",
+      "Retirement Options A B C"
+    ],
+    "areaServed": {
+      "@type": "State",
+      "name": "Massachusetts"
+    },
+    "audience": {
+      "@type": "Audience",
+      "audienceType": "Massachusetts State Employees"
+    },
+    "sameAs": [
+      "https://www.mass.gov"
+    ]
+  }
+
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Mass Pension - Massachusetts Retirement Calculator",
+    "url": "https://www.masspension.com",
+    "description": "Free Massachusetts state employee pension calculator with MSRB-validated formulas for accurate retirement planning.",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://www.masspension.com/search?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    },
+    "mainEntity": {
+      "@type": "WebApplication",
+      "name": "Massachusetts Pension Calculator",
+      "url": "https://www.masspension.com/calculator",
+      "applicationCategory": "FinanceApplication"
+    }
+  }
+
+  return (
+    <div>
+      <Script
+        id="organization-structured-data"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+      />
+      <Script
+        id="website-structured-data"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+      />
+    </div>
+  )
+}
+
+// Breadcrumb structured data for navigation
+interface BreadcrumbStructuredDataProps {
+  items: Array<{
+    name: string
+    url: string
+  }>
+}
+
+export function BreadcrumbStructuredData({ items }: BreadcrumbStructuredDataProps) {
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": items.map((item, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "name": item.name,
+      "item": item.url
+    }))
+  }
+
+  return (
+    <Script
+      id="breadcrumb-structured-data"
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+    />
+  )
+}
+
 interface FAQStructuredDataProps {
   faqs: Array<{
     question: string
@@ -190,6 +288,14 @@ export const RETIREMENT_FAQS = [
   {
     question: "When can I retire as a Massachusetts state employee?",
     answer: "Retirement eligibility depends on your group: Group 1 at age 60, Group 2 at age 55, Group 3 any age with 20+ years, Group 4 at age 50. You also need minimum years of service (typically 10-20 years depending on hire date)."
+  },
+  {
+    question: "How accurate is this Massachusetts pension calculator?",
+    answer: "Our calculator uses official MSRB (Massachusetts State Retirement Board) formulas and is regularly updated to reflect current regulations. However, final pension amounts can only be officially determined by MSRB at retirement."
+  },
+  {
+    question: "Do I need to pay for the Massachusetts pension calculator?",
+    answer: "No, our basic pension calculator is completely free. We offer premium features like detailed PDF reports, historical projections, and advanced planning tools for subscribers who want comprehensive retirement planning."
   }
 ]
 
