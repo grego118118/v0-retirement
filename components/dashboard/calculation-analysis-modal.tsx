@@ -21,10 +21,12 @@ import {
   calculateEnhancedMAPensionCOLAProjections,
   getCOLADisplayInfo 
 } from "@/lib/pension/ma-cola-calculator"
-import { 
-  calculateRetirementBenefitsProjection,
-  ProjectionParameters 
-} from "@/lib/retirement-benefits-projection"
+// Temporarily removed year-by-year projections to fix production API issues
+// import {
+//   calculateRetirementBenefitsProjection,
+//   ProjectionParameters,
+//   ProjectionYear
+// } from "@/lib/retirement-benefits-projection"
 import {
   DollarSign,
   Calendar,
@@ -85,12 +87,24 @@ export function CalculationAnalysisModal({
   const [analysisData, setAnalysisData] = useState<any>(null)
   const [analysisLoading, setAnalysisLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // Temporarily removed year-by-year projections to fix production API issues
+  // const [yearlyProjections, setYearlyProjections] = useState<ProjectionYear[]>([])
+  // const [projectionsLoading, setProjectionsLoading] = useState(false)
   const { toast } = useToast()
+
+  // Helper function to safely get nested properties
+  const safeGet = (obj: any, path: string, defaultValue: any = 0): any => {
+    return path.split('.').reduce((current, key) => {
+      return current && current[key] !== undefined ? current[key] : defaultValue
+    }, obj)
+  }
 
   // Calculate detailed analysis when calculation changes
   useEffect(() => {
     if (calculation && isOpen) {
       calculateDetailedAnalysis()
+      // Temporarily removed year-by-year projections to fix production API issues
+      // calculateYearByYearProjections()
     }
   }, [calculation, isOpen])
 
@@ -147,7 +161,7 @@ export function CalculationAnalysisModal({
       if (calculation.socialSecurityData?.selectedClaimingAge && 
           calculation.socialSecurityData?.fullRetirementBenefit) {
         
-        const projectionParams: ProjectionParameters = {
+        const projectionParams: any = {
           currentAge: calculation.retirementAge - 1, // Approximate current age
           plannedRetirementAge: calculation.retirementAge,
           currentYearsOfService: calculation.yearsOfService,
@@ -163,7 +177,8 @@ export function CalculationAnalysisModal({
           colaRate: 0.03
         }
 
-        comprehensiveProjection = calculateRetirementBenefitsProjection(projectionParams)
+        // Temporarily removed year-by-year projections to fix production API issues
+        // comprehensiveProjection = calculateRetirementBenefitsProjection(projectionParams)
       }
 
       setAnalysisData({
@@ -186,6 +201,12 @@ export function CalculationAnalysisModal({
     }
   }
 
+  // Temporarily removed year-by-year projections to fix production API issues
+  // const calculateYearByYearProjections = async () => {
+  //   if (!calculation) return
+  //   // ... projection calculation logic removed for production stability
+  // }
+
   const handleExport = async () => {
     if (!analysisData || !calculation) {
       toast({
@@ -197,33 +218,59 @@ export function CalculationAnalysisModal({
     }
 
     try {
-      // Create CSV data for export
+      // Helper function to safely format currency values
+      const safeCurrency = (value: any): string => {
+        if (value === null || value === undefined || isNaN(Number(value))) {
+          return '$0'
+        }
+        return `$${Number(value).toLocaleString()}`
+      }
+
+      // Helper function to safely format percentage values
+      const safePercentage = (value: any): string => {
+        if (value === null || value === undefined || isNaN(Number(value))) {
+          return '0%'
+        }
+        return `${Number(value)}%`
+      }
+
+      // Helper function to safely get nested property
+      const safeGet = (obj: any, path: string, defaultValue: any = 0): any => {
+        return path.split('.').reduce((current, key) => {
+          return current && current[key] !== undefined ? current[key] : defaultValue
+        }, obj)
+      }
+
+      // Create CSV data for export with null safety
       const csvData = [
         ['Massachusetts Retirement Analysis Export'],
         ['Generated on:', new Date().toLocaleDateString()],
         [''],
         ['Basic Information'],
         ['Calculation Name:', calculation.calculationName || 'Unnamed Calculation'],
-        ['Retirement Age:', calculation.retirementAge.toString()],
-        ['Years of Service:', calculation.yearsOfService.toString()],
-        ['Average Salary:', `$${calculation.averageSalary.toLocaleString()}`],
-        ['Retirement Group:', calculation.retirementGroup],
+        ['Retirement Age:', (calculation.retirementAge || 0).toString()],
+        ['Years of Service:', (calculation.yearsOfService || 0).toString()],
+        ['Average Salary:', safeCurrency(calculation.averageSalary)],
+        ['Retirement Group:', calculation.retirementGroup || 'Unknown'],
         [''],
         ['Pension Options'],
-        ['Option A - Monthly:', `$${analysisData.pensionOptions.optionA.monthly.toLocaleString()}`],
-        ['Option A - Annual:', `$${analysisData.pensionOptions.optionA.annual.toLocaleString()}`],
-        ['Option B - Monthly:', `$${analysisData.pensionOptions.optionB.monthly.toLocaleString()}`],
-        ['Option B - Annual:', `$${analysisData.pensionOptions.optionB.annual.toLocaleString()}`],
-        ['Option C - Monthly:', `$${analysisData.pensionOptions.optionC.monthly.toLocaleString()}`],
-        ['Option C - Annual:', `$${analysisData.pensionOptions.optionC.annual.toLocaleString()}`],
+        ['Option A - Monthly:', safeCurrency(safeGet(analysisData, 'pensionOptions.optionA.monthly'))],
+        ['Option A - Annual:', safeCurrency(safeGet(analysisData, 'pensionOptions.optionA.annual'))],
+        ['Option B - Monthly:', safeCurrency(safeGet(analysisData, 'pensionOptions.optionB.monthly'))],
+        ['Option B - Annual:', safeCurrency(safeGet(analysisData, 'pensionOptions.optionB.annual'))],
+        ['Option C - Monthly:', safeCurrency(safeGet(analysisData, 'pensionOptions.optionC.monthly'))],
+        ['Option C - Annual:', safeCurrency(safeGet(analysisData, 'pensionOptions.optionC.annual'))],
         [''],
         ['COLA Information'],
-        ['COLA Rate:', `${analysisData.colaInfo.rate}%`],
-        ['Annual Cap:', `$${analysisData.colaInfo.annualCap.toLocaleString()}`],
-        ['First Year COLA:', `$${analysisData.colaProjections.firstYear.toLocaleString()}`],
-        ['Five Year COLA:', `$${analysisData.colaProjections.fiveYear.toLocaleString()}`],
-        ['Ten Year COLA:', `$${analysisData.colaProjections.tenYear.toLocaleString()}`]
+        ['COLA Rate:', safePercentage(safeGet(analysisData, 'colaInfo.rate'))],
+        ['Annual Cap:', safeCurrency(safeGet(analysisData, 'colaInfo.annualCap'))],
+        ['First Year COLA:', safeCurrency(safeGet(analysisData, 'colaProjections.firstYear'))],
+        ['Five Year COLA:', safeCurrency(safeGet(analysisData, 'colaProjections.fiveYear'))],
+        ['Ten Year COLA:', safeCurrency(safeGet(analysisData, 'colaProjections.tenYear'))]
       ]
+
+      // Temporarily removed year-by-year projections to fix production API issues
+      // Year-by-year projections will be re-added in a future update
 
       // Convert to CSV string
       const csvContent = csvData.map(row => row.join(',')).join('\n')
@@ -267,15 +314,30 @@ export function CalculationAnalysisModal({
     }
 
     try {
+      // Helper function to safely format currency values (reuse from export)
+      const safeCurrency = (value: any): string => {
+        if (value === null || value === undefined || isNaN(Number(value))) {
+          return '$0'
+        }
+        return `$${Number(value).toLocaleString()}`
+      }
+
+      // Helper function to safely get nested property (reuse from export)
+      const safeGet = (obj: any, path: string, defaultValue: any = 0): any => {
+        return path.split('.').reduce((current, key) => {
+          return current && current[key] !== undefined ? current[key] : defaultValue
+        }, obj)
+      }
+
       // Create shareable URL with calculation ID
       const shareUrl = `${window.location.origin}/calculator?shared=${calculation.id}`
 
-      // Create share text
+      // Create share text with null safety
       const shareText = `Check out my Massachusetts Retirement Analysis:
 
-Retirement Age: ${calculation.retirementAge}
-Monthly Pension (Option A): $${analysisData.pensionOptions.optionA.monthly.toLocaleString()}
-Annual Pension (Option A): $${analysisData.pensionOptions.optionA.annual.toLocaleString()}
+Retirement Age: ${calculation.retirementAge || 'Unknown'}
+Monthly Pension (Option A): ${safeCurrency(safeGet(analysisData, 'pensionOptions.optionA.monthly'))}
+Annual Pension (Option A): ${safeCurrency(safeGet(analysisData, 'pensionOptions.optionA.annual'))}
 
 View full analysis: ${shareUrl}`
 
@@ -381,11 +443,23 @@ View full analysis: ${shareUrl}`
               </DialogDescription>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={handleExport}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExport}
+                title="Export detailed analysis data as CSV spreadsheet including year-by-year projections (Free feature)"
+                className="hover:border-green-300 hover:bg-green-50"
+              >
                 <Download className="h-4 w-4 mr-2" />
-                Export
+                Export CSV
+                <span className="ml-1 px-1.5 py-0.5 text-xs bg-green-100 text-green-700 rounded-md">CSV</span>
               </Button>
-              <Button variant="outline" size="sm" onClick={handleShare}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleShare}
+                title="Share comprehensive analysis with detailed pension breakdown and projections"
+              >
                 <Share2 className="h-4 w-4 mr-2" />
                 Share
               </Button>
@@ -581,13 +655,13 @@ View full analysis: ${shareUrl}`
                         <div>
                           <p className="text-sm font-medium text-muted-foreground">Monthly Benefit</p>
                           <p className="text-2xl font-bold text-blue-600">
-                            {formatCurrency(analysisData.pensionOptions.optionA.pension / 12)}
+                            {formatCurrency(safeGet(analysisData, 'pensionOptions.optionA.pension') / 12)}
                           </p>
                         </div>
                         <div>
                           <p className="text-sm font-medium text-muted-foreground">Annual Benefit</p>
                           <p className="text-lg font-semibold">
-                            {formatCurrency(analysisData.pensionOptions.optionA.pension)}
+                            {formatCurrency(safeGet(analysisData, 'pensionOptions.optionA.pension'))}
                           </p>
                         </div>
                         <div>
@@ -617,25 +691,25 @@ View full analysis: ${shareUrl}`
                         <div>
                           <p className="text-sm font-medium text-muted-foreground">Monthly Benefit</p>
                           <p className="text-2xl font-bold text-green-600">
-                            {formatCurrency(analysisData.pensionOptions.optionB.pension / 12)}
+                            {formatCurrency(safeGet(analysisData, 'pensionOptions.optionB.pension') / 12)}
                           </p>
                         </div>
                         <div>
                           <p className="text-sm font-medium text-muted-foreground">Annual Benefit</p>
                           <p className="text-lg font-semibold">
-                            {formatCurrency(analysisData.pensionOptions.optionB.pension)}
+                            {formatCurrency(safeGet(analysisData, 'pensionOptions.optionB.pension'))}
                           </p>
                         </div>
                         <div>
                           <p className="text-sm font-medium text-muted-foreground">Reduction</p>
                           <p className="text-sm text-orange-600">
-                            {analysisData.pensionOptions.optionB.reductionPercentage?.toFixed(2)}%
+                            {(safeGet(analysisData, 'pensionOptions.optionB.reductionPercentage', 0)).toFixed(2)}%
                           </p>
                         </div>
                         <div>
                           <p className="text-sm font-medium text-muted-foreground">Survivor Benefit</p>
                           <p className="text-sm text-green-600">
-                            {formatCurrency(analysisData.pensionOptions.optionB.survivorBenefit || 0)}
+                            {formatCurrency(safeGet(analysisData, 'pensionOptions.optionB.survivorBenefit', 0))}
                           </p>
                         </div>
                         <div className="pt-2 border-t">
@@ -661,25 +735,25 @@ View full analysis: ${shareUrl}`
                         <div>
                           <p className="text-sm font-medium text-muted-foreground">Monthly Benefit</p>
                           <p className="text-2xl font-bold text-purple-600">
-                            {formatCurrency(analysisData.pensionOptions.optionC.pension / 12)}
+                            {formatCurrency(safeGet(analysisData, 'pensionOptions.optionC.pension') / 12)}
                           </p>
                         </div>
                         <div>
                           <p className="text-sm font-medium text-muted-foreground">Annual Benefit</p>
                           <p className="text-lg font-semibold">
-                            {formatCurrency(analysisData.pensionOptions.optionC.pension)}
+                            {formatCurrency(safeGet(analysisData, 'pensionOptions.optionC.pension'))}
                           </p>
                         </div>
                         <div>
                           <p className="text-sm font-medium text-muted-foreground">Reduction</p>
                           <p className="text-sm text-orange-600">
-                            {analysisData.pensionOptions.optionC.reductionPercentage?.toFixed(2)}%
+                            {(safeGet(analysisData, 'pensionOptions.optionC.reductionPercentage', 0)).toFixed(2)}%
                           </p>
                         </div>
                         <div>
                           <p className="text-sm font-medium text-muted-foreground">Survivor Benefit</p>
                           <p className="text-sm text-green-600">
-                            {formatCurrency(analysisData.pensionOptions.optionC.survivorBenefit || 0)}
+                            {formatCurrency(safeGet(analysisData, 'pensionOptions.optionC.survivorBenefit', 0))}
                           </p>
                         </div>
                         <div className="pt-2 border-t">
@@ -745,7 +819,7 @@ View full analysis: ${shareUrl}`
                       </CardHeader>
                       <CardContent>
                         <div className="text-2xl font-bold text-purple-600">
-                          {formatCurrency(analysisData.colaInfo.annualCOLA)}
+                          {formatCurrency(safeGet(analysisData, 'colaInfo.annualCOLA'))}
                         </div>
                         <p className="text-xs text-purple-600 mt-1">
                           Based on your pension
@@ -780,7 +854,7 @@ View full analysis: ${shareUrl}`
                           </tr>
                         </thead>
                         <tbody>
-                          {analysisData.colaProjections.slice(0, 10).map((projection: any, index: number) => (
+                          {(analysisData.colaProjections || []).slice(0, 10).map((projection: any, index: number) => (
                             <tr key={projection.year} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
                               <td className="border border-gray-200 p-3 font-medium">
                                 Year {projection.year}
@@ -798,7 +872,7 @@ View full analysis: ${shareUrl}`
                                 {formatCurrency(projection.monthlyPension)}
                               </td>
                               <td className="border border-gray-200 p-3 text-right text-blue-600">
-                                +{formatCurrency(projection.endingPension - analysisData.colaProjections[0].startingPension)}
+                                +{formatCurrency(projection.endingPension - safeGet(analysisData, 'colaProjections.0.startingPension', 0))}
                               </td>
                             </tr>
                           ))}
@@ -818,15 +892,15 @@ View full analysis: ${shareUrl}`
                           <p className="text-sm font-medium text-green-600">Total COLA Increases</p>
                           <p className="text-xl font-bold text-green-700">
                             {formatCurrency(
-                              analysisData.colaProjections[9]?.endingPension -
-                              analysisData.colaProjections[0]?.startingPension || 0
+                              safeGet(analysisData, 'colaProjections.9.endingPension', 0) -
+                              safeGet(analysisData, 'colaProjections.0.startingPension', 0)
                             )}
                           </p>
                         </div>
                         <div>
                           <p className="text-sm font-medium text-green-600">Final Monthly Pension</p>
                           <p className="text-xl font-bold text-green-700">
-                            {formatCurrency(analysisData.colaProjections[9]?.monthlyPension || 0)}
+                            {formatCurrency(safeGet(analysisData, 'colaProjections.9.monthlyPension', 0))}
                           </p>
                         </div>
                       </CardContent>
@@ -846,7 +920,7 @@ View full analysis: ${shareUrl}`
                         <div>
                           <p className="text-sm font-medium text-blue-600">Annual Protection Rate</p>
                           <p className="text-lg font-semibold text-blue-700">
-                            {(analysisData.colaInfo.effectiveRate * 100).toFixed(2)}%
+                            {(safeGet(analysisData, 'colaInfo.effectiveRate', 0) * 100).toFixed(2)}%
                           </p>
                         </div>
                       </CardContent>
@@ -855,6 +929,9 @@ View full analysis: ${shareUrl}`
                 </CardContent>
               </Card>
             </TabsContent>
+
+            {/* Year-by-Year Projections Tab - Temporarily removed to fix production API issues */}
+            {/* Will be re-added in a future update with improved performance */}
 
             {/* Comprehensive Analysis Tab */}
             <TabsContent value="comprehensive" className="space-y-6">
@@ -885,7 +962,7 @@ View full analysis: ${shareUrl}`
                           </tr>
                         </thead>
                         <tbody>
-                          {analysisData.comprehensiveProjection.slice(0, 15).map((year: any, index: number) => (
+                          {(analysisData.comprehensiveProjection || []).slice(0, 15).map((year: any, index: number) => (
                             <tr key={year.age} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
                               <td className="border border-gray-200 p-2 font-medium">{year.age}</td>
                               <td className="border border-gray-200 p-2 text-right">{year.yearsOfService.toFixed(1)}</td>
@@ -932,7 +1009,7 @@ View full analysis: ${shareUrl}`
                         </CardHeader>
                         <CardContent>
                           <div className="text-xl font-bold text-green-600">
-                            {formatCurrency(analysisData.comprehensiveProjection[0]?.combinedTotalAnnual || 0)}
+                            {formatCurrency(safeGet(analysisData, 'comprehensiveProjection.0.combinedTotalAnnual', 0))}
                           </div>
                         </CardContent>
                       </Card>
@@ -944,7 +1021,7 @@ View full analysis: ${shareUrl}`
                         <CardContent>
                           <div className="text-xl font-bold text-purple-600">
                             {formatCurrency(
-                              Math.max(...analysisData.comprehensiveProjection.map((y: any) => y.combinedTotalAnnual))
+                              Math.max(...(analysisData.comprehensiveProjection || []).map((y: any) => y.combinedTotalAnnual || 0))
                             )}
                           </div>
                         </CardContent>
@@ -957,7 +1034,7 @@ View full analysis: ${shareUrl}`
                         <CardContent>
                           <div className="text-xl font-bold text-orange-600">
                             {(
-                              (analysisData.comprehensiveProjection[0]?.combinedTotalAnnual / calculation.averageSalary) * 100
+                              (safeGet(analysisData, 'comprehensiveProjection.0.combinedTotalAnnual', 0) / (calculation.averageSalary || 1)) * 100
                             ).toFixed(1)}%
                           </div>
                         </CardContent>

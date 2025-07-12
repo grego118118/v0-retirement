@@ -1,9 +1,18 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useSubscriptionStatus } from "@/hooks/use-subscription"
+import { getAdSenseManager } from "@/lib/adsense-manager"
 
+/**
+ * AdSense Initializer - Uses centralized AdSense Manager
+ *
+ * This component initializes AdSense using the singleton manager
+ * to prevent duplicate Auto Ads initialization and conflicts.
+ */
 export function AdSenseInitializer() {
   const [isClient, setIsClient] = useState(false)
+  const { isPremium, subscriptionStatus } = useSubscriptionStatus()
 
   useEffect(() => {
     // Set client flag to prevent hydration mismatch
@@ -14,43 +23,31 @@ export function AdSenseInitializer() {
     // Only run on client side after hydration
     if (!isClient || typeof window === 'undefined') return
 
-    // Initialize adsbygoogle array when the component mounts
-    window.adsbygoogle = window.adsbygoogle || []
-    console.log('AdSense initializer: adsbygoogle array initialized')
+    // Initialize AdSense using centralized manager
+    const initializeAdSense = async () => {
+      try {
+        const manager = getAdSenseManager()
 
-    // Check if AdSense script is already loaded
-    let existingScript = document.querySelector('script[src*="adsbygoogle.js"]')
+        // Update manager configuration
+        manager.updateConfig({
+          isPremium: isPremium && subscriptionStatus !== 'loading',
+          isDevelopment: process.env.NODE_ENV === 'development'
+        })
 
-    if (!existingScript) {
-      // Create and load the AdSense script dynamically to avoid hydration issues
-      const publisherId = "ca-pub-8456317857596950"
-      const script = document.createElement('script')
-      script.async = true
-      script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${publisherId}`
-      script.crossOrigin = 'anonymous'
-      script.id = 'adsense-verification-script'
+        // Initialize AdSense (manager handles duplicate prevention)
+        await manager.initialize({
+          enableAutoAds: true,
+          enableManualAds: true
+        })
 
-      script.onload = () => {
-        console.log('AdSense script loaded successfully from initializer')
-        if (typeof window !== 'undefined') {
-          window.adsbygoogle = window.adsbygoogle || []
-          console.log('AdSense adsbygoogle array ready:', window.adsbygoogle.length)
-        }
+        console.log('AdSenseInitializer: Initialization completed via manager')
+      } catch (error) {
+        console.error('AdSenseInitializer: Initialization failed:', error)
       }
-
-      script.onerror = (e) => {
-        console.error('Failed to load AdSense script from initializer:', e)
-      }
-
-      // Append to head to load the script
-      document.head.appendChild(script)
-      console.log('AdSense script created and added to DOM')
-    } else {
-      console.log('AdSense script already exists in DOM')
-      // Initialize immediately if script already exists
-      window.adsbygoogle = window.adsbygoogle || []
     }
-  }, [isClient])
+
+    initializeAdSense()
+  }, [isClient, isPremium, subscriptionStatus])
 
   return null
 }

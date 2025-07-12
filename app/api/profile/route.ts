@@ -1,12 +1,17 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth/auth-config"
-import { prisma } from "@/lib/prisma"
+import { prisma } from "@/lib/db"
+import { logError, logApiPerformance, withPerformanceMonitoring } from "@/lib/monitoring"
+import { cacheUserProfile, invalidateUserCache } from "@/lib/cache"
 
 export async function GET() {
+  const startTime = Date.now();
+  let session: any = null;
+
   try {
     console.log("Profile GET request started")
-    const session = await getServerSession(authOptions)
+    session = await getServerSession(authOptions)
 
     console.log("Session in profile GET:", {
       hasSession: !!session,
@@ -21,51 +26,88 @@ export async function GET() {
 
     console.log("Querying profile for user:", session.user.id)
 
-    // Query both User table and RetirementProfile table
-    const [user, retirementProfile] = await Promise.all([
-      prisma.user.findUnique({
-        where: { id: session.user.id },
-        select: { name: true, retirementDate: true }
-      }),
-      prisma.retirementProfile.findUnique({
-        where: { userId: session.user.id }
-      })
-    ])
+    // Use caching for profile data
+    const responseData = await cacheUserProfile(
+      session.user.id,
+      async () => {
+        // Query both User table and RetirementProfile table
+        const [user, retirementProfile] = await Promise.all([
+          prisma.user.findUnique({
+            where: { id: session.user.id },
+            select: { name: true, retirementDate: true }
+          }),
+          prisma.retirementProfile.findUnique({
+            where: { userId: session.user.id }
+          })
+        ])
 
-    console.log("Profile query result:", { user, retirementProfile })
+        console.log("Profile query result:", { user, retirementProfile })
 
-    // Safe date conversion utility
-    const safeToISOString = (date: Date | null | undefined): string => {
-      if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
-        return "";
-      }
-      try {
-        return date.toISOString();
-      } catch (error) {
-        console.error('Error converting date to ISO string:', error, 'Date value:', date);
-        return "";
-      }
-    };
+        // Safe date conversion utility
+        const safeToISOString = (date: Date | null | undefined): string => {
+          if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
+            return "";
+          }
+          try {
+            return date.toISOString();
+          } catch (error) {
+            console.error('Error converting date to ISO string:', error, 'Date value:', date);
+            return "";
+          }
+        };
 
-    // Convert Prisma result to expected format
-    const responseData = {
-      fullName: user?.name || "",
-      retirementDate: safeToISOString(user?.retirementDate),
-      dateOfBirth: safeToISOString(retirementProfile?.dateOfBirth),
-      membershipDate: safeToISOString(retirementProfile?.membershipDate),
-      retirementGroup: retirementProfile?.retirementGroup || "1",
-      benefitPercentage: retirementProfile?.benefitPercentage || 2.0,
-      currentSalary: retirementProfile?.currentSalary || 0,
-      averageHighest3Years: retirementProfile?.averageHighest3Years || 0,
-      yearsOfService: retirementProfile?.yearsOfService || 0,
-      retirementOption: retirementProfile?.retirementOption || "A",
-      estimatedSocialSecurityBenefit: retirementProfile?.estimatedSocialSecurityBenefit || 0
-    }
+        // Convert Prisma result to expected format
+        return {
+          fullName: user?.name || "",
+          retirementDate: safeToISOString(user?.retirementDate),
+          dateOfBirth: safeToISOString(retirementProfile?.dateOfBirth),
+          membershipDate: safeToISOString(retirementProfile?.membershipDate),
+          retirementGroup: retirementProfile?.retirementGroup || "1",
+          benefitPercentage: retirementProfile?.benefitPercentage || 2.0,
+          currentSalary: retirementProfile?.currentSalary || 0,
+          averageHighest3Years: retirementProfile?.averageHighest3Years || 0,
+          yearsOfService: retirementProfile?.yearsOfService || 0,
+          retirementOption: retirementProfile?.retirementOption || "A",
+          estimatedSocialSecurityBenefit: retirementProfile?.estimatedSocialSecurityBenefit || 0
+        };
+      },
+      300 // Cache for 5 minutes
+    );
 
     console.log("Returning profile data:", responseData)
+
+    // Log successful API performance
+    logApiPerformance({
+      endpoint: '/api/profile',
+      method: 'GET',
+      duration: Date.now() - startTime,
+      status: 200,
+      timestamp: new Date().toISOString(),
+      userId: session.user.id,
+    });
+
     return NextResponse.json(responseData)
   } catch (error) {
     console.error("Error fetching profile:", error)
+
+    // Enhanced error logging
+    logError(error as Error, {
+      endpoint: '/api/profile',
+      userId: session?.user?.id,
+      timestamp: new Date().toISOString(),
+    });
+
+    // Log failed API performance
+    logApiPerformance({
+      endpoint: '/api/profile',
+      method: 'GET',
+      duration: Date.now() - startTime,
+      status: 500,
+      timestamp: new Date().toISOString(),
+      userId: session?.user?.id,
+      errorMessage: error instanceof Error ? error.message : 'Unknown error',
+    });
+
     return NextResponse.json({
       message: "Failed to fetch profile",
       error: error instanceof Error ? error.message : "Unknown error"
@@ -74,6 +116,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const startTime = Date.now();
+  let session: any = null;
+
   try {
     console.log("Profile POST request started")
 
@@ -85,7 +130,7 @@ export async function POST(request: Request) {
       userAgent: headers["user-agent"]
     })
 
-    const session = await getServerSession(authOptions)
+    session = await getServerSession(authOptions)
 
     console.log("Session in profile POST:", {
       hasSession: !!session,
@@ -228,6 +273,20 @@ export async function POST(request: Request) {
       }
 
       console.log("Social Security update successful, returning:", responseData)
+
+      // Invalidate user cache after successful update
+      invalidateUserCache(session.user.id);
+
+      // Log successful API performance
+      logApiPerformance({
+        endpoint: '/api/profile',
+        method: 'POST',
+        duration: Date.now() - startTime,
+        status: 200,
+        timestamp: new Date().toISOString(),
+        userId: session.user.id,
+      });
+
       return NextResponse.json(responseData)
     }
 
@@ -261,6 +320,19 @@ export async function POST(request: Request) {
       }
 
       console.log("Basic profile update completed successfully")
+
+      // Invalidate user cache after successful update
+      invalidateUserCache(session.user.id);
+
+      // Log successful API performance
+      logApiPerformance({
+        endpoint: '/api/profile',
+        method: 'POST',
+        duration: Date.now() - startTime,
+        status: 200,
+        timestamp: new Date().toISOString(),
+        userId: session.user.id,
+      });
 
       return NextResponse.json({
         message: "Basic profile updated successfully",
@@ -353,6 +425,20 @@ export async function POST(request: Request) {
       }
 
       console.log("Retirement profile update successful, returning:", responseData)
+
+      // Invalidate user cache after successful update
+      invalidateUserCache(session.user.id);
+
+      // Log successful API performance
+      logApiPerformance({
+        endpoint: '/api/profile',
+        method: 'POST',
+        duration: Date.now() - startTime,
+        status: 200,
+        timestamp: new Date().toISOString(),
+        userId: session.user.id,
+      });
+
       return NextResponse.json(responseData)
     }
 
@@ -366,6 +452,24 @@ export async function POST(request: Request) {
 
   } catch (error) {
     console.error("Error updating profile:", error)
+
+    // Enhanced error logging
+    logError(error as Error, {
+      endpoint: '/api/profile',
+      userId: session?.user?.id,
+      timestamp: new Date().toISOString(),
+    });
+
+    // Log failed API performance
+    logApiPerformance({
+      endpoint: '/api/profile',
+      method: 'POST',
+      duration: Date.now() - startTime,
+      status: 500,
+      timestamp: new Date().toISOString(),
+      userId: session?.user?.id,
+      errorMessage: error instanceof Error ? error.message : 'Unknown error',
+    });
 
     // More detailed error information
     const errorMessage = error instanceof Error ? error.message : "Unknown error"

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import { useSubscriptionStatus } from "@/hooks/use-subscription"
+import { getAdSenseManager } from "@/lib/adsense-manager"
 
 interface AdSenseProps {
   adSlot: string
@@ -30,13 +31,19 @@ export function AdSense({
 }: AdSenseProps) {
   const { isPremium, subscriptionStatus } = useSubscriptionStatus()
   const adRef = useRef<HTMLDivElement>(null)
-  const isAdLoaded = useRef(false)
   const [isClient, setIsClient] = useState(false)
+  const elementId = useRef(`adsense-${Math.random().toString(36).substr(2, 9)}`)
+  const isInitialized = useRef(false)
   const publisherId = process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID || "ca-pub-8456317857596950"
 
   useEffect(() => {
     setIsClient(true)
   }, [])
+
+  // Reset initialization when slot changes
+  useEffect(() => {
+    isInitialized.current = false
+  }, [adSlot])
 
   useEffect(() => {
     // Only run on client side after hydration
@@ -48,39 +55,55 @@ export function AdSense({
     }
 
     // Don't show ads to confirmed premium users
-    // But allow loading during 'loading' state to ensure ads load for free users
     if (isPremium && subscriptionStatus !== 'loading') {
       return
     }
 
-    // Only load ads once per component instance
-    if (isAdLoaded.current) {
+    // Don't initialize if already done
+    if (isInitialized.current) {
       return
     }
 
-    try {
-      // Wait for the AdSense script to load before initializing ads
-      const checkAdSenseReady = () => {
-        if (typeof window !== 'undefined' && window.adsbygoogle) {
-          // Initialize adsbygoogle array if it doesn't exist
-          window.adsbygoogle = window.adsbygoogle || []
+    // Don't initialize if element ref is not available
+    if (!adRef.current) {
+      return
+    }
 
-          // Push the ad configuration
-          window.adsbygoogle.push({})
-          isAdLoaded.current = true
-          console.log('AdSense ad initialized successfully')
-        } else {
-          // Retry after a short delay if AdSense isn't ready yet
-          setTimeout(checkAdSenseReady, 100)
+    const initializeAd = async () => {
+      try {
+        const manager = getAdSenseManager()
+        const element = adRef.current!
+        const id = elementId.current
+
+        // Register the ad element with the manager
+        manager.registerAdElement(id, element, adSlot)
+
+        // Initialize the ad element
+        await manager.initializeAdElement(id)
+
+        isInitialized.current = true
+        console.log(`AdSense: Initialized ad element ${id} with slot ${adSlot}`)
+      } catch (error) {
+        console.error('AdSense: Failed to initialize ad element:', error)
+      }
+    }
+
+    initializeAd()
+  }, [isClient, isPremium, subscriptionStatus, adSlot])
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (isClient && typeof window !== 'undefined') {
+        try {
+          const manager = getAdSenseManager()
+          manager.cleanupAdElement(elementId.current)
+        } catch (error) {
+          console.error('AdSense: Cleanup error:', error)
         }
       }
-
-      // Start checking for AdSense readiness
-      checkAdSenseReady()
-    } catch (error) {
-      console.error('AdSense error:', error)
     }
-  }, [isClient, isPremium, subscriptionStatus])
+  }, [isClient])
 
   // Don't render anything during SSR to prevent hydration mismatch
   if (!isClient) {
@@ -177,22 +200,41 @@ export function ResponsiveAd({ className = "my-4" }: { className?: string }) {
   )
 }
 
-// Premium user alternative - shows upgrade prompt instead of ads
+// Premium Alternative Component
 export function PremiumAlternative({ className = "my-4" }: { className?: string }) {
-  const { isPremium } = useSubscriptionStatus()
-  
-  if (!isPremium) {
+  const { isPremium, subscriptionStatus } = useSubscriptionStatus()
+  const [isClient, setIsClient] = useState(false)
+
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  // Don't render anything during SSR
+  if (!isClient) {
+    return null
+  }
+
+  // Only show for premium users
+  if (!isPremium || subscriptionStatus === 'loading') {
     return null
   }
 
   return (
-    <div className={`bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4 text-center ${className}`}>
-      <p className="text-sm text-blue-700 font-medium">
-        ✨ Thank you for being a Premium subscriber!
-      </p>
-      <p className="text-xs text-blue-600 mt-1">
-        Enjoy an ad-free experience with all premium features.
+    <div className={`bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-lg p-6 text-center ${className}`}>
+      <div className="flex items-center justify-center mb-3">
+        <div className="bg-purple-100 p-2 rounded-full mr-3">
+          <svg className="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732L14.146 12.8l-1.179 4.456a1 1 0 01-1.934 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732L9.854 7.2l1.179-4.456A1 1 0 0112 2z" clipRule="evenodd" />
+          </svg>
+        </div>
+        <h3 className="text-lg font-semibold text-purple-800">Premium Experience</h3>
+      </div>
+      <p className="text-purple-700 text-sm">
+        Enjoy an ad-free experience with your Premium subscription.
+        Focus on your retirement planning without distractions.
       </p>
     </div>
   )
 }
+
+

@@ -17,9 +17,15 @@ import {
 } from 'lucide-react'
 import {
   PensionCalculationData,
-  CombinedCalculationData,
   PDFGenerationOptions
-} from '@/lib/pdf/pdf-generator'
+} from '@/lib/pdf/puppeteer-pdf-generator'
+
+// Combined calculation data interface (for compatibility)
+interface CombinedCalculationData {
+  pensionData: PensionCalculationData
+  socialSecurityData?: any
+  additionalIncome?: any
+}
 import Link from 'next/link'
 
 interface PDFExportButtonProps {

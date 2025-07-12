@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth/auth-options"
+import { authOptions } from "@/lib/auth/auth-config"
 import { query } from "@/lib/db/postgres"
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {

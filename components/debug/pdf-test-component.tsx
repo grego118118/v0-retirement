@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { usePDFGeneration } from "@/hooks/use-pdf-generation"
 import { CheckCircle, XCircle, AlertTriangle, FileText, Settings, RefreshCw } from "lucide-react"
-import { PensionCalculationData } from "@/lib/pdf/pdf-generator"
+import { PensionCalculationData } from "@/lib/pdf/puppeteer-pdf-generator"
 
 // Sample pension data for testing - Updated to match PensionCalculationData interface
 const samplePensionData: PensionCalculationData = {
@@ -58,7 +58,7 @@ const samplePensionData: PensionCalculationData = {
   ],
   isVeteran: false,
   eligibilityMessage: "Eligible for retirement at age 60",
-  calculationDate: new Date()
+  calculationDate: new Date().toISOString()
 }
 
 export function PDFTestComponent() {

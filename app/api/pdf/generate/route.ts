@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth/auth-options'
+import { authOptions } from '@/lib/auth/auth-config'
 import {
   generatePensionCalculationPDF,
-  generateCombinedRetirementPDF,
   PensionCalculationData,
-  CombinedCalculationData,
   PDFGenerationOptions
-} from '@/lib/pdf/pdf-generator'
+} from '@/lib/pdf/puppeteer-pdf-generator'
 import { canAccessFeature, isUserPremium } from '@/lib/stripe/config'
 import { getUserSubscriptionInfo } from '@/lib/subscription-utils'
 
@@ -105,7 +103,7 @@ export async function POST(request: NextRequest) {
 
     if (reportType === 'pension') {
       const pensionData = data as PensionCalculationData
-      
+
       // Validate pension data
       if (!pensionData.averageSalary || !pensionData.yearsOfService) {
         return NextResponse.json(
@@ -114,22 +112,32 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      const blob = await generatePensionCalculationPDF(pensionData, pdfOptions)
-      pdfBuffer = Buffer.from(await blob.arrayBuffer())
-      
-    } else {
-      const combinedData = data as CombinedCalculationData
-      
-      // Validate combined data
-      if (!combinedData.pensionData?.averageSalary) {
-        return NextResponse.json(
-          { error: 'Invalid combined data: missing pension information' },
-          { status: 400 }
-        )
+      // Ensure calculation date is properly handled
+      if (!pensionData.calculationDate) {
+        pensionData.calculationDate = new Date()
+      } else {
+        // If calculationDate exists but might be a string (from JSON serialization),
+        // ensure it's converted to a proper Date object or keep as string for template handling
+        if (typeof pensionData.calculationDate === 'string') {
+          // Validate the string can be converted to a valid date
+          const testDate = new Date(pensionData.calculationDate)
+          if (isNaN(testDate.getTime())) {
+            // If invalid date string, use current date
+            pensionData.calculationDate = new Date()
+          }
+          // Keep as string - the template will handle conversion
+        }
       }
 
-      const blob = await generateCombinedRetirementPDF(combinedData, pdfOptions)
-      pdfBuffer = Buffer.from(await blob.arrayBuffer())
+      console.log(`📊 PDF Generation: Generating pension PDF for user ${session.user.email}`)
+      pdfBuffer = await generatePensionCalculationPDF(pensionData, pdfOptions)
+
+    } else {
+      // Combined reports not yet implemented with Puppeteer
+      return NextResponse.json(
+        { error: 'Combined reports are temporarily unavailable. Please use pension report type.' },
+        { status: 501 }
+      )
     }
 
     // Generate filename

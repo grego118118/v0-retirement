@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  serverExternalPackages: ['@prisma/client', 'prisma', 'puppeteer'],
+  serverExternalPackages: ['@prisma/client', 'prisma'],
+
+  // Configure ES Module support for React-PDF
+  // transpilePackages: ['@react-pdf/renderer'], // Commented out to avoid conflict
 
   // Production optimizations (disabled for development)
   // output: 'standalone',
@@ -70,7 +73,7 @@ const nextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://vercel.live https://*.vercel.app https://va.vercel-scripts.com https://vitals.vercel-insights.com https://vitals.vercel-analytics.com https://apis.google.com https://accounts.google.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https: blob: https://googleads.g.doubleclick.net https://pagead2.googlesyndication.com; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://*.vercel.app https://*.supabase.co wss://*.vercel.app https://vercel.live wss://vercel.live https://vitals.vercel-insights.com https://vitals.vercel-analytics.com https://apis.google.com https://accounts.google.com https://googleads.g.doubleclick.net https://pagead2.googlesyndication.com; frame-src 'self' https://vercel.live https://accounts.google.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com; worker-src 'self' blob:; object-src 'none';"
+            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://vercel.live https://*.vercel.app https://va.vercel-scripts.com https://vitals.vercel-insights.com https://vitals.vercel-analytics.com https://apis.google.com https://accounts.google.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://partner.googleadservices.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https: blob: https://googleads.g.doubleclick.net https://pagead2.googlesyndication.com; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://*.vercel.app https://*.supabase.co wss://*.vercel.app https://vercel.live wss://vercel.live https://vitals.vercel-insights.com https://vitals.vercel-analytics.com https://apis.google.com https://accounts.google.com https://googleads.g.doubleclick.net https://pagead2.googlesyndication.com https://ep1.adtrafficquality.google https://tpc.googlesyndication.com https://partner.googleadservices.com; frame-src 'self' https://vercel.live https://accounts.google.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com; worker-src 'self' blob:; object-src 'none';"
           }
         ]
       }
@@ -106,6 +109,39 @@ const nextConfig = {
 
   // Webpack configuration for production builds
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+    // Configure React-PDF ES Module handling
+    config.resolve.extensionAlias = {
+      '.js': ['.js', '.ts', '.tsx'],
+      '.jsx': ['.jsx', '.tsx'],
+    }
+
+    // Handle React-PDF ES modules - don't externalize for server
+    // Let webpack bundle it properly instead
+    if (isServer) {
+      // Ensure React-PDF is bundled with the server
+      config.externals = config.externals || []
+      // Remove any existing externalization of react-pdf
+      config.externals = config.externals.filter(external => {
+        if (typeof external === 'string') {
+          return !external.includes('@react-pdf')
+        }
+        if (typeof external === 'object') {
+          return !('@react-pdf/renderer' in external)
+        }
+        return true
+      })
+
+      // Add fallbacks for Node.js modules that React-PDF might need
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        canvas: false,
+        fs: false,
+        path: false,
+        os: false,
+        crypto: false,
+      }
+    }
+
     // Only apply minimal changes in production
     if (!dev && process.env.NODE_ENV === 'production') {
       // Use production stub for wizard-v2-dev component if needed

@@ -36,6 +36,9 @@ export function TrustedTypesSetup() {
               'pagead2.googlesyndication.com',
               'googleads.g.doubleclick.net',
               'tpc.googlesyndication.com',
+              'ep1.adtrafficquality.google',
+              'googleadservices.com',
+              'www.googleadservices.com',
               window.location.origin
             ];
 

@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth/auth-options'
+import { authOptions } from '@/lib/auth/auth-config'
 import { emailService } from '@/lib/email/email-service'
 import { prisma } from '@/lib/prisma'
 import { measureAsync } from '@/lib/utils/performance-monitor'

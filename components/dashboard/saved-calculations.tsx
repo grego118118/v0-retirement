@@ -22,6 +22,13 @@ import Link from "next/link"
 import { CalculationAnalysisModal } from "./calculation-analysis-modal"
 import { useRetirementDataContext } from "@/contexts/retirement-data-context"
 import { useToast } from "@/hooks/use-toast"
+import { getBenefitFactor, calculatePensionWithOption } from "@/lib/pension-calculations"
+// Temporarily removed year-by-year projections to fix production API issues
+// import {
+//   calculateRetirementBenefitsProjection,
+//   ProjectionParameters,
+//   ProjectionYear
+// } from "@/lib/retirement-benefits-projection"
 
 interface SavedCalculation {
   id: string
@@ -83,58 +90,352 @@ export function SavedCalculations() {
     }
   }
 
-  const exportCalculation = async (calc: any) => {
+  // Transform saved calculation data to proper PDF format
+  const transformCalculationForPDF = (calc: any) => {
+    console.log('🔄 Transforming calculation for PDF:', calc)
+
+    // Validate required fields
+    if (!calc.averageSalary || !calc.yearsOfService || !calc.retirementAge) {
+      console.error('❌ Missing required fields:', {
+        averageSalary: calc.averageSalary,
+        yearsOfService: calc.yearsOfService,
+        retirementAge: calc.retirementAge
+      })
+      throw new Error('Missing required calculation data for PDF generation')
+    }
+
+    // Prepare calculation parameters
+    const group = `GROUP_${calc.retirementGroup || '1'}`
+    const serviceEntry = 'before_2012' // Default - could be enhanced with actual data
+    const beneficiaryAge = '65' // Default beneficiary age
+
+    // Calculate base pension using proper MSRB methodology
+    const benefitFactor = getBenefitFactor(calc.retirementAge, group, serviceEntry, calc.yearsOfService)
+    let basePension = calc.averageSalary * calc.yearsOfService * benefitFactor
+
+    // Apply 80% cap
+    const maxPension = calc.averageSalary * 0.8
+    if (basePension > maxPension) {
+      basePension = maxPension
+    }
+
+    // If we have saved annual benefit, use it as the base (it should match our calculation)
+    if (calc.annualBenefit && calc.annualBenefit > 0) {
+      basePension = calc.annualBenefit
+    }
+
+    const totalBenefitPercentage = (basePension / calc.averageSalary) * 100
+    const cappedAt80Percent = totalBenefitPercentage >= 80
+
+    // Calculate all retirement options using proper MSRB functions
+    let optionAResult, optionBResult, optionCResult
     try {
-      // Create CSV data for the calculation
-      const csvData = [
-        ['Massachusetts Retirement Calculation Export'],
-        ['Generated on:', new Date().toLocaleDateString()],
-        [''],
-        ['Basic Information'],
-        ['Calculation Name:', calc.calculationName || 'Unnamed Calculation'],
-        ['Created:', new Date(calc.createdAt).toLocaleDateString()],
-        ['Retirement Age:', calc.retirementAge.toString()],
-        ['Years of Service:', calc.yearsOfService.toString()],
-        ['Average Salary:', `$${calc.averageSalary.toLocaleString()}`],
-        ['Retirement Group:', calc.retirementGroup],
-        ['Retirement Option:', calc.retirementOption],
-        [''],
-        ['Calculated Benefits'],
-        ['Monthly Benefit:', `$${calc.monthlyBenefit.toLocaleString()}`],
-        ['Annual Benefit:', `$${calc.annualBenefit.toLocaleString()}`],
-        ['Benefit Reduction:', `${calc.benefitReduction || 0}%`],
-        ['Survivor Benefit:', `$${calc.survivorBenefit || 0}`],
-        [''],
-        ['Notes'],
-        [calc.notes || 'No additional notes']
-      ]
+      optionAResult = calculatePensionWithOption(basePension, 'A', calc.retirementAge, beneficiaryAge, group)
+      optionBResult = calculatePensionWithOption(basePension, 'B', calc.retirementAge, beneficiaryAge, group)
+      optionCResult = calculatePensionWithOption(basePension, 'C', calc.retirementAge, beneficiaryAge, group)
+      console.log('✅ Pension calculations successful:', { optionAResult, optionBResult, optionCResult })
+    } catch (error) {
+      console.error('❌ Error in pension calculations:', error)
+      // Fallback to simple calculations
+      optionAResult = { pension: basePension, description: 'Option A: Full Allowance (100%)', survivorPension: 0 }
+      optionBResult = { pension: basePension * 0.99, description: 'Option B: Annuity Protection (1% reduction)', survivorPension: 0 }
+      optionCResult = { pension: basePension * 0.9295, description: 'Option C: Joint & Survivor (66.67%)', survivorPension: basePension * 0.9295 * (2/3) }
+    }
 
-      // Convert to CSV string
-      const csvContent = csvData.map(row => row.join(',')).join('\n')
+    // Generate retirement options structure for PDF
+    const options = {
+      A: {
+        annual: optionAResult.pension,
+        monthly: optionAResult.pension / 12,
+        description: optionAResult.description
+      },
+      B: {
+        annual: optionBResult.pension,
+        monthly: optionBResult.pension / 12,
+        description: optionBResult.description,
+        reduction: (basePension - optionBResult.pension) / basePension // Calculate actual reduction
+      },
+      C: {
+        annual: optionCResult.pension,
+        monthly: optionCResult.pension / 12,
+        description: optionCResult.description,
+        reduction: (basePension - optionCResult.pension) / basePension, // Calculate actual reduction
+        survivorAnnual: optionCResult.survivorPension,
+        survivorMonthly: optionCResult.survivorPension / 12,
+        beneficiaryAge: parseInt(beneficiaryAge)
+      }
+    }
 
-      // Create and download file
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    console.log('✅ Generated options for PDF:', options)
+
+    // Temporarily removed year-by-year projections to fix production API issues
+    // Year-by-year projections will be re-added in a future update
+    const yearlyProjections: any[] = []
+
+    const result = {
+      // Personal Information
+      name: calc.calculationName || 'Retirement Analysis',
+      currentAge: calc.retirementAge - calc.yearsOfService, // Estimate current age
+      plannedRetirementAge: calc.retirementAge,
+      retirementGroup: calc.retirementGroup || '1',
+      serviceEntry: serviceEntry,
+
+      // Calculation Details
+      averageSalary: calc.averageSalary,
+      yearsOfService: calc.yearsOfService,
+      projectedYearsAtRetirement: calc.yearsOfService,
+
+      // Pension Results
+      basePension: basePension,
+      benefitFactor: benefitFactor,
+      totalBenefitPercentage: totalBenefitPercentage,
+      cappedAt80Percent: cappedAt80Percent,
+
+      // Retirement Options
+      options: options,
+
+      // Year-by-Year Projections
+      yearlyProjections: yearlyProjections,
+
+      // Additional Information
+      calculationDate: calc.createdAt ? new Date(calc.createdAt) : new Date(),
+      isVeteran: false, // Default - could be enhanced with actual data
+      veteranBenefit: 0
+    }
+
+    console.log('📄 Final PDF data structure:', result)
+    return result
+  }
+
+  const exportCalculation = async (calc: any) => {
+    console.log('🔄 PDF Export: Starting export for calculation:', calc.id)
+
+    try {
+      // Check if user has premium access for PDF generation
+      console.log('🔄 PDF Export: Checking subscription status...')
+      const subscriptionResponse = await fetch('/api/subscription/status')
+      console.log('🔄 PDF Export: Subscription response status:', subscriptionResponse.status)
+
+      if (!subscriptionResponse.ok) {
+        throw new Error(`Subscription check failed: ${subscriptionResponse.status}`)
+      }
+
+      const subscriptionData = await subscriptionResponse.json()
+      console.log('🔄 PDF Export: Subscription data:', subscriptionData)
+      const isPremium = subscriptionData.isPremium
+
+      if (!isPremium) {
+        console.log('❌ PDF Export: User is not premium, redirecting to pricing')
+        // Redirect non-premium users to pricing page
+        window.location.href = '/pricing?feature=pdf-export&context=dashboard_export'
+        return
+      }
+
+      console.log('✅ PDF Export: Premium access confirmed')
+
+      // Convert calculation data to proper PDF format with all required fields
+      console.log('🔄 PDF Export: Transforming calculation data...')
+      const pensionData = transformCalculationForPDF(calc)
+      console.log('🔄 PDF Export: Transformed data:', pensionData)
+
+      // Validate the transformed data has all required fields
+      if (!pensionData.options || !pensionData.options.A || !pensionData.options.B || !pensionData.options.C) {
+        throw new Error('Failed to generate complete pension options data for PDF')
+      }
+
+      console.log('✅ PDF Export: Data validation passed')
+
+      // Show loading state
+      toast({
+        title: "Generating PDF...",
+        description: "Please wait while we create your retirement report",
+      })
+
+      console.log('🔄 PDF Export: Calling PDF generation API...')
+      // Call PDF generation API
+      const pdfResponse = await fetch('/api/pdf/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          data: pensionData,
+          reportType: 'pension',
+          options: {
+            includeCharts: true,
+            includeCOLAProjections: true,
+            reportType: 'basic'
+          }
+        })
+      })
+
+      console.log('🔄 PDF Export: PDF API response status:', pdfResponse.status)
+
+      if (!pdfResponse.ok) {
+        const errorData = await pdfResponse.json()
+        console.error('❌ PDF Export: API error:', errorData)
+        throw new Error(errorData.error || 'Failed to generate PDF')
+      }
+
+      console.log('✅ PDF Export: PDF generated successfully, downloading...')
+
+      // Download the PDF
+      const pdfBlob = await pdfResponse.blob()
+      console.log('🔄 PDF Export: PDF blob size:', pdfBlob.size)
+
+      const url = URL.createObjectURL(pdfBlob)
       const link = document.createElement('a')
-      const url = URL.createObjectURL(blob)
 
-      link.setAttribute('href', url)
-      link.setAttribute('download', `MA_Retirement_${calc.calculationName?.replace(/[^a-zA-Z0-9]/g, '_') || 'Calculation'}_${new Date().toISOString().split('T')[0]}.csv`)
+      link.href = url
+      link.download = `MassPension_${calc.calculationName?.replace(/[^a-zA-Z0-9]/g, '_') || 'Retirement_Report'}_${new Date().toISOString().split('T')[0]}.pdf`
       link.style.visibility = 'hidden'
 
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
 
+      // Clean up
+      URL.revokeObjectURL(url)
+
+      console.log('✅ PDF Export: Download completed successfully')
+
       toast({
-        title: "Export Successful",
-        description: "Calculation data has been downloaded as CSV",
+        title: "PDF Export Successful",
+        description: "Your retirement report has been downloaded",
       })
 
     } catch (error) {
-      console.error('Export error:', error)
+      console.error('❌ PDF Export error:', error)
       toast({
-        title: "Export Failed",
-        description: "There was an error exporting your calculation",
+        title: "PDF Export Failed",
+        description: error instanceof Error ? error.message : "There was an error generating your PDF report",
+        variant: "destructive",
+      })
+    }
+  }
+
+  // Debug function to test PDF generation
+  const testPDFGeneration = async () => {
+    console.log('🧪 Testing PDF generation...')
+    try {
+      const response = await fetch('/api/test-pension-pdf')
+      console.log('🧪 Test PDF response status:', response.status)
+
+      if (response.ok) {
+        const blob = await response.blob()
+        console.log('🧪 Test PDF blob size:', blob.size)
+
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = 'test-pension-report.pdf'
+        link.click()
+        URL.revokeObjectURL(url)
+
+        toast({
+          title: "Test PDF Generated",
+          description: "Test PDF downloaded successfully",
+        })
+      } else {
+        throw new Error(`Test PDF failed: ${response.status}`)
+      }
+    } catch (error) {
+      console.error('🧪 Test PDF error:', error)
+      toast({
+        title: "Test PDF Failed",
+        description: error instanceof Error ? error.message : "Test PDF generation failed",
+        variant: "destructive",
+      })
+    }
+  }
+
+  // Simple PDF test with minimal data
+  const testSimplePDF = async (calc: any) => {
+    console.log('🧪 Testing simple PDF with minimal data...')
+    try {
+      // Create minimal test data
+      const minimalData = {
+        name: calc.calculationName || 'Test Calculation',
+        currentAge: 45,
+        plannedRetirementAge: calc.retirementAge || 65,
+        retirementGroup: calc.retirementGroup || '1',
+        serviceEntry: 'before_2012',
+        yearsOfService: calc.yearsOfService || 20,
+        averageSalary: calc.averageSalary || 50000,
+        options: {
+          A: {
+            annual: 25000,
+            monthly: 2083,
+            description: 'Option A: Full Allowance (100%)'
+          },
+          B: {
+            annual: 24750,
+            monthly: 2063,
+            description: 'Option B: Annuity Protection (1% reduction)',
+            reduction: 1.0
+          },
+          C: {
+            annual: 23238,
+            monthly: 1936,
+            description: 'Option C: Joint & Survivor (66.67%)',
+            reduction: 7.05,
+            survivorAnnual: 15492,
+            survivorMonthly: 1291,
+            beneficiaryAge: 65
+          }
+        },
+        cola: {
+          rate: 3.0,
+          cap: 390,
+          description: '3% on first $13,000 annually'
+        },
+        yearlyProjections: []
+      }
+
+      console.log('🧪 Simple PDF data:', minimalData)
+
+      const response = await fetch('/api/pdf/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          data: minimalData,
+          reportType: 'pension',
+          options: {
+            includeCharts: true,
+            includeCOLAProjections: true,
+            reportType: 'basic'
+          }
+        })
+      })
+
+      console.log('🧪 Simple PDF response status:', response.status)
+
+      if (response.ok) {
+        const blob = await response.blob()
+        console.log('🧪 Simple PDF blob size:', blob.size)
+
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `Simple_Test_${new Date().toISOString().split('T')[0]}.pdf`
+        link.click()
+        URL.revokeObjectURL(url)
+
+        toast({
+          title: "Simple PDF Test Successful",
+          description: "Simple PDF generated and downloaded",
+        })
+      } else {
+        const errorData = await response.json()
+        throw new Error(errorData.error || `Simple PDF failed: ${response.status}`)
+      }
+    } catch (error) {
+      console.error('🧪 Simple PDF error:', error)
+      toast({
+        title: "Simple PDF Test Failed",
+        description: error instanceof Error ? error.message : "Simple PDF test failed",
         variant: "destructive",
       })
     }
@@ -307,6 +608,9 @@ View full calculation: ${shareUrl}`
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">Your Calculations ({calculations.length})</h3>
         <div className="space-x-2">
+          <Button size="sm" variant="secondary" onClick={testPDFGeneration}>
+            🧪 Test PDF
+          </Button>
           <Link href="/calculator">
             <Button size="sm">
               <Calculator className="mr-2 h-4 w-4" />
@@ -389,16 +693,32 @@ View full calculation: ${shareUrl}`
                     size="sm"
                     variant="outline"
                     onClick={() => exportCalculation(calc)}
-                    title="Export calculation as CSV"
+                    title="Generate professional PDF report with charts, COLA projections, and MassPension.com branding (Premium feature)"
+                    className="hover:border-blue-300 hover:bg-blue-50"
                   >
                     <Download className="mr-2 h-4 w-4" />
-                    Export
+                    Export PDF
+                    <span className="ml-1 px-1.5 py-0.5 text-xs bg-blue-100 text-blue-700 rounded-md">PDF</span>
+                    <span className="ml-1 px-1.5 py-0.5 text-xs bg-amber-100 text-amber-700 rounded-md flex items-center">
+                      <svg className="w-3 h-3 mr-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
+                      </svg>
+                      Premium
+                    </span>
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => testSimplePDF(calc)}
+                    title="Test simple PDF generation with minimal data"
+                  >
+                    🧪 Simple PDF
                   </Button>
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={() => shareCalculation(calc)}
-                    title="Share calculation"
+                    title="Share calculation summary with basic pension details via Web Share API or clipboard"
                   >
                     <Share2 className="mr-2 h-4 w-4" />
                     Share
