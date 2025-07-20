@@ -169,23 +169,7 @@ export default async function BlogPostPage({ params }: PageProps) {
             <PremiumAlternative />
           </div>
 
-          {/* Author Bio */}
-          <div className="bg-muted/30 p-6 rounded-lg border mb-12">
-            <div className="flex items-start gap-4">
-              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <User className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <h3 className="font-semibold mb-1">About {post.author}</h3>
-                <p className="text-sm text-muted-foreground mb-2">{post.authorTitle}</p>
-                <p className="text-sm">
-                  {post.author} is a {post.authorTitle.toLowerCase()} with over 15 years of experience helping
-                  Massachusetts state employees navigate their pension benefits. They previously worked at the
-                  Massachusetts State Retirement Board and now write about retirement planning strategies.
-                </p>
-              </div>
-            </div>
-          </div>
+
 
           {/* Related Articles */}
           {relatedPosts.length > 0 && (
