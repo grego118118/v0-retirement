@@ -146,11 +146,11 @@ export async function POST(request: NextRequest) {
           reviewerId: session.user.id,
           reviewStatus: review_status,
           reviewNotes: review_notes,
-          fact_check_completed,
-          seo_check_completed,
-          content_quality_rating,
-          suggested_changes,
-          reviewed_at: new Date()
+          factCheckCompleted: fact_check_completed,
+          seoCheckCompleted: seo_check_completed,
+          contentQualityRating: content_quality_rating,
+          suggestedChanges: suggested_changes,
+          reviewedAt: new Date()
         }
       })
 
@@ -276,9 +276,9 @@ export async function PUT(request: NextRequest) {
         reviewNotes: review_notes,
         contentQualityRating: content_quality_rating,
         factCheckCompleted: fact_check_completed,
-        seo_check_completed,
-        suggested_changes,
-        reviewed_at: new Date()
+        seoCheckCompleted: seo_check_completed,
+        suggestedChanges: suggested_changes,
+        reviewedAt: new Date()
       }
     })
 
