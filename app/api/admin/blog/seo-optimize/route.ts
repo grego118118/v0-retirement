@@ -61,8 +61,8 @@ export async function POST(request: NextRequest) {
         seoDescription: optimization.seo_optimization.meta_description,
         seoKeywords: optimization.seo_optimization.target_keywords,
         internalLinksAdded: true,
-        seo_optimized: true,
-        updated_at: new Date()
+        seoOptimized: true,
+        updatedAt: new Date()
       }
     })
 
@@ -138,8 +138,8 @@ export async function GET(request: NextRequest) {
         post: {
           id: post.id,
           title: post.title,
-          seo_optimized: post.seoOptimized,
-          internal_links_added: post.internalLinksAdded
+          seoOptimized: post.seoOptimized,
+          internalLinksAdded: post.internalLinksAdded
         },
         analysis
       })

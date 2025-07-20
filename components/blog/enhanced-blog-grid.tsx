@@ -43,17 +43,17 @@ export function EnhancedBlogGrid({
         slug: post.id, // Use id as slug for routing consistency
         content: post.content,
         excerpt: post.description,
-        featured_image_url: post.image || '/images/blog/default-blog-image.svg',
+        featuredImageUrl: post.image || '/images/blog/default-blog-image.svg',
         status: 'published' as const,
-        published_at: new Date(post.date).toISOString(),
-        created_at: new Date(post.date).toISOString(),
-        updated_at: new Date(post.date).toISOString(),
-        view_count: Math.floor(Math.random() * 2000) + 500, // Mock view count
-        is_ai_generated: false, // Static posts are not AI generated
-        fact_check_status: 'approved' as const,
-        seo_optimized: true,
-        internal_links_added: true,
-        seo_title: post.title,
+        publishedAt: new Date(post.date).toISOString(),
+        createdAt: new Date(post.date).toISOString(),
+        updatedAt: new Date(post.date).toISOString(),
+        viewCount: Math.floor(Math.random() * 2000) + 500, // Mock view count
+        isAiGenerated: false, // Static posts are not AI generated
+        factCheckStatus: 'approved' as const,
+        seoOptimized: true,
+        internalLinksAdded: true,
+        seoTitle: post.title,
         seo_description: post.description,
         seo_keywords: post.tags
       }))

@@ -49,11 +49,11 @@ export async function GET(request: NextRequest) {
       title: post.title,
       slug: post.slug,
       excerpt: post.excerpt,
-      featured_image_url: post.featuredImageUrl,
-      published_at: post.publishedAt,
-      view_count: post.viewCount,
+      featuredImageUrl: post.featuredImageUrl,
+      publishedAt: post.publishedAt,
+      viewCount: post.viewCount,
       reading_time: Math.ceil(post.content.split(' ').length / 200), // Calculate reading time from content
-      content_quality_score: post.contentQualityScore,
+      contentQualityScore: post.contentQualityScore,
       author: post.author,
       categories: post.categories.map(pc => pc.category)
     }))
