@@ -1,0 +1,335 @@
+{
+  "name": "Daily Content Generation (Option 1: Hard-coded Secret)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * 1-5"
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [240, 180]
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "url": "http://localhost:3000/api/admin/blog/analytics/costs",
+        "options": {
+          "timeout": 30000,
+          "retry": {
+            "enabled": true,
+            "maxTries": 3
+          }
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 462c44a146ca26604411330b9cc568e9cc10a60e09745f4b7e26f8a80983c140"
+            },
+            {
+              "name": "User-Agent",
+              "value": "n8n-workflow/1.0 (Massachusetts Retirement System)"
+            }
+          ]
+        }
+      },
+      "id": "check-budget",
+      "name": "Check Monthly Budget",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [460, 180]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "budget-check",
+              "leftValue": "={{$json.budget_utilization}}",
+              "rightValue": 90,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "budget-decision",
+      "name": "Budget Check Decision",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [680, 180]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "http://localhost:3000/api/admin/blog/generate",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 462c44a146ca26604411330b9cc568e9cc10a60e09745f4b7e26f8a80983c140"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "topic_category",
+              "value": "retirement_planning"
+            },
+            {
+              "name": "target_audience",
+              "value": "massachusetts_employees"
+            },
+            {
+              "name": "content_type",
+              "value": "educational"
+            },
+            {
+              "name": "workflow_source",
+              "value": "n8n_daily_automation"
+            }
+          ]
+        }
+      },
+      "id": "generate-content",
+      "name": "Generate Blog Content",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [900, 120]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "http://localhost:3000/api/admin/blog/seo-optimize",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 462c44a146ca26604411330b9cc568e9cc10a60e09745f4b7e26f8a80983c140"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "post_id",
+              "value": "={{$json.id}}"
+            },
+            {
+              "name": "optimization_level",
+              "value": "comprehensive"
+            }
+          ]
+        }
+      },
+      "id": "seo-optimize",
+      "name": "SEO Optimization",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1120, 120]
+    },
+    {
+      "parameters": {
+        "url": "https://discord.com/api/webhooks/1396207186786652290/GJVGuDbZJdxDweZ7ClbXxiE5VcTiVHGtH4kXdTG4gl-cNphF4W84LF9iEOU08wMJEeEq",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "✅ **Daily Content Generated Successfully**\\n\\n📊 **Budget Status:**\\n- Monthly Total: ${{$('check-budget').item.json.monthly_total}}\\n- Budget Utilization: {{$('check-budget').item.json.budget_utilization}}%\\n- Posts Generated: {{$('check-budget').item.json.posts_generated}}\\n\\n📝 **New Content:**\\n- Title: {{$('generate-content').item.json.title}}\\n- Status: {{$('generate-content').item.json.status}}\\n- Word Count: {{$('generate-content').item.json.word_count}}\\n\\n🔍 **SEO Optimization:**\\n- Score: {{$('seo-optimize').item.json.seo_score}}\\n- Keywords: {{$('seo-optimize').item.json.target_keywords}}\\n\\n⏰ Generated: {{new Date().toLocaleString()}}"
+            }
+          ]
+        }
+      },
+      "id": "discord-success-notification",
+      "name": "Discord Success Notification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1340, 120]
+    },
+    {
+      "parameters": {
+        "url": "https://discord.com/api/webhooks/1396209486326141059/BwNh_3jFBkv3_B3se7GdbDOmegzfk5P8C6sApMNHReICmaTZiT_IIn02cilQ9QL0yPFq",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "⚠️ **Budget Limit Reached**\\n\\n📊 **Current Status:**\\n- Monthly Total: ${{$('check-budget').item.json.monthly_total}}\\n- Budget Utilization: {{$('check-budget').item.json.budget_utilization}}%\\n- Remaining Budget: ${{$('check-budget').item.json.remaining_budget}}\\n\\n🚫 **Action:** Content generation skipped to stay within budget\\n⏰ Time: {{new Date().toLocaleString()}}"
+            }
+          ]
+        }
+      },
+      "id": "discord-budget-warning",
+      "name": "Discord Budget Warning",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [900, 240]
+    },
+    {
+      "parameters": {
+        "url": "https://discord.com/api/webhooks/1396209486326141059/BwNh_3jFBkv3_B3se7GdbDOmegzfk5P8C6sApMNHReICmaTZiT_IIn02cilQ9QL0yPFq",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "❌ **Content Generation Failed**\\n\\n📊 **Budget Status:**\\n- Monthly Total: ${{$('check-budget').item.json.monthly_total}}\\n- Budget Utilization: {{$('check-budget').item.json.budget_utilization}}%\\n\\n🚨 **Error Details:**\\n- Status: {{$('generate-content').item.json.status}}\\n- Error: {{$('generate-content').item.json.error}}\\n\\n⏰ Time: {{new Date().toLocaleString()}}"
+            }
+          ]
+        }
+      },
+      "id": "discord-error-notification",
+      "name": "Discord Error Alert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1120, 240]
+    }
+  ],
+  "connections": {
+    "schedule-trigger": {
+      "main": [
+        [
+          {
+            "node": "check-budget",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "check-budget": {
+      "main": [
+        [
+          {
+            "node": "budget-decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "budget-decision": {
+      "main": [
+        [
+          {
+            "node": "generate-content",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "discord-budget-warning",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "generate-content": {
+      "main": [
+        [
+          {
+            "node": "seo-optimize",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "discord-error-notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "seo-optimize": {
+      "main": [
+        [
+          {
+            "node": "discord-success-notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2024-01-15T10:00:00.000Z",
+      "updatedAt": "2024-01-15T10:00:00.000Z",
+      "id": "mass-retirement-automation",
+      "name": "Massachusetts Retirement"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2024-01-15T10:00:00.000Z",
+  "versionId": "option1-hardcoded-secret-1.0"
+}

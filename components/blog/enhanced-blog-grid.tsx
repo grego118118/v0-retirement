@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { CalendarIcon, Clock, User, ArrowRight, Bot, Sparkles, TrendingUp, Star } from 'lucide-react'
 import { ResponsiveBlogImage } from './blog-image'
 import { ResponsiveAd, PremiumAlternative } from '@/components/ads/adsense'
-import { BlogPost } from '../../types/ai-blog'
+import { BlogPost } from '@/types/ai-blog'
 import { blogPosts } from '@/lib/blog-data'
 
 interface EnhancedBlogGridProps {

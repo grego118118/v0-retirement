@@ -1,0 +1,504 @@
+{
+  "name": "Massachusetts Retirement - Daily Content Generation (Discord)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * 1-5"
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Daily Content Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "https://www.masspension.com/api/admin/blog/generate/random",
+        "authentication": "headerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$env.CRON_SECRET}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "ai_model",
+              "value": "gpt-4-turbo-preview"
+            },
+            {
+              "name": "word_count",
+              "value": 1200
+            },
+            {
+              "name": "complexity",
+              "value": "intermediate"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 120000,
+          "retry": {
+            "enabled": true,
+            "maxTries": 3,
+            "waitBetween": 5000
+          }
+        }
+      },
+      "id": "generate-content",
+      "name": "Generate AI Content",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [460, 300],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "quality-check",
+              "leftValue": "={{$json.post.quality_score}}",
+              "rightValue": 85,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "quality-gate",
+      "name": "Quality Gate Decision",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "https://www.masspension.com/api/admin/blog/seo-optimize",
+        "authentication": "headerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$env.CRON_SECRET}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "post_id",
+              "value": "={{$json.post.id}}"
+            },
+            {
+              "name": "target_keywords",
+              "value": ["Massachusetts retirement", "pension benefits", "retirement planning"]
+            }
+          ]
+        }
+      },
+      "id": "seo-optimize",
+      "name": "SEO Optimization",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [900, 200],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "fact-check-status",
+              "leftValue": "={{$json.post.fact_check_status}}",
+              "rightValue": "approved",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "quality-threshold",
+              "leftValue": "={{$json.post.quality_score}}",
+              "rightValue": 90,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "auto-publish-gate",
+      "name": "Auto-Publish Decision",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1120, 200]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "https://www.masspension.com/api/admin/blog/review",
+        "authentication": "headerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$env.CRON_SECRET}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "post_id",
+              "value": "={{$json.post.id}}"
+            },
+            {
+              "name": "review_status",
+              "value": "approved"
+            },
+            {
+              "name": "review_notes",
+              "value": "Auto-approved: High quality score ({{$json.post.quality_score}}) and fact-check passed"
+            },
+            {
+              "name": "content_quality_rating",
+              "value": 5
+            },
+            {
+              "name": "fact_check_completed",
+              "value": true
+            },
+            {
+              "name": "seo_check_completed",
+              "value": true
+            }
+          ]
+        }
+      },
+      "id": "auto-approve",
+      "name": "Auto-Approve & Publish",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1340, 120]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "https://discord.com/api/webhooks/1396207186786652290/GJVGuDbZJdxDweZ7ClbXxiE5VcTiVHGtH4kXdTG4gl-cNphF4W84LF9iEOU08wMJEeEq",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "🤖 **New AI-generated blog post needs review!**\n\n📝 **Title**: {{$json.post.title}}\n⭐ **Quality Score**: {{$json.post.quality_score}}/100\n🔍 **Fact Check**: {{$json.post.fact_check_status}}\n🎯 **Category**: {{$json.post.category || 'General'}}\n\n👀 **Review needed**: Quality score below auto-publish threshold\n🔗 **Review Link**: https://www.masspension.com/admin/blog/review\n\n📊 **Details**:\n- Word Count: ~{{Math.round($json.post.content.split(' ').length)}} words\n- AI Model: {{$json.post.ai_model_used}}\n- Generated: {{new Date().toLocaleString()}}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "discord-review-notification",
+      "name": "Discord Review Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1340, 280]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "https://discord.com/api/webhooks/1396209486326141059/BwNh_3jFBkv3_B3se7GdbDOmegzfk5P8C6sApMNHReICmaTZiT_IIn02cilQ9QL0yPFq",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "✅ **Auto-Published**: New blog post is live!\n\n📝 **Title**: {{$json.post.title}}\n⭐ **Quality Score**: {{$json.post.quality_score}}/100\n🔍 **Fact Check**: ✅ Approved\n🚀 **Status**: Published automatically\n\n🔗 **View Post**: https://www.masspension.com/blog/{{$json.post.slug}}\n📊 **Admin**: https://www.masspension.com/admin/blog/analytics\n\n🎯 **SEO Optimized**: Internal links added, metadata generated\n📈 **Expected Impact**: Increased organic traffic for Massachusetts retirement keywords"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "discord-publish-notification",
+      "name": "Discord Publish Success",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1560, 120]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "https://discord.com/api/webhooks/1396209486326141059/BwNh_3jFBkv3_B3se7GdbDOmegzfk5P8C6sApMNHReICmaTZiT_IIn02cilQ9QL0yPFq",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "❌ **Content Generation Failed**\n\n🚨 **Error**: {{$json.error || 'Unknown error during content generation'}}\n⏰ **Time**: {{new Date().toLocaleString()}}\n🔄 **Retry**: Workflow will retry automatically\n\n📊 **Check**: \n- API endpoints status\n- AI service quotas\n- Database connectivity\n\n🔗 **Admin Dashboard**: https://www.masspension.com/admin/blog/analytics"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "discord-error-notification",
+      "name": "Discord Error Alert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [680, 480]
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "url": "https://www.masspension.com/api/admin/blog/analytics/costs",
+        "authentication": "headerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$env.CRON_SECRET}}"
+            }
+          ]
+        }
+      },
+      "id": "check-budget",
+      "name": "Check Monthly Budget",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [460, 180]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "budget-check",
+              "leftValue": "={{$json.budget_utilization}}",
+              "rightValue": 90,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "budget-gate",
+      "name": "Budget Check",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [460, 120]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "https://discord.com/api/webhooks/1396209486326141059/BwNh_3jFBkv3_B3se7GdbDOmegzfk5P8C6sApMNHReICmaTZiT_IIn02cilQ9QL0yPFq",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "⚠️ **Budget Alert**: AI content generation paused\n\n💰 **Budget Utilization**: {{$json.budget_utilization}}%\n📊 **Monthly Spend**: ${{$json.monthly_total}}\n🚫 **Action**: Content generation skipped to prevent overspend\n\n🔧 **Next Steps**:\n1. Review budget limits in admin dashboard\n2. Optimize AI model selection for cost efficiency\n3. Consider increasing monthly budget if needed\n\n📈 **Dashboard**: https://www.masspension.com/admin/blog/analytics"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "discord-budget-alert",
+      "name": "Discord Budget Alert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [680, 120]
+    }
+  ],
+  "connections": {
+    "Daily Content Schedule": {
+      "main": [
+        [
+          {
+            "node": "Check Monthly Budget",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Monthly Budget": {
+      "main": [
+        [
+          {
+            "node": "Budget Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Budget Check": {
+      "main": [
+        [
+          {
+            "node": "Generate AI Content",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Discord Budget Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate AI Content": {
+      "main": [
+        [
+          {
+            "node": "Quality Gate Decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ],
+      "error": [
+        [
+          {
+            "node": "Discord Error Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Quality Gate Decision": {
+      "main": [
+        [
+          {
+            "node": "SEO Optimization",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Discord Review Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SEO Optimization": {
+      "main": [
+        [
+          {
+            "node": "Auto-Publish Decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Auto-Publish Decision": {
+      "main": [
+        [
+          {
+            "node": "Auto-Approve & Publish",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Discord Review Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Auto-Approve & Publish": {
+      "main": [
+        [
+          {
+            "node": "Discord Publish Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "error-handler-workflow"
+  },
+  "staticData": {},
+  "tags": ["ai-content", "massachusetts-retirement", "automation", "discord"],
+  "triggerCount": 1,
+  "updatedAt": "2024-01-15T09:00:00.000Z",
+  "versionId": "1"
+}

@@ -1,0 +1,291 @@
+{
+  "name": "Weekly COLA Analysis (Option 1: Hard-coded Secret)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 10 * * 1"
+            }
+          ]
+        }
+      },
+      "id": "weekly-schedule",
+      "name": "Weekly Schedule (Mondays 10 AM)",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [240, 180]
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "url": "http://localhost:3000/api/admin/blog/analytics/costs",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 462c44a146ca26604411330b9cc568e9cc10a60e09745f4b7e26f8a80983c140"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "period",
+              "value": "weekly"
+            },
+            {
+              "name": "analysis_type",
+              "value": "cola_trends"
+            }
+          ]
+        }
+      },
+      "id": "check-weekly-budget",
+      "name": "Check Weekly Budget",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [460, 180]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "http://localhost:3000/api/admin/blog/generate",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 462c44a146ca26604411330b9cc568e9cc10a60e09745f4b7e26f8a80983c140"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "topic_category",
+              "value": "cola_analysis"
+            },
+            {
+              "name": "content_type",
+              "value": "weekly_report"
+            },
+            {
+              "name": "target_audience",
+              "value": "massachusetts_retirees"
+            },
+            {
+              "name": "analysis_period",
+              "value": "current_week"
+            },
+            {
+              "name": "workflow_source",
+              "value": "n8n_weekly_cola"
+            }
+          ]
+        }
+      },
+      "id": "generate-cola-analysis",
+      "name": "Generate COLA Analysis",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [680, 180]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "http://localhost:3000/api/admin/blog/seo-optimize",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 462c44a146ca26604411330b9cc568e9cc10a60e09745f4b7e26f8a80983c140"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "post_id",
+              "value": "={{$json.id}}"
+            },
+            {
+              "name": "optimization_level",
+              "value": "comprehensive"
+            },
+            {
+              "name": "focus_keywords",
+              "value": "massachusetts cola, retirement benefits, cost of living adjustment"
+            }
+          ]
+        }
+      },
+      "id": "seo-optimize-cola",
+      "name": "SEO Optimize COLA Content",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [900, 180]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "http://localhost:3000/api/admin/blog/analytics/track",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 462c44a146ca26604411330b9cc568e9cc10a60e09745f4b7e26f8a80983c140"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "event_type",
+              "value": "weekly_cola_generated"
+            },
+            {
+              "name": "post_id",
+              "value": "={{$('generate-cola-analysis').item.json.id}}"
+            },
+            {
+              "name": "cola_metrics",
+              "value": "={{$('generate-cola-analysis').item.json.cola_data}}"
+            },
+            {
+              "name": "workflow_info",
+              "value": "={{$('check-weekly-budget').item.json}}"
+            }
+          ]
+        }
+      },
+      "id": "track-cola-analytics",
+      "name": "Track COLA Analytics",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1120, 180]
+    },
+    {
+      "parameters": {
+        "url": "https://discord.com/api/webhooks/1396207186786652290/GJVGuDbZJdxDweZ7ClbXxiE5VcTiVHGtH4kXdTG4gl-cNphF4W84LF9iEOU08wMJEeEq",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "📊 **Weekly COLA Analysis Generated**\\n\\n📈 **COLA Insights:**\\n- Current Rate: {{$('generate-cola-analysis').item.json.cola_rate}}%\\n- Annual Impact: ${{$('generate-cola-analysis').item.json.annual_impact}}\\n- Beneficiaries Affected: {{$('generate-cola-analysis').item.json.beneficiaries_count}}\\n\\n📝 **Content Details:**\\n- Title: {{$('generate-cola-analysis').item.json.title}}\\n- Word Count: {{$('generate-cola-analysis').item.json.word_count}}\\n- SEO Score: {{$('seo-optimize-cola').item.json.seo_score}}\\n\\n💰 **Budget Status:**\\n- Weekly Spend: ${{$('check-weekly-budget').item.json.weekly_total}}\\n- Monthly Total: ${{$('check-weekly-budget').item.json.monthly_total}}\\n\\n⏰ Generated: {{new Date().toLocaleString()}}"
+            }
+          ]
+        }
+      },
+      "id": "discord-cola-notification",
+      "name": "Discord COLA Notification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1340, 180]
+    }
+  ],
+  "connections": {
+    "weekly-schedule": {
+      "main": [
+        [
+          {
+            "node": "check-weekly-budget",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "check-weekly-budget": {
+      "main": [
+        [
+          {
+            "node": "generate-cola-analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "generate-cola-analysis": {
+      "main": [
+        [
+          {
+            "node": "seo-optimize-cola",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "seo-optimize-cola": {
+      "main": [
+        [
+          {
+            "node": "track-cola-analytics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "track-cola-analytics": {
+      "main": [
+        [
+          {
+            "node": "discord-cola-notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2024-01-15T10:00:00.000Z",
+      "updatedAt": "2024-01-15T10:00:00.000Z",
+      "id": "mass-retirement-automation",
+      "name": "Massachusetts Retirement"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2024-01-15T10:00:00.000Z",
+  "versionId": "option1-hardcoded-secret-1.0"
+}

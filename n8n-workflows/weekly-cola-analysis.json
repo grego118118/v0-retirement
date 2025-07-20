@@ -1,0 +1,416 @@
+{
+  "name": "Massachusetts Retirement - Weekly COLA Analysis",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 10 * * 1"
+            }
+          ]
+        }
+      },
+      "id": "weekly-trigger",
+      "name": "Weekly COLA Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "url": "https://www.masspension.com/api/admin/blog/generate/topics",
+        "authentication": "headerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$env.CRON_SECRET}}"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "category",
+              "value": "cola-adjustments"
+            },
+            {
+              "name": "seasonal",
+              "value": "true"
+            }
+          ]
+        }
+      },
+      "id": "get-cola-topics",
+      "name": "Get COLA Topics",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Select a random COLA topic or create a timely one\nconst topics = $input.all()[0].json.topics;\nconst currentMonth = new Date().toLocaleString('default', { month: 'long' });\nconst currentYear = new Date().getFullYear();\n\n// Check if we have seasonal topics for current month\nconst seasonalTopics = topics.filter(topic => \n  topic.seasonal_relevance && topic.seasonal_relevance.includes(currentMonth)\n);\n\nlet selectedTopic;\nif (seasonalTopics.length > 0) {\n  // Use seasonal topic\n  selectedTopic = seasonalTopics[Math.floor(Math.random() * seasonalTopics.length)];\n} else {\n  // Create a timely COLA topic\n  selectedTopic = {\n    title: `${currentYear} Massachusetts COLA Impact: What Retirees Need to Know`,\n    description: `Analysis of the ${currentYear} Cost of Living Adjustment and its impact on Massachusetts retirement benefits`,\n    keywords: [`${currentYear} COLA`, 'Massachusetts retirement', 'cost of living adjustment', 'pension benefits'],\n    category: 'cola-adjustments'\n  };\n}\n\n// Add current date context\nselectedTopic.generated_date = new Date().toISOString();\nselectedTopic.content_type = 'weekly_cola_analysis';\n\nreturn { topic: selectedTopic };"
+      },
+      "id": "select-topic",
+      "name": "Select COLA Topic",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "https://www.masspension.com/api/admin/blog/generate",
+        "authentication": "headerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$env.CRON_SECRET}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "topic",
+              "value": "={{$json.topic.title}}"
+            },
+            {
+              "name": "category_id",
+              "value": "cola-adjustments"
+            },
+            {
+              "name": "ai_model",
+              "value": "claude-3-sonnet-20240229"
+            },
+            {
+              "name": "word_count",
+              "value": 1000
+            },
+            {
+              "name": "seo_keywords",
+              "value": "={{$json.topic.keywords}}"
+            },
+            {
+              "name": "auto_publish",
+              "value": false
+            }
+          ]
+        },
+        "options": {
+          "timeout": 180000,
+          "retry": {
+            "enabled": true,
+            "maxTries": 2,
+            "waitBetween": 10000
+          }
+        }
+      },
+      "id": "generate-cola-content",
+      "name": "Generate COLA Content",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [900, 300],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "success-check",
+              "leftValue": "={{$json.success}}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equal"
+              }
+            },
+            {
+              "id": "quality-check",
+              "leftValue": "={{$json.post.quality_score}}",
+              "rightValue": 75,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "content-quality-check",
+      "name": "Content Quality Check",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "https://www.masspension.com/api/admin/blog/seo-optimize",
+        "authentication": "headerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$env.CRON_SECRET}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "post_id",
+              "value": "={{$json.post.id}}"
+            },
+            {
+              "name": "target_keywords",
+              "value": "={{$json.topic.keywords}}"
+            }
+          ]
+        }
+      },
+      "id": "optimize-cola-seo",
+      "name": "Optimize COLA SEO",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1340, 200]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "https://discord.com/api/webhooks/1396207186786652290/GJVGuDbZJdxDweZ7ClbXxiE5VcTiVHGtH4kXdTG4gl-cNphF4W84LF9iEOU08wMJEeEq",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "📊 **Weekly COLA Analysis Ready for Review**\n\n📝 **Title**: {{$json.post.title}}\n📅 **Type**: Weekly COLA Analysis\n⭐ **Quality Score**: {{$json.post.quality_score}}/100\n🔍 **Fact Check**: {{$json.post.fact_check_status}}\n🤖 **AI Model**: {{$json.post.ai_model_used}}\n\n📈 **COLA Focus**: \n- Current year impact analysis\n- Benefit calculation examples\n- Retiree planning guidance\n\n🔗 **Review**: https://www.masspension.com/admin/blog/review\n⏰ **Generated**: {{new Date().toLocaleString()}}\n\n💡 **Note**: COLA content is time-sensitive and valuable for SEO during benefit adjustment periods."
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "discord-cola-review-notification",
+      "name": "Discord COLA Review Notification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1560, 200]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "https://discord.com/api/webhooks/1396209486326141059/BwNh_3jFBkv3_B3se7GdbDOmegzfk5P8C6sApMNHReICmaTZiT_IIn02cilQ9QL0yPFq",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "❌ **COLA Content Generation Failed**\n\n🚨 **Issue**: Weekly COLA analysis could not be generated\n📅 **Scheduled**: Monday COLA content\n⏰ **Time**: {{new Date().toLocaleString()}}\n\n🔍 **Possible Causes**:\n- AI service quota exceeded\n- API endpoint issues\n- Content quality below threshold\n\n🔧 **Action Required**:\n1. Check AI service status\n2. Review error logs\n3. Consider manual content generation\n\n📊 **Dashboard**: https://www.masspension.com/admin/blog/analytics"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "discord-cola-error-alert",
+      "name": "Discord COLA Generation Error",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1340, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Add metadata for COLA-specific tracking\nconst input = $input.all()[0].json;\n\n// Calculate COLA-specific metrics\nconst colaMetrics = {\n  content_type: 'weekly_cola_analysis',\n  generation_week: new Date().toISOString().slice(0, 10),\n  seasonal_relevance: input.topic.seasonal_relevance || [],\n  target_audience: 'massachusetts_retirees',\n  priority: 'high', // COLA content is high priority\n  expected_traffic: 'high', // COLA topics typically get good traffic\n  seo_potential: 'excellent' // Time-sensitive COLA content ranks well\n};\n\n// Combine with existing data\nreturn {\n  ...input,\n  cola_metrics: colaMetrics,\n  workflow_metadata: {\n    workflow_name: 'weekly_cola_analysis',\n    execution_date: new Date().toISOString(),\n    next_execution: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // Next week\n  }\n};"
+      },
+      "id": "add-cola-metadata",
+      "name": "Add COLA Metadata",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 200]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "https://www.masspension.com/api/admin/blog/analytics/track",
+        "authentication": "headerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$env.CRON_SECRET}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "event_type",
+              "value": "weekly_cola_generated"
+            },
+            {
+              "name": "post_id",
+              "value": "={{$json.post.id}}"
+            },
+            {
+              "name": "metadata",
+              "value": "={{$json.cola_metrics}}"
+            },
+            {
+              "name": "workflow_info",
+              "value": "={{$json.workflow_metadata}}"
+            }
+          ]
+        }
+      },
+      "id": "track-cola-generation",
+      "name": "Track COLA Generation",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1560, 300]
+    }
+  ],
+  "connections": {
+    "Weekly COLA Schedule": {
+      "main": [
+        [
+          {
+            "node": "Get COLA Topics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get COLA Topics": {
+      "main": [
+        [
+          {
+            "node": "Select COLA Topic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select COLA Topic": {
+      "main": [
+        [
+          {
+            "node": "Generate COLA Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate COLA Content": {
+      "main": [
+        [
+          {
+            "node": "Content Quality Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ],
+      "error": [
+        [
+          {
+            "node": "Discord COLA Generation Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Content Quality Check": {
+      "main": [
+        [
+          {
+            "node": "Add COLA Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Discord COLA Generation Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add COLA Metadata": {
+      "main": [
+        [
+          {
+            "node": "Optimize COLA SEO",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Track COLA Generation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Optimize COLA SEO": {
+      "main": [
+        [
+          {
+            "node": "Discord COLA Review Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": {},
+  "tags": ["cola-analysis", "weekly-content", "massachusetts-retirement"],
+  "triggerCount": 1,
+  "updatedAt": "2024-01-15T10:00:00.000Z",
+  "versionId": "1"
+}

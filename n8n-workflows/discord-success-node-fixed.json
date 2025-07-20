@@ -1,0 +1,31 @@
+{
+  "name": "Discord Success Alert - Fixed Configuration",
+  "parameters": {
+    "httpMethod": "POST",
+    "url": "https://discord.com/api/webhooks/1396207186786652290/GJVGuDbZJdxDweZ7ClbXxiE5VcTiVHGtH4kXdTG4gl-cNphF4W84LF9iEOU08wMJEeEq",
+    "sendHeaders": true,
+    "headerParameters": {
+      "parameters": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ]
+    },
+    "sendBody": true,
+    "body": "={\"content\": \"🤖 **AI Content Generated Successfully!**\\n\\n📝 **Title**: \" + ($json.post?.title || $json.title || 'Content Generated') + \"\\n⭐ **Quality Score**: \" + ($json.post?.quality_score || $json.quality_score || 'N/A') + \"/100\\n🔍 **Status**: \" + ($json.post?.status || $json.status || 'Generated') + \"\\n🎯 **Model**: \" + ($json.post?.ai_model_used || $json.ai_model_used || 'AI Model') + \"\\n\\n📊 **Details**:\\n- Generated: \" + $now.toLocaleString() + \"\\n- Ready for review\\n\\n🔗 **Review**: https://www.masspension.com/admin/blog/review\"}",
+    "options": {
+      "timeout": 10000,
+      "retry": {
+        "enabled": true,
+        "maxTries": 2,
+        "waitBetween": 2000
+      }
+    }
+  },
+  "id": "discord-success-notification-fixed",
+  "name": "Discord Success Alert (Fixed)",
+  "type": "n8n-nodes-base.httpRequest",
+  "typeVersion": 4,
+  "position": [1120, 300]
+}

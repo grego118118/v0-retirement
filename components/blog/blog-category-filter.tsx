@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Bot, Filter, X } from 'lucide-react'
-import { BlogCategory } from '../../types/ai-blog'
+import { BlogCategory } from '@/types/ai-blog'
 
 interface BlogCategoryFilterProps {
   selectedCategory: string
