@@ -74,16 +74,16 @@ export interface AIContentJob {
 
 export interface ContentReview {
   id: string
-  post_id: string
-  reviewer_id?: string
-  review_status: 'pending' | 'approved' | 'needs_changes' | 'rejected'
-  review_notes?: string
-  fact_check_completed: boolean
-  seo_check_completed: boolean
-  content_quality_rating?: number
-  suggested_changes?: string
-  reviewed_at: string
-  created_at: string
+  postId: string
+  reviewerId?: string
+  reviewStatus: 'pending' | 'approved' | 'needs_changes' | 'rejected'
+  reviewNotes?: string
+  factCheckCompleted: boolean
+  seoCheckCompleted: boolean
+  contentQualityRating?: number
+  suggestedChanges?: string
+  reviewedAt: string
+  createdAt: string
 }
 
 export interface AIContentTemplate {
