@@ -148,14 +148,14 @@ export async function POST(request: NextRequest) {
         title: savedPost.title,
         slug: savedPost.slug,
         status: savedPost.status,
-        quality_score: qualityMetrics.overall_quality,
-        fact_check_status: savedPost.factCheckStatus,
-        word_count: generatedPost.content.split(/\s+/).length,
+        qualityScore: qualityMetrics.overallQuality,
+        factCheckStatus: savedPost.factCheckStatus,
+        wordCount: generatedPost.content.split(/\s+/).length,
         cost: actualCost
       },
-      quality_metrics: qualityMetrics,
-      fact_check_report: factCheckReport,
-      message: auto_publish && factCheckReport.overall_accuracy >= 80 
+      qualityMetrics: qualityMetrics,
+      factCheckReport: factCheckReport,
+      message: auto_publish && factCheckReport.overall_accuracy >= 80
         ? 'Content generated and published successfully'
         : 'Content generated and saved as draft for review'
     })

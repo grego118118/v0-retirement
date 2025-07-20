@@ -140,13 +140,13 @@ export interface BlogPostWithCategories extends BlogPost {
 
 export interface BlogCategoryWithPosts extends BlogCategory {
   posts: BlogPost[]
-  post_count: number
+  postCount: number
 }
 
 export interface AIContentJobWithDetails extends AIContentJob {
   category?: BlogCategory
-  generated_post?: BlogPost
-  cost_breakdown?: AIUsageCost[]
+  generatedPost?: BlogPost
+  costBreakdown?: AIUsageCost[]
 }
 
 // Content generation request types
@@ -156,18 +156,18 @@ export interface ContentGenerationRequest {
     description?: string
     keywords?: string[]
   }
-  category_id: string
-  template_id?: string
-  target_word_count?: number
-  word_count?: number
-  target_audience?: string
-  content_type?: string
-  additional_context?: string
-  seo_keywords?: string[]
-  target_publish_date?: string
-  ai_model?: 'gpt-4' | 'gpt-3.5-turbo' | 'claude-3-opus' | 'claude-3-sonnet' | 'gemini-1.5-pro'
-  include_images?: boolean
-  auto_publish?: boolean
+  categoryId: string
+  templateId?: string
+  targetWordCount?: number
+  wordCount?: number
+  targetAudience?: string
+  contentType?: string
+  additionalContext?: string
+  seoKeywords?: string[]
+  targetPublishDate?: string
+  aiModel?: 'gpt-4' | 'gpt-3.5-turbo' | 'claude-3-opus' | 'claude-3-sonnet' | 'gemini-1.5-pro'
+  includeImages?: boolean
+  autoPublish?: boolean
 }
 
 export interface ContentGenerationResponse {
@@ -200,22 +200,22 @@ export interface MassachusettsRetirementTopic {
   description: string
   category: string
   keywords: string[]
-  target_groups: ('Group 1' | 'Group 2' | 'Group 3' | 'Group 4')[]
-  complexity_level: 'beginner' | 'intermediate' | 'advanced'
-  seasonal_relevance?: string[]
-  related_calculators: string[]
-  official_sources: string[]
+  targetGroups: ('Group 1' | 'Group 2' | 'Group 3' | 'Group 4')[]
+  complexityLevel: 'beginner' | 'intermediate' | 'advanced'
+  seasonalRelevance?: string[]
+  relatedCalculators: string[]
+  officialSources: string[]
 }
 
 // Content quality metrics
 export interface ContentQualityMetrics {
-  readability_score: number
-  seo_score: number
-  fact_accuracy_score: number
-  engagement_potential: number
-  massachusetts_relevance: number
-  overall_quality: number
-  improvement_suggestions: string[]
+  readabilityScore: number
+  seoScore: number
+  factAccuracyScore: number
+  engagementPotential: number
+  massachusettsRelevance: number
+  overallQuality: number
+  improvementSuggestions: string[]
 }
 
 // AI service configuration

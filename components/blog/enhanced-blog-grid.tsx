@@ -54,7 +54,7 @@ export function EnhancedBlogGrid({
         seoOptimized: true,
         internalLinksAdded: true,
         seoTitle: post.title,
-        seo_description: post.description,
+        seoDescription: post.description,
         seo_keywords: post.tags
       }))
 
@@ -176,7 +176,7 @@ export function EnhancedBlogGrid({
                     AI Generated
                   </Badge>
                 )}
-                {getQualityBadge(post.content_quality_score)}
+                {getQualityBadge(post.contentQualityScore)}
               </div>
               <CardTitle className="text-lg leading-tight line-clamp-2 mb-2">
                 {post.title}
@@ -188,13 +188,13 @@ export function EnhancedBlogGrid({
               </p>
               <div className="flex items-center text-xs text-muted-foreground mb-2">
                 <CalendarIcon className="mr-1 h-3 w-3" />
-                {formatDate(post.published_at || post.created_at)}
+                {formatDate(post.publishedAt || post.createdAt)}
                 <span className="mx-2">•</span>
                 <Clock className="mr-1 h-3 w-3" />
                 {Math.ceil((post.content?.length || 1000) / 200)} min read
                 <span className="mx-2">•</span>
                 <User className="mr-1 h-3 w-3" />
-                {post.view_count} views
+                {post.viewCount} views
               </div>
             </CardContent>
             <CardFooter className="pt-2 mt-auto">
