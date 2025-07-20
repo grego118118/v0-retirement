@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
       category_id,
       ai_model = 'gpt-4-turbo-preview',
       word_count = 1000,
-      seo_keywords = [],
+      seo_keywords = [] as string[],
       auto_publish = false,
       template_id
     } = body
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
       category_id: category_id || '',
       ai_model: ai_model as any,
       target_word_count: word_count,
-      seo_keywords,
+      seo_keywords: seo_keywords,
       template_id
     })
 
