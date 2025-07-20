@@ -413,19 +413,19 @@ Remember that pension planning is just one part of comprehensive retirement plan
                       <div>
                         <label className="text-sm font-medium">SEO Title</label>
                         <p className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
-                          {selectedPost.seo_title || 'Not set'}
+                          {selectedPost.seoTitle || 'Not set'}
                         </p>
                       </div>
                       <div>
                         <label className="text-sm font-medium">SEO Description</label>
                         <p className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
-                          {selectedPost.seo_description || 'Not set'}
+                          {selectedPost.seoDescription || 'Not set'}
                         </p>
                       </div>
                       <div>
                         <label className="text-sm font-medium">SEO Keywords</label>
                         <div className="flex flex-wrap gap-2 mt-2">
-                          {selectedPost.seo_keywords?.map((keyword) => (
+                          {selectedPost.seoKeywords?.map((keyword) => (
                             <Badge key={keyword} variant="outline">{keyword}</Badge>
                           )) || <span className="text-sm text-gray-500">No keywords set</span>}
                         </div>
@@ -434,7 +434,7 @@ Remember that pension planning is just one part of comprehensive retirement plan
                         <div>
                           <label className="text-sm font-medium">Internal Links Added</label>
                           <p className="text-sm text-gray-600">
-                            {selectedPost.internal_links_added ? 'Yes' : 'No'}
+                            {selectedPost.internalLinksAdded ? 'Yes' : 'No'}
                           </p>
                         </div>
                         <div>
