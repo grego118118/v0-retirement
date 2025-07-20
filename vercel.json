@@ -1,0 +1,21 @@
+{
+  "functions": {
+    "app/api/cron/content-automation/route.ts": {
+      "maxDuration": 300
+    },
+    "app/api/pdf/generate/route.ts": {
+      "maxDuration": 30
+    }
+  },
+  "headers": [
+    {
+      "source": "/api/cron/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    }
+  ]
+}
