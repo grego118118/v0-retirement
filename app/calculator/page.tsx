@@ -5,6 +5,7 @@ import Script from "next/script"
 import PensionCalculatorWrapper from "@/components/pension-calculator-wrapper"
 import { Skeleton } from "@/components/ui/skeleton"
 import { AuthDisabledNotice } from "@/components/auth-disabled-notice"
+import { BannerAd, ResponsiveAd, PremiumAlternative } from "@/components/ads/adsense"
 
 export const metadata = generateSEOMetadata({
   title: "Pension Calculator | Mass Pension",
@@ -41,9 +42,21 @@ export default function CalculatorPage() {
             </p>
           </div>
           <AuthDisabledNotice className="mb-6" />
+
+          {/* Top Banner Ad */}
+          <div className="mb-8">
+            <BannerAd className="flex justify-center" />
+          </div>
+
           <Suspense fallback={<CalculatorSkeleton />}>
             <PensionCalculatorWrapper />
           </Suspense>
+
+          {/* Bottom Responsive Ad */}
+          <div className="mt-8">
+            <ResponsiveAd className="flex justify-center" />
+            <PremiumAlternative />
+          </div>
         </div>
       </div>
     </>

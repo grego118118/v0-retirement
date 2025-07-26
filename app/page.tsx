@@ -23,6 +23,8 @@ import {
 import { generateSEOMetadata } from "@/components/seo/metadata"
 import { OrganizationStructuredData } from "@/components/seo/structured-data"
 import { NewsletterSignup } from "@/components/email/newsletter-signup"
+import { ResponsiveAd, PremiumAlternative } from "@/components/ads/adsense"
+import { AutoAds } from "@/components/ads/auto-ads"
 
 export const metadata = generateSEOMetadata({
   title: "Massachusetts Pension Estimator | Retirement Planning for State Employees",
@@ -180,6 +182,22 @@ export default function Home() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* AdSense Ads Section for Free Users */}
+      <section className="py-8 bg-gray-50">
+        <div className="container mx-auto px-4">
+          {/* Auto Ads - Primary solution */}
+          <AutoAds />
+
+          {/* Manual Ad Fallback */}
+          <div className="flex justify-center mb-8">
+            <ResponsiveAd className="max-w-4xl" />
+          </div>
+
+          {/* Premium Alternative for premium users */}
+          <PremiumAlternative />
         </div>
       </section>
 
