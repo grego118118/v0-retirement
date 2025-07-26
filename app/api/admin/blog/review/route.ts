@@ -156,21 +156,21 @@ export async function POST(request: NextRequest) {
 
       // Update blog post status based on review
       let updateData: any = {
-        fact_check_status: review_status,
-        updated_at: new Date()
+        factCheckStatus: review_status,
+        updatedAt: new Date()
       }
 
       // If approved, prepare for publishing
       if (review_status === 'approved') {
         updateData.status = 'published'
-        updateData.published_at = new Date()
-        
+        updateData.publishedAt = new Date()
+
         // Mark as fact-checked and SEO optimized if not already
         if (fact_check_completed) {
-          updateData.fact_check_status = 'approved'
+          updateData.factCheckStatus = 'approved'
         }
         if (seo_check_completed) {
-          updateData.seo_optimized = true
+          updateData.seoOptimized = true
         }
       }
 
