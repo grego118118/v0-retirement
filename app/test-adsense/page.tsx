@@ -10,6 +10,7 @@ export default function TestAdSensePage() {
   const { data: session } = useSession()
   const { isPremium, subscriptionStatus } = useSubscriptionStatus()
   const [debugInfo, setDebugInfo] = useState<any>({})
+  const [adSlotInfo, setAdSlotInfo] = useState<any>({})
 
   useEffect(() => {
     // Collect debug information
@@ -27,6 +28,30 @@ export default function TestAdSensePage() {
     }
     setDebugInfo(info)
     console.log('AdSense Debug Info:', info)
+
+    // Collect ad slot information
+    const slots = {
+      banner: process.env.NEXT_PUBLIC_ADSENSE_BANNER_SLOT,
+      square: process.env.NEXT_PUBLIC_ADSENSE_SQUARE_SLOT,
+      sidebar: process.env.NEXT_PUBLIC_ADSENSE_SIDEBAR_SLOT,
+      responsive: process.env.NEXT_PUBLIC_ADSENSE_RESPONSIVE_SLOT,
+    }
+
+    // Check if slots are placeholders
+    const placeholderIds = ['1234567890', '2345678901', '3456789012', '4567890123']
+    const slotAnalysis = Object.entries(slots).map(([type, slot]) => ({
+      type,
+      slot,
+      isPlaceholder: placeholderIds.includes(slot || ''),
+      isValid: slot && slot.length === 10 && /^[0-9]{10}$/.test(slot)
+    }))
+
+    setAdSlotInfo({
+      slots,
+      analysis: slotAnalysis,
+      hasPlaceholders: slotAnalysis.some(s => s.isPlaceholder),
+      allValid: slotAnalysis.every(s => s.isValid)
+    })
   }, [session, isPremium, subscriptionStatus])
 
   return (
@@ -39,6 +64,43 @@ export default function TestAdSensePage() {
         <pre className="text-sm overflow-auto">
           {JSON.stringify(debugInfo, null, 2)}
         </pre>
+      </div>
+
+      {/* Ad Slot Analysis */}
+      <div className="bg-yellow-50 p-6 rounded-lg mb-8">
+        <h2 className="text-xl font-semibold mb-4">Ad Slot Analysis</h2>
+        {adSlotInfo.hasPlaceholders && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <strong>⚠️ ISSUE DETECTED:</strong> Placeholder ad slot IDs are being used. This is why manual ads show "Advertisement space" instead of real ads.
+          </div>
+        )}
+        <div className="space-y-3">
+          {adSlotInfo.analysis?.map((slot: any, index: number) => (
+            <div key={index} className={`p-3 rounded ${slot.isPlaceholder ? 'bg-red-50 border border-red-200' : 'bg-green-50 border border-green-200'}`}>
+              <div className="flex justify-between items-center">
+                <span className="font-medium capitalize">{slot.type} Ad:</span>
+                <span className={`px-2 py-1 rounded text-sm ${slot.isPlaceholder ? 'bg-red-200 text-red-800' : 'bg-green-200 text-green-800'}`}>
+                  {slot.isPlaceholder ? 'PLACEHOLDER' : 'REAL ID'}
+                </span>
+              </div>
+              <div className="text-sm text-gray-600 mt-1">
+                Slot ID: {slot.slot}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {adSlotInfo.hasPlaceholders && (
+          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded">
+            <h3 className="font-semibold text-blue-800 mb-2">🔧 How to Fix:</h3>
+            <ol className="list-decimal list-inside text-sm text-blue-700 space-y-1">
+              <li>Access Google AdSense dashboard</li>
+              <li>Create real ad units for each type (Banner, Square, Sidebar, Responsive)</li>
+              <li>Update Vercel environment variables with real ad unit IDs</li>
+              <li>Redeploy the application</li>
+            </ol>
+          </div>
+        )}
       </div>
 
       {/* User Status */}
