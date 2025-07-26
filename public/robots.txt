@@ -5,6 +5,8 @@ Allow: /
 Sitemap: https://www.masspension.com/sitemap.xml
 
 # Allow all search engines to crawl the site
+
+# Deployment trigger: 2025-01-26 AdSense environment variables update
 # Disallow admin, internal APIs, and private areas
 Disallow: /api/calculations/
 Disallow: /api/debug/
