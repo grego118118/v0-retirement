@@ -37,8 +37,11 @@ export function TrustedTypesSetup() {
               'googleads.g.doubleclick.net',
               'tpc.googlesyndication.com',
               'ep1.adtrafficquality.google',
+              'ep2.adtrafficquality.google',
               'googleadservices.com',
               'www.googleadservices.com',
+              'fundingchoicesmessages.google.com',
+              'www.google.com',
               window.location.origin
             ];
 

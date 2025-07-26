@@ -9,6 +9,8 @@ declare global {
   interface Window {
     adsbygoogle: any[]
     adSenseManager?: AdSenseManager
+    __ADSENSE_INITIALIZED__?: boolean
+    __ADSENSE_AUTO_ADS_ENABLED__?: boolean
   }
 }
 
@@ -36,6 +38,8 @@ export class AdSenseManager {
   private config: AdSenseConfig
   private adElements = new Map<string, AdElement>()
   private initializationPromise: Promise<void> | null = null
+  private autoAdsAttempts = 0
+  private maxAutoAdsAttempts = 1
 
   private constructor() {
     this.config = {
@@ -67,6 +71,12 @@ export class AdSenseManager {
    * Initialize AdSense with configuration
    */
   public async initialize(config?: Partial<AdSenseConfig>): Promise<void> {
+    // Check global initialization flag first
+    if (typeof window !== 'undefined' && window.__ADSENSE_INITIALIZED__) {
+      console.log('AdSenseManager: AdSense already initialized globally, skipping')
+      return
+    }
+
     // Prevent multiple initializations
     if (this.isInitialized) {
       console.log('AdSenseManager: Already initialized, skipping')
@@ -107,6 +117,11 @@ export class AdSenseManager {
     try {
       console.log('AdSenseManager: Starting initialization...')
 
+      // Set global initialization flag
+      if (typeof window !== 'undefined') {
+        window.__ADSENSE_INITIALIZED__ = true
+      }
+
       // Load AdSense script if not already loaded
       await this._loadAdSenseScript()
 
@@ -119,6 +134,10 @@ export class AdSenseManager {
       console.log('AdSenseManager: Initialization completed successfully')
     } catch (error) {
       console.error('AdSenseManager: Initialization failed:', error)
+      // Reset global flag on error
+      if (typeof window !== 'undefined') {
+        window.__ADSENSE_INITIALIZED__ = false
+      }
       throw error
     }
   }
@@ -176,6 +195,34 @@ export class AdSenseManager {
       return
     }
 
+    // Check for existing Auto Ads attempts
+    if (this.autoAdsAttempts >= this.maxAutoAdsAttempts) {
+      console.warn('AdSenseManager: Maximum Auto Ads attempts reached, preventing duplicate initialization')
+      return
+    }
+
+    // Check global Auto Ads flag
+    if (typeof window !== 'undefined' && window.__ADSENSE_AUTO_ADS_ENABLED__) {
+      console.warn('AdSenseManager: Auto Ads already enabled globally, skipping')
+      this.autoAdsEnabled = true
+      return
+    }
+
+    // Check if Auto Ads already exist in adsbygoogle array
+    if (typeof window !== 'undefined' && window.adsbygoogle) {
+      const existingAutoAds = window.adsbygoogle.filter(item =>
+        item && typeof item === 'object' && item.enable_page_level_ads
+      )
+      if (existingAutoAds.length > 0) {
+        console.warn('AdSenseManager: Auto Ads already exist in adsbygoogle array, skipping')
+        this.autoAdsEnabled = true
+        if (typeof window !== 'undefined') {
+          window.__ADSENSE_AUTO_ADS_ENABLED__ = true
+        }
+        return
+      }
+    }
+
     try {
       // Ensure adsbygoogle array exists
       window.adsbygoogle = window.adsbygoogle || []
@@ -187,8 +234,15 @@ export class AdSenseManager {
         overlays: { bottom: true }
       })
 
+      this.autoAdsAttempts++
       this.autoAdsEnabled = true
-      console.log('AdSenseManager: Auto Ads enabled successfully')
+
+      // Set global Auto Ads flag
+      if (typeof window !== 'undefined') {
+        window.__ADSENSE_AUTO_ADS_ENABLED__ = true
+      }
+
+      console.log('AdSenseManager: Auto Ads enabled successfully (attempt', this.autoAdsAttempts, ')')
     } catch (error) {
       console.error('AdSenseManager: Failed to enable Auto Ads:', error)
       throw error
