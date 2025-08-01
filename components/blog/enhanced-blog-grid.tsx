@@ -35,19 +35,74 @@ export function EnhancedBlogGrid({
   const loadBlogPosts = async () => {
     try {
       setLoading(true)
-      
-      // Convert static blog data to BlogPost format and apply filters
-      let filteredPosts = blogPosts.map(post => ({
-        id: post.id,
-        title: post.title,
-        slug: post.id, // Use id as slug for routing consistency
-        content: post.content,
-        excerpt: post.description,
-        featured_image_url: post.image || '/images/blog/default-blog-image.svg',
-        status: 'published' as const,
-        published_at: new Date(post.date).toISOString(),
-        created_at: new Date(post.date).toISOString(),
-        updated_at: new Date(post.date).toISOString(),
+      setError(null)
+
+      // Use provided posts if available, otherwise fetch from API
+      if (posts && posts.length > 0) {
+        let filteredPosts = [...posts]
+
+        // Apply category filter
+        if (selectedCategory !== 'all') {
+          filteredPosts = filteredPosts.filter(post =>
+            post.seo_keywords?.some(keyword =>
+              keyword.toLowerCase().includes(selectedCategory.toLowerCase())
+            )
+          )
+        }
+
+        // Apply search filter
+        if (searchQuery) {
+          filteredPosts = filteredPosts.filter(post =>
+            post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            post.excerpt?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            post.content.toLowerCase().includes(searchQuery.toLowerCase())
+          )
+        }
+
+        // Apply AI generated filter
+        if (!showAIGenerated) {
+          filteredPosts = filteredPosts.filter(post => !post.is_ai_generated)
+        }
+
+        setDisplayPosts(filteredPosts)
+        setLoading(false)
+        return
+      }
+
+      // Fetch from API if no posts provided
+      const params = new URLSearchParams({
+        limit: '20',
+        status: 'published'
+      })
+
+      if (selectedCategory !== 'all') {
+        params.append('category', selectedCategory)
+      }
+
+      if (searchQuery) {
+        params.append('search', searchQuery)
+      }
+
+      if (!showAIGenerated) {
+        params.append('ai_generated', 'false')
+      }
+
+      const response = await fetch(`/api/blog/posts?${params.toString()}`)
+
+      if (!response.ok) {
+        // Fallback to static data if API fails
+        console.warn('Blog API failed, using fallback static data')
+        let filteredPosts = blogPosts.map(post => ({
+          id: post.id,
+          title: post.title,
+          slug: post.id,
+          content: post.content,
+          excerpt: post.description,
+          featured_image_url: post.image || '/images/blog/default-blog-image.svg',
+          status: 'published' as const,
+          published_at: new Date(post.date).toISOString(),
+          created_at: new Date(post.date).toISOString(),
+          updated_at: new Date(post.date).toISOString(),
         view_count: Math.floor(Math.random() * 2000) + 500, // Mock view count
         is_ai_generated: false, // Static posts are not AI generated
         fact_check_status: 'approved' as const,
