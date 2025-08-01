@@ -103,38 +103,48 @@ export function EnhancedBlogGrid({
           published_at: new Date(post.date).toISOString(),
           created_at: new Date(post.date).toISOString(),
           updated_at: new Date(post.date).toISOString(),
-        view_count: Math.floor(Math.random() * 2000) + 500, // Mock view count
-        is_ai_generated: false, // Static posts are not AI generated
-        fact_check_status: 'approved' as const,
-        seo_optimized: true,
-        internal_links_added: true,
-        seo_title: post.title,
-        seo_description: post.description,
-        seo_keywords: post.tags
-      }))
+          view_count: Math.floor(Math.random() * 2000) + 500,
+          is_ai_generated: false,
+          fact_check_status: 'approved' as const,
+          seo_optimized: true,
+          internal_links_added: true,
+          seo_title: post.title,
+          seo_description: post.description,
+          seo_keywords: post.tags
+        }))
 
-      // Apply category filter
-      if (selectedCategory && selectedCategory !== 'all') {
-        filteredPosts = filteredPosts.filter(post => {
-          const originalPost = blogPosts.find(bp => bp.id === post.id)
-          return originalPost?.category === selectedCategory
-        })
+        // Apply category filter to static data
+        if (selectedCategory && selectedCategory !== 'all') {
+          filteredPosts = filteredPosts.filter(post => {
+            const originalPost = blogPosts.find(bp => bp.id === post.id)
+            return originalPost?.category === selectedCategory
+          })
+        }
+
+        // Apply search filter to static data
+        if (searchQuery) {
+          const query = searchQuery.toLowerCase()
+          filteredPosts = filteredPosts.filter(post =>
+            post.title.toLowerCase().includes(query) ||
+            post.excerpt?.toLowerCase().includes(query) ||
+            post.seo_keywords?.some(keyword => keyword.toLowerCase().includes(query))
+          )
+        }
+
+        // Apply AI filter to static data
+        if (!showAIGenerated) {
+          filteredPosts = filteredPosts.filter(post => !post.is_ai_generated)
+        }
+
+        setDisplayPosts(filteredPosts)
+        setError(null)
+        setLoading(false)
+        return
       }
 
-      // Apply search filter
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase()
-        filteredPosts = filteredPosts.filter(post =>
-          post.title.toLowerCase().includes(query) ||
-          post.excerpt?.toLowerCase().includes(query) ||
-          post.seo_keywords?.some(keyword => keyword.toLowerCase().includes(query))
-        )
-      }
-
-      // For now, we'll show all posts since they're not AI generated
-      // In the future, this would filter based on showAIGenerated
-      
-      setDisplayPosts(filteredPosts)
+      // Handle successful API response
+      const data = await response.json()
+      setDisplayPosts(data.posts || [])
       setError(null)
     } catch (err) {
       setError('Failed to load blog posts')
