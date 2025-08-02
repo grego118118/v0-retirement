@@ -449,6 +449,7 @@ model User {
   RetirementCalculation      RetirementCalculation[]
   RetirementProfile          RetirementProfile?
   Session                    Session[]
+  blogPosts                  BlogPost[]
 
   @@schema("public")
 }
@@ -740,6 +741,8 @@ model BlogPost {
 
   // Relations
   categories            BlogPostCategory[]
+  reviews               ContentReview[]
+  author                User?             @relation(fields: [authorId], references: [id])
 
   @@map("blog_posts")
   @@schema("public")
@@ -819,16 +822,25 @@ model AiUsageCost {
 }
 
 model ContentReview {
-  id              String   @id @default(cuid())
-  postId          String
-  reviewerId      String?
-  status          String   @default("pending") // pending, approved, rejected, needs_revision
-  reviewNotes     String?
-  qualityScore    Float?
-  factCheckNotes  String?
-  seoNotes        String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id                    String   @id @default(cuid())
+  postId                String
+  reviewerId            String?
+  status                String   @default("pending") // pending, approved, rejected, needs_revision
+  reviewStatus          String   @default("pending") // pending, approved, rejected, needs_revision
+  reviewNotes           String?
+  qualityScore          Float?
+  contentQualityRating  Float?
+  factCheckNotes        String?
+  factCheckCompleted    Boolean  @default(false)
+  seoNotes              String?
+  seoCheckCompleted     Boolean  @default(false)
+  suggestedChanges      String?
+  reviewedAt            DateTime?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  // Relations
+  post                  BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@map("content_reviews")
   @@schema("public")
