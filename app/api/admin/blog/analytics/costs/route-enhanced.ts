@@ -105,7 +105,7 @@ export async function GET(request: NextRequest) {
     })
 
     // Calculate totals and analytics
-    const monthlyTotal = costs.reduce((sum, cost) => sum + Number(cost.costUsd), 0)
+    const monthlyTotal = costs.reduce((sum, cost) => sum + Number(cost.costUsd || 0), 0)
     const budgetUtilization = (monthlyTotal / MONTHLY_BUDGET_LIMIT) * 100
     const remainingBudget = Math.max(0, MONTHLY_BUDGET_LIMIT - monthlyTotal)
     
