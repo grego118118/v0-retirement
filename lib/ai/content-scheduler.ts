@@ -246,20 +246,20 @@ export class ContentScheduler {
    * Get active content schedules
    */
   private static async getActiveSchedules(): Promise<ContentSchedule[]> {
-    // This would fetch from database in production
-    // For now, return predefined schedules
+    // Enhanced schedules for Massachusetts Retirement System
     return [
       {
-        id: 'weekly-pension-guide',
-        name: 'Weekly Pension Planning Guide',
-        description: 'Weekly comprehensive pension planning content',
-        frequency: 'weekly',
-        day_of_week: 1, // Monday
-        time_of_day: '09:00',
-        categories: ['pension-planning', 'benefit-calculations'],
+        id: 'bi-daily-massachusetts-content',
+        name: 'Bi-Daily Massachusetts Retirement Content',
+        description: 'Generate 1 new Massachusetts Retirement blog post every 48 hours during business hours',
+        frequency: 'daily',
+        day_of_week: undefined,
+        time_of_day: '10:00', // 10 AM EST
+        categories: ['pension-planning', 'cola-adjustments', 'retirement-groups', 'pension-options', 'social-security-integration', 'career-planning', 'benefit-calculations', 'tax-planning'],
         is_active: true,
-        next_execution: this.getNextExecutionTime('weekly', 1, '09:00'),
-        last_execution: undefined
+        next_execution: this.getNextBiDailyExecution(),
+        last_execution: undefined,
+        interval_hours: 48 // Every 48 hours
       },
       {
         id: 'monthly-cola-update',
@@ -365,6 +365,35 @@ export class ContentScheduler {
   }
 
   /**
+   * Get next bi-daily execution time (every 48 hours during business hours)
+   */
+  private static getNextBiDailyExecution(): string {
+    const now = new Date()
+    const businessHours = { start: 9, end: 17 } // 9 AM - 5 PM EST
+
+    let nextExecution = new Date(now)
+    nextExecution.setHours(10, 0, 0, 0) // Default to 10 AM
+
+    // If current time is after business hours, schedule for next business day
+    if (now.getHours() >= businessHours.end) {
+      nextExecution.setDate(nextExecution.getDate() + 1)
+    }
+
+    // Skip weekends - schedule for Monday if it falls on weekend
+    const dayOfWeek = nextExecution.getDay()
+    if (dayOfWeek === 0) { // Sunday
+      nextExecution.setDate(nextExecution.getDate() + 1) // Monday
+    } else if (dayOfWeek === 6) { // Saturday
+      nextExecution.setDate(nextExecution.getDate() + 2) // Monday
+    }
+
+    // Add 48 hours from the base time
+    nextExecution.setHours(nextExecution.getHours() + 48)
+
+    return nextExecution.toISOString()
+  }
+
+  /**
    * Get next execution time based on frequency
    */
   private static getNextExecutionTime(
@@ -375,7 +404,7 @@ export class ContentScheduler {
   ): string {
     const now = new Date()
     const [hours, minutes] = timeOfDay.split(':').map(Number)
-    
+
     let nextExecution = new Date()
     nextExecution.setHours(hours, minutes, 0, 0)
 
