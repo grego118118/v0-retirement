@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status') || 'published'
     const limit = parseInt(searchParams.get('limit') || '20')
     const offset = parseInt(searchParams.get('offset') || '0')
-    const sortBy = searchParams.get('sort') || 'published_at'
+    const sortBy = searchParams.get('sort') || 'publishedAt'
     const sortOrder = searchParams.get('order') || 'desc'
 
     // Build where clause
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
 
     // Filter by AI generated content
     if (aiGenerated !== null) {
-      where.is_ai_generated = aiGenerated === 'true'
+      where.isAiGenerated = aiGenerated === 'true'
     }
 
     // Search functionality
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
         { title: { contains: search, mode: 'insensitive' } },
         { content: { contains: search, mode: 'insensitive' } },
         { excerpt: { contains: search, mode: 'insensitive' } },
-        { seo_keywords: { has: search } }
+        { seoKeywords: { has: search } }
       ]
     }
 
@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
             reviewStatus: 'approved'
           },
           orderBy: {
-            reviewedAt: 'desc'
+            createdAt: 'desc'
           },
           take: 1
         }
