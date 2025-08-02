@@ -849,10 +849,10 @@ model ContentReview {
 model NewsletterSubscriber {
   id              String   @id @default(cuid())
   email           String   @unique
-  name            String?
   isActive        Boolean  @default(true)
   subscribedAt    DateTime @default(now())
   unsubscribedAt  DateTime?
+  source          String?  // website, api, import, etc.
   preferences     String[] // topics they're interested in
 
   @@map("newsletter_subscribers")
