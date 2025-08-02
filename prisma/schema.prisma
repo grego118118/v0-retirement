@@ -393,7 +393,7 @@ model RetirementCalculation {
 }
 
 model RetirementProfile {
-  id                             String    @id
+  id                             String    @id @default(cuid())
   userId                         String    @unique
   dateOfBirth                    DateTime
   membershipDate                 DateTime
@@ -413,7 +413,7 @@ model RetirementProfile {
 }
 
 model Session {
-  id           String   @id
+  id           String   @id @default(cuid())
   sessionToken String   @unique
   userId       String
   expires      DateTime
