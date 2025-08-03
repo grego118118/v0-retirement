@@ -59,6 +59,20 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Check if prisma is available (might be null during build time)
+    if (!prisma) {
+      return NextResponse.json({
+        success: true,
+        posts: [],
+        pagination: {
+          page: 1,
+          limit: 10,
+          total: 0,
+          totalPages: 0
+        }
+      })
+    }
+
     // Fetch posts with relations
     const posts = await prisma.blogPost.findMany({
       where: {

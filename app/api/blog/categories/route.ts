@@ -17,6 +17,15 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const includeInactive = searchParams.get('include_inactive') === 'true'
     
+    // Check if prisma is available (might be null during build time)
+    if (!prisma) {
+      return NextResponse.json({
+        success: true,
+        categories: [],
+        total: 0
+      })
+    }
+
     const categories = await prisma.blogCategory.findMany({
       where: includeInactive ? {} : { isActive: true },
       orderBy: [
