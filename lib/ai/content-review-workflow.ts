@@ -352,14 +352,14 @@ export class ContentReviewWorkflowManager {
    * Get email subject based on notification type
    */
   private static getEmailSubject(notificationType: string, postTitle: string): string {
-    const subjects = {
+    const subjects: Record<string, string> = {
       'ai_quality_failed': `[Mass Pension] AI Quality Check Failed: ${postTitle}`,
       'fact_check_required': `[Mass Pension] Fact Check Required: ${postTitle}`,
       'seo_optimization_required': `[Mass Pension] SEO Optimization Required: ${postTitle}`,
       'manual_approval_required': `[Mass Pension] Manual Approval Required: ${postTitle}`,
       'content_approved': `[Mass Pension] Content Approved: ${postTitle}`
     }
-    
+
     return subjects[notificationType] || `[Mass Pension] Content Review: ${postTitle}`
   }
 
