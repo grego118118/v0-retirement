@@ -11,6 +11,7 @@ import { ContentQualityChecker } from '@/lib/ai/content-quality-checker'
 import { AICostTracker } from '@/lib/ai/ai-service-config'
 import { getRandomTopic, MASSACHUSETTS_RETIREMENT_TOPICS } from '@/lib/ai/massachusetts-topics'
 import { prisma } from '@/lib/prisma'
+import { emailService } from '@/lib/email/email-service'
 
 /**
  * POST /api/admin/blog/generate
@@ -233,6 +234,91 @@ export async function POST(request: NextRequest) {
 
     console.log(`Content generated successfully: ${savedPost.id}`)
 
+    // Send email notification for draft posts (only for real posts, not mock responses)
+    let emailNotificationResult = null
+    if (savedPost.status === 'draft' && !savedPost.id.startsWith('test-') && process.env.ENABLE_EMAIL === 'true') {
+      try {
+        console.log('📧 Sending email notification for draft blog post...')
+
+        const reviewerEmails = process.env.CONTENT_REVIEWER_EMAILS?.split(',').map(email => email.trim()).filter(Boolean) || []
+
+        if (reviewerEmails.length > 0 && emailService.isConfigured()) {
+          const reviewUrl = `${process.env.NEXTAUTH_URL || 'https://www.masspension.com'}/admin/blog/review/${savedPost.id}`
+          const postExcerpt = generatedPost.content.substring(0, 200) + '...'
+
+          emailNotificationResult = await emailService.sendEmail({
+            to: reviewerEmails,
+            subject: `[Mass Pension] New Blog Draft Ready for Review: ${generatedPost.title}`,
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #1e40af;">New Blog Post Draft Ready for Review</h2>
+
+                <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                  <h3 style="margin: 0 0 10px 0; color: #334155;">${generatedPost.title}</h3>
+                  <p style="color: #64748b; margin: 0;"><strong>Post ID:</strong> ${savedPost.id}</p>
+                  <p style="color: #64748b; margin: 5px 0;"><strong>Status:</strong> Draft</p>
+                  <p style="color: #64748b; margin: 5px 0;"><strong>Word Count:</strong> ${generatedPost.content.split(/\s+/).length} words</p>
+                </div>
+
+                <div style="margin: 20px 0;">
+                  <h4 style="color: #334155;">Content Preview:</h4>
+                  <p style="color: #64748b; line-height: 1.6;">${postExcerpt}</p>
+                </div>
+
+                <div style="margin: 30px 0;">
+                  <a href="${reviewUrl}" style="background: #1e40af; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">Review & Approve Post</a>
+                </div>
+
+                <div style="margin: 20px 0; padding: 15px; background: #fef3c7; border-radius: 6px;">
+                  <p style="margin: 0; color: #92400e;"><strong>Action Required:</strong> Please review this blog post draft and approve it for publication or request changes.</p>
+                </div>
+
+                <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;">
+                <p style="color: #94a3b8; font-size: 14px;">
+                  This notification was sent by the Massachusetts Retirement System AI Blog Generation System.<br>
+                  Generated on ${new Date().toLocaleString('en-US', { timeZone: 'America/New_York' })} EST
+                </p>
+              </div>
+            `,
+            text: `
+New Blog Post Draft Ready for Review
+
+Title: ${generatedPost.title}
+Post ID: ${savedPost.id}
+Status: Draft
+Word Count: ${generatedPost.content.split(/\s+/).length} words
+
+Content Preview:
+${postExcerpt}
+
+Review URL: ${reviewUrl}
+
+Action Required: Please review this blog post draft and approve it for publication or request changes.
+
+This notification was sent by the Massachusetts Retirement System AI Blog Generation System.
+Generated on ${new Date().toLocaleString('en-US', { timeZone: 'America/New_York' })} EST
+            `
+          })
+
+          if (emailNotificationResult.success) {
+            console.log('✅ Email notification sent successfully to:', reviewerEmails.join(', '))
+          } else {
+            console.warn('❌ Email notification failed:', emailNotificationResult.error)
+          }
+        } else {
+          console.warn('⚠️  Email notification skipped: No reviewer emails configured or email service not configured')
+        }
+      } catch (emailError) {
+        console.error('❌ Email notification error:', emailError)
+        emailNotificationResult = {
+          success: false,
+          error: emailError instanceof Error ? emailError.message : 'Unknown email error',
+          provider: 'unknown',
+          timestamp: new Date()
+        }
+      }
+    }
+
     return NextResponse.json({
       success: true,
       post: {
@@ -264,6 +350,15 @@ export async function POST(request: NextRequest) {
       ...(savedPost.id?.startsWith('test-') && {
         is_mock_response: true,
         database_save_failed: true
+      }),
+      // Include email notification result
+      ...(emailNotificationResult && {
+        email_notification: {
+          sent: emailNotificationResult.success,
+          error: emailNotificationResult.error,
+          provider: emailNotificationResult.provider,
+          timestamp: emailNotificationResult.timestamp
+        }
       })
     })
 
