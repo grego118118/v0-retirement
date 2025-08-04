@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
     // Prepare blog post data (declare in higher scope for error logging)
     const blogPostData = {
         title: generatedPost.title,
-        slug: generatedPost.slug || `${generatedPost.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`,
+        slug: generatedPost.slug || `${generatedPost.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').substring(0, 30)}-${crypto.randomUUID().substring(0, 8)}`,
         content: generatedPost.content,
         excerpt: generatedPost.meta_description || generatedPost.content.substring(0, 200),
         status: auto_publish && factCheckReport.overall_accuracy >= 80 ? 'published' : 'draft',
