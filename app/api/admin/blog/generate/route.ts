@@ -135,12 +135,38 @@ export async function POST(request: NextRequest) {
       console.log('🔍 Blog post title:', blogPostData.title?.substring(0, 50))
       console.log('🔍 Blog post slug:', blogPostData.slug)
 
-      // Use standard Prisma client with optimized connection string (prepared statement conflicts resolved)
-      savedPost = await prisma.blogPost.create({ data: blogPostData })
+      // Retry mechanism for slug conflicts
+      let attempts = 0
+      const maxAttempts = 3
 
-      // Explicit success logging
-      console.log('✅ Database save successful! Post ID:', savedPost.id)
-      console.log('✅ Post title:', savedPost.title?.substring(0, 50))
+      while (attempts < maxAttempts) {
+        try {
+          // Use standard Prisma client with optimized connection string (prepared statement conflicts resolved)
+          savedPost = await prisma.blogPost.create({ data: blogPostData })
+
+          // Explicit success logging
+          console.log('✅ Database save successful! Post ID:', savedPost.id)
+          console.log('✅ Post title:', savedPost.title?.substring(0, 50))
+          break // Success, exit retry loop
+
+        } catch (slugError) {
+          attempts++
+          console.log(`⚠️  Attempt ${attempts} failed, trying new slug...`)
+
+          if (slugError instanceof Error && slugError.message.includes('Unique constraint failed') && slugError.message.includes('slug')) {
+            // Generate a new unique slug and retry
+            blogPostData.slug = `${generatedPost.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').substring(0, 30)}-${crypto.randomUUID().substring(0, 8)}`
+            console.log(`🔄 New slug generated: ${blogPostData.slug}`)
+
+            if (attempts >= maxAttempts) {
+              throw new Error(`Failed to create unique slug after ${maxAttempts} attempts`)
+            }
+          } else {
+            // Different error, don't retry
+            throw slugError
+          }
+        }
+      }
     } catch (dbError) {
       console.warn('Database save failed, continuing with generated content:', dbError)
       // Type-safe error logging with detailed debugging
