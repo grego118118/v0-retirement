@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 
 const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined
+  prisma: PrismaClient | null
 }
 
 // Enhanced Prisma configuration with optimized connection pooling
@@ -38,17 +38,38 @@ const isProduction = process.env.NODE_ENV === 'production'
 const isServerless = process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME
 
 // Create Prisma client with null safety for build time
-const createSafePrismaClient = () => {
+const createSafePrismaClient = (): PrismaClient | null => {
   if (!isProduction && !isServerless) {
     // Development: use global singleton
-    return globalForPrisma.prisma ?? (globalForPrisma.prisma = createPrismaClient())
+    const client = globalForPrisma.prisma ?? createPrismaClient()
+    if (client) {
+      globalForPrisma.prisma = client
+    }
+    return client
   } else {
     // Production/serverless: create new instance
     return createPrismaClient()
   }
 }
 
-export const prisma = createSafePrismaClient() as PrismaClient
+// Create a proxy that throws helpful errors when prisma is null
+const createPrismaProxy = (client: PrismaClient | null): PrismaClient => {
+  if (client === null) {
+    // During build time, return a proxy that throws helpful errors
+    return new Proxy({} as PrismaClient, {
+      get(target, prop) {
+        throw new Error(
+          `Prisma client is not available during build time. ` +
+          `This usually happens when DATABASE_URL is not set during the build process. ` +
+          `Property accessed: ${String(prop)}`
+        )
+      }
+    })
+  }
+  return client
+}
+
+export const prisma = createPrismaProxy(createSafePrismaClient())
 
 // Enhanced connection cleanup for proper resource management
 if (typeof window === 'undefined') {
