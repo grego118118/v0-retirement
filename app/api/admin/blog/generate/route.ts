@@ -198,13 +198,19 @@ export async function POST(request: NextRequest) {
         ? 'Content generated and published successfully'
         : 'Content generated and saved as draft for review',
       // Include database error information for debugging if post ID starts with 'test-'
-      ...(savedPost.id?.startsWith('test-') && {
+      ...(savedPost.id?.startsWith('test-') && savedPost._dbError && {
         debug_info: {
           database_error: savedPost._dbError,
           error_type: savedPost._errorType,
           error_name: savedPost._errorName,
-          note: 'This is a mock response due to database save failure'
+          note: 'This is a mock response due to database save failure',
+          mock_post_keys: Object.keys(savedPost)
         }
+      }),
+      // Always include if it's a test post for debugging
+      ...(savedPost.id?.startsWith('test-') && {
+        is_mock_response: true,
+        database_save_failed: true
       })
     })
 
