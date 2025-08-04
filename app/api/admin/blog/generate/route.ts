@@ -105,8 +105,9 @@ export async function POST(request: NextRequest) {
 
     // Save blog post using specialized database client with retry logic
     let savedPost
-    try {
-      const blogPostData = {
+
+    // Prepare blog post data (declare in higher scope for error logging)
+    const blogPostData = {
         title: generatedPost.title,
         slug: generatedPost.slug || `${generatedPost.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`,
         content: generatedPost.content,
@@ -128,6 +129,7 @@ export async function POST(request: NextRequest) {
         authorId: session?.user?.id || null // Remove system user reference that may not exist
       }
 
+    try {
       // Use standard Prisma client with optimized connection string (prepared statement conflicts resolved)
       savedPost = await prisma.blogPost.create({ data: blogPostData })
     } catch (dbError) {
