@@ -200,7 +200,8 @@ ${request.additional_context ? `Additional Context: ${request.additional_context
     } catch (error) {
       clearTimeout(timeoutId)
 
-      if (error.name === 'AbortError') {
+      // Type-safe error checking for AbortError
+      if (error instanceof Error && error.name === 'AbortError') {
         throw new Error('Gemini API request timed out after 30 seconds - check API key and network connectivity')
       }
 
