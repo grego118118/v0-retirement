@@ -126,7 +126,7 @@ export async function POST(request: NextRequest) {
           seoDescription: generatedPost.meta_description || '',
           metaDescription: generatedPost.meta_description || '', // Fixed: added metaDescription field
           seoKeywords: generatedPost.keywords || [],
-          authorId: isAuthorizedCron ? 'system' : session?.user?.id || 'system'
+          authorId: session?.user?.id || null // Remove system user reference that may not exist
         }
       })
     } catch (dbError) {
