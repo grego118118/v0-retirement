@@ -36,13 +36,7 @@ class BlogDatabaseClient {
           url: databaseUrl
         }
       },
-      log: ['error'],
-      // Force new connection pool for each client instance
-      __internal: {
-        engine: {
-          enableEngineDebugMode: false,
-        }
-      }
+      log: ['error']
     })
 
     // Test the connection

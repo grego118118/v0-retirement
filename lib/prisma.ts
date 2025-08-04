@@ -28,14 +28,7 @@ const createPrismaClient = () => {
         url: databaseUrl
       }
     },
-    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
-    // Supabase-specific configuration to prevent prepared statement conflicts
-    __internal: {
-      engine: {
-        // Force new engine instance for each client to prevent statement conflicts
-        enableEngineDebugMode: false,
-      }
-    }
+    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error']
   })
 }
 
