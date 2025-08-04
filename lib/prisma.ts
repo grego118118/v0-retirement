@@ -47,8 +47,11 @@ const createSafePrismaClient = (): PrismaClient | null => {
     }
     return client
   } else {
-    // Production/serverless: create new instance
-    return createPrismaClient()
+    // Production/serverless: always use global singleton to prevent prepared statement conflicts
+    if (!globalForPrisma.prisma) {
+      globalForPrisma.prisma = createPrismaClient()
+    }
+    return globalForPrisma.prisma
   }
 }
 
