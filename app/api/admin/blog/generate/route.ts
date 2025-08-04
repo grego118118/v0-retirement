@@ -130,8 +130,17 @@ export async function POST(request: NextRequest) {
       }
 
     try {
+      // Explicit logging to identify silent failure
+      console.log('🔍 Attempting database save with data keys:', Object.keys(blogPostData))
+      console.log('🔍 Blog post title:', blogPostData.title?.substring(0, 50))
+      console.log('🔍 Blog post slug:', blogPostData.slug)
+
       // Use standard Prisma client with optimized connection string (prepared statement conflicts resolved)
       savedPost = await prisma.blogPost.create({ data: blogPostData })
+
+      // Explicit success logging
+      console.log('✅ Database save successful! Post ID:', savedPost.id)
+      console.log('✅ Post title:', savedPost.title?.substring(0, 50))
     } catch (dbError) {
       console.warn('Database save failed, continuing with generated content:', dbError)
       // Type-safe error logging with detailed debugging
@@ -162,6 +171,22 @@ export async function POST(request: NextRequest) {
         _dbError: dbError instanceof Error ? dbError.message : String(dbError),
         _errorType: typeof dbError,
         _errorName: dbError instanceof Error ? dbError.name : 'Unknown'
+      }
+    }
+
+    // Check for silent failure (savedPost is undefined)
+    if (!savedPost) {
+      console.warn('⚠️  Silent database failure detected - savedPost is undefined')
+      savedPost = {
+        id: `test-${Date.now()}`,
+        title: generatedPost.title,
+        content: generatedPost.content,
+        status: 'draft',
+        created_at: new Date(),
+        // Include silent failure information
+        _dbError: 'Silent failure - no exception thrown',
+        _errorType: 'silent_failure',
+        _errorName: 'SilentDatabaseFailure'
       }
     }
 
