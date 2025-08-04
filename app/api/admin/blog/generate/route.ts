@@ -11,7 +11,6 @@ import { ContentQualityChecker } from '@/lib/ai/content-quality-checker'
 import { AICostTracker } from '@/lib/ai/ai-service-config'
 import { getRandomTopic, MASSACHUSETTS_RETIREMENT_TOPICS } from '@/lib/ai/massachusetts-topics'
 import { prisma } from '@/lib/prisma'
-import { blogDbClient } from '@/lib/database/blog-db-client'
 
 /**
  * POST /api/admin/blog/generate
@@ -129,8 +128,8 @@ export async function POST(request: NextRequest) {
         authorId: session?.user?.id || null // Remove system user reference that may not exist
       }
 
-      // Use specialized blog database client with retry logic for prepared statement conflicts
-      savedPost = await blogDbClient.createBlogPost(blogPostData)
+      // Use standard Prisma client with optimized connection string (prepared statement conflicts resolved)
+      savedPost = await prisma.blogPost.create({ data: blogPostData })
     } catch (dbError) {
       console.warn('Database save failed, continuing with generated content:', dbError)
       // Type-safe error logging
