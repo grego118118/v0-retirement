@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
     try {
       const blogPostData = {
         title: generatedPost.title,
-        slug: generatedPost.slug || generatedPost.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+        slug: generatedPost.slug || `${generatedPost.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`,
         content: generatedPost.content,
         excerpt: generatedPost.meta_description || generatedPost.content.substring(0, 200),
         status: auto_publish && factCheckReport.overall_accuracy >= 80 ? 'published' : 'draft',
