@@ -59,13 +59,24 @@ export class GeminiContentGenerator {
    */
   async generateContent(request: ContentGenerationRequest): Promise<ContentGenerationResponse> {
     try {
+      // Enhanced API key validation
       if (!this.config.apiKey) {
         throw new Error('Gemini API key not configured')
       }
 
+      if (typeof this.config.apiKey !== 'string' || this.config.apiKey.trim().length === 0) {
+        throw new Error('Gemini API key is empty or invalid')
+      }
+
+      // Validate API key format (Google API keys typically start with AIza)
+      if (!this.config.apiKey.startsWith('AIza') || this.config.apiKey.length < 35) {
+        throw new Error('Gemini API key format appears invalid (should start with AIza and be ~39 characters)')
+      }
+
+      console.log('Gemini API key validation passed, generating content...')
       const prompt = this.buildContentPrompt(request)
       const response = await this.callGeminiAPI(prompt)
-      
+
       return this.parseGeminiResponse(response, request)
     } catch (error) {
       console.error('Gemini content generation error:', error)
@@ -132,11 +143,11 @@ ${request.additional_context ? `Additional Context: ${request.additional_context
   }
 
   /**
-   * Call Gemini API
+   * Call Gemini API with timeout protection
    */
   private async callGeminiAPI(prompt: string): Promise<any> {
     const url = `${this.baseUrl}/${this.config.model}:generateContent?key=${this.config.apiKey}`
-    
+
     const requestBody = {
       contents: [{
         parts: [{
@@ -152,20 +163,50 @@ ${request.additional_context ? `Additional Context: ${request.additional_context
       safetySettings: this.config.safetySettings
     }
 
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(requestBody)
-    })
+    console.log(`Making Gemini API call to: ${url.replace(this.config.apiKey, 'AI***REDACTED***')}`)
 
-    if (!response.ok) {
-      const errorData = await response.text()
-      throw new Error(`Gemini API error: ${response.status} - ${errorData}`)
+    // Add timeout protection to prevent hanging requests
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => {
+      console.error('Gemini API call timed out after 30 seconds')
+      controller.abort()
+    }, 30000) // 30 second timeout
+
+    try {
+      const startTime = Date.now()
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestBody),
+        signal: controller.signal
+      })
+
+      clearTimeout(timeoutId)
+      const responseTime = Date.now() - startTime
+      console.log(`Gemini API response: ${response.status} (${responseTime}ms)`)
+
+      if (!response.ok) {
+        const errorData = await response.text()
+        console.error('Gemini API error response:', errorData)
+        throw new Error(`Gemini API error: ${response.status} - ${errorData}`)
+      }
+
+      const jsonResponse = await response.json()
+      console.log('Gemini API call successful')
+      return jsonResponse
+
+    } catch (error) {
+      clearTimeout(timeoutId)
+
+      if (error.name === 'AbortError') {
+        throw new Error('Gemini API request timed out after 30 seconds - check API key and network connectivity')
+      }
+
+      console.error('Gemini API fetch error:', error)
+      throw error
     }
-
-    return await response.json()
   }
 
   /**
