@@ -132,16 +132,34 @@ export async function POST(request: NextRequest) {
       savedPost = await prisma.blogPost.create({ data: blogPostData })
     } catch (dbError) {
       console.warn('Database save failed, continuing with generated content:', dbError)
-      // Type-safe error logging
+      // Type-safe error logging with detailed debugging
       const errorMessage = dbError instanceof Error ? dbError.message : String(dbError)
       console.warn('Database error details:', errorMessage)
+
+      // Enhanced debugging for database storage issue
+      console.warn('Database error type:', typeof dbError)
+      console.warn('Database error name:', dbError instanceof Error ? dbError.name : 'Unknown')
+      console.warn('Database error stack:', dbError instanceof Error ? dbError.stack : 'No stack trace')
+
+      // Log the data that failed to save for debugging
+      console.warn('Failed blog post data keys:', Object.keys(blogPostData))
+      console.warn('Blog post data sample:', {
+        title: blogPostData.title?.substring(0, 50),
+        status: blogPostData.status,
+        isAiGenerated: blogPostData.isAiGenerated,
+        authorId: blogPostData.authorId
+      })
       // Create a mock saved post for testing
       savedPost = {
         id: `test-${Date.now()}`,
         title: generatedPost.title,
         content: generatedPost.content,
         status: 'draft',
-        created_at: new Date()
+        created_at: new Date(),
+        // Include error information for debugging
+        _dbError: dbError instanceof Error ? dbError.message : String(dbError),
+        _errorType: typeof dbError,
+        _errorName: dbError instanceof Error ? dbError.name : 'Unknown'
       }
     }
 
@@ -176,9 +194,18 @@ export async function POST(request: NextRequest) {
       },
       quality_metrics: qualityMetrics,
       fact_check_report: factCheckReport,
-      message: auto_publish && factCheckReport.overall_accuracy >= 80 
+      message: auto_publish && factCheckReport.overall_accuracy >= 80
         ? 'Content generated and published successfully'
-        : 'Content generated and saved as draft for review'
+        : 'Content generated and saved as draft for review',
+      // Include database error information for debugging if post ID starts with 'test-'
+      ...(savedPost.id?.startsWith('test-') && {
+        debug_info: {
+          database_error: savedPost._dbError,
+          error_type: savedPost._errorType,
+          error_name: savedPost._errorName,
+          note: 'This is a mock response due to database save failure'
+        }
+      })
     })
 
   } catch (error) {
