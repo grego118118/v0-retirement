@@ -131,7 +131,9 @@ export async function POST(request: NextRequest) {
       })
     } catch (dbError) {
       console.warn('Database save failed, continuing with generated content:', dbError)
-      console.warn('Database error details:', dbError.message || dbError)
+      // Type-safe error logging
+      const errorMessage = dbError instanceof Error ? dbError.message : String(dbError)
+      console.warn('Database error details:', errorMessage)
       // Create a mock saved post for testing
       savedPost = {
         id: `test-${Date.now()}`,
