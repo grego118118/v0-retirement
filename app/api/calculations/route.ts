@@ -11,6 +11,14 @@ export async function GET() {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
     }
 
+    // Check if prisma is available (might be null during build time)
+    if (!prisma) {
+      return NextResponse.json({
+        message: "Service temporarily unavailable during build",
+        error: "BUILD_TIME_UNAVAILABLE"
+      }, { status: 503 })
+    }
+
     // Fetch calculations using Prisma
     const calculations = await prisma.retirementCalculation.findMany({
       where: {

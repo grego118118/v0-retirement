@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth/auth-config"
-import { prisma } from "@/lib/db"
+import { prisma } from "@/lib/prisma"
 import { logError, logApiPerformance, withPerformanceMonitoring } from "@/lib/monitoring"
 import { cacheUserProfile, invalidateUserCache } from "@/lib/cache"
 
@@ -25,6 +25,15 @@ export async function GET() {
     }
 
     console.log("Querying profile for user:", session.user.id)
+
+    // Check if prisma is available (might be null during build time)
+    if (!prisma) {
+      console.log("Prisma client not available during build time")
+      return NextResponse.json({
+        message: "Service temporarily unavailable during build",
+        error: "BUILD_TIME_UNAVAILABLE"
+      }, { status: 503 })
+    }
 
     // Use caching for profile data
     const responseData = await cacheUserProfile(
@@ -228,6 +237,15 @@ export async function POST(request: Request) {
     })
 
     console.log("Updating user profile for user:", session.user.id)
+
+    // Check if prisma is available (might be null during build time)
+    if (!prisma) {
+      console.log("Prisma client not available during build time")
+      return NextResponse.json({
+        message: "Service temporarily unavailable during build",
+        error: "BUILD_TIME_UNAVAILABLE"
+      }, { status: 503 })
+    }
 
     // Prioritize Social Security updates when they only contain SS fields
     if (isSocialSecurityUpdate && !isBasicProfileUpdate && (!isDetailedProfileUpdate || estimatedSocialSecurityBenefit !== undefined)) {

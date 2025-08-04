@@ -26,28 +26,33 @@ export async function GET(request: NextRequest) {
     const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999)
 
     // Get AI blog posts from current month
-    // For now, return empty array if table doesn't exist yet
+    // For now, return empty array if table doesn't exist yet or prisma is not available
     let monthlyPosts: any[] = []
 
     try {
-      monthlyPosts = await prisma.blogPost.findMany({
-        where: {
-          createdAt: {
-            gte: monthStart,
-            lte: monthEnd
+      // Check if prisma is available (might be null during build time)
+      if (prisma) {
+        monthlyPosts = await prisma.blogPost.findMany({
+          where: {
+            createdAt: {
+              gte: monthStart,
+              lte: monthEnd
+            },
+            isAiGenerated: true
           },
-          isAiGenerated: true
-        },
-        select: {
-          id: true,
-          aiModelUsed: true,
-          aiGenerationCost: true,
-          content: true,
-          createdAt: true
-        }
-      })
+          select: {
+            id: true,
+            aiModelUsed: true,
+            aiGenerationCost: true,
+            content: true,
+            createdAt: true
+          }
+        })
+      } else {
+        console.log('Prisma client not available (likely build time), returning empty data')
+      }
     } catch (error) {
-      console.log('Blog posts table not yet created, returning empty data')
+      console.log('Blog posts query failed, returning empty data:', error)
       // Continue with empty array
     }
 

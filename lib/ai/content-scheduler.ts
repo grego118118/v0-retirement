@@ -258,8 +258,7 @@ export class ContentScheduler {
         categories: ['pension-planning', 'cola-adjustments', 'retirement-groups', 'pension-options', 'social-security-integration', 'career-planning', 'benefit-calculations', 'tax-planning'],
         is_active: true,
         next_execution: this.getNextBiDailyExecution(),
-        last_execution: undefined,
-        interval_hours: 48 // Every 48 hours
+        last_execution: undefined
       },
       {
         id: 'monthly-cola-update',
