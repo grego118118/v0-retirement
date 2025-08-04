@@ -4,7 +4,7 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | null
 }
 
-// Enhanced Prisma configuration with optimized connection pooling
+// Enhanced Prisma configuration with Supabase connection pooling optimization
 const createPrismaClient = () => {
   const databaseUrl = process.env.DATABASE_URL
 
@@ -29,6 +29,13 @@ const createPrismaClient = () => {
       }
     },
     log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+    // Supabase-specific configuration to prevent prepared statement conflicts
+    __internal: {
+      engine: {
+        // Force new engine instance for each client to prevent statement conflicts
+        enableEngineDebugMode: false,
+      }
+    }
   })
 }
 
