@@ -497,6 +497,13 @@ Remember that pension planning is just one part of comprehensive retirement plan
                           Submit Review
                         </Button>
                         <Button
+                          variant="secondary"
+                          onClick={() => handleReview(selectedPost.id, 'approved', reviewNotes, Math.max(qualityRating, 4))}
+                          className="flex-1"
+                        >
+                          Publish Now
+                        </Button>
+                        <Button
                           variant="outline"
                           onClick={() => {
                             setSelectedPost(null)

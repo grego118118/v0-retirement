@@ -9,6 +9,9 @@ import { CalendarIcon, Clock, User, ArrowRight, Bot, Sparkles, TrendingUp, Star 
 import { ResponsiveBlogImage } from './blog-image'
 import { ResponsiveAd, PremiumAlternative } from '@/components/ads/adsense'
 import { BlogPost } from '@/types/ai-blog'
+import { useSession } from 'next-auth/react'
+import { Switch } from '@/components/ui/switch'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { blogPosts } from '@/lib/blog-data'
 
 interface EnhancedBlogGridProps {
@@ -18,12 +21,16 @@ interface EnhancedBlogGridProps {
   showAIGenerated?: boolean
 }
 
-export function EnhancedBlogGrid({ 
-  posts = [], 
+export function EnhancedBlogGrid({
+  posts = [],
   selectedCategory = 'all',
   searchQuery = '',
-  showAIGenerated = true 
+  showAIGenerated = true
 }: EnhancedBlogGridProps) {
+  const { data: session } = useSession()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const showingDrafts = (searchParams?.get('showDrafts') === 'true') || false
   const [displayPosts, setDisplayPosts] = useState<BlogPost[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -68,11 +75,10 @@ export function EnhancedBlogGrid({
         setLoading(false)
         return
       }
-
       // Fetch from API if no posts provided
       const params = new URLSearchParams({
         limit: '20',
-        status: 'published'
+        status: (typeof window !== 'undefined' && window.location.search.includes('showDrafts=true')) ? 'draft' : 'published'
       })
 
       if (selectedCategory !== 'all') {
@@ -87,7 +93,7 @@ export function EnhancedBlogGrid({
         params.append('ai_generated', 'false')
       }
 
-      const response = await fetch(`/api/blog/posts?${params.toString()}`)
+      const response = await fetch(`/api/blog/posts?${params.toString()}` , { credentials: 'include' })
 
       if (!response.ok) {
         // Fallback to static data if API fails
@@ -156,7 +162,7 @@ export function EnhancedBlogGrid({
 
   const getQualityBadge = (score?: number) => {
     if (!score) return null
-    
+
     if (score >= 90) {
       return <Badge variant="outline" className="text-green-600 border-green-200 bg-green-50">
         <Star className="w-3 h-3 mr-1" />
@@ -211,18 +217,54 @@ export function EnhancedBlogGrid({
     return (
       <div className="text-center py-12">
         <p className="text-muted-foreground mb-4">No blog posts found matching your criteria.</p>
-        <Button onClick={() => {
-          setDisplayPosts([])
-          loadBlogPosts()
-        }} variant="outline">
+        <Button onClick={() => { setDisplayPosts([]); loadBlogPosts() }} variant="outline">
           Reset Filters
         </Button>
       </div>
     )
   }
+  // Admin toolbar (visible when posts exist too)
+  const AdminToolbar = () => (
+    session?.user && (session.user as any).role === 'admin' ? (
+      <div className="flex items-center justify-between">
+        <Badge variant="outline" className="text-blue-600 border-blue-200 bg-blue-50">Admin mode</Badge>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">Show drafts</span>
+          <Switch
+            checked={showingDrafts}
+            onCheckedChange={(checked) => {
+              const url = new URL(window.location.href)
+              if (checked) url.searchParams.set('showDrafts', 'true')
+              else url.searchParams.delete('showDrafts')
+              router.push(url.toString())
+            }}
+          />
+        </div>
+      </div>
+    ) : null
+  )
+
+  const publishNow = async (postId: string) => {
+    try {
+      const res = await fetch('/api/admin/blog/review', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ post_id: postId, review_status: 'approved' })
+      })
+      if (res.ok) {
+        loadBlogPosts()
+      } else {
+        console.warn('Publish failed')
+      }
+    } catch (e) {
+      console.error('Publish error', e)
+    }
+  }
+
 
   return (
     <div className="space-y-8">
+      <AdminToolbar />
       {/* Blog Posts Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {displayPosts.map((post, index) => (
@@ -272,6 +314,11 @@ export function EnhancedBlogGrid({
                   Read more <span className="sr-only">about {post.title}</span>
                   <ArrowRight className="h-3 w-3 ml-1 transition-transform group-hover:translate-x-1" />
                 </Link>
+                {session?.user && (session.user as any).role === 'admin' && (
+                  <Button variant="outline" size="sm" className="ml-2" onClick={() => publishNow(post.id)}>
+                    Publish
+                  </Button>
+                )}
               </Button>
             </CardFooter>
           </Card>

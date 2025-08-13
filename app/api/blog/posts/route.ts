@@ -5,6 +5,8 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth/auth-config'
 import { BlogPost, BlogCategory } from '@/types/ai-blog'
 
 /**
@@ -26,8 +28,18 @@ export async function GET(request: NextRequest) {
     const sortOrder = searchParams.get('order') || 'desc'
 
     // Build where clause
-    const where: any = {
-      status: status as 'published' | 'draft' | 'archived'
+    const where: any = {}
+
+    // If status explicitly provided (and not 'all'), filter by it; otherwise default to published for public
+    if (status && status !== 'all') {
+      where.status = status as 'published' | 'draft' | 'archived'
+    } else {
+      where.status = 'published'
+    }
+
+    // If requesting drafts or all, require admin session
+    if ((status === 'draft' || status === 'all') && !(await getServerSession(authOptions))?.user) {
+      return NextResponse.json({ error: 'Unauthorized to view drafts' }, { status: 401 })
     }
 
     // Filter by AI generated content

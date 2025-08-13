@@ -19,6 +19,7 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+      authorization: { params: { prompt: "select_account" } },
     }),
   ],
   secret: process.env.NEXTAUTH_SECRET,
@@ -35,6 +36,12 @@ export const authOptions: NextAuthOptions = {
         token.name = user.name
         token.picture = user.image
       }
+      // Admin role assignment via env var list
+      const adminEmails = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim().toLowerCase()).filter(Boolean)
+      const email = (token.email as string | undefined)?.toLowerCase()
+      if (email && adminEmails.includes(email)) {
+        ;(token as any).role = 'admin'
+      }
       return token
     },
     async session({ session, token }) {
@@ -44,6 +51,7 @@ export const authOptions: NextAuthOptions = {
         session.user.email = token.email as string
         session.user.name = token.name as string
         session.user.image = token.picture as string
+        ;(session.user as any).role = (token as any).role
       }
       return session
     },
