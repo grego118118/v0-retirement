@@ -1454,9 +1454,15 @@ export default function PensionCalculator() {
                         <span className="text-sm">Save Calculation</span>
                       </Button>
                       {!isPremium && (
-                        <p className="mt-2 text-sm text-muted-foreground">
-                          {savedCalculationsCount}/{maxSavedCalculations} saved calculations used
-                        </p>
+                        <div>
+                          <div className="text-xs text-muted-foreground mt-2">
+                            <span>Methodology:</span>{' '}
+                            <a href="/methodology" className="underline">Formulas & assumptions</a>
+                          </div>
+                          <p className="mt-2 text-sm text-muted-foreground">
+                            {savedCalculationsCount}/{maxSavedCalculations} saved calculations used
+                          </p>
+                        </div>
                       )}
                     </div>
                   )}

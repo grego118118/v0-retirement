@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { generateSEOMetadata } from "@/components/seo/metadata"
 import BlogClientComponent from "./blog-client"
+import { BreadcrumbStructuredData } from "@/components/seo/structured-data"
 
 export const metadata: Metadata = generateSEOMetadata({
   title: "Retirement Planning Blog | Massachusetts Pension Estimator",
@@ -21,5 +22,16 @@ export const metadata: Metadata = generateSEOMetadata({
 })
 
 export default function BlogPage() {
-  return <BlogClientComponent />
+  // Structured data for blog listing
+  // Keeping it simple: one-level breadcrumb
+  // (Category pages would similarly inject their own breadcrumb)
+  // We render this in the client component to ensure JSON-LD is present
+  return (
+    <>
+      {/* BreadcrumbList JSON-LD for /blog */}
+      {/* Using the shared component */}
+      <BreadcrumbStructuredData items={[{ name: 'Blog', url: 'https://www.masspension.com/blog' }]} />
+      <BlogClientComponent />
+    </>
+  )
 }

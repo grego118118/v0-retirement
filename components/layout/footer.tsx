@@ -422,6 +422,10 @@ export function Footer() {
               <Link href="/about" className="hover:text-gray-900 transition-colors">
                 About This Tool
               </Link>
+              <span className="mx-2">•</span>
+              <Link href="/methodology" className="hover:text-gray-900 transition-colors">
+                Methodology & Formulas
+              </Link>
             </div>
           </div>
         </div>

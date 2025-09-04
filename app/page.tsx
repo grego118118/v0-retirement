@@ -21,7 +21,7 @@ import {
   Target
 } from "lucide-react"
 import { generateSEOMetadata } from "@/components/seo/metadata"
-import { OrganizationStructuredData } from "@/components/seo/structured-data"
+import { OrganizationStructuredData, FAQStructuredData, HowToStructuredData, RETIREMENT_FAQS, PENSION_CALCULATION_STEPS } from "@/components/seo/structured-data"
 import { NewsletterSignup } from "@/components/email/newsletter-signup"
 import { ResponsiveAd, PremiumAlternative } from "@/components/ads/adsense"
 import { AutoAds } from "@/components/ads/auto-ads"
@@ -46,6 +46,13 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       <OrganizationStructuredData />
+      {/* AEO: FAQ + HowTo structured data for rich answers */}
+      <FAQStructuredData faqs={RETIREMENT_FAQS} />
+      <HowToStructuredData
+        title="How to estimate your Massachusetts state pension"
+        description="Follow these steps to estimate your retirement benefits using official MSRB formulas."
+        steps={PENSION_CALCULATION_STEPS}
+      />
 
       {/* Hero Section - Conversion Optimized */}
       <section className="bg-gradient-to-br from-blue-600 via-indigo-700 to-purple-800 text-white py-20 md:py-28 relative overflow-hidden">
