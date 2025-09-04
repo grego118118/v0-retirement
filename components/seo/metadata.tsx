@@ -17,7 +17,12 @@ export function generateSEOMetadata({
 }: SEOMetadataProps): Metadata {
   // Use the new masspension.com domain
   const baseUrl = "https://www.masspension.com"
-  const url = path
+
+  // Ensure absolute canonical URL
+  const url = path?.startsWith('http') ? path : `${baseUrl}${path}`
+
+  // Ensure absolute Open Graph image URL
+  const ogImageUrl = ogImage?.startsWith('http') ? ogImage : `${baseUrl}${ogImage}`
 
   // Default keywords for all pages
   const defaultKeywords = [
@@ -50,7 +55,7 @@ export function generateSEOMetadata({
       type: "website",
       images: [
         {
-          url: ogImage,
+          url: ogImageUrl,
           width: 1200,
           height: 630,
           alt: title,
@@ -61,7 +66,7 @@ export function generateSEOMetadata({
       card: "summary_large_image",
       title,
       description,
-      images: [ogImage],
+      images: [ogImageUrl],
     },
   }
 }

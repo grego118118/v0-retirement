@@ -42,6 +42,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     description: post.description,
     path: `/blog/${post.id}`,
     keywords: post.tags,
+    ogImage: post.image || '/images/og-image.jpg',
   })
 }
 
