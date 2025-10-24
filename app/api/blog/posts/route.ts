@@ -173,10 +173,19 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error('Error fetching blog posts:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch blog posts' },
-      { status: 500 }
-    )
+    // Harden API: return 200 with empty posts so frontend can gracefully fallback
+    return NextResponse.json({
+      posts: [],
+      pagination: {
+        total: 0,
+        limit: 0,
+        offset: 0,
+        has_more: false,
+        page: 1,
+        total_pages: 0
+      },
+      error: 'upstream_error',
+    })
   }
 }
 
