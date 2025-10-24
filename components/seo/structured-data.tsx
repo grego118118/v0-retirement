@@ -49,7 +49,7 @@ export function CalculatorStructuredData({ pageUrl, calculatorType }: Calculator
             "Real-time calculation updates"
           ]
         }
-      
+
       case 'cola':
         return {
           ...baseSchema,
@@ -63,7 +63,7 @@ export function CalculatorStructuredData({ pageUrl, calculatorType }: Calculator
             "Historical COLA rate analysis"
           ]
         }
-      
+
       case 'wizard':
         return {
           ...baseSchema,
@@ -77,7 +77,7 @@ export function CalculatorStructuredData({ pageUrl, calculatorType }: Calculator
             "Income replacement analysis"
           ]
         }
-      
+
       case 'comparison':
         return {
           ...baseSchema,
@@ -91,7 +91,7 @@ export function CalculatorStructuredData({ pageUrl, calculatorType }: Calculator
             "Decision-making guidance"
           ]
         }
-      
+
       default:
         return baseSchema
     }
@@ -103,6 +103,37 @@ export function CalculatorStructuredData({ pageUrl, calculatorType }: Calculator
       type="application/ld+json"
       dangerouslySetInnerHTML={{ __html: JSON.stringify(getCalculatorSchema()) }}
     />
+  )
+}
+
+// BlogPosting structured data for articles
+interface BlogPostingStructuredDataProps {
+  headline: string
+  authorName: string
+  datePublished: string
+  image?: string
+  url: string
+  description?: string
+  reviewedByName?: string
+  dateModified?: string
+}
+
+export function BlogPostingStructuredData({ headline, authorName, datePublished, image, url, description, reviewedByName, dateModified }: BlogPostingStructuredDataProps) {
+  const blogSchema = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": headline,
+    "author": { "@type": "Person", "name": authorName },
+    "datePublished": datePublished,
+    ...(image ? { image } : {}),
+    ...(reviewedByName ? { reviewedBy: { "@type": "Person", name: reviewedByName } } : {}),
+    ...(dateModified ? { dateModified } : {}),
+    "mainEntityOfPage": url,
+    ...(description ? { description } : {}),
+  }
+
+  return (
+    <Script id="blogposting-structured-data" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogSchema) }} />
   )
 }
 
@@ -135,7 +166,10 @@ export function OrganizationStructuredData() {
       "audienceType": "Massachusetts State Employees"
     },
     "sameAs": [
-      "https://www.mass.gov"
+      "https://www.mass.gov",
+      "https://www.linkedin.com/company/masspension",
+      "https://twitter.com/masspension",
+      "https://www.youtube.com/@MassPension"
     ]
   }
 

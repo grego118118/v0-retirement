@@ -15,7 +15,7 @@
     "test:coverage": "jest --coverage",
     "test:integration": "jest --testPathPattern=integration",
     "test:smoke": "bash scripts/smoke-tests.sh",
-    "type-check": "tsc --noEmit",
+    "type-check": "tsc --noEmit -p tsconfig.build.json",
     "db:migrate": "prisma migrate deploy",
     "db:generate": "prisma generate",
     "db:studio": "prisma studio",

@@ -14,6 +14,7 @@ import { generateSEOMetadata } from "@/components/seo/metadata"
 import { BlogHeroImage, RelatedPostImage } from "@/components/blog/blog-image"
 import { CalculatorCTA } from "@/components/blog/calculator-cta"
 import { ResponsiveAd, PremiumAlternative } from "@/components/ads/adsense"
+import { BreadcrumbStructuredData, BlogPostingStructuredData } from "@/components/seo/structured-data"
 
 export const dynamic = "force-dynamic"
 export const fetchCache = "force-no-store"
@@ -41,6 +42,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     description: post.description,
     path: `/blog/${post.id}`,
     keywords: post.tags,
+    ogImage: post.image || '/images/og-image.jpg',
   })
 }
 
@@ -70,11 +72,31 @@ export default async function BlogPostPage({ params }: PageProps) {
     }
   }
 
+  // Structured data for Breadcrumb and BlogPosting
+  const breadcrumbItems = [
+    { name: 'Blog', url: 'https://www.masspension.com/blog' },
+    { name: post.category, url: `https://www.masspension.com/blog?category=${encodeURIComponent(post.category)}` },
+    { name: post.title, url: `https://www.masspension.com/blog/${post.id}` }
+  ]
+
   return (
     <BlogPostClient post={post} relatedPosts={relatedPosts}>
       <div className="container py-8 md:py-12">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
+            {/* Structured Data for SEO */}
+            <BreadcrumbStructuredData items={breadcrumbItems} />
+            <BlogPostingStructuredData
+              headline={post.title}
+              authorName={post.author || 'Mass Pension Editorial Team'}
+              datePublished={new Date(post.date).toISOString()}
+              image={post.image}
+              url={`https://www.masspension.com/blog/${post.id}`}
+              description={post.description}
+              reviewedByName={post.authorTitle || 'Editorial Reviewer'}
+              dateModified={new Date(post.date).toISOString()}
+            />
+
             <Link
               href="/blog"
               prefetch={true}
