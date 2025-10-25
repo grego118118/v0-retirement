@@ -1,7 +1,8 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "noEmit": true
+    "noEmit": true,
+    "incremental": false
   },
   "include": [
     "app/**/*.ts",
@@ -20,8 +21,8 @@
     "node_modules",
     "__tests__/**",
     "temp_excluded/**",
-    "components/debug/**",
-    "app/api/debug/**",
+    "**/components/debug/**",
+    "**/app/api/debug/**",
     "scripts/**",
     "app_backup/**"
   ]
