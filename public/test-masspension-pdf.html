@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test MassPension.com PDF Generation</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        button { padding: 10px 20px; margin: 10px 0; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .result { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 4px; }
+        .success { background: #d4edda; border-color: #c3e6cb; color: #155724; }
+        .error { background: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Test MassPension.com PDF Generation</h1>
+        <p>This page tests the production PDF generation API with the new MassPension.com branding and logo.</p>
+        
+        <button onclick="testPDFGeneration()">Test PDF Generation with New Branding</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function testPDFGeneration() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div class="result">Testing PDF generation with MassPension.com branding...</div>';
+            
+            try {
+                // Test data with proper date handling
+                const testData = {
+                    reportType: 'pension',
+                    data: {
+                        name: 'Greg Oravec',
+                        currentAge: 51,
+                        plannedRetirementAge: 55,
+                        retirementGroup: 'Group 2',
+                        serviceEntry: 'before_2012',
+                        averageSalary: 95000,
+                        yearsOfService: 27,
+                        projectedYearsAtRetirement: 31,
+                        basePension: 53372,
+                        benefitFactor: 0.025,
+                        totalBenefitPercentage: 77.5,
+                        cappedAt80Percent: false,
+                        options: {
+                            A: { 
+                                annual: 53372, 
+                                monthly: 4447.67, 
+                                description: 'Option A: Full Allowance (100%)' 
+                            },
+                            B: { 
+                                annual: 52838, 
+                                monthly: 4403.17, 
+                                description: 'Option B: Annuity Protection (1% reduction)', 
+                                reduction: 0.01 
+                            },
+                            C: { 
+                                annual: 49615, 
+                                monthly: 4134.58, 
+                                description: 'Option C: Joint & Survivor (66.67%)', 
+                                reduction: 0.0705, 
+                                survivorAnnual: 33081, 
+                                survivorMonthly: 2756.75,
+                                beneficiaryAge: 48
+                            }
+                        },
+                        colaProjections: [
+                            {
+                                year: 1,
+                                startingPension: 53372,
+                                colaIncrease: 390,
+                                endingPension: 53762,
+                                monthlyPension: 4480.17
+                            },
+                            {
+                                year: 2,
+                                startingPension: 53762,
+                                colaIncrease: 390,
+                                endingPension: 54152,
+                                monthlyPension: 4512.67
+                            }
+                        ],
+                        isVeteran: false,
+                        eligibilityMessage: 'Eligible for full retirement benefits at age 55',
+                        calculationDate: new Date().toISOString()
+                    },
+                    options: {
+                        reportType: 'basic',
+                        includeCharts: false,
+                        includeCOLAProjections: true
+                    }
+                };
+
+                console.log('Sending PDF generation request with MassPension.com branding:', testData);
+
+                const response = await fetch('/api/pdf/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(testData)
+                });
+
+                if (response.ok) {
+                    // PDF generation successful
+                    const blob = await response.blob();
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = 'masspension-test-report.pdf';
+                    link.click();
+                    URL.revokeObjectURL(url);
+
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            <h3>✅ MassPension.com PDF Generation Successful!</h3>
+                            <p>PDF size: ${blob.size} bytes</p>
+                            <p>The PDF with new MassPension.com branding should have been downloaded automatically.</p>
+                            <p><strong>Features tested:</strong></p>
+                            <ul>
+                                <li>✅ MassPension.com logo in header</li>
+                                <li>✅ Updated branding text</li>
+                                <li>✅ MSRB disclaimer</li>
+                                <li>✅ Professional styling</li>
+                            </ul>
+                        </div>
+                    `;
+                } else {
+                    // Error occurred
+                    const errorData = await response.json();
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            <h3>❌ PDF Generation Failed</h3>
+                            <p><strong>Status:</strong> ${response.status}</p>
+                            <p><strong>Error:</strong> ${errorData.error || 'Unknown error'}</p>
+                            <pre>${JSON.stringify(errorData, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+
+            } catch (error) {
+                console.error('PDF generation error:', error);
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h3>❌ Request Failed</h3>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

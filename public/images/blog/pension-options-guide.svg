@@ -1,0 +1,83 @@
+<svg width="800" height="400" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#059669;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#10b981;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="cardGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.95" />
+      <stop offset="100%" style="stop-color:#f0fdf4;stop-opacity:0.95" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="800" height="400" fill="url(#bgGradient)"/>
+  
+  <!-- Decorative elements -->
+  <circle cx="120" cy="100" r="50" fill="rgba(255,255,255,0.1)"/>
+  <circle cx="680" cy="300" r="40" fill="rgba(255,255,255,0.1)"/>
+  <circle cx="750" cy="80" r="25" fill="rgba(255,255,255,0.1)"/>
+  
+  <!-- Main content card -->
+  <rect x="50" y="50" width="700" height="300" rx="20" fill="url(#cardGradient)" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+  
+  <!-- Title -->
+  <text x="400" y="100" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#059669">
+    Massachusetts Pension Options
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="400" y="125" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#64748b">
+    A Complete Guide to Options A, B, and C
+  </text>
+  
+  <!-- Option boxes -->
+  <g transform="translate(80, 160)">
+    <!-- Option A -->
+    <rect x="0" y="0" width="180" height="80" rx="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+    <text x="90" y="25" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#92400e">
+      Option A
+    </text>
+    <text x="90" y="45" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#92400e">
+      Maximum
+    </text>
+    <text x="90" y="60" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#92400e">
+      Allowance
+    </text>
+    
+    <!-- Option B -->
+    <rect x="200" y="0" width="180" height="80" rx="10" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
+    <text x="290" y="25" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#1e40af">
+      Option B
+    </text>
+    <text x="290" y="45" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#1e40af">
+      Annuity
+    </text>
+    <text x="290" y="60" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#1e40af">
+      Protection
+    </text>
+    
+    <!-- Option C -->
+    <rect x="400" y="0" width="180" height="80" rx="10" fill="#f3e8ff" stroke="#8b5cf6" stroke-width="2"/>
+    <text x="490" y="25" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#6b21a8">
+      Option C
+    </text>
+    <text x="490" y="45" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#6b21a8">
+      Joint Survivor
+    </text>
+    <text x="490" y="60" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#6b21a8">
+      Allowance
+    </text>
+  </g>
+  
+  <!-- Bottom text -->
+  <text x="400" y="290" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#64748b">
+    Choose the right option for your retirement needs
+  </text>
+  
+  <!-- Massachusetts seal placeholder -->
+  <circle cx="150" cy="300" r="20" fill="#059669" stroke="white" stroke-width="2"/>
+  <text x="150" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="white">
+    MA
+  </text>
+</svg>
