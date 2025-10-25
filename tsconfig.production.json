@@ -27,6 +27,8 @@
   "exclude": [
     "node_modules",
     "scripts",
+    "scripts_app/**/*",
+    "archive_root/**/*",
     "app_backup",
     "temp_excluded/**/*",
     "app/dev/**/*",
@@ -54,6 +56,7 @@
     "test-*.js",
     "validate-*.js",
     "debug-*.js",
-    "__tests__/**/*"
+    "__tests__/**/*",
+    "archive_flatten_backup/**/*"
   ]
 }

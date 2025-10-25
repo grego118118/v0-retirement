@@ -62,9 +62,15 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error('Error fetching blog stats:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch blog statistics' },
-      { status: 500 }
-    )
+    // Graceful empty-state: return 200 with safe defaults so UI can render
+    return NextResponse.json({
+      total_posts: 0,
+      ai_generated_posts: 0,
+      ai_percentage: 0,
+      published_today: 0,
+      total_views: 0,
+      average_quality_score: null,
+      error: 'upstream_error'
+    })
   }
 }
