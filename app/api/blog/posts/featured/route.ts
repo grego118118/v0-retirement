@@ -65,9 +65,11 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error('Error fetching featured posts:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch featured posts' },
-      { status: 500 }
-    )
+    // Graceful empty-state: return 200 with empty list so UI can fallback
+    return NextResponse.json({
+      featured_posts: [],
+      total: 0,
+      error: 'upstream_error'
+    })
   }
 }
