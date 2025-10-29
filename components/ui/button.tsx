@@ -39,7 +39,10 @@ export interface ButtonProps
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, onClick, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button"
+    // Safely enable asChild only when a single valid React element is provided
+    const hasSingleValidChild = React.isValidElement(props.children)
+    const useAsChild = asChild && hasSingleValidChild
+    const Comp = useAsChild ? Slot : "button"
 
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
       // If the button is disabled, prevent the click
@@ -51,6 +54,14 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
       // Call the original onClick if provided
       onClick?.(event)
+    }
+
+    if (asChild && !hasSingleValidChild) {
+      // Help surface misuses during development without crashing in production
+      if (process.env.NODE_ENV !== "production") {
+        // eslint-disable-next-line no-console
+        console.warn("<Button asChild> expects a single React element child. Falling back to a native <button>.")
+      }
     }
 
     return (
