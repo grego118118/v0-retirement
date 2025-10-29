@@ -255,21 +255,19 @@ export function EditCalculationModal({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-5xl max-h-[95vh] overflow-y-auto">
-        <DialogHeader className="pb-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <DialogTitle className="text-xl font-semibold">
-                Edit Retirement Calculation
-              </DialogTitle>
-              <DialogDescription className="mt-1">
-                Modify your retirement calculation parameters and see updated projections
-              </DialogDescription>
-            </div>
-            <Button variant="ghost" size="sm" onClick={onClose}>
-              <X className="h-4 w-4" />
-            </Button>
+        <div className="flex items-center justify-between pb-4">
+          <div>
+            <DialogTitle className="text-xl font-semibold">
+              Edit Retirement Calculation
+            </DialogTitle>
+            <DialogDescription className="mt-1">
+              Modify your retirement calculation parameters and see updated projections
+            </DialogDescription>
           </div>
-        </DialogHeader>
+          <Button variant="ghost" size="sm" onClick={onClose}>
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
 
         <div className="space-y-6">
           {/* Basic Information */}
