@@ -157,7 +157,9 @@ export class AdSenseManager {
       if (existingScript) {
         console.log('AdSenseManager: Script already exists in DOM')
         this.scriptLoaded = true
-        window.adsbygoogle = window.adsbygoogle || []
+        if (!Array.isArray(window.adsbygoogle)) {
+          window.adsbygoogle = []
+        }
         resolve()
         return
       }
@@ -172,7 +174,9 @@ export class AdSenseManager {
       script.onload = () => {
         console.log('AdSenseManager: Script loaded successfully')
         this.scriptLoaded = true
-        window.adsbygoogle = window.adsbygoogle || []
+        if (!Array.isArray(window.adsbygoogle)) {
+          window.adsbygoogle = []
+        }
         resolve()
       }
 
@@ -209,23 +213,29 @@ export class AdSenseManager {
     }
 
     // Check if Auto Ads already exist in adsbygoogle array
-    if (typeof window !== 'undefined' && window.adsbygoogle) {
-      const existingAutoAds = window.adsbygoogle.filter(item =>
-        item && typeof item === 'object' && item.enable_page_level_ads
-      )
-      if (existingAutoAds.length > 0) {
-        console.warn('AdSenseManager: Auto Ads already exist in adsbygoogle array, skipping')
-        this.autoAdsEnabled = true
-        if (typeof window !== 'undefined') {
-          window.__ADSENSE_AUTO_ADS_ENABLED__ = true
+    if (typeof window !== 'undefined' && window.adsbygoogle && Array.isArray(window.adsbygoogle)) {
+      try {
+        const existingAutoAds = window.adsbygoogle.filter(item =>
+          item && typeof item === 'object' && item.enable_page_level_ads
+        )
+        if (existingAutoAds.length > 0) {
+          console.warn('AdSenseManager: Auto Ads already exist in adsbygoogle array, skipping')
+          this.autoAdsEnabled = true
+          if (typeof window !== 'undefined') {
+            window.__ADSENSE_AUTO_ADS_ENABLED__ = true
+          }
+          return
         }
-        return
+      } catch (error) {
+        console.warn('AdSenseManager: Error checking existing Auto Ads:', error)
       }
     }
 
     try {
-      // Ensure adsbygoogle array exists
-      window.adsbygoogle = window.adsbygoogle || []
+      // Ensure adsbygoogle array exists and is actually an array
+      if (!Array.isArray(window.adsbygoogle)) {
+        window.adsbygoogle = []
+      }
 
       // Enable Auto Ads - this should only happen once per page
       window.adsbygoogle.push({
@@ -350,7 +360,9 @@ export class AdSenseManager {
       adElement.element.appendChild(insElement)
 
       // Push to adsbygoogle array
-      window.adsbygoogle = window.adsbygoogle || []
+      if (!Array.isArray(window.adsbygoogle)) {
+        window.adsbygoogle = []
+      }
       window.adsbygoogle.push({})
 
       adElement.status = 'loaded'
@@ -510,11 +522,16 @@ export class AdSenseManager {
    * Count potential duplicate Auto Ads attempts
    */
   private _countAutoAdsAttempts(): number {
-    if (typeof window === 'undefined' || !window.adsbygoogle) return 0
+    if (typeof window === 'undefined' || !window.adsbygoogle || !Array.isArray(window.adsbygoogle)) return 0
 
-    return window.adsbygoogle.filter(item =>
-      item && typeof item === 'object' && item.enable_page_level_ads
-    ).length
+    try {
+      return window.adsbygoogle.filter(item =>
+        item && typeof item === 'object' && item.enable_page_level_ads
+      ).length
+    } catch (error) {
+      console.warn('AdSenseManager: Error counting Auto Ads attempts:', error)
+      return 0
+    }
   }
 
   /**
