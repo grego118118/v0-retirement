@@ -42,6 +42,7 @@
     "app/test-pdf/**/*",
     "app/test-pdf-redirect/**/*",
     "app/test-*/**/*",
+    "app/api/test-*/**/*",
     "components/wizard/wizard-v2-dev.tsx",
     "components/wizard/wizard-navigation-v2.tsx",
     "components/wizard/essential-information-step.tsx",

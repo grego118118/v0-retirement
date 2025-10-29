@@ -130,6 +130,15 @@ const nextConfig = {
       '@/public': require('path').resolve(__dirname, './public'),
     }
 
+    // Exclude test files from production builds
+    if (!dev && process.env.NODE_ENV === 'production') {
+      config.plugins.push(
+        new webpack.IgnorePlugin({
+          resourceRegExp: /^.*\/app\/api\/test-pdf\/.*$/,
+        })
+      )
+    }
+
     // Handle React-PDF ES modules - don't externalize for server
     // Let webpack bundle it properly instead
     if (isServer) {
