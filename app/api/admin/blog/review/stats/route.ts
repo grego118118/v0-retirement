@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const stats = await prisma.$transaction(async (tx) => {
+    const stats = await prisma.$transaction(async (tx: any) => {
       const [
         totalPending,
         totalApproved,

@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
     })
 
     // Add post counts
-    const categoriesWithCounts = categories.map(category => ({
+    const categoriesWithCounts = categories.map((category: any) => ({
       id: category.id,
       name: category.name,
       slug: category.slug,

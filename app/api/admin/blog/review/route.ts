@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
     })
 
     // Transform to match our types
-    const transformedPosts: BlogPost[] = posts.map(post => ({
+    const transformedPosts: BlogPost[] = posts.map((post: any) => ({
       id: post.id,
       title: post.title,
       slug: post.slug,
@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Start transaction
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: any) => {
       // Create content review record
       const review = await tx.contentReview.create({
         data: {

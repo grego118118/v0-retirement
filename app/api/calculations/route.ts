@@ -30,7 +30,7 @@ export async function GET() {
     })
 
     // Transform the data to include parsed socialSecurityData
-    const transformedCalculations = calculations.map(calc => ({
+    const transformedCalculations = calculations.map((calc: any) => ({
       ...calc,
       socialSecurityData: calc.socialSecurityData ? JSON.parse(calc.socialSecurityData) : null
     }))
