@@ -1,6 +1,6 @@
 /**
  * Centralized AdSense Manager - Singleton Pattern
- * 
+ *
  * Prevents duplicate Auto Ads initialization and manages ad lifecycle
  * Resolves critical AdSense errors on Massachusetts Retirement System website
  */
@@ -352,6 +352,16 @@ export class AdSenseManager {
       // Ensure AdSense is initialized
       await this.initialize()
 
+
+      // Wait until the container has measurable width to avoid TagError
+      const ready = await this._waitForRenderableWidth(adElement.element, 2000)
+      if (!ready) {
+        console.warn(`AdSenseManager: Container for ${elementId} has zero width; deferring initialization`)
+        adElement.retryCount++
+        setTimeout(() => this.initializeAdElement(elementId), 500)
+        return
+      }
+
       // Clean up any existing ads first
       this._cleanupExistingAds(adElement.element)
 
@@ -385,11 +395,36 @@ export class AdSenseManager {
     const ins = document.createElement('ins')
     ins.className = 'adsbygoogle'
     ins.style.display = 'block'
+    ins.style.width = '100%'
     ins.setAttribute('data-ad-client', this.config.publisherId)
     ins.setAttribute('data-ad-slot', slot)
     ins.setAttribute('data-ad-format', 'auto')
     ins.setAttribute('data-full-width-responsive', 'true')
     return ins
+  }
+
+
+  /**
+   * Wait until the container has a non-zero renderable width to avoid
+   * "No slot size for availableWidth=0" TagError from AdSense.
+   */
+  private _hasRenderableWidth(element: HTMLElement): boolean {
+    const rect = element.getBoundingClientRect()
+    const style = window.getComputedStyle(element)
+    return rect.width > 0 && style.display !== 'none' && style.visibility !== 'hidden'
+  }
+
+  private async _waitForRenderableWidth(element: HTMLElement, maxWaitMs = 2000): Promise<boolean> {
+    if (this._hasRenderableWidth(element)) return true
+    return new Promise<boolean>((resolve) => {
+      const start = performance.now()
+      const check = () => {
+        if (this._hasRenderableWidth(element)) return resolve(true)
+        if (performance.now() - start >= maxWaitMs) return resolve(false)
+        requestAnimationFrame(check)
+      }
+      check()
+    })
   }
 
   /**
