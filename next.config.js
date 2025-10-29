@@ -115,6 +115,21 @@ const nextConfig = {
       '.jsx': ['.jsx', '.tsx'],
     }
 
+    // Ensure path aliases are properly configured for webpack
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': require('path').resolve(__dirname, './'),
+      '@/components': require('path').resolve(__dirname, './components'),
+      '@/lib': require('path').resolve(__dirname, './lib'),
+      '@/app': require('path').resolve(__dirname, './app'),
+      '@/hooks': require('path').resolve(__dirname, './hooks'),
+      '@/contexts': require('path').resolve(__dirname, './contexts'),
+      '@/utils': require('path').resolve(__dirname, './utils'),
+      '@/types': require('path').resolve(__dirname, './types'),
+      '@/styles': require('path').resolve(__dirname, './styles'),
+      '@/public': require('path').resolve(__dirname, './public'),
+    }
+
     // Handle React-PDF ES modules - don't externalize for server
     // Let webpack bundle it properly instead
     if (isServer) {
