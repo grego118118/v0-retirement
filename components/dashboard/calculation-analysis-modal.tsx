@@ -432,43 +432,41 @@ View full analysis: ${shareUrl}`
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-7xl max-h-[95vh] overflow-hidden">
-        <DialogHeader className="pb-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <DialogTitle className="text-xl font-semibold">
-                {calculation.calculationName || 'Retirement Analysis'}
-              </DialogTitle>
-              <DialogDescription className="mt-1">
-                Comprehensive breakdown of your Massachusetts retirement benefits
-              </DialogDescription>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleExport}
-                title="Export detailed analysis data as CSV spreadsheet including year-by-year projections (Free feature)"
-                className="hover:border-green-300 hover:bg-green-50"
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Export CSV
-                <span className="ml-1 px-1.5 py-0.5 text-xs bg-green-100 text-green-700 rounded-md">CSV</span>
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleShare}
-                title="Share comprehensive analysis with detailed pension breakdown and projections"
-              >
-                <Share2 className="h-4 w-4 mr-2" />
-                Share
-              </Button>
-              <Button variant="ghost" size="sm" onClick={onClose}>
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
+        <div className="flex items-center justify-between pb-4">
+          <div>
+            <DialogTitle className="text-xl font-semibold">
+              {calculation.calculationName || 'Retirement Analysis'}
+            </DialogTitle>
+            <DialogDescription className="mt-1">
+              Comprehensive breakdown of your Massachusetts retirement benefits
+            </DialogDescription>
           </div>
-        </DialogHeader>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExport}
+              title="Export detailed analysis data as CSV spreadsheet including year-by-year projections (Free feature)"
+              className="hover:border-green-300 hover:bg-green-50"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Export CSV
+              <span className="ml-1 px-1.5 py-0.5 text-xs bg-green-100 text-green-700 rounded-md">CSV</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleShare}
+              title="Share comprehensive analysis with detailed pension breakdown and projections"
+            >
+              <Share2 className="h-4 w-4 mr-2" />
+              Share
+            </Button>
+            <Button variant="ghost" size="sm" onClick={onClose}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
 
         <ScrollArea className="flex-1 px-1">
           <Tabs defaultValue="overview" className="space-y-6">
