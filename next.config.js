@@ -134,7 +134,7 @@ const nextConfig = {
     if (!dev && process.env.NODE_ENV === 'production') {
       config.plugins.push(
         new webpack.IgnorePlugin({
-          resourceRegExp: /^.*\/app\/api\/test-pdf\/.*$/,
+          resourceRegExp: /^.*\/app\/api\/test-.*\/.*$/,
         })
       )
     }
