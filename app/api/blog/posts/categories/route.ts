@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    const formattedCategories = categories.map(category => ({
+    const formattedCategories = categories.map((category: any) => ({
       id: category.id,
       name: category.name,
       slug: category.slug,
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
       sort_order: category.sortOrder,
       is_ai_topic: category.isAiTopic,
       created_at: category.createdAt,
-      post_count: category.posts?.filter(pc => pc.post.status === 'published').length || 0
+      post_count: category.posts?.filter((pc: any) => pc.post.status === 'published').length || 0
     }))
 
     return NextResponse.json({

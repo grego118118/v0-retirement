@@ -105,7 +105,7 @@ export async function GET(request: NextRequest) {
     })
 
     // Calculate totals and analytics
-    const monthlyTotal = costs.reduce((sum, cost) => sum + Number(cost.costUsd || 0), 0)
+    const monthlyTotal = costs.reduce((sum: number, cost: any) => sum + Number(cost.costUsd || 0), 0)
     const budgetUtilization = (monthlyTotal / MONTHLY_BUDGET_LIMIT) * 100
     const remainingBudget = Math.max(0, MONTHLY_BUDGET_LIMIT - monthlyTotal)
     
@@ -126,13 +126,13 @@ export async function GET(request: NextRequest) {
       : 0
 
     // Group costs by service provider
-    const costsByProvider = costs.reduce((acc, cost) => {
+    const costsByProvider = costs.reduce((acc: Record<string, number>, cost: any) => {
       acc[cost.serviceProvider] = (acc[cost.serviceProvider] || 0) + Number(cost.costUsd)
       return acc
     }, {} as Record<string, number>)
 
     // Group costs by day
-    const dailyCosts = costs.reduce((acc, cost) => {
+    const dailyCosts = costs.reduce((acc: Record<string, number>, cost: any) => {
       const day = cost.createdAt.toISOString().split('T')[0]
       acc[day] = (acc[day] || 0) + Number(cost.costUsd)
       return acc

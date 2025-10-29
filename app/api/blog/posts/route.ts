@@ -123,7 +123,7 @@ export async function GET(request: NextRequest) {
     })
 
     // Transform to match our types
-    const transformedPosts: BlogPost[] = posts.map(post => ({
+    const transformedPosts: BlogPost[] = posts.map((post: any) => ({
       id: post.id,
       title: post.title,
       slug: post.slug,

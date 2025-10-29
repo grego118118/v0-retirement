@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
       take: limit
     })
 
-    const formattedPosts = featuredPosts.map(post => ({
+    const formattedPosts = featuredPosts.map((post: any) => ({
       id: post.id,
       title: post.title,
       slug: post.slug,
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
       reading_time: Math.ceil(post.content.split(' ').length / 200), // Calculate reading time from content
       content_quality_score: post.contentQualityScore,
       author: post.author,
-      categories: post.categories.map(pc => pc.category)
+      categories: post.categories.map((pc: any) => pc.category)
     }))
 
     return NextResponse.json({

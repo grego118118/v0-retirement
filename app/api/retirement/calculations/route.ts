@@ -195,7 +195,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Transform Prisma data to match expected format
-    const parsedCalculations = calculations.map(calc => {
+    const parsedCalculations = calculations.map((calc: any) => {
       // Parse the socialSecurityData JSON if it exists
       let socialSecurityData = null
       try {

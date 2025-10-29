@@ -89,7 +89,7 @@ export async function GET(request: NextRequest) {
           }
         }
       })
-      monthlyTotal = costs.reduce((sum, cost) => sum + parseFloat(cost.costUsd.toString()), 0)
+      monthlyTotal = costs.reduce((sum: number, cost: any) => sum + parseFloat(cost.costUsd.toString()), 0)
     } catch (error) {
       console.log('AiUsageCost table not found, using default values')
       monthlyTotal = 0
