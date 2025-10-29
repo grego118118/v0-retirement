@@ -9,6 +9,9 @@ dev-debug.log
 # Dependency directories
 node_modules/
 
+# Next.js build output and cache
+.next/
+
 # Environment variables
 .env
 
