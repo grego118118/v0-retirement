@@ -89,8 +89,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Test direct Gemini API call
-    // Use gemini-pro which is the stable/available model
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${geminiApiKey}`
+    // Use gemini-1.5-flash-latest which is the stable/available model
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-latest:generateContent?key=${geminiApiKey}`
     
     const testPayload = {
       contents: [{

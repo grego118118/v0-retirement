@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     const {
       topic,
       category_id,
-      ai_model = 'gemini-pro',
+      ai_model = 'gemini-1.5-flash-latest',
       word_count = 1000,
       seo_keywords = [] as string[],
       auto_publish = false,
