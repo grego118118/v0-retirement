@@ -36,8 +36,8 @@ export async function GET(request: NextRequest) {
         exists: !!geminiApiKey,
         is_string: typeof geminiApiKey === 'string',
         length: geminiApiKey ? geminiApiKey.length : 0,
-        starts_with_ai: geminiApiKey ? geminiApiKey.startsWith('AI') : false,
-        format_check: geminiApiKey ? /^AI[a-zA-Z0-9_-]{35,}$/.test(geminiApiKey) : false,
+        starts_with_ai: geminiApiKey ? geminiApiKey.startsWith('AIza') : false,
+        format_check: geminiApiKey ? /^AIza[a-zA-Z0-9_-]{30,}$/.test(geminiApiKey) : false,
         first_10_chars: geminiApiKey ? geminiApiKey.substring(0, 10) + '...' : 'N/A',
         last_4_chars: geminiApiKey && geminiApiKey.length > 10 ? '...' + geminiApiKey.slice(-4) : 'N/A'
       },
@@ -89,7 +89,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Test direct Gemini API call
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`
+    // Try both v1 and v1beta endpoints with different model names
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`
     
     const testPayload = {
       contents: [{

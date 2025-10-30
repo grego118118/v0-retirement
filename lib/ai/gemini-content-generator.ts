@@ -51,7 +51,7 @@ export class GeminiContentGenerator {
       ]
     }
     
-    this.baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models'
+    this.baseUrl = 'https://generativelanguage.googleapis.com/v1/models'
   }
 
   /**
