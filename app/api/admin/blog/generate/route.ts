@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     const {
       topic,
       category_id,
-      ai_model = 'gpt-4-turbo-preview',
+      ai_model = 'gemini-pro',
       word_count = 1000,
       seo_keywords = [] as string[],
       auto_publish = false,
