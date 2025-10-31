@@ -100,8 +100,8 @@ export async function POST(request: NextRequest) {
       console.log('Error listing models:', e)
     }
 
-    // Use gemini-1.5-flash which should be available
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`
+    // Try gemini-pro first (most basic model)
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${geminiApiKey}`
     
     const testPayload = {
       contents: [{

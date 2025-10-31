@@ -28,7 +28,7 @@ export class GeminiContentGenerator {
   constructor() {
     this.config = {
       apiKey: process.env.GEMINI_API_KEY || '',
-      model: 'gemini-1.5-flash', // Stable model available in v1 API
+      model: 'gemini-pro', // Basic model available in v1 API
       maxTokens: 8192,
       temperature: 0.7,
       safetySettings: [
