@@ -89,8 +89,19 @@ export async function POST(request: NextRequest) {
     }
 
     // Test direct Gemini API call
-    // Use gemini-1.5-flash-latest which is the stable/available model
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-latest:generateContent?key=${geminiApiKey}`
+    // Try to list available models first to debug
+    const listModelsUrl = `https://generativelanguage.googleapis.com/v1/models?key=${geminiApiKey}`
+
+    try {
+      const listResponse = await fetch(listModelsUrl)
+      const listData = await listResponse.json()
+      console.log('Available models:', listData)
+    } catch (e) {
+      console.log('Error listing models:', e)
+    }
+
+    // Use gemini-1.5-flash which should be available
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`
     
     const testPayload = {
       contents: [{

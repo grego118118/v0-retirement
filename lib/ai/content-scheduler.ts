@@ -30,7 +30,7 @@ export class ContentScheduler {
       // Estimate cost
       const estimatedCost = AICostTracker.estimateContentCost(
         options.wordCount || 1000,
-        options.aiModel || 'gemini-1.5-flash-latest'
+        options.aiModel || 'gemini-1.5-flash'
       )
 
       // Check budget
@@ -47,7 +47,7 @@ export class ContentScheduler {
           topic,
           categoryId: categoryId,
           targetPublishDate: targetPublishDate,
-          aiModel: options.aiModel || 'gemini-1.5-flash-latest',
+          aiModel: options.aiModel || 'gemini-1.5-flash',
           generationPrompt: topic,
           costEstimate: estimatedCost,
           createdBy: 'system' // Would be actual user ID in production
@@ -368,7 +368,7 @@ export class ContentScheduler {
         topic.category,
         targetPublishDate,
         {
-          aiModel: 'gemini-1.5-flash-latest',
+          aiModel: 'gemini-1.5-flash',
           wordCount: 1200,
           seoKeywords: topic.keywords,
           autoPublish: false // Always require review
