@@ -22,13 +22,13 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
         "@type": "ListItem",
         position: 1,
         name: "Home",
-        item: "https://mapensionestimator.gov",
+        item: "https://www.masspension.com",
       },
       ...items.map((item, index) => ({
         "@type": "ListItem",
         position: index + 2,
         name: item.label,
-        item: `https://mapensionestimator.gov${item.href}`,
+        item: `https://www.masspension.com${item.href}`,
       })),
     ],
   }

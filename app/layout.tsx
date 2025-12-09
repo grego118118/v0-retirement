@@ -25,6 +25,22 @@ export const metadata: Metadata = {
   description: "Calculate your Massachusetts state employee pension benefits with official MSRB formulas. Comprehensive retirement planning for Groups 1-4 with COLA projections.",
   generator: 'v0.dev',
   metadataBase: new URL(process.env.NEXTAUTH_URL || 'https://www.masspension.com'),
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 5,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
   icons: {
     icon: [
       { url: '/favicon.svg', type: 'image/svg+xml' },

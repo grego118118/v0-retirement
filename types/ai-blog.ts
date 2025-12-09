@@ -165,7 +165,7 @@ export interface ContentGenerationRequest {
   additional_context?: string
   seo_keywords?: string[]
   target_publish_date?: string
-  ai_model?: 'gpt-4' | 'gpt-3.5-turbo' | 'claude-3-opus' | 'claude-3-sonnet' | 'gemini-1.5-pro'
+  ai_model?: 'gpt-4' | 'gpt-3.5-turbo' | 'claude-3-opus' | 'claude-3-sonnet' | 'gemini-1.5-pro' | 'gemini-1.5-flash'
   include_images?: boolean
   auto_publish?: boolean
 }

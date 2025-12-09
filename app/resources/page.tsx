@@ -6,10 +6,17 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { ExternalLink, FileText, Search, BookOpen, Calculator, DollarSign, Building, Calendar } from "lucide-react"
+import { BreadcrumbStructuredData } from "@/components/seo/structured-data"
 
 export const metadata: Metadata = {
-  title: "Resources | Massachusetts Pension Estimator",
-  description: "Helpful resources and links for Massachusetts state employees planning their retirement.",
+  title: "Massachusetts Retirement Resources | MSRB Forms, Calculators & Guides",
+  description: "Essential Massachusetts state employee retirement resources: MSRB official forms, retirement group guides, COLA information, pension options explained, and links to official state retirement resources.",
+  keywords: "Massachusetts retirement resources, MSRB forms, state employee retirement guide, Massachusetts pension resources, retirement planning resources, state retirement board, pension forms Massachusetts",
+  openGraph: {
+    title: "Massachusetts Retirement Resources | MSRB Forms & Guides",
+    description: "Essential Massachusetts state employee retirement resources including official forms, guides, and calculators.",
+    type: "website",
+  },
 }
 
 interface ResourceItemProps {
@@ -52,9 +59,16 @@ function ResourceItem({ title, description, link, badge }: ResourceItemProps) {
 
 export default function ResourcesPage() {
   return (
-    <div className="container py-12">
-      <div className="max-w-5xl mx-auto">
-        <h1 className="text-3xl font-bold tracking-tight mb-2">Retirement Resources</h1>
+    <>
+      <BreadcrumbStructuredData
+        items={[
+          { name: "Home", url: "https://www.masspension.com" },
+          { name: "Resources", url: "https://www.masspension.com/resources" },
+        ]}
+      />
+      <div className="container py-12">
+        <div className="max-w-5xl mx-auto">
+          <h1 className="text-3xl font-bold tracking-tight mb-2">Retirement Resources</h1>
         <p className="text-muted-foreground mb-8 max-w-3xl">
           Access valuable information, tools, and official resources to help you plan for retirement as a Massachusetts
           state employee.
@@ -483,6 +497,7 @@ export default function ResourcesPage() {
           </Button>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   )
 }

@@ -1,15 +1,29 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import type { Metadata } from "next"
+import { BreadcrumbStructuredData } from "@/components/seo/structured-data"
 
 export const metadata: Metadata = {
-  title: "About | Massachusetts Pension Estimator",
+  title: "About Mass Pension | Massachusetts Retirement Calculator",
   description:
-    "Learn about the Massachusetts Pension Estimator tool and how it can help state employees plan for retirement.",
+    "Learn how Mass Pension helps Massachusetts state employees calculate their retirement benefits using official MSRB formulas. Trusted by thousands of state workers for accurate pension estimates.",
+  keywords: "about Mass Pension, Massachusetts pension calculator, MSRB calculator, state employee retirement tool, pension estimator about, Massachusetts retirement planning",
+  openGraph: {
+    title: "About Mass Pension | Massachusetts Retirement Calculator",
+    description: "Learn how Mass Pension helps Massachusetts state employees calculate their retirement benefits.",
+    type: "website",
+  },
 }
 
 export default function AboutPage() {
   return (
-    <div className="container py-12">
+    <>
+      <BreadcrumbStructuredData
+        items={[
+          { name: "Home", url: "https://www.masspension.com" },
+          { name: "About", url: "https://www.masspension.com/about" },
+        ]}
+      />
+      <div className="container py-12">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold tracking-tight mb-6">About the Massachusetts Pension Estimator</h1>
 
@@ -117,6 +131,7 @@ export default function AboutPage() {
           </Card>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   )
 }

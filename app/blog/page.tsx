@@ -4,20 +4,21 @@ import BlogClientComponent from "./blog-client"
 import { BreadcrumbStructuredData } from "@/components/seo/structured-data"
 
 export const metadata: Metadata = generateSEOMetadata({
-  title: "Retirement Planning Blog | Massachusetts Pension Estimator",
+  title: "Massachusetts Retirement Blog | Pension Tips, COLA Updates & Planning Guides",
   description:
-    "Expert articles, guides, and resources to help Massachusetts state employees plan for retirement and maximize their pension benefits.",
+    "Expert Massachusetts retirement articles covering pension Groups 1-4, COLA updates, Social Security Fairness Act, WEP/GPO changes, and benefit maximization strategies for state employees.",
   path: "/blog",
   keywords: [
-    "retirement planning blog",
-    "Massachusetts retirement guides",
-    "state pension advice",
-    "retirement tips",
-    "pension maximization strategies",
-    "state employee retirement",
+    "Massachusetts retirement blog",
+    "state pension articles",
+    "MSRB retirement guides",
+    "pension COLA updates",
     "Social Security Fairness Act",
-    "WEP",
-    "GPO",
+    "WEP GPO Massachusetts",
+    "state employee retirement tips",
+    "pension maximization strategies",
+    "Massachusetts pension news",
+    "retirement planning articles",
   ],
 })
 

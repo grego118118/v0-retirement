@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next"
+import { blogPosts } from "@/lib/blog-data"
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://www.masspension.com"
@@ -25,10 +26,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/dashboard`,
+      url: `${baseUrl}/social-security`,
       lastModified,
-      changeFrequency: "weekly" as const,
-      priority: 0.8,
+      changeFrequency: "monthly" as const,
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/guides`,
+      lastModified,
+      changeFrequency: "monthly" as const,
+      priority: 0.85,
     },
     {
       url: `${baseUrl}/about`,
@@ -49,10 +56,46 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
+      url: `${baseUrl}/checklist`,
+      lastModified,
+      changeFrequency: "monthly" as const,
+      priority: 0.75,
+    },
+    {
+      url: `${baseUrl}/methodology`,
+      lastModified,
+      changeFrequency: "yearly" as const,
+      priority: 0.7,
+    },
+    {
       url: `${baseUrl}/pricing`,
       lastModified,
       changeFrequency: "monthly" as const,
       priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/benefits`,
+      lastModified,
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/financial-literacy`,
+      lastModified,
+      changeFrequency: "monthly" as const,
+      priority: 0.65,
+    },
+    {
+      url: `${baseUrl}/webinars`,
+      lastModified,
+      changeFrequency: "weekly" as const,
+      priority: 0.65,
+    },
+    {
+      url: `${baseUrl}/events`,
+      lastModified,
+      changeFrequency: "weekly" as const,
+      priority: 0.6,
     },
     {
       url: `${baseUrl}/contact`,
@@ -64,17 +107,57 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: `${baseUrl}/privacy`,
       lastModified,
       changeFrequency: "yearly" as const,
-      priority: 0.5,
+      priority: 0.4,
     },
     {
       url: `${baseUrl}/terms`,
       lastModified,
       changeFrequency: "yearly" as const,
-      priority: 0.5,
+      priority: 0.4,
+    },
+    {
+      url: `${baseUrl}/accessibility`,
+      lastModified,
+      changeFrequency: "yearly" as const,
+      priority: 0.4,
+    },
+    {
+      url: `${baseUrl}/editorial-policy`,
+      lastModified,
+      changeFrequency: "yearly" as const,
+      priority: 0.4,
     },
   ]
 
-  // Blog pages
+  // Resource sub-pages
+  const resourcePages = [
+    {
+      url: `${baseUrl}/resources/groups`,
+      lastModified,
+      changeFrequency: "monthly" as const,
+      priority: 0.75,
+    },
+    {
+      url: `${baseUrl}/resources/cola`,
+      lastModified,
+      changeFrequency: "monthly" as const,
+      priority: 0.75,
+    },
+    {
+      url: `${baseUrl}/resources/options`,
+      lastModified,
+      changeFrequency: "monthly" as const,
+      priority: 0.75,
+    },
+    {
+      url: `${baseUrl}/resources/wep-gpo`,
+      lastModified,
+      changeFrequency: "monthly" as const,
+      priority: 0.75,
+    },
+  ]
+
+  // Blog index page
   const blogPages = [
     {
       url: `${baseUrl}/blog`,
@@ -84,69 +167,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ]
 
-  // SEO-optimized blog posts for Massachusetts retirement topics
-  const blogPosts = [
-    {
-      url: `${baseUrl}/blog/massachusetts-pension-calculator-guide`,
-      lastModified,
-      changeFrequency: "monthly" as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/blog/understanding-massachusetts-retirement-groups`,
-      lastModified,
-      changeFrequency: "monthly" as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/blog/massachusetts-pension-options-a-b-c-explained`,
-      lastModified,
-      changeFrequency: "monthly" as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/blog/massachusetts-cola-calculation-guide`,
-      lastModified,
-      changeFrequency: "monthly" as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/blog/retirement-planning-for-massachusetts-state-employees`,
-      lastModified,
-      changeFrequency: "monthly" as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/blog/maximizing-your-massachusetts-pension-benefits`,
-      lastModified,
-      changeFrequency: "monthly" as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/blog/social-security-and-massachusetts-state-pension`,
-      lastModified,
-      changeFrequency: "monthly" as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/blog/massachusetts-state-employee-retirement-age-guide`,
-      lastModified,
-      changeFrequency: "monthly" as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/blog/healthcare-benefits-massachusetts-retirees`,
-      lastModified,
-      changeFrequency: "monthly" as const,
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/blog/massachusetts-pension-vs-401k-comparison`,
-      lastModified,
-      changeFrequency: "monthly" as const,
-      priority: 0.6,
-    },
-  ]
+  // Dynamic blog posts from actual data - ensures sitemap matches real content
+  const dynamicBlogPosts = blogPosts.map((post) => ({
+    url: `${baseUrl}/blog/${post.id}`,
+    lastModified: post.date ? new Date(post.date) : lastModified,
+    changeFrequency: "monthly" as const,
+    priority: 0.7,
+  }))
 
   // Utility pages for specific retirement groups
   const utilityPages = [
@@ -176,5 +203,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ]
 
-  return [...staticPages, ...blogPages, ...blogPosts, ...utilityPages]
+  return [...staticPages, ...resourcePages, ...blogPages, ...dynamicBlogPosts, ...utilityPages]
 }

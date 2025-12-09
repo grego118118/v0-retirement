@@ -193,7 +193,8 @@ export async function GET(request: NextRequest) {
         node_env: process.env.NODE_ENV,
         vercel_env: process.env.VERCEL_ENV,
         has_openai_key: !!process.env.OPENAI_API_KEY,
-        has_anthropic_key: !!process.env.ANTHROPIC_API_KEY
+        has_anthropic_key: !!process.env.ANTHROPIC_API_KEY,
+        has_gemini_key: !!process.env.GEMINI_API_KEY
       }
     })
 

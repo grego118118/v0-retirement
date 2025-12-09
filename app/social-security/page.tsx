@@ -10,16 +10,20 @@ import { PremiumGate } from "@/components/premium/premium-gate"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export const metadata = generateSEOMetadata({
-  title: "Social Security Integration | Massachusetts Pension Estimator",
-  description: "Combine your Massachusetts state pension with official Social Security benefits from SSA.gov for complete retirement income planning.",
+  title: "Social Security Calculator | Massachusetts Pension & SS Benefits Combined",
+  description: "Combine your Massachusetts state pension with Social Security benefits for complete retirement income planning. Calculate optimal claiming strategies, WEP/GPO impacts, and maximize lifetime benefits.",
   path: "/social-security",
   keywords: [
-    "Social Security calculator",
+    "Social Security calculator Massachusetts",
+    "pension Social Security combined",
+    "WEP calculator Massachusetts",
+    "GPO calculator",
+    "Social Security claiming strategy",
+    "retirement income calculator",
+    "Social Security optimization",
     "Massachusetts pension Social Security",
-    "retirement income planning",
-    "combined benefits calculator",
-    "Social Security timing",
-    "SSA.gov benefits",
+    "SSA.gov benefits calculator",
+    "combined retirement income",
   ],
 })
 
