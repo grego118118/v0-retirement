@@ -11,6 +11,9 @@ import { prisma } from '@/lib/prisma'
 import { measureAsync } from '@/lib/utils/performance-monitor'
 import { rateLimit } from '@/lib/utils/rate-limit'
 
+// Force dynamic rendering to prevent static generation issues with Prisma
+export const dynamic = 'force-dynamic'
+
 // Rate limiting: 10 emails per hour per user
 const emailRateLimit = rateLimit({
   interval: 60 * 60 * 1000, // 1 hour

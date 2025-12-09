@@ -13,6 +13,9 @@ import { getRandomTopic, MASSACHUSETTS_RETIREMENT_TOPICS } from '@/lib/ai/massac
 import { prisma } from '@/lib/prisma'
 import { emailService } from '@/lib/email/email-service'
 
+// Force dynamic rendering to prevent static generation issues with Prisma
+export const dynamic = 'force-dynamic'
+
 /**
  * POST /api/admin/blog/generate
  * Generate blog content on-demand

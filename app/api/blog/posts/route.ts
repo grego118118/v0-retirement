@@ -9,6 +9,9 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth/auth-config'
 import { BlogPost, BlogCategory } from '@/types/ai-blog'
 
+// Force dynamic rendering to prevent static generation issues with Prisma
+export const dynamic = 'force-dynamic'
+
 /**
  * GET /api/blog/posts
  * Get published blog posts with filtering and pagination

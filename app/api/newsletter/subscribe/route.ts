@@ -2,7 +2,17 @@ import { NextRequest, NextResponse } from "next/server"
 import { Resend } from "resend"
 import { prisma } from "@/lib/prisma"
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+// Force dynamic rendering to prevent static generation issues with Prisma
+export const dynamic = 'force-dynamic'
+
+// Lazy-initialize Resend to prevent build-time errors
+let resendInstance: Resend | null = null
+const getResend = () => {
+  if (!resendInstance) {
+    resendInstance = new Resend(process.env.RESEND_API_KEY)
+  }
+  return resendInstance
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -40,7 +50,7 @@ export async function POST(request: NextRequest) {
     // Send welcome email using Resend
     if (process.env.RESEND_API_KEY) {
       try {
-        await resend.emails.send({
+        await getResend().emails.send({
           from: process.env.EMAIL_FROM || "noreply@masspension.com",
           to: email,
           subject: "Welcome to Mass Pension Updates!",

@@ -3,6 +3,9 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth/auth-config"
 import { query } from "@/lib/db/postgres"
 
+// Force dynamic rendering to prevent static generation issues with database queries
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions)

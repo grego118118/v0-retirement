@@ -4,6 +4,9 @@ import { authOptions } from '@/lib/auth/auth-config'
 import { SUBSCRIPTION_PLANS, STRIPE_CONFIG, stripe } from '@/lib/stripe/config'
 import { prisma } from '@/lib/prisma'
 
+// Force dynamic rendering to prevent static generation issues with Prisma
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   try {
     const session = await getServerSession(authOptions)

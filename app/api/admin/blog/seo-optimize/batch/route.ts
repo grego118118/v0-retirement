@@ -8,6 +8,9 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth/auth-config'
 import { prisma } from '@/lib/prisma'
 
+// Force dynamic rendering to prevent static generation issues with Prisma
+export const dynamic = 'force-dynamic'
+
 /**
  * POST /api/admin/blog/seo-optimize/batch
  * Optimize multiple blog posts for SEO

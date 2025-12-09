@@ -4,6 +4,9 @@ import { authOptions } from "@/lib/auth/auth-config"
 import { z } from "zod"
 import { prisma } from "@/lib/prisma"
 
+// Force dynamic rendering to prevent static generation issues with Prisma
+export const dynamic = 'force-dynamic'
+
 // Schema for updating calculation data
 const updateCalculationSchema = z.object({
   calculationName: z.string().optional(),

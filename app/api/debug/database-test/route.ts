@@ -6,6 +6,9 @@
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 
+// Force dynamic rendering to prevent static generation issues with Prisma
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   const startTime = Date.now()
   

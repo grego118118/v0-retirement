@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
+// Force dynamic rendering to prevent static generation issues with Prisma
+export const dynamic = 'force-dynamic'
+
 // Temporary admin seeding endpoint
 // Protect with SEED_SECRET in environment
 export async function POST(req: NextRequest) {

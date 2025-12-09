@@ -7,6 +7,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { emailService } from '@/lib/email/email-service'
 
+// Force dynamic rendering to prevent static generation issues with Prisma
+export const dynamic = 'force-dynamic'
+
 interface HealthCheckResult {
   status: 'healthy' | 'degraded' | 'unhealthy'
   timestamp: string

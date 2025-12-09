@@ -9,6 +9,9 @@ import { authOptions } from '@/lib/auth/auth-config'
 import { prisma } from '@/lib/prisma'
 import { BlogPost, ContentReview } from '@/types/ai-blog'
 
+// Force dynamic rendering to prevent static generation issues with Prisma
+export const dynamic = 'force-dynamic'
+
 /**
  * GET /api/admin/blog/review
  * Get posts pending review

@@ -4,6 +4,9 @@ import { authOptions } from "@/lib/auth/auth-config"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
+// Force dynamic rendering to prevent static generation issues with Prisma
+export const dynamic = 'force-dynamic'
+
 // Extended session type to include user.id
 interface ExtendedSession {
   user?: {

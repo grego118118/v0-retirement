@@ -9,6 +9,9 @@ import { authOptions } from '@/lib/auth/auth-config'
 import { SEOOptimizer } from '@/lib/ai/seo-optimizer'
 import { prisma } from '@/lib/prisma'
 
+// Force dynamic rendering to prevent static generation issues with Prisma
+export const dynamic = 'force-dynamic'
+
 /**
  * POST /api/admin/blog/seo-optimize
  * Optimize a blog post for SEO

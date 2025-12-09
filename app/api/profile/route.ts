@@ -5,6 +5,9 @@ import { prisma } from "@/lib/prisma"
 import { logError, logApiPerformance, withPerformanceMonitoring } from "@/lib/monitoring"
 import { cacheUserProfile, invalidateUserCache } from "@/lib/cache"
 
+// Force dynamic rendering to prevent static generation issues with Prisma
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   const startTime = Date.now();
   let session: any = null;

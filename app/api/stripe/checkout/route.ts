@@ -10,6 +10,9 @@ import { prisma } from '@/lib/prisma'
 import { StripeService } from '@/lib/stripe/service'
 import { SUBSCRIPTION_PLANS } from '@/lib/stripe/config'
 
+// Force dynamic rendering to prevent static generation issues with Prisma
+export const dynamic = 'force-dynamic'
+
 interface CheckoutRequest {
   priceId: string
   successUrl?: string

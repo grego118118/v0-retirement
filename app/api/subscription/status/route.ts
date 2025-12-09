@@ -7,6 +7,9 @@ import { isSubscriptionActive, FREE_TIER_LIMITS } from '@/lib/stripe/config'
 import type { SubscriptionStatus, SubscriptionPlan } from '@/lib/stripe/config'
 import { isPremiumUser } from '@/lib/subscription-utils'
 
+// Force dynamic rendering to prevent static generation issues with Prisma
+export const dynamic = 'force-dynamic'
+
 // Safe date utility to prevent RangeError: Invalid time value
 const safeToISOString = (date: Date | null | undefined): string | undefined => {
   if (!date || !(date instanceof Date) || isNaN(date.getTime())) {

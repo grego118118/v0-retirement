@@ -9,6 +9,9 @@ import { stripe, STRIPE_CONFIG, STRIPE_WEBHOOK_EVENTS, getSubscriptionPlan } fro
 import { prisma } from '@/lib/prisma'
 import type Stripe from 'stripe'
 
+// Force dynamic rendering to prevent static generation issues with Prisma
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.text()

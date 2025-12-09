@@ -15,6 +15,9 @@ import {
   DEFAULT_EMAIL_PREFERENCES
 } from '@/lib/email/email-preferences'
 
+// Force dynamic rendering to prevent static generation issues with Prisma
+export const dynamic = 'force-dynamic'
+
 /**
  * Get user email preferences
  */

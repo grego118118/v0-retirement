@@ -10,6 +10,9 @@ import { prisma } from '@/lib/prisma'
 import { StripeService } from '@/lib/stripe/service'
 import { isStripeConfigured, handleStripeDevError } from '@/lib/stripe/development-helper'
 
+// Force dynamic rendering to prevent static generation issues with Prisma
+export const dynamic = 'force-dynamic'
+
 // Development fallback premium users (when Stripe is not configured)
 const FALLBACK_PREMIUM_USERS = [
   'premium@example.com',

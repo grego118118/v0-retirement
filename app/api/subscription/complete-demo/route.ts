@@ -4,6 +4,9 @@ import { authOptions } from "@/lib/auth/auth-config"
 import { addPremiumUser } from "@/lib/subscription-utils"
 import { prisma } from "@/lib/prisma"
 
+// Force dynamic rendering to prevent static generation issues with Prisma
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions)

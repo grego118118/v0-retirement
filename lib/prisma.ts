@@ -11,13 +11,19 @@ const createPrismaClient = () => {
   // During build time, DATABASE_URL might not be available
   // Return null to prevent build failures
   if (!databaseUrl) {
-    if (process.env.NODE_ENV === 'production' && !process.env.VERCEL_ENV) {
-      // Only throw error in production runtime (not build time)
-      throw new Error('DATABASE_URL environment variable is not set')
+    // Check if we're in a build context (Next.js sets this during build)
+    const isBuildTime = process.env.NEXT_PHASE === 'phase-production-build' ||
+                        process.env.npm_lifecycle_event === 'build' ||
+                        !process.env.VERCEL_ENV // Local builds without VERCEL_ENV
+
+    if (isBuildTime) {
+      // During build, return null - the proxy will handle access attempts
+      console.log('DATABASE_URL not available during build time, returning null Prisma client')
+      return null
     }
-    // During build or when DATABASE_URL is not available, return null
-    console.log('DATABASE_URL not available, returning null Prisma client (likely build time)')
-    return null
+
+    // In production runtime, throw an error
+    throw new Error('DATABASE_URL environment variable is not set')
   }
 
   console.log('Prisma connecting with URL:', databaseUrl.replace(/:[^:@]*@/, ':***@'))
