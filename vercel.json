@@ -1,5 +1,4 @@
 {
-  "_comment": "Force redeploy - gemini model fix",
   "functions": {
     "app/api/cron/content-automation/route.ts": {
       "maxDuration": 300

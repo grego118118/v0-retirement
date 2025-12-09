@@ -101,18 +101,19 @@ export async function GET() {
   } catch (error) {
     const endTime = Date.now()
     const duration = endTime - startTime
-    
+    const err = error instanceof Error ? error : new Error(String(error))
+
     console.error('❌ Database diagnostic failed:', error)
     console.error('Error details:', {
-      message: error.message,
-      stack: error.stack,
-      name: error.name
+      message: err.message,
+      stack: err.stack,
+      name: err.name
     })
-    
+
     return NextResponse.json({
       success: false,
-      error: error.message,
-      errorName: error.name,
+      error: err.message,
+      errorName: err.name,
       diagnostics: {
         hasDbUrl: !!process.env.DATABASE_URL,
         dbUrlLength: process.env.DATABASE_URL?.length || 0,
@@ -122,7 +123,7 @@ export async function GET() {
         isVercel: !!process.env.VERCEL,
         duration: `${duration}ms`,
         timestamp: new Date().toISOString(),
-        errorStack: error.stack
+        errorStack: err.stack
       }
     }, { status: 500 })
   }

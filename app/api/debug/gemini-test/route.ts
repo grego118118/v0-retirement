@@ -176,8 +176,9 @@ export async function POST(request: NextRequest) {
       clearTimeout(timeoutId)
       const endTime = Date.now()
       const responseTime = endTime - startTime
-      
-      if (fetchError.name === 'AbortError') {
+      const err = fetchError instanceof Error ? fetchError : new Error(String(fetchError))
+
+      if (err.name === 'AbortError') {
         console.error('Gemini API call timed out after 15 seconds')
         return NextResponse.json({
           success: false,
@@ -196,7 +197,7 @@ export async function POST(request: NextRequest) {
           gemini_test: {
             status: 'network_error',
             response_time_ms: responseTime,
-            error: fetchError.message,
+            error: err.message,
             api_key_working: false
           },
           message: 'Network error during Gemini API call'

@@ -56,10 +56,11 @@ export async function GET() {
     
   } catch (error) {
     console.error('❌ Environment diagnostic failed:', error)
-    
+    const err = error instanceof Error ? error : new Error(String(error))
+
     return NextResponse.json({
       success: false,
-      error: error.message,
+      error: err.message,
       timestamp: new Date().toISOString()
     }, { status: 500 })
   }
