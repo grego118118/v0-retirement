@@ -56,6 +56,8 @@ model identities {
   last_sign_in_at DateTime?  @db.Timestamptz(6)
   created_at      DateTime?  @db.Timestamptz(6)
   updated_at      DateTime?  @db.Timestamptz(6)
+  /// CI-only: simplified to nullable without default to avoid column-reference DEFAULT in prisma db push.
+  /// In production, Supabase manages any derived email defaults for identities.
   email           String?
   id              String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   users           auth_users @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
@@ -307,7 +309,10 @@ model auth_users {
   phone_change                String?                @default("")
   phone_change_token          String?                @default("") @db.VarChar(255)
   phone_change_sent_at        DateTime?              @db.Timestamptz(6)
-  confirmed_at                DateTime?              @default(dbgenerated("LEAST(email_confirmed_at, phone_confirmed_at)")) @db.Timestamptz(6)
+  /// CI-only: removed complex DEFAULT that referenced other columns (email_confirmed_at, phone_confirmed_at)
+  /// because PostgreSQL does not allow column references in DEFAULT expressions when recreating this table
+  /// via prisma db push against a blank CI database. Supabase manages this behavior in production.
+  confirmed_at                DateTime?              @db.Timestamptz(6)
   email_change_token_current  String?                @default("") @db.VarChar(255)
   email_change_confirm_status Int?                   @default(0) @db.SmallInt
   banned_until                DateTime?              @db.Timestamptz(6)
