@@ -286,6 +286,195 @@ export const blogPosts = [
     ],
   },
   {
+    id: "massachusetts-retirement-groups-1-4-complete-guide",
+    title: "Massachusetts Retirement Groups 1-4: Complete Eligibility and Benefits Guide",
+    description:
+      "Complete guide to Massachusetts Retirement Groups 1-4, including eligibility requirements, minimum retirement ages, and benefit calculations for all public employees.",
+    date: "December 10, 2025",
+    readTime: "13 min read",
+    author: "Mass Pension Editorial Team",
+    authorTitle: "Retirement Specialist",
+    category: "Group Classifications",
+    tags: ["retirement groups", "group 1", "group 2", "group 3", "group 4", "eligibility", "benefits"],
+    image: "/images/blog/default-blog-image.svg",
+    content: `
+      <h2>Understanding Your Massachusetts Retirement Group</h2>
+      <p>Understanding your Massachusetts Retirement Group is crucial for planning your public service career and retirement. The Massachusetts Retirement System classifies all public employees into four distinct groups, each with specific eligibility requirements, minimum retirement ages, and benefit calculations.</p>
+
+      <h2>Group 1: General Employees</h2>
+      <p>Group 1 includes most Massachusetts public employees, including teachers, municipal workers, and state employees in non-hazardous positions.</p>
+
+      <h3>Eligibility Requirements</h3>
+      <ul>
+        <li>Minimum retirement age: 60</li>
+        <li>Minimum service requirement: 10 years</li>
+        <li>Full benefits available at age 65 with 10 years of service</li>
+      </ul>
+
+      <h3>Benefit Calculation</h3>
+      <ul>
+        <li>Benefit percentage increases from 2.0% at age 60 to 2.5% at age 65</li>
+        <li>Maximum benefit cap: 80% of average salary</li>
+      </ul>
+
+      <h2>Group 2: Hazardous Duty Employees</h2>
+      <p>Group 2 covers probation officers, court officers, and certain other positions involving public safety.</p>
+
+      <h3>Eligibility Requirements</h3>
+      <ul>
+        <li>Minimum retirement age: 55</li>
+        <li>Minimum service requirement: 10 years</li>
+        <li>Full benefits available at age 60 with 10 years of service</li>
+      </ul>
+
+      <h3>Benefit Calculation</h3>
+      <ul>
+        <li>Benefit percentage increases from 2.0% at age 55 to 2.5% at age 60</li>
+        <li>Maximum benefit cap: 80% of average salary</li>
+      </ul>
+
+      <h2>Group 3: State Police</h2>
+      <p>Group 3 is exclusively for Massachusetts State Police officers.</p>
+
+      <h3>Eligibility Requirements</h3>
+      <ul>
+        <li>No minimum retirement age with 20+ years of service</li>
+        <li>Mandatory retirement at age 65</li>
+        <li>Special provisions for disability retirement</li>
+      </ul>
+
+      <h3>Benefit Calculation</h3>
+      <ul>
+        <li>Flat 2.5% benefit percentage regardless of age</li>
+        <li>Maximum benefit cap: 80% of average salary</li>
+      </ul>
+
+      <h2>Group 4: Public Safety and Corrections</h2>
+      <p>Group 4 includes local police officers, firefighters, and corrections officers.</p>
+
+      <h3>Eligibility Requirements</h3>
+      <ul>
+        <li>Minimum retirement age: 50</li>
+        <li>Minimum service requirement: 10 years</li>
+        <li>Full benefits available at age 55 with 10 years of service</li>
+      </ul>
+
+      <h3>Benefit Calculation</h3>
+      <ul>
+        <li>Benefit percentage increases from 2.0% at age 50 to 2.5% at age 55</li>
+        <li>Maximum benefit cap: 80% of average salary</li>
+      </ul>
+
+      <h2>Planning Your Massachusetts Retirement</h2>
+      <p>Understanding your group classification helps you:</p>
+      <ul>
+        <li>Plan your retirement timeline</li>
+        <li>Maximize your benefit percentage</li>
+        <li>Make informed career decisions</li>
+        <li>Understand your pension options</li>
+      </ul>
+
+      <p>For personalized calculations and planning, use the Massachusetts Pension Calculator.</p>
+
+      <p><em>Disclaimer: This information is for educational purposes only. For official benefit calculations, consult the Massachusetts Retirement Board.</em></p>
+    `,
+    relatedPosts: [
+      "understanding-massachusetts-pension-options",
+      "massachusetts-cola-13000-cap-annual-adjustments",
+      "maximizing-your-state-pension-benefits",
+    ],
+  },
+  {
+    id: "massachusetts-cola-13000-cap-annual-adjustments",
+    title: "Understanding Massachusetts COLA: The $13,000 Cap and Your Annual Adjustments",
+    description:
+      "Comprehensive explanation of Massachusetts COLA with the $13,000 cap, including calculations, examples, and long-term impact on your retirement benefits.",
+    date: "December 10, 2025",
+    readTime: "13 min read",
+    author: "Mass Pension Editorial Team",
+    authorTitle: "COLA Specialist",
+    category: "COLA Adjustments",
+    tags: ["COLA", "cost of living", "13000 cap", "pension adjustments", "retirement benefits"],
+    image: "/images/blog/default-blog-image.svg",
+    content: `
+      <h2>What is Massachusetts COLA?</h2>
+      <p>The Massachusetts Cost of Living Adjustment (COLA) is a crucial component of your retirement benefits, but it comes with a unique cap that many retirees don't fully understand. Here's everything you need to know about how COLA affects your Massachusetts pension.</p>
+
+      <p>The Massachusetts COLA provides annual increases to help your pension keep pace with inflation. Unlike many other states, Massachusetts has a fixed 3% annual COLA rate.</p>
+
+      <h2>The $13,000 Cap Explained</h2>
+      <p>The most important aspect of Massachusetts COLA is the $13,000 cap:</p>
+      <ul>
+        <li><strong>COLA Rate</strong>: 3% annually</li>
+        <li><strong>Applied To</strong>: Only the first $13,000 of your annual pension</li>
+        <li><strong>Maximum Annual Increase</strong>: $390 ($13,000 × 3%)</li>
+        <li><strong>Timing</strong>: Begins the first year after retirement</li>
+      </ul>
+
+      <h2>How COLA Calculations Work</h2>
+
+      <h3>Example 1: Pension Under $13,000</h3>
+      <ul>
+        <li>Annual pension: $10,000</li>
+        <li>COLA increase: $10,000 × 3% = $300</li>
+        <li>New annual pension: $10,300</li>
+      </ul>
+
+      <h3>Example 2: Pension Over $13,000</h3>
+      <ul>
+        <li>Annual pension: $25,000</li>
+        <li>COLA increase: $13,000 × 3% = $390 (capped)</li>
+        <li>New annual pension: $25,390</li>
+      </ul>
+
+      <h2>COLA with Pension Options</h2>
+      <p>COLA applies to all pension options:</p>
+
+      <h3>Option A (Single Life)</h3>
+      <p>Full COLA on base pension amount</p>
+
+      <h3>Option B (Life with Guarantee)</h3>
+      <p>COLA applies to reduced pension amount</p>
+
+      <h3>Option C (Joint and Survivor)</h3>
+      <p>COLA applies to both member and survivor benefits</p>
+
+      <h2>Long-Term Impact</h2>
+      <p>Over time, the $13,000 cap significantly affects higher pension amounts:</p>
+      <ul>
+        <li><strong>Year 1</strong>: $390 increase</li>
+        <li><strong>Year 5</strong>: $1,950 cumulative increase</li>
+        <li><strong>Year 10</strong>: $3,900 cumulative increase</li>
+        <li><strong>Year 20</strong>: $7,800 cumulative increase</li>
+      </ul>
+
+      <h2>Planning Strategies</h2>
+      <ul>
+        <li><strong>Understand the Real Impact</strong>: Higher pensions lose purchasing power over time</li>
+        <li><strong>Consider Supplemental Savings</strong>: 401(k), 403(b), or IRA contributions</li>
+        <li><strong>Factor COLA into Retirement Planning</strong>: Use realistic projections</li>
+        <li><strong>Review Annually</strong>: Track your COLA increases</li>
+      </ul>
+
+      <h2>COLA and Social Security</h2>
+      <p>Massachusetts COLA is separate from Social Security COLA:</p>
+      <ul>
+        <li>Social Security has its own annual adjustment</li>
+        <li>Both can be received simultaneously</li>
+        <li>Combined benefits help maintain purchasing power</li>
+      </ul>
+
+      <p>For detailed COLA projections and retirement planning, use our pension calculator.</p>
+
+      <p><em>Disclaimer: This information is for educational purposes only. For official COLA calculations, consult the Massachusetts Retirement Board.</em></p>
+    `,
+    relatedPosts: [
+      "massachusetts-retirement-groups-1-4-complete-guide",
+      "understanding-massachusetts-pension-options",
+      "maximizing-your-state-pension-benefits",
+    ],
+  },
+  {
     id: "retirement-planning-for-massachusetts-state-employees",
     title: "Retirement Planning Timeline for Massachusetts State Employees",
     description:
