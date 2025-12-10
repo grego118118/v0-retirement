@@ -54,46 +54,48 @@ export async function updateUserMetadata(userId: string, data: { full_name?: str
 
 // Pension calculations
 export async function savePensionCalculation(data: any) {
-  const {
-    user_id,
-    name,
-    service_entry_date,
-    age,
-    years_of_service,
-    group_type,
-    salary1,
-    salary2,
-    salary3,
-    retirement_option,
-    beneficiary_age,
-    result,
-  } = data
+	const {
+		user_id,
+		name,
+		service_entry_date,
+		age,
+		years_of_service,
+		group_type,
+		salary1,
+		salary2,
+		salary3,
+		retirement_option,
+		beneficiary_age,
+		result,
+	} = data
 
-  const result_json = typeof result === "string" ? result : JSON.stringify(result)
+	const result_json = typeof result === "string" ? result : JSON.stringify(result)
+	const id = uuidv4()
 
-  const queryResult = await query(
-    `INSERT INTO pension_calculations (
-      user_id, name, service_entry_date, age, years_of_service, group_type,
-      salary1, salary2, salary3, retirement_option, beneficiary_age, result
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-    RETURNING id`,
-    [
-      user_id,
-      name,
-      service_entry_date,
-      age,
-      years_of_service,
-      group_type,
-      salary1,
-      salary2,
-      salary3,
-      retirement_option,
-      beneficiary_age,
-      result_json,
-    ],
-  )
+	const queryResult = await query(
+		`INSERT INTO pension_calculations (
+		  id, user_id, name, service_entry_date, age, years_of_service, group_type,
+		  salary1, salary2, salary3, retirement_option, beneficiary_age, result
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+		RETURNING id`,
+		[
+			id,
+			user_id,
+			name,
+			service_entry_date,
+			age,
+			years_of_service,
+			group_type,
+			salary1,
+			salary2,
+			salary3,
+			retirement_option,
+			beneficiary_age,
+			result_json,
+		],
+	)
 
-  return queryResult.rows[0].id
+	return queryResult.rows[0].id
 }
 
 export async function getPensionCalculations(userId: string) {
