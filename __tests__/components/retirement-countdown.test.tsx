@@ -2,13 +2,14 @@ import React from 'react'
 import { render, screen, waitFor } from '@testing-library/react'
 import { RetirementCountdown } from '@/components/countdown/retirement-countdown'
 
-// Mock the Card components
-jest.mock('@/components/ui/card', () => ({
-  Card: ({ children, className }: any) => <div className={className}>{children}</div>,
-  CardContent: ({ children }: any) => <div>{children}</div>,
-  CardHeader: ({ children }: any) => <div>{children}</div>,
-  CardTitle: ({ children }: any) => <h2>{children}</h2>,
-}))
+	// Mock the Card components
+	jest.mock('@/components/ui/card', () => ({
+	  Card: ({ children, className }: any) => <div className={className}>{children}</div>,
+	  CardContent: ({ children }: any) => <div>{children}</div>,
+	  CardHeader: ({ children }: any) => <div>{children}</div>,
+	  CardTitle: ({ children }: any) => <h2>{children}</h2>,
+	  CardDescription: ({ children }: any) => <p>{children}</p>,
+	}))
 
 // Mock the Button component
 jest.mock('@/components/ui/button', () => ({
@@ -39,13 +40,15 @@ describe('RetirementCountdown', () => {
     jest.useRealTimers()
   })
 
-  it('renders loading state when not mounted', () => {
-    const futureDate = new Date('2028-04-19T00:00:00Z')
-    render(<RetirementCountdown retirementDate={futureDate} />)
-    
-    // Should show loading skeleton
-    expect(screen.getByText('Retirement Countdown')).toBeInTheDocument()
-  })
+	  it('renders countdown header for a future retirement date', async () => {
+	    const futureDate = new Date('2028-04-19T00:00:00Z')
+	    render(<RetirementCountdown retirementDate={futureDate} />)
+	    
+	    // Wait for the component to mount and show the main countdown header
+	    await waitFor(() => {
+	      expect(screen.getByText('⏰ Countdown to Freedom')).toBeInTheDocument()
+	    }, { timeout: 2000 })
+	  })
 
   it('calculates correct time remaining for future date', async () => {
     const futureDate = new Date('2028-04-19T00:00:00Z') // About 3 years, 9 months, 22 days from test date
@@ -76,12 +79,14 @@ describe('RetirementCountdown', () => {
     }, { timeout: 2000 })
   })
 
-  it('handles null retirement date gracefully', () => {
-    render(<RetirementCountdown retirementDate={null} />)
-    
-    // Should show loading state
-    expect(screen.getByText('Retirement Countdown')).toBeInTheDocument()
-  })
+	  it('handles null retirement date gracefully', async () => {
+	    render(<RetirementCountdown retirementDate={null} />)
+	    
+	    // For a null retirement date we should show the goal configuration card
+	    await waitFor(() => {
+	      expect(screen.getByText('Set Your Retirement Goal')).toBeInTheDocument()
+	    }, { timeout: 2000 })
+	  })
 
   it('calculates years, months, and days correctly', async () => {
     // Test with a specific date that should give predictable results
@@ -120,9 +125,17 @@ describe('RetirementCountdown', () => {
   it('displays formatted retirement date correctly', async () => {
     const testDate = new Date('2028-04-19T00:00:00Z')
     render(<RetirementCountdown retirementDate={testDate} />)
-    
-    await waitFor(() => {
-      expect(screen.getByText('04/19/2028')).toBeInTheDocument()
-    }, { timeout: 2000 })
+	    
+	    // Use the same locale formatting logic as the component so this test
+	    // is robust across different timezone/locale settings in CI.
+	    const expectedDate = testDate.toLocaleDateString('en-US', {
+	      month: '2-digit',
+	      day: '2-digit',
+	      year: 'numeric',
+	    })
+	
+	    await waitFor(() => {
+	      expect(screen.getByText(expectedDate)).toBeInTheDocument()
+	    }, { timeout: 2000 })
   })
 })

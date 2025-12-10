@@ -144,14 +144,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-  } catch (error) {
-    console.error('Email send error:', error)
-    
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
+	  } catch (error) {
+	    console.error('Email send error:', error)
+	    
+	    return NextResponse.json(
+	      { error: 'Failed to send email' },
+	      { status: 500 }
+	    )
+	  }
 }
 
 /**

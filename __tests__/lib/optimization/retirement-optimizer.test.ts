@@ -76,7 +76,15 @@ describe('Retirement Optimization Engine', () => {
     })
 
     it('should include Monte Carlo results when requested', () => {
-      const result = optimizeRetirementStrategy(mockCalculationData)
+	      const dataWithMonteCarlo = {
+	        ...mockCalculationData,
+	        preferences: {
+	          ...mockCalculationData.preferences,
+	          includeMonteCarloAnalysis: true
+	        }
+	      }
+
+	      const result = optimizeRetirementStrategy(dataWithMonteCarlo)
       
       expect(result.monteCarloResults).toBeDefined()
       expect(result.monteCarloResults?.scenarios).toBe(1000)
@@ -129,8 +137,15 @@ describe('Retirement Optimization Engine', () => {
 
     it('should handle Monte Carlo simulation efficiently', () => {
       const startTime = Date.now()
-      
-      const result = optimizeRetirementStrategy(mockCalculationData)
+	      
+	      const dataWithMonteCarlo = {
+	        ...mockCalculationData,
+	        preferences: {
+	          ...mockCalculationData.preferences,
+	          includeMonteCarloAnalysis: true
+	        }
+	      }
+	      const result = optimizeRetirementStrategy(dataWithMonteCarlo)
       
       const endTime = Date.now()
       const executionTime = endTime - startTime

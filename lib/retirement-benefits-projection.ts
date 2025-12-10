@@ -84,20 +84,23 @@ export function calculateRetirementBenefitsProjection(
     GROUP_4: 50
   }
   
-  const minAge = minRetirementAges[retirementGroup] || 55
-  const startAge = Math.max(plannedRetirementAge, minAge)
-  
-  // Calculate years until retirement
-  const yearsUntilRetirement = Math.max(0, plannedRetirementAge - currentAge)
+	  const minAge = minRetirementAges[retirementGroup] || 55
+	  const startAge = Math.max(plannedRetirementAge, minAge)
+	  const effectiveRetirementAge = startAge
+	  
+	  // Calculate years of service at retirement and freeze it for all future years.
+	  // Once a member retires, they no longer accrue additional creditable service.
+	  const yearsUntilRetirement = Math.max(0, effectiveRetirementAge - currentAge)
+	  const yearsOfServiceAtRetirement = currentYearsOfService + yearsUntilRetirement
   
   // Track cumulative COLA for compounding
   let cumulativeCOLA = 0
   
-  for (let age = startAge; age <= projectionEndAge; age++) {
-    // Calculate years of service at this age
-    // For chart display consistency: Use current years of service as baseline for all calculations
-    // This ensures the chart shows projections based on user's actual entered years of service
-    const yearsOfService = currentYearsOfService + Math.max(0, age - currentAge)
+	  for (let age = startAge; age <= projectionEndAge; age++) {
+	    // Years of service should be frozen at the value at retirement. Members do not
+	    // continue accruing creditable service after retiring; only COLA and Social
+	    // Security adjustments change the income profile in later years.
+	    const yearsOfService = yearsOfServiceAtRetirement
     
     // Check eligibility
     const eligibility = checkEligibility(age, yearsOfService, retirementGroup, serviceEntry)

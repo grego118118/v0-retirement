@@ -58,3 +58,32 @@ jest.mock('next-auth/react', () => ({
 // Mock environment variables
 process.env.NEXTAUTH_URL = 'http://localhost:3000'
 process.env.NEXTAUTH_SECRET = 'test-secret'
+
+// Ensure browser-like APIs that JSDOM doesn't provide by default
+if (typeof window !== 'undefined') {
+  // JSDOM does not implement matchMedia by default; provide a minimal stub
+  if (!window.matchMedia) {
+    // @ts-ignore
+    window.matchMedia = jest.fn().mockImplementation(query => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      dispatchEvent: jest.fn(),
+    }))
+  }
+
+  // Polyfill requestAnimationFrame / cancelAnimationFrame for components
+  // that use smooth countdown or animation loops (e.g., RetirementCountdown).
+  if (typeof globalThis.requestAnimationFrame === 'undefined') {
+    // @ts-ignore
+    globalThis.requestAnimationFrame = (callback) => setTimeout(callback, 16)
+  }
+  if (typeof globalThis.cancelAnimationFrame === 'undefined') {
+    // @ts-ignore
+    globalThis.cancelAnimationFrame = (id) => clearTimeout(id)
+  }
+}

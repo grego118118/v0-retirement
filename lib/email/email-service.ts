@@ -44,60 +44,74 @@ export interface EmailProvider {
  * Resend Email Provider
  */
 class ResendProvider implements EmailProvider {
-  name = 'resend'
-  private client: Resend | null = null
+	  name = 'resend'
+	  private client: Resend | null = null
 
-  constructor() {
-    if (process.env.RESEND_API_KEY) {
-      this.client = new Resend(process.env.RESEND_API_KEY)
-    }
-  }
+	  /**
+	   * Ensure we have a Resend client instance.
+	   *
+	   * In production and tests, this simply constructs a Resend client when
+	   * an API key is present. Jest tests mock the `resend` module so no real
+	   * network calls are made.
+	   */
+	  private ensureClient(): Resend | null {
+	    if (!process.env.RESEND_API_KEY) {
+	      this.client = null
+	      return null
+	    }
 
-  isConfigured(): boolean {
-    return Boolean(process.env.RESEND_API_KEY && this.client)
-  }
+	    if (!this.client) {
+	      this.client = new Resend(process.env.RESEND_API_KEY)
+	    }
+	    return this.client
+	  }
 
-  async sendEmail(options: EmailOptions): Promise<EmailResult> {
-    if (!this.client) {
-      return {
-        success: false,
-        error: 'Resend client not configured',
-        provider: this.name,
-        timestamp: new Date()
-      }
-    }
+	  isConfigured(): boolean {
+	    return this.ensureClient() !== null
+	  }
 
-    try {
-      const result = await this.client.emails.send({
-        from: options.from || process.env.EMAIL_FROM || 'noreply@maretirement.com',
-        to: Array.isArray(options.to) ? options.to : [options.to],
-        subject: options.subject,
-        html: options.html,
-        text: options.text || options.subject,
-        replyTo: options.replyTo,
-        attachments: options.attachments?.map(att => ({
-          filename: att.filename,
-          content: att.content,
-          content_type: att.contentType
-        }))
-      })
+	  async sendEmail(options: EmailOptions): Promise<EmailResult> {
+	    const client = this.ensureClient() as any
+	    if (!client) {
+	      return {
+	        success: false,
+	        error: 'Resend client not configured',
+	        provider: this.name,
+	        timestamp: new Date()
+	      }
+	    }
 
-      return {
-        success: true,
-        messageId: result.data?.id,
-        provider: this.name,
-        timestamp: new Date()
-      }
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-        provider: this.name,
-        timestamp: new Date()
-      }
-    }
-  }
-}
+	    try {
+	      const result = await client.emails.send({
+	        from: options.from || process.env.EMAIL_FROM || 'noreply@maretirement.com',
+	        to: Array.isArray(options.to) ? options.to : [options.to],
+	        subject: options.subject,
+	        html: options.html,
+	        text: options.text || options.subject,
+	        replyTo: options.replyTo,
+	        attachments: options.attachments?.map(att => ({
+	          filename: att.filename,
+	          content: att.content,
+	          content_type: att.contentType
+	        }))
+	      })
+
+	      return {
+	        success: true,
+	        messageId: result.data?.id,
+	        provider: this.name,
+	        timestamp: new Date()
+	      }
+	    } catch (error) {
+	      return {
+	        success: false,
+	        error: error instanceof Error ? error.message : 'Unknown error',
+	        provider: this.name,
+	        timestamp: new Date()
+	      }
+	    }
+	  }
+	}
 
 /**
  * Nodemailer SMTP Provider (fallback)
@@ -184,9 +198,6 @@ export class EmailService {
       new ResendProvider(),
       new NodemailerProvider()
     ]
-
-    // Set primary provider to the first configured one
-    this.primaryProvider = this.providers.find(p => p.isConfigured()) || null
   }
 
   static getInstance(): EmailService {
@@ -196,49 +207,61 @@ export class EmailService {
     return EmailService.instance
   }
 
-  /**
-   * Send email with automatic provider fallback
-   */
-  async sendEmail(options: EmailOptions): Promise<EmailResult> {
-    return measureAsync('email-send', async () => {
-      if (!this.primaryProvider) {
-        return {
-          success: false,
-          error: 'No email provider configured',
-          provider: 'none',
-          timestamp: new Date()
-        }
-      }
 
-      // Try primary provider first
-      let result = await this.primaryProvider.sendEmail(options)
-      
-      if (result.success) {
-        await this.logEmailSent(options, result)
-        return result
-      }
+	  /**
+	   * Resolve the primary provider based on current environment configuration.
+	   * This is called on-demand so tests can toggle env vars between cases.
+	   */
+	  private resolvePrimaryProvider(): EmailProvider | null {
+	    const configured = this.providers.find((provider) => provider.isConfigured()) || null
+	    this.primaryProvider = configured
+	    return configured
+	  }
 
-      // Try fallback providers
-      for (const provider of this.providers) {
-        if (provider === this.primaryProvider || !provider.isConfigured()) {
-          continue
-        }
+	  /**
+	   * Send email with automatic provider fallback
+	   */
+	  async sendEmail(options: EmailOptions): Promise<EmailResult> {
+	    return measureAsync('email-send', async () => {
+	      const primary = this.resolvePrimaryProvider()
+	      if (!primary) {
+	        return {
+	          success: false,
+	          error: 'No email provider configured',
+	          provider: 'none',
+	          timestamp: new Date()
+	        }
+	      }
 
-        console.warn(`Primary provider ${this.primaryProvider.name} failed, trying ${provider.name}`)
-        result = await provider.sendEmail(options)
-        
-        if (result.success) {
-          await this.logEmailSent(options, result)
-          return result
-        }
-      }
+	      // Try primary provider first
+	      let result = await primary.sendEmail(options)
+	      
+	      if (result.success) {
+	        await this.logEmailSent(options, result)
+	        return result
+	      }
 
-      // All providers failed
-      console.error('All email providers failed:', result.error)
-      await this.logEmailError(options, result)
-      return result
-    })
-  }
+	      // Try fallback providers
+	      for (const provider of this.providers) {
+	        if (provider === primary || !provider.isConfigured()) {
+	          continue
+	        }
+	
+	        console.warn(`Primary provider ${primary.name} failed, trying ${provider.name}`)
+	        result = await provider.sendEmail(options)
+	        
+	        if (result.success) {
+	          await this.logEmailSent(options, result)
+	          return result
+	        }
+	      }
+
+	      // All providers failed
+	      console.error('All email providers failed:', result.error)
+	      await this.logEmailError(options, result)
+	      return result
+	    })
+	  }
 
   /**
    * Send email with template
@@ -297,19 +320,20 @@ export class EmailService {
     })
   }
 
-  /**
-   * Check if email service is configured
-   */
-  isConfigured(): boolean {
-    return this.primaryProvider !== null
-  }
+	  /**
+	   * Check if email service is configured
+	   */
+	  isConfigured(): boolean {
+	    return this.resolvePrimaryProvider() !== null
+	  }
 
-  /**
-   * Get configured provider name
-   */
-  getProviderName(): string {
-    return this.primaryProvider?.name || 'none'
-  }
+	  /**
+	   * Get configured provider name
+	   */
+	  getProviderName(): string {
+	    const provider = this.resolvePrimaryProvider()
+	    return provider?.name || 'none'
+	  }
 
   /**
    * Log successful email send

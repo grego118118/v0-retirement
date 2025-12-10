@@ -358,11 +358,16 @@ function calculateTaxOptimization(data: CombinedCalculationData, scenario: Optim
   }
 }
 
-/**
- * Enhanced Monte Carlo simulation for comprehensive scenario analysis
- */
-function runMonteCarloSimulation(data: CombinedCalculationData, scenario: OptimizationScenario) {
-  const scenarios = 10000 // Increased for better accuracy
+	/**
+	 * Enhanced Monte Carlo simulation for comprehensive scenario analysis
+	 *
+	 * NOTE: To keep CI and runtime performance within the 2s requirement,
+	 * we use 1,000 scenarios by default. This still provides smooth,
+	 * statistically useful results while avoiding excessive CPU usage
+	 * in tests and on low-powered devices.
+	 */
+	function runMonteCarloSimulation(data: CombinedCalculationData, scenario: OptimizationScenario) {
+	  const scenarios = 1000
   const results: number[] = []
   const yearlyResults: number[][] = []
   const retirementYears = data.personalInfo.lifeExpectancy - data.personalInfo.retirementGoalAge

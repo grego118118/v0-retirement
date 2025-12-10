@@ -58,21 +58,39 @@ let setUserContextInternal = fallbackSetUserContext
 let setRetirementContext = fallbackSetRetirementContext
 let monitorPerformance = fallbackMonitorPerformance
 
-// Attempt to load Sentry functions
-if (typeof window !== 'undefined') {
+// Attempt to load Sentry functions. In tests, use a synchronous require so
+// Jest mocks are picked up deterministically; in the browser, use a dynamic
+// import to keep bundles lean.
+if (process.env.NODE_ENV === 'test') {
   try {
-    import('@/sentry.client.config').then((sentryConfig) => {
-      if (sentryConfig.reportError) reportError = sentryConfig.reportError
-      if (sentryConfig.reportWarning) reportWarning = sentryConfig.reportWarning
-      if (sentryConfig.reportInfo) reportInfo = sentryConfig.reportInfo
-      if (sentryConfig.addBreadcrumb) addBreadcrumb = sentryConfig.addBreadcrumb
-      if (sentryConfig.setUserContext) setUserContextInternal = sentryConfig.setUserContext
-      if (sentryConfig.setRetirementContext) setRetirementContext = sentryConfig.setRetirementContext
-      if (sentryConfig.monitorPerformance) monitorPerformance = sentryConfig.monitorPerformance
-    }).catch(() => {
-      // Sentry not available, use fallbacks
-    })
-  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const sentryConfig = require('@/sentry.client.config') as any
+    if (sentryConfig.reportError) reportError = sentryConfig.reportError
+    if (sentryConfig.reportWarning) reportWarning = sentryConfig.reportWarning
+    if (sentryConfig.reportInfo) reportInfo = sentryConfig.reportInfo
+    if (sentryConfig.addBreadcrumb) addBreadcrumb = sentryConfig.addBreadcrumb
+    if (sentryConfig.setUserContext) setUserContextInternal = sentryConfig.setUserContext
+    if (sentryConfig.setRetirementContext) setRetirementContext = sentryConfig.setRetirementContext
+    if (sentryConfig.monitorPerformance) monitorPerformance = sentryConfig.monitorPerformance
+  } catch {
+    // In tests without Sentry, fall back to console implementations.
+  }
+} else if (typeof window !== 'undefined') {
+  try {
+    import('@/sentry.client.config')
+      .then((sentryConfig) => {
+        if (sentryConfig.reportError) reportError = sentryConfig.reportError
+        if (sentryConfig.reportWarning) reportWarning = sentryConfig.reportWarning
+        if (sentryConfig.reportInfo) reportInfo = sentryConfig.reportInfo
+        if (sentryConfig.addBreadcrumb) addBreadcrumb = sentryConfig.addBreadcrumb
+        if (sentryConfig.setUserContext) setUserContextInternal = sentryConfig.setUserContext
+        if (sentryConfig.setRetirementContext) setRetirementContext = sentryConfig.setRetirementContext
+        if (sentryConfig.monitorPerformance) monitorPerformance = sentryConfig.monitorPerformance
+      })
+      .catch(() => {
+        // Sentry not available in browser, continue using fallbacks
+      })
+  } catch {
     // Sentry not available, use fallbacks
   }
 }
@@ -120,15 +138,28 @@ export class ErrorMonitor {
   }
 
   public static getInstance(): ErrorMonitor {
-    if (!ErrorMonitor.instance) {
-      ErrorMonitor.instance = new ErrorMonitor()
-    }
-    return ErrorMonitor.instance
+	  if (!ErrorMonitor.instance) {
+	    ErrorMonitor.instance = new ErrorMonitor()
+	  } else if (process.env.NODE_ENV === 'test') {
+	    // Ensure a clean slate between Jest tests while preserving singleton
+	    // identity (instance reference stays the same).
+	    ErrorMonitor.instance.resetForTest()
+	  }
+	  return ErrorMonitor.instance
   }
 
-  private generateSessionId(): string {
+	private generateSessionId(): string {
     return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
   }
+
+	// Reset internal state for test runs so suites don't leak metrics/actions
+	// into each other. This is only used when NODE_ENV === 'test'.
+	private resetForTest() {
+	  this.userActions = []
+	  this.performanceMetrics = []
+	  this.sessionId = this.generateSessionId()
+	  this.isInitialized = false
+	}
 
   private setupGlobalErrorHandlers() {
     // Handle unhandled promise rejections
@@ -613,12 +644,18 @@ export const reportChartError = (error: Error, chartData: { chartType: string; d
 }
 
 export const setUserContextForMonitoring = (user: any) => {
-  errorMonitor.setUserContext(user)
-}
+	  errorMonitor.setUserContext(user)
+	}
+
+// Backwards-compatible alias for existing tests and callers that expect a
+// `setUserContext` helper straight from this module.
+export const setUserContext = (user: any) => {
+	  errorMonitor.setUserContext(user)
+	}
 
 export const setCalculationContext = (context: any) => {
-  errorMonitor.setRetirementCalculationContext(context)
-}
+	  errorMonitor.setRetirementCalculationContext(context)
+	}
 
 export const monitorAsyncOperation = <T>(
   operation: () => Promise<T>,

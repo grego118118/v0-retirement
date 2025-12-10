@@ -1,12 +1,51 @@
 /**
- * Email Send API Tests
- * Tests for the email sending API endpoint
- */
+	 * Email Send API Tests
+	 * Tests for the email sending API endpoint
+	 */
 
-import { NextRequest } from 'next/server'
-import { POST, GET } from '@/app/api/email/send/route'
+	import { POST, GET } from '@/app/api/email/send/route'
 
-// Mock dependencies
+	// Mock Next.js server primitives to avoid relying on the real
+	// `next/server` implementation in the Jest environment.
+	// We only need minimal behavior for these tests: constructing
+	// a request with a URL, method, and JSON body, and returning
+	// a JSON response with a status code.
+	jest.mock('next/server', () => {
+	  class NextRequest {
+	    url: string
+	    method: string
+	    private _body: any
+
+	    constructor(input: string | URL, init?: { method?: string; body?: any }) {
+	      this.url = typeof input === 'string' ? input : input.toString()
+	      this.method = init?.method || 'GET'
+	      this._body = init?.body
+	    }
+
+	    async json() {
+	      if (typeof this._body === 'string') {
+	        return JSON.parse(this._body)
+	      }
+	      return this._body
+	    }
+	  }
+
+	  const NextResponse = {
+	    json(body: any, init?: { status?: number }) {
+	      const status = init?.status ?? 200
+	      return {
+	        status,
+	        async json() {
+	          return body
+	        },
+	      }
+	    },
+	  }
+
+	  return { NextRequest, NextResponse }
+	})
+
+	// Mock dependencies
 jest.mock('next-auth', () => ({
   getServerSession: jest.fn()
 }))
@@ -48,13 +87,17 @@ jest.mock('@/lib/utils/rate-limit', () => ({
   })
 }))
 
-describe('/api/email/send', () => {
-  const { getServerSession } = require('next-auth')
-  const { prisma } = require('@/lib/prisma')
-  const { emailService } = require('@/lib/email/email-service')
+	describe('/api/email/send', () => {
+	  const { getServerSession } = require('next-auth')
+	  const { prisma } = require('@/lib/prisma')
+	  const { emailService } = require('@/lib/email/email-service')
+	  const { NextRequest } = require('next/server')
 
   beforeEach(() => {
-    jest.clearAllMocks()
+	    jest.clearAllMocks()
+	    // Default configuration: email service is available and uses Resend.
+	    emailService.isConfigured.mockReturnValue(true)
+	    emailService.getProviderName.mockReturnValue('resend')
   })
 
   describe('POST /api/email/send', () => {
