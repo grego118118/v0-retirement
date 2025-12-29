@@ -71,8 +71,52 @@ export default function CalculatorPage() {
             <PremiumAlternative />
           </div>
 
-          {/* Related Resources - Internal Linking for SEO */}
+          {/* Group-Specific Calculators for SEO */}
           <div className="mt-12 border-t pt-8">
+            <h2 className="text-xl font-semibold mb-4 text-center">Calculate by Retirement Group</h2>
+            <p className="text-center text-sm text-muted-foreground mb-6">Get group-specific information and optimized calculations</p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <Link href="/calculator/group-1" className="group" title="Group 1 Pension Calculator - General Employees">
+                <Card className="h-full hover:shadow-md transition-shadow hover:border-blue-300">
+                  <CardContent className="pt-4 text-center">
+                    <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center mx-auto mb-2 font-bold">1</div>
+                    <p className="text-sm font-medium group-hover:text-blue-600">Group 1</p>
+                    <p className="text-xs text-muted-foreground">Teachers, General</p>
+                  </CardContent>
+                </Card>
+              </Link>
+              <Link href="/calculator/group-2" className="group" title="Group 2 Pension Calculator - Probation Officers">
+                <Card className="h-full hover:shadow-md transition-shadow hover:border-green-300">
+                  <CardContent className="pt-4 text-center">
+                    <div className="w-10 h-10 rounded-full bg-green-100 text-green-700 flex items-center justify-center mx-auto mb-2 font-bold">2</div>
+                    <p className="text-sm font-medium group-hover:text-green-600">Group 2</p>
+                    <p className="text-xs text-muted-foreground">Probation, Court</p>
+                  </CardContent>
+                </Card>
+              </Link>
+              <Link href="/calculator/group-3" className="group" title="Group 3 Pension Calculator - State Police">
+                <Card className="h-full hover:shadow-md transition-shadow hover:border-red-300">
+                  <CardContent className="pt-4 text-center">
+                    <div className="w-10 h-10 rounded-full bg-red-100 text-red-700 flex items-center justify-center mx-auto mb-2 font-bold">3</div>
+                    <p className="text-sm font-medium group-hover:text-red-600">Group 3</p>
+                    <p className="text-xs text-muted-foreground">State Police</p>
+                  </CardContent>
+                </Card>
+              </Link>
+              <Link href="/calculator/group-4" className="group" title="Group 4 Pension Calculator - Police & Fire">
+                <Card className="h-full hover:shadow-md transition-shadow hover:border-orange-300">
+                  <CardContent className="pt-4 text-center">
+                    <div className="w-10 h-10 rounded-full bg-orange-100 text-orange-700 flex items-center justify-center mx-auto mb-2 font-bold">4</div>
+                    <p className="text-sm font-medium group-hover:text-orange-600">Group 4</p>
+                    <p className="text-xs text-muted-foreground">Police, Fire, Corrections</p>
+                  </CardContent>
+                </Card>
+              </Link>
+            </div>
+          </div>
+
+          {/* Related Resources - Internal Linking for SEO */}
+          <div className="mt-10">
             <h2 className="text-xl font-semibold mb-6 text-center">Related Resources</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <Link href="/resources/groups" className="group" title="Massachusetts Retirement Groups 1-4 Explained">
