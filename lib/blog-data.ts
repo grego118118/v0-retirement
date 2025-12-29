@@ -503,7 +503,7 @@ export const blogPosts = [
     authorTitle: "Retirement Specialist",
     category: "Group Classifications",
     tags: ["retirement groups", "group 1", "group 2", "group 3", "group 4", "eligibility", "benefits"],
-    image: "/images/blog/default-blog-image.svg",
+    image: "/images/blog/mass retire groups.jpg",
     content: `
       <h2>Understanding Your Massachusetts Retirement Group</h2>
       <p>Understanding your Massachusetts Retirement Group is crucial for planning your public service career and retirement. The Massachusetts Retirement System classifies all public employees into four distinct groups, each with specific eligibility requirements, minimum retirement ages, and benefit calculations.</p>
@@ -602,7 +602,7 @@ export const blogPosts = [
     authorTitle: "COLA Specialist",
     category: "COLA Adjustments",
     tags: ["COLA", "cost of living", "13000 cap", "pension adjustments", "retirement benefits"],
-    image: "/images/blog/default-blog-image.svg",
+    image: "/images/blog/mass cola.jpg",
     content: `
       <h2>What is Massachusetts COLA?</h2>
       <p>The Massachusetts Cost of Living Adjustment (COLA) is a crucial component of your retirement benefits, but it comes with a unique cap that many retirees don't fully understand. Here's everything you need to know about how COLA affects your Massachusetts pension.</p>
