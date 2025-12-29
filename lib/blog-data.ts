@@ -14,7 +14,7 @@ export const blogPosts = [
     image: "/images/blog/massachusetts-cola-2026.svg",
     content: `
       <h2>Understanding Massachusetts COLA for 2026</h2>
-      <p>The Cost of Living Adjustment (COLA) is a critical component of your Massachusetts state pension that helps protect your retirement income against inflation. For 2026, the Massachusetts State Retirement Board has maintained the established COLA structure that applies to all eligible retirees in the Massachusetts State Employees' Retirement System (MSERS). Use our <a href="/calculator" title="Massachusetts Pension Calculator">Massachusetts pension calculator</a> to see exactly how COLA will affect your benefits.</p>
+      <p>The Cost of Living Adjustment (COLA) is a critical component of your Massachusetts state pension that helps protect your retirement income against inflation. For 2026, the Massachusetts State Retirement Board has maintained the established COLA structure that applies to all eligible retirees in the Massachusetts State Employees' Retirement System (MSERS). Use our <a href="/calculator" title="Massachusetts Pension Calculator">free pension estimate tool</a> to see exactly how COLA will affect your benefits.</p>
 
       <p>This comprehensive guide explains everything you need to know about how COLA works, what to expect in 2026, and how to maximize your retirement benefits.</p>
 
@@ -202,7 +202,7 @@ export const blogPosts = [
       <h2>Conclusion</h2>
       <p>The Massachusetts COLA provides valuable inflation protection for state retirees, with the 2026 structure maintaining the 3% rate on the first $13,000 of annual pension benefits. While the maximum $390 annual increase may seem modest, the compounding effect over a long retirement can significantly boost your total benefits.</p>
 
-      <p>Understanding how COLA works—and its limitations—is essential for comprehensive retirement planning. Use our <a href="/calculator" title="Massachusetts Pension Calculator">pension calculator</a> to model your specific situation and see how COLA will affect your retirement income over time.</p>
+      <p>Understanding how COLA works—and its limitations—is essential for comprehensive retirement planning. Use our <a href="/calculator" title="Massachusetts Pension Calculator">retirement benefit estimator</a> to model your specific situation and see how COLA will affect your retirement income over time.</p>
 
       <p>For personalized guidance on your retirement planning, including COLA projections and optimization strategies, explore our <a href="/resources/cola" title="COLA Resource Page">complete COLA resource center</a>, check out our <a href="/blog/maximizing-your-state-pension-benefits" title="Strategies to Maximize Your Pension">strategies for maximizing your pension benefits</a>, or consult with a qualified financial advisor.</p>
     `,
@@ -290,7 +290,7 @@ export const blogPosts = [
       <ul>
         <li>You can now include your full Social Security benefit in your retirement income calculations</li>
         <li>This may affect your optimal retirement timing and financial planning—see our <a href="/blog/retirement-planning-for-massachusetts-state-employees" title="Retirement Planning Timeline">retirement planning timeline guide</a></li>
-        <li>Consider using our updated <a href="/calculator" title="Massachusetts Pension Calculator">Massachusetts pension calculator</a> to model your new retirement scenarios</li>
+        <li>Consider using our updated <a href="/calculator" title="Massachusetts Pension Calculator">retirement benefit calculator</a> to model your new retirement scenarios</li>
       </ul>
       
       <h2>Implementation Progress and What to Expect</h2>
@@ -416,7 +416,7 @@ export const blogPosts = [
     image: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2026&q=80",
     content: `
       <h2>Introduction to Massachusetts State Pension Options</h2>
-      <p>When you retire as a Massachusetts state employee, you'll need to make an important decision that will affect both you and potentially your beneficiaries for years to come: selecting a retirement option. The Massachusetts State Retirement System offers three distinct options, each with different benefits and considerations. Use our <a href="/calculator" title="Massachusetts Pension Calculator">Massachusetts pension calculator</a> to compare your estimated benefits under each option.</p>
+      <p>When you retire as a Massachusetts state employee, you'll need to make an important decision that will affect both you and potentially your beneficiaries for years to come: selecting a retirement option. The Massachusetts State Retirement System offers three distinct options, each with different benefits and considerations. Use our <a href="/calculator" title="Massachusetts Pension Calculator">pension benefits estimator</a> to compare your estimated benefits under each option.</p>
 
       <p>This comprehensive guide will help you understand each option in detail, providing you with the knowledge to make an informed decision based on your personal circumstances.</p>
       
@@ -490,7 +490,7 @@ export const blogPosts = [
 
       <p>By carefully evaluating each option and considering the factors outlined in this guide, you can make an informed decision that provides financial security for both you and your loved ones throughout retirement. Don't forget to factor in <a href="/resources/cola" title="COLA Explained">COLA adjustments</a> when planning for the long term.</p>
 
-      <p>Remember that our <a href="/calculator" title="Massachusetts Pension Calculator">pension calculator</a> can help you estimate your benefits under each option, and the Massachusetts State Retirement Board is available to answer any specific questions about your retirement benefits. Also check out our <a href="/resources/options" title="Options Resource Page">detailed options comparison page</a>.</p>
+      <p>Remember that our <a href="/calculator" title="Massachusetts Pension Calculator">free retirement calculator</a> can help you estimate your benefits under each option, and the Massachusetts State Retirement Board is available to answer any specific questions about your retirement benefits. Also check out our <a href="/resources/options" title="Options Resource Page">detailed options comparison page</a>.</p>
     `,
     relatedPosts: [
       "retirement-planning-for-massachusetts-state-employees",
@@ -513,7 +513,7 @@ export const blogPosts = [
     image: "/images/blog/mass retire groups.jpg",
     content: `
       <h2>Understanding Your Massachusetts Retirement Group</h2>
-      <p>Understanding your Massachusetts Retirement Group is crucial for planning your public service career and retirement. The Massachusetts Retirement System classifies all public employees into four distinct groups, each with specific eligibility requirements, minimum retirement ages, and benefit calculations. Use our <a href="/calculator" title="Massachusetts Pension Calculator">Massachusetts pension calculator</a> to see exactly how your group affects your benefits.</p>
+      <p>Understanding your Massachusetts Retirement Group is crucial for planning your public service career and retirement. The Massachusetts Retirement System classifies all public employees into four distinct groups, each with specific eligibility requirements, minimum retirement ages, and benefit calculations. Use our <a href="/calculator" title="Massachusetts Pension Calculator">retirement income calculator</a> to see exactly how your group affects your benefits.</p>
 
       <h2>Group 1: General Employees</h2>
       <p>Group 1 includes most Massachusetts public employees, including teachers, municipal workers, and state employees in non-hazardous positions.</p>
@@ -588,7 +588,7 @@ export const blogPosts = [
         <li>Understand your <a href="/resources/options" title="Pension Options A, B, C">pension options (A, B, and C)</a></li>
       </ul>
 
-      <p>For personalized calculations and planning, use the <a href="/calculator" title="Massachusetts Pension Calculator">Massachusetts Pension Calculator</a>. Also learn about <a href="/resources/cola" title="COLA Explained">how COLA affects your retirement benefits</a>.</p>
+      <p>For personalized calculations and planning, use our <a href="/calculator" title="Massachusetts Pension Calculator">free benefit estimate tool</a>. Also learn about <a href="/resources/cola" title="COLA Explained">how COLA affects your retirement benefits</a>.</p>
 
       <p><em>Disclaimer: This information is for educational purposes only. For official benefit calculations, consult the Massachusetts Retirement Board.</em></p>
     `,
@@ -613,7 +613,7 @@ export const blogPosts = [
     image: "/images/blog/mass cola.jpg",
     content: `
       <h2>What is Massachusetts COLA?</h2>
-      <p>The Massachusetts Cost of Living Adjustment (COLA) is a crucial component of your retirement benefits, but it comes with a unique cap that many retirees don't fully understand. Here's everything you need to know about how COLA affects your Massachusetts pension. Use our <a href="/calculator" title="Massachusetts Pension Calculator">Massachusetts pension calculator</a> to see exactly how COLA impacts your projected benefits.</p>
+      <p>The Massachusetts Cost of Living Adjustment (COLA) is a crucial component of your retirement benefits, but it comes with a unique cap that many retirees don't fully understand. Here's everything you need to know about how COLA affects your Massachusetts pension. Use our <a href="/calculator" title="Massachusetts Pension Calculator">pension projection tool</a> to see exactly how COLA impacts your projected benefits.</p>
 
       <p>The Massachusetts COLA provides annual increases to help your pension keep pace with inflation. Unlike many other states, Massachusetts has a fixed 3% annual COLA rate.</p>
 
@@ -681,7 +681,7 @@ export const blogPosts = [
         <li>Combined benefits help maintain purchasing power—see our <a href="/social-security" title="Social Security Calculator">Social Security integration calculator</a></li>
       </ul>
 
-      <p>For detailed COLA projections and retirement planning, use our <a href="/calculator" title="Massachusetts Pension Calculator">Massachusetts pension calculator</a>. Also explore our <a href="/resources/cola" title="COLA Resource Center">complete COLA resource center</a>.</p>
+      <p>For detailed COLA projections and retirement planning, use our <a href="/calculator" title="Massachusetts Pension Calculator">MSRB pension calculator</a>. Also explore our <a href="/resources/cola" title="COLA Resource Center">complete COLA resource center</a>.</p>
 
       <p><em>Disclaimer: This information is for educational purposes only. For official COLA calculations, consult the Massachusetts Retirement Board.</em></p>
     `,
@@ -706,7 +706,7 @@ export const blogPosts = [
     image: "https://images.unsplash.com/photo-1434626881859-194d67b2b86f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2074&q=80",
     content: `
       <h2>Your Massachusetts State Retirement Planning Timeline</h2>
-      <p>Planning for retirement is a process that should begin well before your actual retirement date. This timeline provides Massachusetts state employees with a structured approach to retirement planning, ensuring you don't miss critical steps along the way. Use our <a href="/calculator" title="Massachusetts Pension Calculator">Massachusetts pension calculator</a> to estimate your benefits at any point in your planning process.</p>
+      <p>Planning for retirement is a process that should begin well before your actual retirement date. This timeline provides Massachusetts state employees with a structured approach to retirement planning, ensuring you don't miss critical steps along the way. Use our <a href="/calculator" title="Massachusetts Pension Calculator">state employee retirement calculator</a> to estimate your benefits at any point in your planning process.</p>
 
       <h2>5 Years Before Retirement</h2>
       <p>The five-year mark is an ideal time to begin serious retirement planning. At this stage, you should:</p>
@@ -738,7 +738,7 @@ export const blogPosts = [
       <h3>Update Your Retirement Estimate</h3>
       <ul>
         <li>Request an updated benefit estimate</li>
-        <li>Use our <a href="/calculator" title="Massachusetts Pension Calculator">pension calculator</a> to model different retirement dates and options</li>
+        <li>Use our <a href="/calculator" title="Massachusetts Pension Calculator">benefit modeling tool</a> to compare different retirement dates and options</li>
         <li>Begin considering which <a href="/blog/understanding-massachusetts-pension-options" title="Pension Options Guide">retirement option (A, B, or C)</a> might be best for you</li>
       </ul>
       
@@ -900,7 +900,7 @@ export const blogPosts = [
     image: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
     content: `
       <h2>Introduction</h2>
-      <p>As a Massachusetts state employee, your pension will likely be a cornerstone of your retirement income. While the basic formula for calculating your pension is straightforward, there are several strategies you can employ to maximize your benefits. This article explores five proven approaches to help you secure the highest possible pension benefit for your retirement years. Use our <a href="/calculator" title="Massachusetts Pension Calculator">Massachusetts pension calculator</a> to see exactly how these strategies could affect your benefits.</p>
+      <p>As a Massachusetts state employee, your pension will likely be a cornerstone of your retirement income. While the basic formula for calculating your pension is straightforward, there are several strategies you can employ to maximize your benefits. This article explores five proven approaches to help you secure the highest possible pension benefit for your retirement years. Use our <a href="/calculator" title="Massachusetts Pension Calculator">pension benefit calculator</a> to see exactly how these strategies could affect your benefits.</p>
 
       <h2>Strategy 1: Extend Your Service Time Strategically</h2>
       <p>One of the most effective ways to increase your pension is to extend your years of creditable service. Your pension is calculated using a formula that multiplies your years of service by a percentage factor and your highest average salary. Your <a href="/resources/groups" title="Massachusetts Retirement Groups">retirement group classification</a> determines your benefit factors.</p>
@@ -908,7 +908,7 @@ export const blogPosts = [
       <h3>Key Actions:</h3>
       <ul>
         <li>Work until you reach a significant service milestone (e.g., 30 years for post-2012 hires)</li>
-        <li>Use our <a href="/calculator" title="Massachusetts Pension Calculator">pension calculator</a> to identify the optimal retirement age based on your specific circumstances</li>
+        <li>Use our <a href="/calculator" title="Massachusetts Pension Calculator">retirement planning calculator</a> to identify the optimal retirement age based on your specific circumstances</li>
         <li>Consider the trade-off between additional service time and other retirement goals</li>
       </ul>
       
@@ -997,7 +997,7 @@ export const blogPosts = [
       <h2>Conclusion</h2>
       <p>Maximizing your Massachusetts state pension requires careful planning and strategic decision-making. By extending your service time, <a href="/blog/creditable-service-guide-for-ma-state-employees" title="Creditable Service Guide">purchasing additional creditable service</a>, maximizing your highest average salary, choosing the right retirement option, and understanding pension limitations, you can significantly increase your retirement income. Don't forget to factor in <a href="/resources/cola" title="COLA Explained">COLA adjustments</a> when projecting your long-term benefits.</p>
 
-      <p>Remember that each employee's situation is unique, and what works best for one person may not be optimal for another. Use our <a href="/calculator" title="Massachusetts Pension Calculator">pension calculator</a> to model different scenarios based on your specific circumstances, and consider consulting with a financial advisor who specializes in public employee retirement planning.</p>
+      <p>Remember that each employee's situation is unique, and what works best for one person may not be optimal for another. Use our <a href="/calculator" title="Massachusetts Pension Calculator">online benefit calculator</a> to model different scenarios based on your specific circumstances, and consider consulting with a financial advisor who specializes in public employee retirement planning.</p>
 
       <p>With thoughtful planning and these strategic approaches, you can make the most of your Massachusetts state pension and enjoy a more financially secure retirement. Also check out our <a href="/blog/retirement-planning-for-massachusetts-state-employees" title="Retirement Planning Timeline">retirement planning timeline</a> to stay on track.</p>
     `,
@@ -1021,7 +1021,7 @@ export const blogPosts = [
     image: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
     content: `
       <h2>Introduction</h2>
-      <p>Healthcare costs are a significant consideration in retirement planning. For Massachusetts state employees, understanding your healthcare options after retirement is crucial for both your physical and financial well-being. This comprehensive guide explores the healthcare benefits available to retired state employees, including coverage through the Group Insurance Commission (GIC), Medicare coordination, and strategies for managing healthcare costs in retirement. Use our <a href="/calculator" title="Massachusetts Pension Calculator">pension calculator</a> to estimate your retirement income and plan for healthcare expenses.</p>
+      <p>Healthcare costs are a significant consideration in retirement planning. For Massachusetts state employees, understanding your healthcare options after retirement is crucial for both your physical and financial well-being. This comprehensive guide explores the healthcare benefits available to retired state employees, including coverage through the Group Insurance Commission (GIC), Medicare coordination, and strategies for managing healthcare costs in retirement. Use our <a href="/calculator" title="Massachusetts Pension Calculator">MA state pension calculator</a> to estimate your retirement income and plan for healthcare expenses.</p>
 
       <h2>Eligibility for Retiree Health Insurance</h2>
       <p>Not all retired state employees automatically qualify for health insurance benefits in retirement. Understanding the eligibility requirements is the first step in planning for your healthcare needs.</p>
@@ -1177,7 +1177,7 @@ export const blogPosts = [
       </ul>
       
       <h2>Conclusion</h2>
-      <p>Healthcare planning is a critical component of retirement preparation for Massachusetts state employees. By understanding your eligibility for retiree health benefits, the coordination between Medicare and GIC coverage, and strategies for managing healthcare costs, you can better prepare for a financially secure and healthy retirement. Use our <a href="/calculator" title="Massachusetts Pension Calculator">pension calculator</a> to model your retirement income and plan for healthcare expenses.</p>
+      <p>Healthcare planning is a critical component of retirement preparation for Massachusetts state employees. By understanding your eligibility for retiree health benefits, the coordination between Medicare and GIC coverage, and strategies for managing healthcare costs, you can better prepare for a financially secure and healthy retirement. Use our <a href="/calculator" title="Massachusetts Pension Calculator">retirement income tool</a> to model your retirement income and plan for healthcare expenses.</p>
 
       <p>Remember that healthcare benefits and costs can change over time. Stay informed by reviewing annual GIC benefit guides, attending pre-retirement seminars, and consulting with GIC representatives about your specific situation. Check out our <a href="/blog/retirement-planning-for-massachusetts-state-employees" title="Retirement Planning Timeline">retirement planning timeline</a> for a comprehensive checklist. With proper planning, you can navigate the complexities of retiree healthcare and make informed decisions that support your overall retirement goals.</p>
     `,
@@ -1202,7 +1202,7 @@ export const blogPosts = [
     image: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
     content: `
       <h2>Introduction</h2>
-      <p>For Massachusetts state employees, one of the most effective strategies to increase your pension benefit is to maximize your creditable service. While your years of employment with the state automatically count toward your pension, you may be eligible to purchase additional creditable service for certain periods of your career. This guide explains the types of service you can purchase, the process for doing so, and how to determine if a service purchase is a good financial decision. Use our <a href="/calculator" title="Massachusetts Pension Calculator">pension calculator</a> to see how additional service years affect your benefits.</p>
+      <p>For Massachusetts state employees, one of the most effective strategies to increase your pension benefit is to maximize your creditable service. While your years of employment with the state automatically count toward your pension, you may be eligible to purchase additional creditable service for certain periods of your career. This guide explains the types of service you can purchase, the process for doing so, and how to determine if a service purchase is a good financial decision. Use our <a href="/calculator" title="Massachusetts Pension Calculator">service credit calculator</a> to see how additional service years affect your benefits.</p>
 
       <h2>What is Creditable Service?</h2>
       <p>Creditable service refers to the total amount of time that counts toward your pension calculation. Your pension benefit is determined by a formula that multiplies your years of creditable service by a percentage factor and your highest average salary. Therefore, increasing your creditable service directly increases your pension benefit.</p>
@@ -1349,7 +1349,7 @@ export const blogPosts = [
 
       <p>To make the most of this opportunity, start by identifying any eligible service periods in your career history. Then, contact the Massachusetts State Retirement Board to verify your eligibility and request cost estimates. Check out our <a href="/blog/retirement-planning-for-massachusetts-state-employees" title="Retirement Planning Timeline">retirement planning timeline</a> to ensure you complete this process well before retirement.</p>
 
-      <p>Remember that our <a href="/calculator" title="Massachusetts Pension Calculator">pension calculator</a> can help you model different scenarios and see how additional creditable service would affect your retirement benefit. Learn how your <a href="/resources/groups" title="Massachusetts Retirement Groups">retirement group classification</a> affects your benefit calculation. For personalized advice, consider consulting with a financial advisor who specializes in public employee retirement planning.</p>
+      <p>Remember that our <a href="/calculator" title="Massachusetts Pension Calculator">benefit projection tool</a> can help you model different scenarios and see how additional creditable service would affect your retirement benefit. Learn how your <a href="/resources/groups" title="Massachusetts Retirement Groups">retirement group classification</a> affects your benefit calculation. For personalized advice, consider consulting with a financial advisor who specializes in public employee retirement planning.</p>
     `,
     relatedPosts: [
       "understanding-massachusetts-pension-options",

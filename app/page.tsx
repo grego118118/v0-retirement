@@ -18,7 +18,8 @@ import {
   Zap,
   Star,
   Timer,
-  Target
+  Target,
+  BookOpen
 } from "lucide-react"
 import { generateSEOMetadata } from "@/components/seo/metadata"
 import { OrganizationStructuredData, FAQStructuredData, HowToStructuredData, RETIREMENT_FAQS, PENSION_CALCULATION_STEPS } from "@/components/seo/structured-data"
@@ -209,6 +210,115 @@ export default function Home() {
 
           {/* Premium Alternative for premium users */}
           <PremiumAlternative />
+        </div>
+      </section>
+
+      {/* Latest Retirement Guides Section - SEO Internal Linking */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-10">
+            <Badge className="mb-4 bg-blue-100 text-blue-800 border-blue-200">
+              <BookOpen className="w-3 h-3 mr-1" />
+              Expert Guides
+            </Badge>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Latest Retirement Planning Guides
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Expert insights on Massachusetts pension benefits, COLA adjustments, and retirement optimization strategies.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {/* COLA 2026 Guide */}
+            <Link href="/blog/massachusetts-cola-2026-complete-guide" className="group" title="Massachusetts COLA 2026 Complete Guide">
+              <Card className="h-full hover:shadow-xl transition-all duration-300 hover:border-blue-300 hover:-translate-y-1">
+                <CardHeader>
+                  <Badge variant="outline" className="w-fit mb-2 text-xs bg-green-50 text-green-700 border-green-200">COLA Updates</Badge>
+                  <CardTitle className="text-lg group-hover:text-blue-600 transition-colors flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5 text-green-600 flex-shrink-0" />
+                    Massachusetts COLA 2026 Guide
+                  </CardTitle>
+                  <CardDescription>
+                    Everything about the 3% COLA rate, $13,000 cap, and how annual adjustments affect your retirement income.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground flex items-center gap-1">
+                      <Clock className="h-3 w-3" /> 10 min read
+                    </span>
+                    <span className="text-blue-600 flex items-center gap-1 group-hover:gap-2 transition-all">
+                      Read Guide <ArrowRight className="h-3 w-3" />
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+
+            {/* Social Security Fairness Act */}
+            <Link href="/blog/social-security-fairness-act-what-massachusetts-state-employees-need-to-know" className="group" title="Social Security Fairness Act Guide">
+              <Card className="h-full hover:shadow-xl transition-all duration-300 hover:border-blue-300 hover:-translate-y-1">
+                <CardHeader>
+                  <Badge variant="outline" className="w-fit mb-2 text-xs bg-purple-50 text-purple-700 border-purple-200">Breaking News</Badge>
+                  <CardTitle className="text-lg group-hover:text-blue-600 transition-colors flex items-center gap-2">
+                    <Shield className="h-5 w-5 text-purple-600 flex-shrink-0" />
+                    Social Security Fairness Act
+                  </CardTitle>
+                  <CardDescription>
+                    How the elimination of WEP/GPO increases your Social Security benefits and what to expect.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground flex items-center gap-1">
+                      <Clock className="h-3 w-3" /> 8 min read
+                    </span>
+                    <span className="text-blue-600 flex items-center gap-1 group-hover:gap-2 transition-all">
+                      Read Guide <ArrowRight className="h-3 w-3" />
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+
+            {/* Pension Options Guide */}
+            <Link href="/blog/understanding-massachusetts-pension-options" className="group" title="Massachusetts Pension Options A, B, C Guide">
+              <Card className="h-full hover:shadow-xl transition-all duration-300 hover:border-blue-300 hover:-translate-y-1">
+                <CardHeader>
+                  <Badge variant="outline" className="w-fit mb-2 text-xs bg-blue-50 text-blue-700 border-blue-200">Essential</Badge>
+                  <CardTitle className="text-lg group-hover:text-blue-600 transition-colors flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                    Pension Options A, B, C
+                  </CardTitle>
+                  <CardDescription>
+                    Complete guide to choosing between maximum benefits, survivor protection, and joint options.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground flex items-center gap-1">
+                      <Clock className="h-3 w-3" /> 8 min read
+                    </span>
+                    <span className="text-blue-600 flex items-center gap-1 group-hover:gap-2 transition-all">
+                      Read Guide <ArrowRight className="h-3 w-3" />
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
+
+          {/* View All Link */}
+          <div className="text-center mt-10">
+            <Button variant="outline" size="lg" asChild className="group">
+              <Link href="/blog" title="View all Massachusetts retirement planning articles">
+                <BookOpen className="mr-2 h-5 w-5" />
+                View All Retirement Guides
+                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </Button>
+          </div>
         </div>
       </section>
 

@@ -29,7 +29,7 @@
     "health:check": "curl -f http://localhost:3000/api/health || exit 1",
     "validate-calculations": "tsx scripts_app/validate-calculations.ts",
     "validate-calculations:critical": "tsx scripts_app/validate-calculations.ts --critical",
-    "test:msrb": "node pension-calculation-audit.js",
+    "test:msrb": "node scripts/archive/pension-calculation-audit.js",
     "test:msrb-jest": "jest tests/msrb-validation.test.js",
     "validate:msrb": "npm run test:msrb && echo '✅ All MSRB validations passed'",
     "validate:all": "npm run validate-calculations && npm run validate:msrb"
