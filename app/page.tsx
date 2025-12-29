@@ -27,9 +27,9 @@ import { ResponsiveAd, PremiumAlternative } from "@/components/ads/adsense"
 import { AutoAds } from "@/components/ads/auto-ads"
 
 export const metadata = generateSEOMetadata({
-  title: "Massachusetts Pension Calculator | Free MSRB Retirement Estimator 2025",
+  title: "Massachusetts Pension Calculator | Free MSRB Retirement Tool 2025",
   description:
-    "Free Massachusetts state employee pension calculator using official MSRB formulas. Calculate retirement benefits for Groups 1-4, COLA projections, Options A/B/C, and Social Security integration. Trusted by thousands of MA state workers.",
+    "Calculate your MA state pension in 60 seconds - FREE. Official MSRB formulas for Groups 1-4. See monthly benefits, COLA projections & survivor options. Trusted by 5,000+ Massachusetts state employees.",
   path: "/",
   keywords: [
     "Massachusetts pension calculator",

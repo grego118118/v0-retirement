@@ -11,9 +11,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowRight, BookOpen, Users, DollarSign, Calculator } from "lucide-react"
 
 export const metadata = generateSEOMetadata({
-  title: "Massachusetts Pension Calculator | Free MSRB Retirement Estimator 2025",
+  title: "MA State Pension Calculator 2025 | Free MSRB Tool - Results in 60 Seconds",
   description:
-    "Free Massachusetts state employee pension calculator using official MSRB formulas. Calculate your retirement benefits for Groups 1-4, COLA projections, and Options A/B/C. Accurate estimates in seconds.",
+    "Calculate your exact Massachusetts pension in 60 seconds. Free calculator using official MSRB formulas for Groups 1-4. See your monthly benefit, COLA projections & Options A/B/C comparison instantly.",
   path: "/calculator",
   keywords: [
     "Massachusetts pension calculator",
