@@ -1,6 +1,8 @@
 import { Metadata } from "next"
 import Link from "next/link"
 import { BreadcrumbStructuredData, FAQStructuredData } from "@/components/seo/structured-data"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ArrowRight, BookOpen, Calculator, FileText, Clock } from "lucide-react"
 
 export const metadata: Metadata = {
   title: "Massachusetts Pension Options A/B/C Compared",
@@ -44,12 +46,52 @@ export default function OptionsPage() {
         </table>
       </div>
 
+      {/* Related Blog Posts */}
+      <div className="mt-10">
+        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+          <BookOpen className="h-5 w-5" />
+          Related Guides
+        </h2>
+        <div className="grid gap-4 md:grid-cols-2">
+          <Link href="/blog/understanding-massachusetts-pension-options" className="group" title="Understanding Massachusetts Pension Options A, B, C">
+            <Card className="h-full hover:shadow-md transition-shadow hover:border-blue-300">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm flex items-center gap-2 group-hover:text-blue-600">
+                  <FileText className="h-4 w-4" />
+                  Complete Guide to Options A, B, C
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs text-muted-foreground mb-2">Detailed comparison of survivor benefits and how to choose the right option for your situation</p>
+                <span className="text-xs text-blue-600 flex items-center gap-1">Read More <ArrowRight className="h-3 w-3" /></span>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/blog/retirement-planning-for-massachusetts-state-employees" className="group" title="Retirement Planning Timeline">
+            <Card className="h-full hover:shadow-md transition-shadow hover:border-blue-300">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm flex items-center gap-2 group-hover:text-blue-600">
+                  <Clock className="h-4 w-4" />
+                  Retirement Planning Timeline
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs text-muted-foreground mb-2">Year-by-year checklist including when to make your option selection</p>
+                <span className="text-xs text-blue-600 flex items-center gap-1">Read More <ArrowRight className="h-3 w-3" /></span>
+              </CardContent>
+            </Card>
+          </Link>
+        </div>
+      </div>
+
       <div className="mt-8 space-x-2">
-        <Link href="/resources/groups" className="underline">Groups 1–4</Link>
+        <Link href="/resources/groups" className="underline" title="Massachusetts Retirement Groups 1-4">Groups 1–4</Link>
         <span>•</span>
-        <Link href="/resources/cola" className="underline">COLA Rules</Link>
+        <Link href="/resources/cola" className="underline" title="Massachusetts COLA Explained">COLA Rules</Link>
         <span>•</span>
-        <Link href="/calculator" className="underline">Estimate Now</Link>
+        <Link href="/calculator" className="underline" title="Massachusetts Pension Calculator">
+          <span className="inline-flex items-center gap-1"><Calculator className="h-3 w-3" /> Calculate Your Pension</span>
+        </Link>
       </div>
     </div>
   )

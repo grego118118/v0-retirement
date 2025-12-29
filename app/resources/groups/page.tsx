@@ -3,6 +3,7 @@ import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { BreadcrumbStructuredData, FAQStructuredData } from "@/components/seo/structured-data"
+import { ArrowRight, BookOpen, Calculator, Users, FileText } from "lucide-react"
 
 export const metadata: Metadata = {
   title: "Massachusetts Pension Groups (1–4) Explained",
@@ -77,13 +78,52 @@ export default function GroupsPage() {
         </Card>
       </div>
 
+      {/* Related Blog Posts */}
+      <div className="mt-10">
+        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+          <BookOpen className="h-5 w-5" />
+          Related Guides
+        </h2>
+        <div className="grid gap-4 md:grid-cols-2">
+          <Link href="/blog/massachusetts-retirement-groups-1-4-complete-guide" className="group" title="Complete Guide to Massachusetts Retirement Groups">
+            <Card className="h-full hover:shadow-md transition-shadow hover:border-blue-300">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm flex items-center gap-2 group-hover:text-blue-600">
+                  <Users className="h-4 w-4" />
+                  Complete Guide to Retirement Groups 1-4
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs text-muted-foreground mb-2">In-depth explanation of each group's eligibility, multipliers, and retirement age requirements</p>
+                <span className="text-xs text-blue-600 flex items-center gap-1">Read More <ArrowRight className="h-3 w-3" /></span>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/blog/maximizing-your-state-pension-benefits" className="group" title="Strategies to Maximize Your Pension Benefits">
+            <Card className="h-full hover:shadow-md transition-shadow hover:border-blue-300">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm flex items-center gap-2 group-hover:text-blue-600">
+                  <FileText className="h-4 w-4" />
+                  Maximize Your Pension Benefits
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs text-muted-foreground mb-2">Proven strategies to increase your retirement income regardless of your group</p>
+                <span className="text-xs text-blue-600 flex items-center gap-1">Read More <ArrowRight className="h-3 w-3" /></span>
+              </CardContent>
+            </Card>
+          </Link>
+        </div>
+      </div>
+
       <div className="mt-8 space-x-2">
-        <Badge variant="outline">Interlinking</Badge>
-        <Link href="/resources/cola" className="underline">COLA Rules</Link>
+        <Link href="/resources/cola" className="underline" title="Massachusetts COLA Explained">COLA Rules</Link>
         <span>•</span>
-        <Link href="/resources/options" className="underline">Options A/B/C</Link>
+        <Link href="/resources/options" className="underline" title="Massachusetts Pension Options A, B, C">Options A/B/C</Link>
         <span>•</span>
-        <Link href="/calculator" className="underline">Try the Calculator</Link>
+        <Link href="/calculator" className="underline" title="Massachusetts Pension Calculator">
+          <span className="inline-flex items-center gap-1"><Calculator className="h-3 w-3" /> Calculate Your Pension</span>
+        </Link>
       </div>
     </div>
   )

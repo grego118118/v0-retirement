@@ -320,6 +320,80 @@ export function Footer() {
           </Card>
         </div>
 
+        {/* Popular Articles Section */}
+        <div className="border-t border-gray-200 pt-6 pb-4">
+          <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            Most Helpful Guides
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+            <Link
+              href="/blog/massachusetts-cola-2026-complete-guide"
+              className="text-gray-600 hover:text-blue-700 transition-colors flex items-center gap-2"
+              title="Massachusetts COLA 2026 Complete Guide"
+            >
+              <span className="w-1.5 h-1.5 bg-blue-400 rounded-full flex-shrink-0"></span>
+              Massachusetts COLA 2026 Guide
+            </Link>
+            <Link
+              href="/blog/understanding-massachusetts-pension-options"
+              className="text-gray-600 hover:text-blue-700 transition-colors flex items-center gap-2"
+              title="Understanding Massachusetts Pension Options A, B, C"
+            >
+              <span className="w-1.5 h-1.5 bg-blue-400 rounded-full flex-shrink-0"></span>
+              Pension Options A, B, C Explained
+            </Link>
+            <Link
+              href="/blog/social-security-fairness-act-what-massachusetts-state-employees-need-to-know"
+              className="text-gray-600 hover:text-blue-700 transition-colors flex items-center gap-2"
+              title="Social Security Fairness Act Guide"
+            >
+              <span className="w-1.5 h-1.5 bg-blue-400 rounded-full flex-shrink-0"></span>
+              Social Security Fairness Act
+            </Link>
+            <Link
+              href="/blog/retirement-planning-for-massachusetts-state-employees"
+              className="text-gray-600 hover:text-blue-700 transition-colors flex items-center gap-2"
+              title="Retirement Planning Timeline"
+            >
+              <span className="w-1.5 h-1.5 bg-blue-400 rounded-full flex-shrink-0"></span>
+              Retirement Planning Timeline
+            </Link>
+            <Link
+              href="/blog/massachusetts-retirement-groups-1-4-complete-guide"
+              className="text-gray-600 hover:text-blue-700 transition-colors flex items-center gap-2"
+              title="Massachusetts Retirement Groups 1-4 Guide"
+            >
+              <span className="w-1.5 h-1.5 bg-blue-400 rounded-full flex-shrink-0"></span>
+              Retirement Groups 1-4 Guide
+            </Link>
+            <Link
+              href="/blog/maximizing-your-state-pension-benefits"
+              className="text-gray-600 hover:text-blue-700 transition-colors flex items-center gap-2"
+              title="Strategies to Maximize Your Pension Benefits"
+            >
+              <span className="w-1.5 h-1.5 bg-blue-400 rounded-full flex-shrink-0"></span>
+              Maximize Your Pension Benefits
+            </Link>
+            <Link
+              href="/blog/creditable-service-guide-for-ma-state-employees"
+              className="text-gray-600 hover:text-blue-700 transition-colors flex items-center gap-2"
+              title="Creditable Service Purchase Guide"
+            >
+              <span className="w-1.5 h-1.5 bg-blue-400 rounded-full flex-shrink-0"></span>
+              Creditable Service Guide
+            </Link>
+            <Link
+              href="/blog/retirement-healthcare-options-for-state-employees"
+              className="text-gray-600 hover:text-blue-700 transition-colors flex items-center gap-2"
+              title="Healthcare Options for Retired State Employees"
+            >
+              <span className="w-1.5 h-1.5 bg-blue-400 rounded-full flex-shrink-0"></span>
+              Retiree Healthcare Options
+            </Link>
+          </div>
+        </div>
+
         {/* Additional Resources Bar */}
         <div className="border-t border-gray-200 pt-6 pb-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
@@ -329,17 +403,17 @@ export function Footer() {
               <h4 className="font-medium text-gray-900 mb-2">Publications & Forms</h4>
               <ul className="space-y-1 text-gray-600">
                 <li>
-                  <Link href="/blog" className="hover:text-gray-900 transition-colors">
+                  <Link href="/blog" className="hover:text-gray-900 transition-colors" title="Massachusetts Retirement Planning Blog">
                     Retirement Planning Blog
                   </Link>
                 </li>
                 <li>
-                  <Link href="/guides" className="hover:text-gray-900 transition-colors">
+                  <Link href="/guides" className="hover:text-gray-900 transition-colors" title="Retirement Planning Guides">
                     Planning Guides
                   </Link>
                 </li>
                 <li>
-                  <Link href="/resources" className="hover:text-gray-900 transition-colors">
+                  <Link href="/resources" className="hover:text-gray-900 transition-colors" title="Complete Resource Library">
                     Complete Resource Library
                   </Link>
                 </li>
@@ -351,17 +425,17 @@ export function Footer() {
               <h4 className="font-medium text-gray-900 mb-2">Educational Resources</h4>
               <ul className="space-y-1 text-gray-600">
                 <li>
-                  <Link href="/checklist" className="hover:text-gray-900 transition-colors">
+                  <Link href="/checklist" className="hover:text-gray-900 transition-colors" title="Retirement Planning Checklist">
                     Retirement Planning Checklist
                   </Link>
                 </li>
                 <li>
-                  <Link href="/service-guide" className="hover:text-gray-900 transition-colors">
+                  <Link href="/service-guide" className="hover:text-gray-900 transition-colors" title="Service Credit Guide">
                     Service Credit Guide
                   </Link>
                 </li>
                 <li>
-                  <Link href="/financial-literacy" className="hover:text-gray-900 transition-colors">
+                  <Link href="/financial-literacy" className="hover:text-gray-900 transition-colors" title="Financial Planning Resources">
                     Financial Planning Resources
                   </Link>
                 </li>
@@ -373,17 +447,17 @@ export function Footer() {
               <h4 className="font-medium text-gray-900 mb-2">Events & Contact</h4>
               <ul className="space-y-1 text-gray-600">
                 <li>
-                  <Link href="/events" className="hover:text-gray-900 transition-colors">
+                  <Link href="/events" className="hover:text-gray-900 transition-colors" title="Planning Workshops">
                     Planning Workshops
                   </Link>
                 </li>
                 <li>
-                  <Link href="/webinars" className="hover:text-gray-900 transition-colors">
+                  <Link href="/webinars" className="hover:text-gray-900 transition-colors" title="Educational Webinars">
                     Educational Webinars
                   </Link>
                 </li>
                 <li>
-                  <Link href="/contact" className="hover:text-gray-900 transition-colors">
+                  <Link href="/contact" className="hover:text-gray-900 transition-colors" title="Contact Support">
                     Contact Support
                   </Link>
                 </li>
