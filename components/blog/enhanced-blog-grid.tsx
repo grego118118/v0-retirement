@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { CalendarIcon, Clock, User, ArrowRight, Bot, Sparkles, TrendingUp, Star } from 'lucide-react'
+import { CalendarIcon, Clock, User, ArrowRight, TrendingUp, Star } from 'lucide-react'
 import { ResponsiveBlogImage } from './blog-image'
 import { ResponsiveAd, PremiumAlternative } from '@/components/ads/adsense'
 import { BlogPost } from '@/types/ai-blog'
@@ -18,14 +18,12 @@ interface EnhancedBlogGridProps {
   posts?: BlogPost[]
   selectedCategory?: string
   searchQuery?: string
-  showAIGenerated?: boolean
 }
 
 export function EnhancedBlogGrid({
   posts = [],
   selectedCategory = 'all',
-  searchQuery = '',
-  showAIGenerated = true
+  searchQuery = ''
 }: EnhancedBlogGridProps) {
   const { data: session } = useSession()
   const router = useRouter()
@@ -37,7 +35,7 @@ export function EnhancedBlogGrid({
 
   useEffect(() => {
     loadBlogPosts()
-  }, [selectedCategory, searchQuery, showAIGenerated])
+  }, [selectedCategory, searchQuery])
 
   const loadBlogPosts = async () => {
     try {
@@ -66,11 +64,6 @@ export function EnhancedBlogGrid({
           )
         }
 
-        // Apply AI generated filter
-        if (!showAIGenerated) {
-          filteredPosts = filteredPosts.filter(post => !post.is_ai_generated)
-        }
-
         setDisplayPosts(filteredPosts)
         setLoading(false)
         return
@@ -87,10 +80,6 @@ export function EnhancedBlogGrid({
 
       if (searchQuery) {
         params.append('search', searchQuery)
-      }
-
-      if (!showAIGenerated) {
-        params.append('ai_generated', 'false')
       }
 
       const response = await fetch(`/api/blog/posts?${params.toString()}` , { credentials: 'include' })
@@ -135,11 +124,6 @@ export function EnhancedBlogGrid({
             post.excerpt?.toLowerCase().includes(query) ||
             post.seo_keywords?.some(keyword => keyword.toLowerCase().includes(query))
           )
-        }
-
-        // Apply AI filter to static data
-        if (!showAIGenerated) {
-          filteredPosts = filteredPosts.filter(post => !post.is_ai_generated)
         }
 
         setDisplayPosts(filteredPosts)
@@ -189,10 +173,6 @@ export function EnhancedBlogGrid({
             p.seo_keywords?.some(keyword => keyword.toLowerCase().includes(query))
           )
         }
-        if (!showAIGenerated) {
-          filteredPosts = filteredPosts.filter(p => !p.is_ai_generated)
-        }
-
         setDisplayPosts(filteredPosts)
         setError(null)
       } else {
@@ -237,9 +217,6 @@ export function EnhancedBlogGrid({
           p.excerpt?.toLowerCase().includes(query) ||
           p.seo_keywords?.some(keyword => keyword.toLowerCase().includes(query))
         )
-      }
-      if (!showAIGenerated) {
-        filteredPosts = filteredPosts.filter(p => !p.is_ai_generated)
       }
 
       setDisplayPosts(filteredPosts)
@@ -366,12 +343,6 @@ export function EnhancedBlogGrid({
             />
             <CardHeader className="pb-2">
               <div className="flex items-center gap-2 mb-2 flex-wrap">
-                {post.is_ai_generated && (
-                  <Badge variant="outline" className="text-purple-600 border-purple-200 bg-purple-50">
-                    <Bot className="w-3 h-3 mr-1" />
-                    AI Generated
-                  </Badge>
-                )}
                 {getQualityBadge(post.content_quality_score)}
               </div>
               <CardTitle className="text-lg leading-tight line-clamp-2 mb-2">

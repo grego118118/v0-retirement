@@ -3,16 +3,12 @@
 import { useState, useEffect } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Switch } from '@/components/ui/switch'
-import { Label } from '@/components/ui/label'
-import { Bot, Filter, X } from 'lucide-react'
+import { Filter, X } from 'lucide-react'
 import { BlogCategory } from '../../types/ai-blog'
 
 interface BlogCategoryFilterProps {
   selectedCategory: string
   onCategoryChange: (category: string) => void
-  showAIGenerated: boolean
-  onAIGeneratedChange: (show: boolean) => void
   searchQuery: string
   onSearchChange: (query: string) => void
 }
@@ -20,8 +16,6 @@ interface BlogCategoryFilterProps {
 export function BlogCategoryFilter({
   selectedCategory,
   onCategoryChange,
-  showAIGenerated,
-  onAIGeneratedChange,
   searchQuery,
   onSearchChange
 }: BlogCategoryFilterProps) {
@@ -152,10 +146,9 @@ export function BlogCategoryFilter({
   const clearFilters = () => {
     onCategoryChange('all')
     onSearchChange('')
-    onAIGeneratedChange(true)
   }
 
-  const hasActiveFilters = selectedCategory !== 'all' || searchQuery || !showAIGenerated
+  const hasActiveFilters = selectedCategory !== 'all' || searchQuery
 
   if (loading) {
     return (
@@ -218,24 +211,6 @@ export function BlogCategoryFilter({
         </div>
       </div>
 
-      {/* AI Content Filter */}
-      <div className="flex items-center space-x-3 p-3 bg-purple-50 rounded-lg border border-purple-200">
-        <Bot className="w-5 h-5 text-purple-600" />
-        <div className="flex-1">
-          <Label htmlFor="ai-content-toggle" className="text-sm font-medium text-purple-900">
-            Show AI-Generated Content
-          </Label>
-          <p className="text-xs text-purple-700">
-            Include articles created by our AI content system
-          </p>
-        </div>
-        <Switch
-          id="ai-content-toggle"
-          checked={showAIGenerated}
-          onCheckedChange={onAIGeneratedChange}
-        />
-      </div>
-
       {/* Active Filters Summary */}
       {hasActiveFilters && (
         <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
@@ -251,11 +226,6 @@ export function BlogCategoryFilter({
                 {searchQuery && (
                   <div className="text-xs">
                     Search: "{searchQuery}"
-                  </div>
-                )}
-                {!showAIGenerated && (
-                  <div className="text-xs">
-                    Hiding AI-generated content
                   </div>
                 )}
               </div>
@@ -278,18 +248,12 @@ export function BlogCategoryFilter({
           {(() => {
             const category = categories.find(c => c.slug === selectedCategory)
             if (!category) return null
-            
+
             return (
               <div className="text-sm">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-lg">{category.icon}</span>
                   <span className="font-medium text-gray-900">{category.name}</span>
-                  {category.is_ai_topic && (
-                    <Badge variant="outline" className="text-purple-600 border-purple-200 bg-purple-50 text-xs">
-                      <Bot className="w-3 h-3 mr-1" />
-                      AI Enhanced
-                    </Badge>
-                  )}
                 </div>
                 <p className="text-gray-600">{category.description}</p>
               </div>

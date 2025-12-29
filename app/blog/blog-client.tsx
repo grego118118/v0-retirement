@@ -3,7 +3,7 @@
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Search, Bot, Sparkles } from "lucide-react"
+import { Search, Sparkles, BookOpen } from "lucide-react"
 import { CalculatorCTA } from "@/components/blog/calculator-cta"
 import { ResponsiveAd, PremiumAlternative } from "@/components/ads/adsense"
 import { EnhancedBlogGrid } from "@/components/blog/enhanced-blog-grid"
@@ -13,7 +13,6 @@ import { useState } from 'react'
 export default function BlogClientComponent() {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
-  const [showAIGenerated, setShowAIGenerated] = useState(true)
 
   return (
     <div className="container py-8 md:py-12">
@@ -21,12 +20,12 @@ export default function BlogClientComponent() {
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold tracking-tight mb-2">Massachusetts Retirement Planning Blog</h1>
           <p className="text-muted-foreground max-w-3xl mx-auto">
-            Expert articles, AI-powered insights, and comprehensive guides to help Massachusetts state employees plan for retirement and maximize their pension benefits.
+            Expert articles and comprehensive guides to help Massachusetts state employees plan for retirement and maximize their pension benefits.
           </p>
           <div className="flex items-center justify-center gap-2 mt-4">
-            <Badge variant="outline" className="text-purple-600 border-purple-200 bg-purple-50">
-              <Bot className="w-3 h-3 mr-1" />
-              AI-Enhanced Content
+            <Badge variant="outline" className="text-blue-600 border-blue-200 bg-blue-50">
+              <BookOpen className="w-3 h-3 mr-1" />
+              In-Depth Guides
             </Badge>
             <Badge variant="outline" className="text-green-600 border-green-200 bg-green-50">
               <Sparkles className="w-3 h-3 mr-1" />
@@ -55,8 +54,6 @@ export default function BlogClientComponent() {
               <BlogCategoryFilter
                 selectedCategory={selectedCategory}
                 onCategoryChange={setSelectedCategory}
-                showAIGenerated={showAIGenerated}
-                onAIGeneratedChange={setShowAIGenerated}
                 searchQuery={searchQuery}
                 onSearchChange={setSearchQuery}
               />
@@ -65,23 +62,6 @@ export default function BlogClientComponent() {
 
           {/* Main Content */}
           <div className="lg:col-span-3 space-y-8">
-
-            {/* Featured AI Content Notice */}
-            <div className="mb-8 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2">
-                  <Bot className="w-5 h-5 text-purple-600" />
-                  <Sparkles className="w-4 h-4 text-blue-600" />
-                </div>
-                <div>
-                  <h3 className="font-medium text-gray-900">AI-Powered Content</h3>
-                  <p className="text-sm text-gray-600">
-                    Our advanced AI system generates comprehensive, fact-checked articles about Massachusetts retirement benefits,
-                    reviewed by experts for accuracy and relevance.
-                  </p>
-                </div>
-              </div>
-            </div>
 
             {/* Calculator CTA */}
             <div className="mb-8">
@@ -98,31 +78,30 @@ export default function BlogClientComponent() {
             <EnhancedBlogGrid
               selectedCategory={selectedCategory}
               searchQuery={searchQuery}
-              showAIGenerated={showAIGenerated}
             />
 
           </div>
         </div>
 
         {/* Newsletter Signup */}
-        <div className="mt-12 bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg border border-blue-200">
+        <div className="mt-12 bg-gradient-to-r from-blue-50 to-green-50 p-6 rounded-lg border border-blue-200">
           <div className="max-w-2xl mx-auto text-center">
             <div className="flex items-center justify-center gap-2 mb-3">
-              <Bot className="w-5 h-5 text-blue-600" />
-              <h2 className="text-xl font-semibold">Stay Updated with AI-Powered Insights</h2>
+              <BookOpen className="w-5 h-5 text-blue-600" />
+              <h2 className="text-xl font-semibold">Stay Updated on Massachusetts Retirement</h2>
             </div>
             <p className="text-muted-foreground mb-4">
-              Subscribe to receive the latest AI-generated retirement planning insights, pension updates, and personalized
+              Subscribe to receive the latest retirement planning insights, pension updates, and personalized
               resources for Massachusetts state employees.
             </p>
             <div className="flex flex-col sm:flex-row gap-2">
               <Input placeholder="Your email address" type="email" className="sm:flex-1" />
-              <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+              <Button className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700">
                 Subscribe
               </Button>
             </div>
             <p className="text-xs text-muted-foreground mt-2">
-              Get weekly AI-curated content. We respect your privacy. Unsubscribe at any time.
+              Get weekly retirement planning content. We respect your privacy. Unsubscribe at any time.
             </p>
           </div>
         </div>
