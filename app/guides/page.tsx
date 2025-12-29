@@ -807,6 +807,58 @@ export default function RetirementGuidePage() {
           </TabsContent>
         </Tabs>
 
+        {/* Related Blog Articles - SEO Internal Linking */}
+        <div className="mt-12">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Related Retirement Articles</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Link href="/blog/massachusetts-cola-2026-complete-guide" className="group" title="Massachusetts COLA 2026 Guide">
+              <Card className="h-full hover:shadow-lg transition-all hover:border-blue-300">
+                <CardContent className="p-4">
+                  <Badge variant="outline" className="mb-2 text-xs bg-green-50 text-green-700">COLA</Badge>
+                  <h3 className="font-semibold text-sm group-hover:text-blue-600 mb-2">COLA 2026 Complete Guide</h3>
+                  <p className="text-xs text-muted-foreground">Understanding the 3% COLA rate and $13,000 cap</p>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/blog/understanding-massachusetts-pension-options" className="group" title="Pension Options A, B, C Guide">
+              <Card className="h-full hover:shadow-lg transition-all hover:border-blue-300">
+                <CardContent className="p-4">
+                  <Badge variant="outline" className="mb-2 text-xs bg-blue-50 text-blue-700">Options</Badge>
+                  <h3 className="font-semibold text-sm group-hover:text-blue-600 mb-2">Pension Options A, B, C</h3>
+                  <p className="text-xs text-muted-foreground">Choosing the right retirement option</p>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/blog/massachusetts-retirement-groups-1-4-complete-guide" className="group" title="Retirement Groups Guide">
+              <Card className="h-full hover:shadow-lg transition-all hover:border-blue-300">
+                <CardContent className="p-4">
+                  <Badge variant="outline" className="mb-2 text-xs bg-purple-50 text-purple-700">Groups</Badge>
+                  <h3 className="font-semibold text-sm group-hover:text-blue-600 mb-2">Retirement Groups 1-4</h3>
+                  <p className="text-xs text-muted-foreground">Eligibility and benefits by group</p>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/blog/retirement-planning-for-massachusetts-state-employees" className="group" title="Retirement Planning Timeline">
+              <Card className="h-full hover:shadow-lg transition-all hover:border-blue-300">
+                <CardContent className="p-4">
+                  <Badge variant="outline" className="mb-2 text-xs bg-orange-50 text-orange-700">Planning</Badge>
+                  <h3 className="font-semibold text-sm group-hover:text-blue-600 mb-2">Planning Timeline</h3>
+                  <p className="text-xs text-muted-foreground">Year-by-year retirement preparation</p>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
+          <div className="text-center mt-6">
+            <Button variant="outline" asChild>
+              <Link href="/blog" className="inline-flex items-center gap-2">
+                <BookOpen className="h-4 w-4" />
+                View All Articles
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+
         {/* Footer CTA Section */}
         <div className="mt-12 text-center">
           <Card className="bg-gradient-to-r from-primary/10 to-blue-100 border-primary/20">

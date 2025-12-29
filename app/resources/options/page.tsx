@@ -1,6 +1,7 @@
 import { Metadata } from "next"
 import Link from "next/link"
 import { BreadcrumbStructuredData, FAQStructuredData } from "@/components/seo/structured-data"
+import { Breadcrumbs } from "@/components/seo/breadcrumbs"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowRight, BookOpen, Calculator, FileText, Clock } from "lucide-react"
 
@@ -25,6 +26,15 @@ export default function OptionsPage() {
     <div className="container py-10">
       <BreadcrumbStructuredData items={breadcrumbs} />
       <FAQStructuredData faqs={faqs} />
+
+      {/* Visual Breadcrumbs */}
+      <Breadcrumbs
+        items={[
+          { label: "Resources", href: "/resources" },
+          { label: "Options A, B, C" }
+        ]}
+        className="mb-4"
+      />
 
       <h1 className="text-3xl font-bold mb-4">Options A/B/C</h1>
       {/* Answer box for AEO */}

@@ -1,6 +1,7 @@
 import { Metadata } from "next"
 import Link from "next/link"
 import { BreadcrumbStructuredData, FAQStructuredData } from "@/components/seo/structured-data"
+import { Breadcrumbs } from "@/components/seo/breadcrumbs"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowRight, BookOpen, Calculator, Shield, TrendingUp } from "lucide-react"
 
@@ -24,6 +25,15 @@ export default function WepGpoPage() {
     <div className="container py-10">
       <BreadcrumbStructuredData items={breadcrumbs} />
       <FAQStructuredData faqs={faqs} />
+
+      {/* Visual Breadcrumbs */}
+      <Breadcrumbs
+        items={[
+          { label: "Resources", href: "/resources" },
+          { label: "WEP/GPO" }
+        ]}
+        className="mb-4"
+      />
 
       <h1 className="text-3xl font-bold mb-4">WEP/GPO Overview</h1>
       <p className="text-muted-foreground mb-6">Summary of how WEP/GPO worked and their impact on MA employees, plus links to official resources.</p>

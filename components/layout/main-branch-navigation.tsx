@@ -8,7 +8,14 @@
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
-import { Calculator, Home, User, BookOpen, Phone, HelpCircle, Info } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu'
+import { Calculator, Home, User, BookOpen, Phone, HelpCircle, Info, FolderOpen, ChevronDown, TrendingUp, Users, FileText, Shield } from 'lucide-react'
 
 export function MainBranchNavigation() {
   const { data: session } = useSession()
@@ -38,6 +45,20 @@ export function MainBranchNavigation() {
       href: '/blog',
       icon: BookOpen,
       description: 'Retirement planning insights'
+    },
+    {
+      name: 'Resources',
+      href: '/resources',
+      icon: FolderOpen,
+      description: 'Resource hub',
+      hasDropdown: true,
+      dropdownItems: [
+        { name: 'All Resources', href: '/resources', icon: FolderOpen },
+        { name: 'COLA Information', href: '/resources/cola', icon: TrendingUp },
+        { name: 'Retirement Groups', href: '/resources/groups', icon: Users },
+        { name: 'Pension Options', href: '/resources/options', icon: FileText },
+        { name: 'WEP/GPO', href: '/resources/wep-gpo', icon: Shield },
+      ]
     },
     {
       name: 'About',
@@ -77,6 +98,40 @@ export function MainBranchNavigation() {
                 }
 
                 const Icon = item.icon
+
+                // Handle dropdown items
+                if (item.hasDropdown && item.dropdownItems) {
+                  return (
+                    <DropdownMenu key={item.name}>
+                      <DropdownMenuTrigger className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors outline-none">
+                        <Icon className="h-4 w-4 mr-1" />
+                        {item.name}
+                        <ChevronDown className="h-3 w-3 ml-1" />
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start" className="w-56">
+                        {item.dropdownItems.map((dropdownItem, index) => {
+                          const DropdownIcon = dropdownItem.icon
+                          return (
+                            <div key={dropdownItem.name}>
+                              <DropdownMenuItem asChild>
+                                <Link
+                                  href={dropdownItem.href}
+                                  className="flex items-center gap-2 cursor-pointer"
+                                  title={dropdownItem.name}
+                                >
+                                  <DropdownIcon className="h-4 w-4" />
+                                  {dropdownItem.name}
+                                </Link>
+                              </DropdownMenuItem>
+                              {index === 0 && <DropdownMenuSeparator />}
+                            </div>
+                          )
+                        })}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )
+                }
+
                 return (
                   <Link
                     key={item.name}
@@ -126,6 +181,42 @@ export function MainBranchNavigation() {
             }
 
             const Icon = item.icon
+
+            // Handle dropdown items in mobile view
+            if (item.hasDropdown && item.dropdownItems) {
+              return (
+                <div key={item.name}>
+                  <Link
+                    href={item.href}
+                    className="block pl-3 pr-4 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+                  >
+                    <div className="flex items-center">
+                      <Icon className="h-4 w-4 mr-2" />
+                      {item.name}
+                    </div>
+                  </Link>
+                  {/* Mobile submenu items */}
+                  <div className="pl-8 space-y-1">
+                    {item.dropdownItems.slice(1).map((dropdownItem) => {
+                      const DropdownIcon = dropdownItem.icon
+                      return (
+                        <Link
+                          key={dropdownItem.name}
+                          href={dropdownItem.href}
+                          className="block pl-3 pr-4 py-1.5 text-sm text-gray-600 hover:text-blue-600 hover:bg-gray-50"
+                        >
+                          <div className="flex items-center">
+                            <DropdownIcon className="h-3 w-3 mr-2" />
+                            {dropdownItem.name}
+                          </div>
+                        </Link>
+                      )
+                    })}
+                  </div>
+                </div>
+              )
+            }
+
             return (
               <Link
                 key={item.name}

@@ -3,6 +3,7 @@ import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { BreadcrumbStructuredData, FAQStructuredData } from "@/components/seo/structured-data"
+import { Breadcrumbs } from "@/components/seo/breadcrumbs"
 import { ArrowRight, BookOpen, Calculator, Users, FileText } from "lucide-react"
 
 export const metadata: Metadata = {
@@ -27,6 +28,15 @@ export default function GroupsPage() {
     <div className="container py-10">
       <BreadcrumbStructuredData items={breadcrumbs} />
       <FAQStructuredData faqs={faqs} />
+
+      {/* Visual Breadcrumbs */}
+      <Breadcrumbs
+        items={[
+          { label: "Resources", href: "/resources" },
+          { label: "Retirement Groups 1-4" }
+        ]}
+        className="mb-4"
+      />
 
       <h1 className="text-3xl font-bold mb-4">Massachusetts Pension Groups (1–4) Explained</h1>
       <p className="text-muted-foreground mb-6">Minimum retirement ages and multipliers vary by group. The 80% cap applies before Option B/C reductions.</p>

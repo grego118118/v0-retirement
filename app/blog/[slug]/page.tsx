@@ -15,6 +15,7 @@ import { BlogHeroImage, RelatedPostImage } from "@/components/blog/blog-image"
 import { CalculatorCTA } from "@/components/blog/calculator-cta"
 import { ResponsiveAd, PremiumAlternative } from "@/components/ads/adsense"
 import { BreadcrumbStructuredData, BlogPostingStructuredData } from "@/components/seo/structured-data"
+import { Breadcrumbs } from "@/components/seo/breadcrumbs"
 
 export const dynamic = "force-dynamic"
 export const fetchCache = "force-no-store"
@@ -95,6 +96,16 @@ export default async function BlogPostPage({ params }: PageProps) {
               description={post.description}
               reviewedByName={post.authorTitle || 'Editorial Reviewer'}
               dateModified={new Date(post.date).toISOString()}
+            />
+
+            {/* Visual Breadcrumbs */}
+            <Breadcrumbs
+              items={[
+                { label: "Blog", href: "/blog" },
+                { label: post.category, href: `/blog?category=${encodeURIComponent(post.category)}` },
+                { label: post.title }
+              ]}
+              className="mb-4"
             />
 
             <Link

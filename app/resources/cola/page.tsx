@@ -1,6 +1,7 @@
 import { Metadata } from "next"
 import Link from "next/link"
 import { BreadcrumbStructuredData, FAQStructuredData } from "@/components/seo/structured-data"
+import { Breadcrumbs } from "@/components/seo/breadcrumbs"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowRight, BookOpen, Calculator, TrendingUp } from "lucide-react"
 
@@ -24,6 +25,16 @@ export default function COLAPage() {
     <div className="container py-10">
       <BreadcrumbStructuredData items={breadcrumbs} />
       <FAQStructuredData faqs={faqs} />
+
+      {/* Visual Breadcrumbs */}
+      <Breadcrumbs
+        items={[
+          { label: "Resources", href: "/resources" },
+          { label: "COLA" }
+        ]}
+        className="mb-4"
+      />
+
       <h1 className="text-3xl font-bold mb-4">Massachusetts COLA Explained</h1>
       {/* Answer box for AEO */}
       <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
