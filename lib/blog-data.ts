@@ -1,6 +1,213 @@
 // This would typically come from a CMS or database
 export const blogPosts = [
   {
+    id: "massachusetts-cola-2026-complete-guide",
+    title: "Massachusetts COLA 2026: Complete Guide to Cost of Living Adjustments for State Pensions",
+    description:
+      "Everything you need to know about the 2026 Massachusetts pension COLA: 3% rate on first $13,000, $390 maximum annual increase, and how it affects your retirement benefits.",
+    date: "December 29, 2025",
+    readTime: "10 min read",
+    author: "Greg O",
+    authorTitle: "Retirement Planning Specialist",
+    category: "COLA",
+    tags: ["COLA", "cost of living adjustment", "pension benefits", "retirement planning", "2026"],
+    image: "/images/blog/massachusetts-cola-2026.svg",
+    content: `
+      <h2>Understanding Massachusetts COLA for 2026</h2>
+      <p>The Cost of Living Adjustment (COLA) is a critical component of your Massachusetts state pension that helps protect your retirement income against inflation. For 2026, the Massachusetts State Retirement Board has maintained the established COLA structure that applies to all eligible retirees in the Massachusetts State Employees' Retirement System (MSERS).</p>
+
+      <p>This comprehensive guide explains everything you need to know about how COLA works, what to expect in 2026, and how to maximize your retirement benefits.</p>
+
+      <h2>2026 COLA Key Facts at a Glance</h2>
+      <p>Here are the essential numbers every Massachusetts state retiree should know:</p>
+
+      <ul>
+        <li><strong>COLA Rate:</strong> 3% annually</li>
+        <li><strong>Base Amount:</strong> Applied to the first $13,000 of your annual pension only</li>
+        <li><strong>Maximum Annual Increase:</strong> $390 per year</li>
+        <li><strong>Maximum Monthly Increase:</strong> $32.50 per month</li>
+        <li><strong>When It Starts:</strong> The first year after retirement, then annually</li>
+        <li><strong>Compounding:</strong> COLA is applied to your adjusted pension amount each year</li>
+      </ul>
+
+      <h2>How Massachusetts COLA Is Calculated</h2>
+      <p>Understanding the COLA calculation is essential for accurate retirement planning. Here's how it works:</p>
+
+      <h3>The Basic Formula</h3>
+      <p>Massachusetts COLA is calculated as 3% of the first $13,000 of your annual pension benefit. This means:</p>
+
+      <ul>
+        <li>If your pension is $13,000 or less: COLA = Pension × 3%</li>
+        <li>If your pension exceeds $13,000: COLA = $13,000 × 3% = $390 (maximum)</li>
+      </ul>
+
+      <h3>Example Calculations</h3>
+      <p><strong>Example 1: Pension Below Base Amount</strong></p>
+      <p>Annual pension: $10,000</p>
+      <p>COLA calculation: $10,000 × 3% = $300 per year ($25 per month)</p>
+
+      <p><strong>Example 2: Pension at Base Amount</strong></p>
+      <p>Annual pension: $13,000</p>
+      <p>COLA calculation: $13,000 × 3% = $390 per year ($32.50 per month)</p>
+
+      <p><strong>Example 3: Pension Above Base Amount</strong></p>
+      <p>Annual pension: $45,000</p>
+      <p>COLA calculation: $13,000 × 3% = $390 per year (capped at maximum)</p>
+      <p>Effective COLA rate: $390 ÷ $45,000 = 0.87%</p>
+
+      <h2>The Effective COLA Rate: What It Really Means</h2>
+      <p>One of the most important concepts to understand is the "effective COLA rate." Because COLA only applies to the first $13,000 of your pension, the actual percentage increase you receive decreases as your pension amount increases.</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Annual Pension</th>
+            <th>COLA Amount</th>
+            <th>Effective Rate</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>$8,000</td>
+            <td>$240</td>
+            <td>3.00%</td>
+          </tr>
+          <tr>
+            <td>$13,000</td>
+            <td>$390</td>
+            <td>3.00%</td>
+          </tr>
+          <tr>
+            <td>$20,000</td>
+            <td>$390</td>
+            <td>1.95%</td>
+          </tr>
+          <tr>
+            <td>$35,000</td>
+            <td>$390</td>
+            <td>1.11%</td>
+          </tr>
+          <tr>
+            <td>$50,000</td>
+            <td>$390</td>
+            <td>0.78%</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>This declining effective rate is an important consideration for retirement planning, especially for higher-earning employees.</p>
+
+      <h2>COLA Compounding: How Your Benefits Grow Over Time</h2>
+      <p>One positive aspect of Massachusetts COLA is that it compounds annually. This means each year's COLA is added to your pension, and the following year's COLA is calculated on the new, higher amount.</p>
+
+      <h3>10-Year COLA Projection Example</h3>
+      <p>Starting with a $45,000 annual pension receiving the maximum $390 COLA each year:</p>
+
+      <ul>
+        <li>Year 1: $45,000 + $390 = $45,390</li>
+        <li>Year 5: $46,560 (total increase: $1,560)</li>
+        <li>Year 10: $48,510 (total increase: $3,510)</li>
+        <li>Year 20: $52,800 (total increase: $7,800)</li>
+      </ul>
+
+      <p>Over a 20-year retirement, the cumulative COLA increases can add nearly $8,000 to your annual pension—a significant boost to your retirement income.</p>
+
+      <h2>When Does COLA Start?</h2>
+      <p>Your first COLA increase begins in the first full year after your retirement date. Here's how the timing works:</p>
+
+      <ul>
+        <li>If you retire in 2025, your first COLA will be applied in 2026</li>
+        <li>COLA increases are typically applied on July 1 of each year</li>
+        <li>You must be retired for at least one full year to receive your first COLA</li>
+      </ul>
+
+      <h2>Important Legislative Context</h2>
+      <p>It's crucial to understand that Massachusetts COLA is not guaranteed and requires annual legislative approval. Here are key points to keep in mind:</p>
+
+      <ul>
+        <li><strong>Subject to Legislative Approval:</strong> COLA rates are approved annually by the Massachusetts Legislature and may vary based on state budget conditions</li>
+        <li><strong>Historical Consistency:</strong> The 3% rate on the first $13,000 has been the standard for several years</li>
+        <li><strong>COLA Commission:</strong> A special COLA Commission periodically reviews potential base amount increases</li>
+        <li><strong>Budget Considerations:</strong> Economic conditions and state budget health can influence COLA decisions</li>
+      </ul>
+
+      <p>Retirees should monitor annual state budget discussions for potential COLA adjustments and stay informed about any proposed changes to the COLA structure.</p>
+
+      <h2>COLA vs. Inflation: Understanding the Gap</h2>
+      <p>While COLA helps protect against inflation, it's important to understand that the Massachusetts COLA may not fully keep pace with actual inflation, especially for higher pension amounts:</p>
+
+      <ul>
+        <li>The 3% COLA rate is fixed, regardless of actual inflation rates</li>
+        <li>The $13,000 base cap limits the benefit for higher pensions</li>
+        <li>In years of high inflation (like 2022-2023), the effective COLA may fall short of actual cost increases</li>
+      </ul>
+
+      <p>This is why comprehensive retirement planning should include other income sources and savings strategies to supplement your pension.</p>
+
+      <h2>Strategies to Maximize Your COLA Benefits</h2>
+      <p>While you can't change the COLA formula, there are strategies to optimize your overall retirement income:</p>
+
+      <h3>1. Understand Your Total Retirement Picture</h3>
+      <p>COLA is just one component of your retirement income. Consider how it interacts with:</p>
+      <ul>
+        <li>Your base pension amount</li>
+        <li>Social Security benefits (if applicable)</li>
+        <li>Personal savings and investments</li>
+        <li>Other retirement accounts (401(k), IRA, etc.)</li>
+      </ul>
+
+      <h3>2. Plan for Healthcare Costs</h3>
+      <p>Healthcare costs often rise faster than general inflation. Factor in:</p>
+      <ul>
+        <li>Medicare premiums and supplemental insurance</li>
+        <li>Out-of-pocket medical expenses</li>
+        <li>Long-term care considerations</li>
+      </ul>
+
+      <h3>3. Consider Retirement Timing</h3>
+      <p>Your retirement date affects when COLA begins. Working longer means:</p>
+      <ul>
+        <li>A higher base pension (more years of service)</li>
+        <li>Delayed COLA start, but applied to a larger base</li>
+        <li>Potentially higher average salary for pension calculation</li>
+      </ul>
+
+      <h2>Frequently Asked Questions About Massachusetts COLA</h2>
+
+      <h3>Q: Is the 3% COLA guaranteed every year?</h3>
+      <p>A: No. COLA requires annual legislative approval and is subject to state budget conditions. While the 3% rate has been consistent in recent years, it is not guaranteed.</p>
+
+      <h3>Q: Why is COLA only applied to the first $13,000?</h3>
+      <p>A: The $13,000 base was established by the Legislature to balance providing inflation protection for retirees while managing the state's pension obligations. The COLA Commission periodically reviews this amount.</p>
+
+      <h3>Q: Can the COLA base amount increase?</h3>
+      <p>A: Yes, the Legislature can vote to increase the base amount. The COLA Commission reviews and makes recommendations, but any changes require legislative action.</p>
+
+      <h3>Q: How does COLA affect my taxes?</h3>
+      <p>A: COLA increases are added to your taxable pension income. Massachusetts does not tax pension income for state retirees, but federal taxes may apply.</p>
+
+      <h3>Q: What if I chose Option B or Option C for my pension?</h3>
+      <p>A: COLA applies to your actual pension amount regardless of which retirement option you selected. If you chose a reduced benefit option, COLA is calculated on that reduced amount.</p>
+
+      <h2>Looking Ahead: COLA Considerations for Future Retirees</h2>
+      <p>If you're still working and planning for retirement, here are key COLA-related considerations:</p>
+
+      <ul>
+        <li><strong>Build Additional Savings:</strong> Don't rely solely on COLA to maintain purchasing power. Build personal savings to supplement your pension.</li>
+        <li><strong>Monitor Legislative Changes:</strong> Stay informed about potential changes to COLA rules or base amounts.</li>
+        <li><strong>Use Retirement Calculators:</strong> Our pension calculator includes COLA projections to help you plan accurately.</li>
+        <li><strong>Consider Inflation Scenarios:</strong> Plan for both moderate and high inflation scenarios in your retirement projections.</li>
+      </ul>
+
+      <h2>Conclusion</h2>
+      <p>The Massachusetts COLA provides valuable inflation protection for state retirees, with the 2026 structure maintaining the 3% rate on the first $13,000 of annual pension benefits. While the maximum $390 annual increase may seem modest, the compounding effect over a long retirement can significantly boost your total benefits.</p>
+
+      <p>Understanding how COLA works—and its limitations—is essential for comprehensive retirement planning. Use our pension calculator to model your specific situation and see how COLA will affect your retirement income over time.</p>
+
+      <p>For personalized guidance on your retirement planning, including COLA projections and optimization strategies, explore our full suite of retirement planning tools or consult with a qualified financial advisor.</p>
+    `,
+  },
+  {
     id: "social-security-fairness-act-what-massachusetts-state-employees-need-to-know",
     title: "Social Security Fairness Act: What Massachusetts State Employees Need to Know",
     description:
