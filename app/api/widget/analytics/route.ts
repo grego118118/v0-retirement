@@ -113,6 +113,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Partner ID required" }, { status: 400 })
   }
 
+  if (!supabaseUrl || !supabaseServiceKey) {
+    return NextResponse.json({ error: "Supabase not configured" }, { status: 500 })
+  }
+
   try {
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
