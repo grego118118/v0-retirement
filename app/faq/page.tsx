@@ -3,6 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import Script from "next/script"
 import type { Metadata } from "next"
+import { BreadcrumbStructuredData } from "@/components/seo/structured-data"
+import { Breadcrumbs } from "@/components/seo/breadcrumbs"
 
 // AI-optimized metadata for better search engine understanding
 export const metadata: Metadata = {
@@ -52,6 +54,12 @@ export default function FAQPage() {
   return (
     <>
       {/* Structured Data for AI Search Engines */}
+      <BreadcrumbStructuredData
+        items={[
+          { name: "Home", url: "https://www.masspension.com" },
+          { name: "FAQ", url: "https://www.masspension.com/faq" },
+        ]}
+      />
       <Script
         id="faq-structured-data"
         type="application/ld+json"
@@ -60,6 +68,12 @@ export default function FAQPage() {
 
       <div className="container py-12">
         <div className="max-w-3xl mx-auto">
+          {/* Visual Breadcrumbs */}
+          <Breadcrumbs
+            items={[{ label: "FAQ" }]}
+            className="mb-4"
+          />
+
           {/* AI-optimized header with quick answer */}
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold tracking-tight mb-4">

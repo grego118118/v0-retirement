@@ -48,6 +48,7 @@ export default function SubscriptionPortalPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [loading, setLoading] = useState(true)
   const [portalLoading, setPortalLoading] = useState(false)
+  const [stripeNotConfigured, setStripeNotConfigured] = useState(false)
 
   useEffect(() => {
     async function fetchData() {
@@ -66,6 +67,9 @@ export default function SubscriptionPortalPage() {
         if (portalResponse.ok) {
           const portalData = await portalResponse.json()
           setInvoices(portalData.invoices || [])
+        } else if (portalResponse.status === 503) {
+          // Stripe not configured - don't treat as error
+          console.log('Stripe portal not available (503)')
         }
       } catch (error) {
         console.error('Failed to fetch subscription data:', error)
@@ -126,33 +130,18 @@ export default function SubscriptionPortalPage() {
           errorData
         })
 
-        // Provide specific error messages based on the error type
+        // Handle 503 - Stripe not configured
         if (response.status === 503) {
-          if (errorData.isDevelopmentMode) {
-            alert(`Development Mode: ${errorData.details || 'Stripe not configured'}\n\nNote: ${errorData.developmentNote || 'Add STRIPE_SECRET_KEY to .env.local'}`)
-          } else {
-            alert(`Stripe is not configured: ${errorData.details || 'Please contact support.'}`)
-          }
-        } else if (response.status === 404) {
-          alert(`Subscription not found. ${errorData.message || errorData.details || 'Please subscribe first.'}`)
-        } else if (response.status === 502) {
-          alert(`Payment system error: ${errorData.details || errorData.error || 'Stripe service unavailable. Please try again later.'}`)
-        } else if (response.status === 500) {
-          alert(`Server error: ${errorData.details || errorData.error || 'Internal server error. Please try again.'}`)
-        } else {
-          alert(`Failed to open customer portal: ${errorData.error || errorData.details || `HTTP ${response.status} error`}`)
+          setStripeNotConfigured(true)
+          return // Don't throw, just show the UI message
         }
 
-        const errorMessage = errorData.error || errorData.details || `HTTP ${response.status} error`
-        throw new Error(`Portal API error: ${response.status} - ${errorMessage}`)
+        // Handle other errors with console log only (no alerts)
+        console.warn(`Portal error: ${response.status} - ${errorData.error || errorData.details}`)
+        return
       }
     } catch (error) {
       console.error('🚨 Portal error:', error)
-
-      // Only show alert if we haven't already shown one above
-      if (error instanceof Error && error.message && !error.message.includes('Portal API error:')) {
-        alert('Failed to open customer portal. Please try again.')
-      }
     } finally {
       setPortalLoading(false)
     }
@@ -164,6 +153,58 @@ export default function SubscriptionPortalPage() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading subscription details...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show development mode message when Stripe is not configured
+  if (stripeNotConfigured) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12">
+        <div className="container mx-auto px-4">
+          <div className="max-w-2xl mx-auto">
+            <Card className="border-amber-200 bg-amber-50">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-amber-800">
+                  <AlertTriangle className="h-5 w-5" />
+                  Stripe Not Configured
+                </CardTitle>
+                <CardDescription className="text-amber-700">
+                  Payment processing is not yet set up for this application.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-amber-800">
+                  The Stripe Customer Portal requires API keys to be configured. Once set up, you'll be able to:
+                </p>
+                <ul className="text-sm text-amber-800 list-disc list-inside space-y-1">
+                  <li>Manage your subscription and billing</li>
+                  <li>Update payment methods</li>
+                  <li>View invoices and payment history</li>
+                  <li>Cancel or modify your subscription</li>
+                </ul>
+                <Alert className="border-blue-200 bg-blue-50">
+                  <AlertDescription className="text-blue-800 text-sm">
+                    <strong>For Developers:</strong> Add <code className="bg-blue-100 px-1 rounded">STRIPE_SECRET_KEY</code> to your <code className="bg-blue-100 px-1 rounded">.env.local</code> file to enable Stripe integration.
+                  </AlertDescription>
+                </Alert>
+                <div className="flex gap-3 pt-2">
+                  <Link href="/calculator" className="flex-1">
+                    <Button variant="outline" className="w-full">
+                      <ArrowLeft className="mr-2 h-4 w-4" />
+                      Back to Calculator
+                    </Button>
+                  </Link>
+                  <Link href="/subscribe" className="flex-1">
+                    <Button className="w-full">
+                      View Plans
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     )

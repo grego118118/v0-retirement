@@ -23,6 +23,7 @@ import { calculateRetirementBenefitsProjection, ProjectionParameters } from "@/l
 import { RetirementBenefitsProjection } from "@/components/retirement-benefits-projection"
 import { PDFExportButton, PDFExportSection } from "@/components/pdf/pdf-export-button"
 import { PensionCalculationData } from "@/lib/pdf/puppeteer-pdf-generator"
+import { RetirementAgeComparison } from "./calculator/retirement-age-comparison"
 
 interface PensionResultsProps {
   result: {
@@ -32,6 +33,8 @@ interface PensionResultsProps {
     monthlyPension: number
     survivorAnnualPension?: number
     survivorMonthlyPension?: number
+    retirementOption?: string  // 'A', 'B', or 'C'
+    beneficiaryAge?: string    // For Option C calculations
     details: {
       averageSalary: number
       group: string
@@ -225,6 +228,17 @@ export default function PensionResults({ result }: PensionResultsProps) {
               <AlertDescription>{result.optionWarning}</AlertDescription>
             </Alert>
           )}
+
+          {/* Early vs. Later Retirement Comparison */}
+          <RetirementAgeComparison
+            currentAge={result.details.age}
+            yearsOfService={result.details.yearsOfService}
+            averageSalary={result.details.averageSalary}
+            group={result.details.group}
+            currentMonthlyPension={result.monthlyPension}
+            retirementOption={result.retirementOption || 'A'}
+            beneficiaryAge={result.beneficiaryAge || ''}
+          />
         </TabsContent>
 
         {/* COLA Adjustments Tab */}

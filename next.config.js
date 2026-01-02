@@ -52,8 +52,32 @@ const nextConfig = {
   // Security headers
   async headers() {
     return [
+      // Special headers for embed pages - allow embedding in iframes
       {
-        source: '/(.*)',
+        source: '/embed/:path*',
+        headers: [
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff'
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block'
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin'
+          },
+          // Allow embedding from any origin for widget distribution
+          {
+            key: 'Content-Security-Policy',
+            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https: blob:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://*.supabase.co; frame-ancestors *; object-src 'none';"
+          }
+        ]
+      },
+      // Default headers for all other pages
+      {
+        source: '/((?!embed).*)',
         headers: [
           {
             key: 'X-Frame-Options',

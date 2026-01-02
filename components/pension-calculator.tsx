@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,7 +11,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ArrowLeft, ArrowRight, Calculator, HelpCircle, Info, Save, Crown, CheckCircle } from "lucide-react"
+import { ArrowLeft, ArrowRight, Calculator, HelpCircle, Info, Save, Crown, CheckCircle, Users, AlertCircle } from "lucide-react"
 import { announceToScreenReader, announceFormErrors, announceFormSuccess } from "@/lib/accessibility/aria-live"
 import { focusFirstErrorField } from "@/lib/accessibility/focus-management"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
@@ -22,6 +22,7 @@ import {
   getBenefitFactor,
   generateProjectionTable,
 } from "@/lib/pension-calculations"
+import { parseGroupParam, getDefaultRetirementAge as getGroupDefaultAge } from "@/lib/utils/group-param-parser"
 import EligibilityInfo from "./eligibility-info"
 import PensionResults from "./pension-results"
 import ProjectionTable from "./projection-table"
@@ -90,7 +91,7 @@ const getDefaultRetirementAge = (group: string): number => {
   switch (group) {
     case 'GROUP_1': return 60 // Group 1: Default to minimum eligible age
     case 'GROUP_2': return 55 // Group 2: Default to minimum eligible age
-    case 'GROUP_3': return 55 // Group 3: Keep existing default (practical age)
+    case 'GROUP_3': return 45 // Group 3: MA State Police ONLY - any age with 20+ years (practical default for early career starters)
     case 'GROUP_4': return 50 // Group 4: Default to minimum eligible age
     default: return 60
   }
@@ -236,6 +237,168 @@ export default function PensionCalculator() {
       setSavedMessage("Saved calculations are currently disabled.")
     }
   }, [session, searchParams])
+
+  // Handle group query parameter from group landing pages (e.g., /calculator?group=1)
+  useEffect(() => {
+    if (!isHydrated) return
+
+    const groupParam = searchParams.get("group")
+    if (groupParam && !formData.group) {
+      // Use the utility function for parsing and validation
+      const result = parseGroupParam(groupParam)
+
+      if (result.success && result.group && result.defaultAge) {
+        setFormData(prev => ({
+          ...prev,
+          group: result.group!,
+          age: prev.age || result.defaultAge!.toString()
+        }))
+        console.log(`Pre-selected group from URL: ${result.group}`)
+      } else if (result.error) {
+        console.warn(result.error)
+      }
+    }
+  }, [isHydrated, searchParams, formData.group])
+
+  // Track if we've processed widget params to avoid re-processing
+  const widgetParamsProcessed = useRef(false)
+
+  // Handle widget query parameters (from embedded widget CTA)
+  useEffect(() => {
+    if (!isHydrated) return
+    if (widgetParamsProcessed.current) return
+
+    const fromWidget = searchParams.get("from") === "widget"
+    if (!fromWidget) return
+
+    // Extract widget params
+    const widgetGroup = searchParams.get("group")
+    const widgetAge = searchParams.get("age")
+    const widgetYos = searchParams.get("yos")
+    const widgetSalary = searchParams.get("salary")
+    const widgetOption = searchParams.get("option")
+    const widgetBeneficiaryAge = searchParams.get("beneficiaryAge")
+
+    console.log("Widget params received:", { widgetGroup, widgetAge, widgetYos, widgetSalary, widgetOption, widgetBeneficiaryAge })
+
+    // Only update if we have required data from widget
+    if (widgetGroup && widgetAge && widgetYos && widgetSalary) {
+      widgetParamsProcessed.current = true
+
+      const parsedGroup = `GROUP_${widgetGroup}`
+      const salaryNum = parseFloat(widgetSalary)
+
+      // Build the complete form data for calculation
+      const widgetFormData = {
+        serviceEntryDate: "before_2012", // Default assumption from widget
+        age: widgetAge,
+        yearsOfService: widgetYos,
+        group: parsedGroup,
+        salary1: salaryNum.toString(),
+        salary2: salaryNum.toString(),
+        salary3: salaryNum.toString(),
+        retirementOption: widgetOption || "A",
+        beneficiaryAge: widgetBeneficiaryAge || "",
+        // Keep other fields with defaults
+        servicePurchaseYears: "",
+        servicePurchaseCost: "",
+        healthcareElection: "",
+        taxWithholding: "",
+        phaseRetirement: false,
+        partTimeYears: "",
+        beneficiaryName: "",
+        beneficiaryRelationship: "",
+        currentAge: "",
+        membershipDate: "",
+        additionalService: "",
+      }
+
+      setFormData(widgetFormData)
+      console.log("Pre-populated form from widget data:", widgetFormData)
+
+      // Auto-calculate and show results after a brief delay to allow form to update
+      setTimeout(() => {
+        // Trigger calculation directly with widget data
+        const enteredAge = parseFloat(widgetAge)
+        const enteredYOS = parseFloat(widgetYos)
+        const group = parsedGroup
+        const serviceEntry = "before_2012"
+
+        // Check eligibility
+        const eligibility = checkEligibility(Math.floor(enteredAge), enteredYOS, group, serviceEntry)
+        if (!eligibility.eligible) {
+          setEligibilityWarning(eligibility.message)
+          return
+        }
+
+        // Calculate benefit factor
+        const benefitFactor = getBenefitFactor(Math.floor(enteredAge), group, serviceEntry, enteredYOS)
+        if (benefitFactor === 0) return
+
+        // Calculate average salary and pension
+        const averageSalary = salaryNum
+        let annualPension = averageSalary * benefitFactor * enteredYOS
+        const maxPensionAllowed = averageSalary * 0.8
+        const isCapped = annualPension > maxPensionAllowed
+        if (isCapped) annualPension = maxPensionAllowed
+
+        // Apply retirement option
+        const optionResult = calculatePensionWithOption(
+          annualPension,
+          widgetOption || "A",
+          Math.floor(enteredAge),
+          widgetBeneficiaryAge || "",
+          group
+        )
+
+        // Generate projection table with correct parameters:
+        // generateProjectionTable(groupToProject, projectionStartAgeForm, baseEnteredYOSForm, averageSalary, selectedOption, beneficiaryAgeStr, serviceEntry)
+        const projectionData = generateProjectionTable(
+          group,                    // groupToProject
+          Math.floor(enteredAge),   // projectionStartAgeForm
+          enteredYOS,               // baseEnteredYOSForm
+          salaryNum,                // averageSalary
+          widgetOption || "A",      // selectedOption
+          widgetBeneficiaryAge || "", // beneficiaryAgeStr
+          serviceEntry              // serviceEntry
+        )
+
+        // Calculate base values for details
+        const totalBenefitPercentage = Math.min(benefitFactor * enteredYOS, 0.8)
+        const baseAnnualPension = salaryNum * totalBenefitPercentage
+
+        // Set results using the correct state setter and format
+        setCalculationResult({
+          selectedOption: optionResult.description,
+          optionWarning: optionResult.warning,
+          annualPension: optionResult.pension,
+          monthlyPension: optionResult.pension / 12,
+          survivorAnnualPension: optionResult.survivorPension || 0,
+          survivorMonthlyPension: (optionResult.survivorPension || 0) / 12,
+          retirementOption: widgetOption || "A",
+          beneficiaryAge: widgetBeneficiaryAge || "",
+          details: {
+            averageSalary: salaryNum,
+            group: group,
+            age: Math.floor(enteredAge),
+            yearsOfService: enteredYOS,
+            basePercentage: totalBenefitPercentage * 100,
+            baseAnnualPension: baseAnnualPension,
+            cappedBase: isCapped,
+          },
+          projectionData,
+        })
+
+        setShowResults(true)
+        setCurrentStep(2) // Jump directly to results
+
+        // Scroll to top to show results
+        window.scrollTo({ top: 0, behavior: "smooth" })
+
+        console.log("Auto-calculated results from widget data")
+      }, 100)
+    }
+  }, [isHydrated, searchParams])
 
   // Load and integrate user profile data
   useEffect(() => {
@@ -610,6 +773,8 @@ export default function PensionCalculator() {
         monthlyPension: finalMonthlyPension,
         survivorAnnualPension: optionResult.survivorPension,
         survivorMonthlyPension: optionResult.survivorPension / 12,
+        retirementOption: formData.retirementOption,
+        beneficiaryAge: formData.beneficiaryAge,
         details: {
           averageSalary,
           group,
@@ -774,7 +939,7 @@ export default function PensionCalculator() {
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent className="max-w-xs">
-                            <p>Enter your age at the time you plan to retire. Minimum eligible ages: Group 1 (60), Group 2 (55), Group 3 (any age with 20+ years), Group 4 (50). This affects your benefit factor.</p>
+                            <p>Enter your age at the time you plan to retire. Minimum eligible ages: Group 1 (60), Group 2 (55), Group 3/MA State Police ONLY (ANY age with 20+ years), Group 4 (50). This affects your benefit factor.</p>
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
@@ -841,10 +1006,10 @@ export default function PensionCalculator() {
                           </TooltipTrigger>
                           <TooltipContent className="max-w-xs">
                             <p>
-                              Group 1: General employees<br />
-                              Group 2: Certain hazardous positions<br />
-                              Group 3: State police<br />
-                              Group 4: Police officers, firefighters
+                              Group 1: General employees (min age 60)<br />
+                              Group 2: Probation/Court officers (min age 55)<br />
+                              Group 3: MA State Police ONLY - not municipal police (any age w/20+ yrs)<br />
+                              Group 4: Municipal police, firefighters, corrections (min age 50)
                             </p>
                           </TooltipContent>
                         </Tooltip>
@@ -857,8 +1022,8 @@ export default function PensionCalculator() {
                       <SelectContent>
                         <SelectItem value="GROUP_1">Group I (General Employees) - min. age 60</SelectItem>
                         <SelectItem value="GROUP_2">Group II (Probation/Court Officers) - min. age 55</SelectItem>
-                        <SelectItem value="GROUP_3">Group III (State Police) - any age with 20+ years</SelectItem>
-                        <SelectItem value="GROUP_4">Group IV (Public Safety/Corrections) - min. age 50</SelectItem>
+                        <SelectItem value="GROUP_3">Group III (MA State Police ONLY) - any age with 20+ years</SelectItem>
+                        <SelectItem value="GROUP_4">Group IV (Municipal Police/Fire/Corrections) - min. age 50</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -1012,16 +1177,28 @@ export default function PensionCalculator() {
 
                     {formData.retirementOption === "C" && (
                       <div className="mt-3 ml-6 space-y-2">
-                        <Label htmlFor="beneficiaryAge" className="text-sm">Beneficiary's Age (at your retirement):</Label>
-                        <Input
-                          id="beneficiaryAge"
-                          name="beneficiaryAge"
-                          type="number"
-                          placeholder="e.g., 58"
-                          className="max-w-xs"
-                          value={formData.beneficiaryAge}
-                          onChange={handleInputChange}
-                        />
+                        <div className="p-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
+                          <Label htmlFor="beneficiaryAge" className="text-sm font-medium flex items-center gap-2">
+                            <Users className="h-4 w-4 text-blue-600" />
+                            Beneficiary's Age (at your retirement)
+                            <span className="text-red-500">*</span>
+                          </Label>
+                          <Input
+                            id="beneficiaryAge"
+                            name="beneficiaryAge"
+                            type="number"
+                            placeholder="e.g., 58"
+                            className={`max-w-xs mt-2 ${!formData.beneficiaryAge ? 'border-amber-400 focus:border-amber-500' : ''}`}
+                            value={formData.beneficiaryAge}
+                            onChange={handleInputChange}
+                          />
+                          {!formData.beneficiaryAge && (
+                            <p className="text-xs text-amber-600 dark:text-amber-400 mt-2 flex items-center gap-1">
+                              <AlertCircle className="h-3 w-3" />
+                              Required for accurate Option C calculations. The reduction depends on both your age and your beneficiary's age.
+                            </p>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -1318,16 +1495,28 @@ export default function PensionCalculator() {
 
                 {formData.retirementOption === "C" && (
                   <div className="mt-4 ml-6 space-y-2">
-                    <Label htmlFor="beneficiaryAge">Beneficiary's Age (at your retirement):</Label>
-                    <Input
-                      id="beneficiaryAge"
-                      name="beneficiaryAge"
-                      type="number"
-                      placeholder="e.g., 58"
-                      className="max-w-xs"
-                      value={formData.beneficiaryAge}
-                      onChange={handleInputChange}
-                    />
+                    <div className="p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
+                      <Label htmlFor="beneficiaryAge" className="font-medium flex items-center gap-2">
+                        <Users className="h-4 w-4 text-blue-600" />
+                        Beneficiary's Age (at your retirement)
+                        <span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        id="beneficiaryAge"
+                        name="beneficiaryAge"
+                        type="number"
+                        placeholder="e.g., 58"
+                        className={`max-w-xs mt-2 ${!formData.beneficiaryAge ? 'border-amber-400 focus:border-amber-500' : ''}`}
+                        value={formData.beneficiaryAge}
+                        onChange={handleInputChange}
+                      />
+                      {!formData.beneficiaryAge && (
+                        <p className="text-sm text-amber-600 dark:text-amber-400 mt-2 flex items-center gap-1">
+                          <AlertCircle className="h-4 w-4" />
+                          Required for accurate Option C calculations. The pension reduction depends on both your age and your beneficiary's age.
+                        </p>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
@@ -2056,11 +2245,16 @@ export default function PensionCalculator() {
                   </div>
                   {summaryData.completionPercentage === 100 && (
                     <Button
-                      onClick={() => setCurrentStep(2)}
-                      className="bg-indigo-600 hover:bg-indigo-700 text-white min-h-[44px] px-4 touch-manipulation"
+                      onClick={calculatePension}
+                      disabled={isCalculating}
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white min-h-[44px] px-4 touch-manipulation animate-pulse-glow"
                     >
-                      <Calculator className="h-4 w-4 mr-2" />
-                      <span className="text-sm">Calculate Now</span>
+                      {isCalculating ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                      ) : (
+                        <Calculator className="h-4 w-4 mr-2" />
+                      )}
+                      <span className="text-sm">{isCalculating ? "Calculating..." : "Calculate Now"}</span>
                     </Button>
                   )}
                 </div>
@@ -2178,11 +2372,16 @@ export default function PensionCalculator() {
                   </div>
                   {summaryData.completionPercentage === 100 && (
                     <Button
-                      onClick={() => setCurrentStep(2)}
-                      className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                      onClick={calculatePension}
+                      disabled={isCalculating}
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white animate-pulse-glow"
                     >
-                      <Calculator className="h-4 w-4 mr-2" />
-                      Calculate Now
+                      {isCalculating ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                      ) : (
+                        <Calculator className="h-4 w-4 mr-2" />
+                      )}
+                      {isCalculating ? "Calculating..." : "Calculate Now"}
                     </Button>
                   )}
                 </div>

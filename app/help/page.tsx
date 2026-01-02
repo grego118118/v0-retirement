@@ -161,8 +161,8 @@ export default function HelpPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600 mb-4">
-                  Most state employees are in Group 1. Group 2 includes probation and court officers. 
-                  Group 3 is for State Police. Group 4 includes corrections and public safety personnel.
+                  Most state employees are in Group 1. Group 2 includes probation and court officers.
+                  Group 3 is EXCLUSIVELY for Massachusetts State Police (not municipal police). Group 4 includes municipal police, corrections, firefighters, and other public safety personnel.
                 </p>
                 <Button asChild variant="outline" size="sm">
                   <Link href="/benefits">

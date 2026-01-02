@@ -4,11 +4,13 @@ import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { 
-  Calculator, Users, Clock, DollarSign, CheckCircle, ArrowRight, 
+import {
+  Calculator, Users, Clock, DollarSign, CheckCircle, ArrowRight,
   BookOpen, TrendingUp, Shield, FileText, Info, AlertCircle
 } from "lucide-react"
 import { Breadcrumbs } from "@/components/seo/breadcrumbs"
+import { EarlyRetirementHighlight } from "./early-retirement-highlight"
+import { EARLY_RETIREMENT_DATA } from "@/lib/utils/early-retirement-data"
 
 export interface GroupInfo {
   group: "1" | "2" | "3" | "4"
@@ -136,6 +138,15 @@ export function GroupLandingPage({ groupInfo, relatedBlogPosts }: GroupLandingPa
           </div>
         </CardContent>
       </Card>
+
+      {/* Early Retirement Highlight */}
+      {EARLY_RETIREMENT_DATA[`GROUP_${group}` as keyof typeof EARLY_RETIREMENT_DATA] && (
+        <div className="mb-10">
+          <EarlyRetirementHighlight
+            data={EARLY_RETIREMENT_DATA[`GROUP_${group}` as keyof typeof EARLY_RETIREMENT_DATA]}
+          />
+        </div>
+      )}
 
       {/* How It Works */}
       <div className="mb-10">

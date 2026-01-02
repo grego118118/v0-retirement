@@ -309,7 +309,7 @@ export const RETIREMENT_FAQS = [
   },
   {
     question: "What are the different Massachusetts retirement groups?",
-    answer: "Group 1: General employees (minimum age 60). Group 2: Certain public safety (minimum age 55). Group 3: State Police (any age with 20+ years). Group 4: Public safety/corrections (minimum age 50). Each group has different benefit factors and retirement ages."
+    answer: "Group 1: General employees (minimum age 60). Group 2: Probation/Court officers (minimum age 55). Group 3: Massachusetts State Police ONLY - not municipal police (any age with 20+ years, flat 2.5% multiplier). Group 4: Municipal police, firefighters, corrections (minimum age 50). Each group has different benefit factors and retirement ages."
   },
   {
     question: "How does Massachusetts COLA work for retirees?",
@@ -337,7 +337,7 @@ export const RETIREMENT_FAQS = [
 export const PENSION_CALCULATION_STEPS = [
   {
     name: "Determine Your Retirement Group",
-    text: "Identify whether you're in Group 1 (general employees), Group 2 (certain public safety), Group 3 (State Police), or Group 4 (public safety/corrections). This determines your benefit factor and minimum retirement age."
+    text: "Identify whether you're in Group 1 (general employees), Group 2 (probation/court officers), Group 3 (Massachusetts State Police ONLY), or Group 4 (municipal police, firefighters, corrections). This determines your benefit factor and minimum retirement age. Note: Group 3 is exclusively for MA State Police, not municipal police."
   },
   {
     name: "Calculate Your Average Salary",

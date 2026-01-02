@@ -98,6 +98,7 @@ export function getCSP(isDevelopment: boolean = false) {
       isDevelopment && 'wss://localhost:*',
     ].filter(Boolean) as string[],
     'frame-src': [
+      self,
       'https://accounts.google.com',
       'https://googleads.g.doubleclick.net',
       'https://tpc.googlesyndication.com',

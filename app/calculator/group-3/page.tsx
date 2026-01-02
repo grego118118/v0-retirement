@@ -4,40 +4,41 @@ import { BreadcrumbStructuredData, CalculatorStructuredData, FAQStructuredData }
 import { GroupLandingPage, GroupInfo } from "@/components/calculator/group-landing-page"
 
 export const metadata: Metadata = generateSEOMetadata({
-  title: "Group 3 Pension Calculator 2025 | Massachusetts State Police",
-  description: "Calculate your Massachusetts State Police Group 3 pension benefits. Free calculator with MSRB formulas. Retire at any age with 20+ years of service. 2.5% flat multiplier.",
+  title: "Group 3 Pension Calculator 2025 | Massachusetts State Police ONLY",
+  description: "Calculate your Massachusetts State Police Group 3 pension benefits. EXCLUSIVE to MSP members. Retire at ANY age with 20+ years of service. Flat 2.5% multiplier - highest in MA system.",
   path: "/calculator/group-3",
   keywords: [
     "Massachusetts Group 3 pension calculator",
     "MA State Police pension calculator",
     "Massachusetts State Police retirement",
-    "Group 3 retirement benefits",
+    "Group 3 retirement benefits MSP only",
     "MSRB Group 3 calculator",
     "State Police pension Massachusetts",
     "MSP retirement calculator",
-    "Group 3 20 years retirement",
+    "Group 3 any age retirement",
     "Massachusetts trooper pension",
-    "State Police benefit multiplier"
+    "State Police 2.5% multiplier",
+    "MSP exclusive retirement benefits"
   ],
 })
 
 const group3Info: GroupInfo = {
   group: "3",
-  name: "Group 3 - Massachusetts State Police",
-  shortName: "Group 3 - State Police",
-  description: "Group 3 is exclusively for Massachusetts State Police members who can retire at any age with 20+ years of service and receive a flat 2.5% benefit multiplier.",
+  name: "Group 3 - Massachusetts State Police ONLY",
+  shortName: "MSP Exclusive",
+  description: "Group 3 is EXCLUSIVELY for Massachusetts State Police members. Unlike other law enforcement (municipal police, sheriff's deputies, etc.), MSP members can retire at ANY age with 20+ years of service and receive a flat 2.5% multiplier—the maximum available in the MA retirement system.",
   minAge: 0,
   minService: 20,
-  multiplierRange: "2.5%",
+  multiplierRange: "2.5% (flat)",
   maxBenefit: "80%",
-  eligibilityNote: "State Police members can retire at any age with 20 or more years of creditable service. This unique provision recognizes the demanding nature of law enforcement and allows for earlier career transitions.",
+  eligibilityNote: "IMPORTANT: Group 3 is ONLY for Massachusetts State Police. Municipal police, sheriff's deputies, campus police, and other law enforcement are NOT in Group 3—they are in Group 4. MSP members can retire at ANY age (no minimum) once they have 20+ years of creditable service, recognizing the unique demands of state-level law enforcement.",
   examples: [
-    "Massachusetts State Police troopers",
-    "MSP sergeants",
-    "MSP lieutenants",
-    "MSP captains",
-    "MSP detectives",
-    "State Police command staff"
+    "Massachusetts State Police Troopers",
+    "MSP Detective Lieutenants",
+    "MSP Sergeants & Corporals",
+    "MSP Station Commanders",
+    "State Police Crime Lab personnel",
+    "MSP Command Staff (Captains, Majors, Lt. Colonels)"
   ],
   colorClass: "bg-red-100 text-red-800",
   iconBgClass: "bg-red-100 text-red-700"
@@ -65,21 +66,25 @@ const relatedBlogPosts = [
 ]
 
 const faqs = [
-  { 
-    question: "What is Massachusetts Retirement Group 3?", 
-    answer: "Group 3 is exclusively for Massachusetts State Police members. They can retire at any age with 20+ years of service, reflecting the unique demands of state law enforcement." 
+  {
+    question: "What is Massachusetts Retirement Group 3?",
+    answer: "Group 3 is EXCLUSIVELY for Massachusetts State Police (MSP) members. It does NOT include municipal police, sheriff's deputies, campus police, or MBTA police—those positions are in Group 4. MSP members receive unique benefits including any-age retirement with 20+ years of service."
   },
-  { 
-    question: "What is the Group 3 benefit multiplier?", 
-    answer: "Group 3 has a flat 2.5% benefit multiplier regardless of retirement age. This is the maximum multiplier available in the Massachusetts retirement system." 
+  {
+    question: "What is the Group 3 benefit multiplier?",
+    answer: "Group 3 has a flat 2.5% benefit multiplier regardless of retirement age. This is the MAXIMUM multiplier available in the entire Massachusetts retirement system. Other groups must reach certain ages to achieve 2.5%, but MSP members get it at any age."
   },
-  { 
-    question: "When can State Police retire?", 
-    answer: "State Police (Group 3) can retire at any age once they have 20 or more years of creditable service. There is no minimum age requirement unlike other groups." 
+  {
+    question: "When can State Police retire?",
+    answer: "Massachusetts State Police (Group 3) can retire at ANY age once they have 20 or more years of creditable service. There is NO minimum age requirement—unlike Group 4 (min age 50), Group 2 (min age 55), or Group 1 (min age 60). This recognizes the demanding nature of state law enforcement work."
   },
-  { 
-    question: "How is Group 3 pension calculated?", 
-    answer: "Group 3 pension = Average of highest 3 consecutive years salary × years of service × 2.5%, with an 80% maximum cap. The flat 2.5% multiplier applies regardless of age." 
+  {
+    question: "How is Group 3 pension calculated?",
+    answer: "Group 3 pension = Average of highest 3 consecutive years salary × years of service × 2.5%, with an 80% maximum cap. The flat 2.5% multiplier applies regardless of your retirement age—a 42-year-old trooper with 20 years gets the same 2.5% as a 55-year-old."
+  },
+  {
+    question: "I'm a municipal police officer—am I in Group 3?",
+    answer: "No. Municipal police, town police, sheriff's deputies, campus police, MBTA police, and other law enforcement are in Group 4, not Group 3. Group 3 is EXCLUSIVELY for Massachusetts State Police members. Group 4 has a minimum retirement age of 50 with 10+ years of service."
   }
 ]
 

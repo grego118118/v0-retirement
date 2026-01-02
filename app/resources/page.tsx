@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { ExternalLink, FileText, Search, BookOpen, Calculator, DollarSign, Building, Calendar } from "lucide-react"
 import { BreadcrumbStructuredData } from "@/components/seo/structured-data"
+import { Breadcrumbs } from "@/components/seo/breadcrumbs"
 
 export const metadata: Metadata = {
   title: "Massachusetts Retirement Resources | MSRB Forms, Calculators & Guides",
@@ -68,6 +69,10 @@ export default function ResourcesPage() {
       />
       <div className="container py-12">
         <div className="max-w-5xl mx-auto">
+          <Breadcrumbs
+            items={[{ label: "Resources" }]}
+            className="mb-4"
+          />
           <h1 className="text-3xl font-bold tracking-tight mb-2">Retirement Resources</h1>
         <p className="text-muted-foreground mb-8 max-w-3xl">
           Access valuable information, tools, and official resources to help you plan for retirement as a Massachusetts

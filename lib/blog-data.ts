@@ -510,7 +510,7 @@ export const blogPosts = [
     authorTitle: "Retirement Specialist",
     category: "Group Classifications",
     tags: ["retirement groups", "group 1", "group 2", "group 3", "group 4", "eligibility", "benefits"],
-    image: "/images/blog/mass retire groups.jpg",
+    image: "/images/blog/mass-retire-groups.jpg",
     content: `
       <h2>Understanding Your Massachusetts Retirement Group</h2>
       <p>Understanding your Massachusetts Retirement Group is crucial for planning your public service career and retirement. The Massachusetts Retirement System classifies all public employees into four distinct groups, each with specific eligibility requirements, minimum retirement ages, and benefit calculations. Use our <a href="/calculator" title="Massachusetts Pension Calculator">retirement income calculator</a> to see exactly how your group affects your benefits.</p>
@@ -547,24 +547,25 @@ export const blogPosts = [
         <li>Maximum benefit cap: 80% of average salary</li>
       </ul>
 
-      <h2>Group 3: State Police</h2>
-      <p>Group 3 is exclusively for Massachusetts State Police officers.</p>
+      <h2>Group 3: Massachusetts State Police ONLY</h2>
+      <p><strong>IMPORTANT:</strong> Group 3 is EXCLUSIVELY for Massachusetts State Police (MSP) members. Municipal police, sheriff's deputies, campus police, and MBTA police are NOT in Group 3—they are in Group 4.</p>
 
       <h3>Eligibility Requirements</h3>
       <ul>
-        <li>No minimum retirement age with 20+ years of service</li>
+        <li><strong>No minimum retirement age</strong> with 20+ years of service (unique among all groups)</li>
         <li>Mandatory retirement at age 65</li>
         <li>Special provisions for disability retirement</li>
       </ul>
 
       <h3>Benefit Calculation</h3>
       <ul>
-        <li>Flat 2.5% benefit percentage regardless of age</li>
+        <li>Flat 2.5% benefit percentage regardless of age—the maximum multiplier in the MA system</li>
         <li>Maximum benefit cap: 80% of average salary</li>
+        <li>Unlike other groups, MSP members get the maximum 2.5% multiplier at ANY retirement age</li>
       </ul>
 
-      <h2>Group 4: Public Safety and Corrections</h2>
-      <p>Group 4 includes local police officers, firefighters, and corrections officers.</p>
+      <h2>Group 4: Municipal Police, Firefighters, and Corrections</h2>
+      <p>Group 4 includes municipal/local police officers, firefighters, corrections officers, and other public safety personnel. Note: This is where most law enforcement belongs—NOT Group 3.</p>
 
       <h3>Eligibility Requirements</h3>
       <ul>
@@ -610,7 +611,7 @@ export const blogPosts = [
     authorTitle: "COLA Specialist",
     category: "COLA Adjustments",
     tags: ["COLA", "cost of living", "13000 cap", "pension adjustments", "retirement benefits"],
-    image: "/images/blog/mass cola.jpg",
+    image: "/images/blog/mass-cola.jpg",
     content: `
       <h2>What is Massachusetts COLA?</h2>
       <p>The Massachusetts Cost of Living Adjustment (COLA) is a crucial component of your retirement benefits, but it comes with a unique cap that many retirees don't fully understand. Here's everything you need to know about how COLA affects your Massachusetts pension. Use our <a href="/calculator" title="Massachusetts Pension Calculator">pension projection tool</a> to see exactly how COLA impacts your projected benefits.</p>
@@ -880,9 +881,9 @@ export const blogPosts = [
       <p>Start early, stay organized, and seek professional advice when needed to make the most of your well-earned retirement.</p>
     `,
     relatedPosts: [
+      "medicare-gap-insurance-age-65-massachusetts-retirees",
       "understanding-massachusetts-pension-options",
       "maximizing-your-state-pension-benefits",
-      "social-security-fairness-act-what-massachusetts-state-employees-need-to-know",
       "massachusetts-cola-2026-complete-guide",
     ],
   },
@@ -1182,9 +1183,9 @@ export const blogPosts = [
       <p>Remember that healthcare benefits and costs can change over time. Stay informed by reviewing annual GIC benefit guides, attending pre-retirement seminars, and consulting with GIC representatives about your specific situation. Check out our <a href="/blog/retirement-planning-for-massachusetts-state-employees" title="Retirement Planning Timeline">retirement planning timeline</a> for a comprehensive checklist. With proper planning, you can navigate the complexities of retiree healthcare and make informed decisions that support your overall retirement goals.</p>
     `,
     relatedPosts: [
-      "understanding-massachusetts-pension-options",
+      "medicare-gap-insurance-age-65-massachusetts-retirees",
       "retirement-planning-for-massachusetts-state-employees",
-      "social-security-fairness-act-what-massachusetts-state-employees-need-to-know",
+      "understanding-massachusetts-pension-options",
       "massachusetts-cola-2026-complete-guide",
     ],
   },
@@ -1357,4 +1358,289 @@ export const blogPosts = [
       "social-security-fairness-act-what-massachusetts-state-employees-need-to-know",
     ],
   },
+  {
+    id: "medicare-gap-insurance-age-65-massachusetts-retirees",
+    title: "Why Massachusetts Retirees Must Enroll in Gap Health Insurance at Age 65: A Critical Guide",
+    description:
+      "Don't lose your GIC health coverage! Massachusetts state retirees must enroll in Medicare and gap insurance at 65. Learn the deadlines, consequences of missing enrollment, and step-by-step instructions.",
+    date: "December 30, 2025",
+    readTime: "12 min read",
+    author: "Greg O",
+    authorTitle: "Retirement Benefits Specialist",
+    category: "Healthcare",
+    tags: ["Medicare", "gap insurance", "GIC", "age 65", "healthcare", "retiree benefits", "Medicare supplement"],
+    image: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+    content: `
+      <h2>The Critical Age 65 Healthcare Transition Every Massachusetts Retiree Must Know</h2>
+      <p>If you're a Massachusetts state retiree approaching age 65, you're facing one of the most important healthcare decisions of your retirement: enrolling in Medicare and transitioning to gap (supplemental) health insurance. <strong>This is not optional.</strong> Failing to take action at the right time can result in losing your Group Insurance Commission (GIC) coverage entirely, leaving you without health insurance or facing significant financial penalties.</p>
+
+      <p>This comprehensive guide explains exactly what you need to do, when you need to do it, and why this transition is so critical for protecting your health and financial security in retirement. Use our <a href="/calculator" title="Massachusetts Pension Calculator">retirement income calculator</a> to plan for healthcare costs as part of your overall retirement strategy.</p>
+
+      <h2>Why Age 65 Is a Mandatory Transition Point</h2>
+      <p>At age 65, you become eligible for Medicare, the federal health insurance program. For Massachusetts state retirees receiving GIC health benefits, this triggers a mandatory transition:</p>
+
+      <ul>
+        <li><strong>Medicare becomes your primary insurance</strong> - By law, Medicare must be your primary coverage once you're eligible</li>
+        <li><strong>GIC coverage changes to supplemental</strong> - Your GIC plan converts from primary to "gap" or supplemental coverage</li>
+        <li><strong>Enrollment is required, not optional</strong> - You MUST enroll in Medicare Parts A and B to maintain any GIC coverage</li>
+        <li><strong>Failure to enroll = loss of GIC coverage</strong> - The GIC will terminate your health insurance if you don't enroll in Medicare</li>
+      </ul>
+
+      <h3>What Happens If You Don't Enroll?</h3>
+      <p>The consequences of missing Medicare enrollment at 65 are severe:</p>
+      <ul>
+        <li><strong>Complete loss of GIC health coverage</strong> - Your retiree health insurance will be terminated</li>
+        <li><strong>Late enrollment penalties</strong> - Medicare Part B premiums increase 10% for each 12-month period you were eligible but didn't enroll</li>
+        <li><strong>Coverage gaps</strong> - You could be left without any health insurance for months</li>
+        <li><strong>Lifetime premium surcharges</strong> - Late enrollment penalties typically apply for as long as you have Medicare</li>
+        <li><strong>Difficulty re-enrolling</strong> - Getting back into GIC coverage after termination can be extremely difficult or impossible</li>
+      </ul>
+
+      <h2>Understanding Medicare and Gap Insurance</h2>
+      <p>Before diving into the enrollment process, let's clarify what Medicare and gap insurance are and how they work together.</p>
+
+      <h3>What Is Medicare?</h3>
+      <p>Medicare is the federal health insurance program for people 65 and older (and some younger people with disabilities). It has several parts:</p>
+      <ul>
+        <li><strong>Part A (Hospital Insurance)</strong> - Covers inpatient hospital stays, skilled nursing facility care, hospice, and some home health care. Usually premium-free if you or your spouse paid Medicare taxes for 10+ years.</li>
+        <li><strong>Part B (Medical Insurance)</strong> - Covers doctor visits, outpatient care, medical equipment, and preventive services. Requires a monthly premium (about $185/month in 2025, income-adjusted).</li>
+        <li><strong>Part D (Prescription Drugs)</strong> - Covers prescription medications. Your GIC Medicare plan includes Part D coverage.</li>
+      </ul>
+
+      <h3>What Is Gap (Supplemental) Insurance?</h3>
+      <p>Gap insurance, also called Medicare supplement or "Medigap" insurance, fills the "gaps" in Medicare coverage:</p>
+      <ul>
+        <li><strong>Covers deductibles and copays</strong> - Medicare has significant out-of-pocket costs that gap insurance helps cover</li>
+        <li><strong>Provides additional benefits</strong> - May cover services Medicare doesn't, like routine dental or vision</li>
+        <li><strong>Works alongside Medicare</strong> - Medicare pays first, then your gap insurance covers remaining eligible costs</li>
+      </ul>
+
+      <h3>How GIC Medicare Plans Work</h3>
+      <p>For Massachusetts state retirees, the GIC offers several Medicare supplement plans that serve as your gap insurance:</p>
+      <ul>
+        <li><strong>UniCare State Indemnity Plan Medicare Extension (OME)</strong> - PPO-style plan with broad provider network</li>
+        <li><strong>Harvard Pilgrim Medicare Enhance</strong> - HMO-style managed care option</li>
+        <li><strong>Health New England MedPlus</strong> - Regional HMO option (primarily Western MA)</li>
+        <li><strong>Tufts Medicare Complement and Medicare Preferred</strong> - HMO-style options</li>
+      </ul>
+      <p>All GIC Medicare plans include integrated Part D prescription drug coverage through SilverScript, so you don't need to enroll in a separate Part D plan.</p>
+
+      <h2>The Enrollment Timeline: Critical Deadlines</h2>
+      <p>Understanding the timeline is crucial. Missing deadlines can have lasting consequences.</p>
+
+      <h3>Initial Enrollment Period (IEP)</h3>
+      <p>Your Initial Enrollment Period for Medicare is a 7-month window:</p>
+      <ul>
+        <li><strong>Starts:</strong> 3 months before your 65th birthday month</li>
+        <li><strong>Includes:</strong> Your birthday month</li>
+        <li><strong>Ends:</strong> 3 months after your birthday month</li>
+      </ul>
+      <p><strong>Example:</strong> If your 65th birthday is July 15, your IEP runs from April 1 through October 31.</p>
+
+      <h3>When to Enroll for Best Results</h3>
+      <p>For the smoothest transition, follow this timeline:</p>
+      <ul>
+        <li><strong>3 months before turning 65:</strong> Apply for Medicare Parts A and B through Social Security</li>
+        <li><strong>2-3 months before:</strong> Contact GIC to select your Medicare supplement plan</li>
+        <li><strong>1 month before:</strong> Confirm all paperwork is complete and coverage will start on time</li>
+        <li><strong>On your birthday:</strong> Medicare coverage should be active with GIC gap coverage in place</li>
+      </ul>
+
+      <h3>What If You're Still Working at 65?</h3>
+      <p>If you're still an active state employee at 65 (not yet retired), you may be able to delay Medicare enrollment without penalty. However, once you retire, you have a Special Enrollment Period (SEP) of 8 months to sign up for Medicare. Don't wait until the last minute—start the process well before your retirement date.</p>
+
+      <h2>Step-by-Step Enrollment Process</h2>
+      <p>Follow these steps to ensure a smooth transition to Medicare and GIC gap coverage.</p>
+
+      <h3>Step 1: Enroll in Medicare Parts A and B</h3>
+      <p>You must enroll through the Social Security Administration:</p>
+      <ul>
+        <li><strong>Online:</strong> Visit <a href="https://www.ssa.gov/medicare" target="_blank" rel="noopener noreferrer">ssa.gov/medicare</a> and complete the application</li>
+        <li><strong>By phone:</strong> Call Social Security at 1-800-772-1213 (TTY 1-800-325-0778)</li>
+        <li><strong>In person:</strong> Visit your local Social Security office (schedule appointment first)</li>
+      </ul>
+      <p><strong>Important:</strong> Even if you're already receiving Social Security benefits, you may still need to actively enroll in Medicare Part B.</p>
+
+      <h3>Step 2: Notify the GIC</h3>
+      <p>Once you've enrolled in Medicare, you must notify the GIC:</p>
+      <ul>
+        <li>Contact GIC at 617-727-2310 (option 1 for retirees)</li>
+        <li>Provide your Medicare Beneficiary Identifier (MBI) number</li>
+        <li>Confirm your Medicare Part A and B effective dates</li>
+        <li>Select your GIC Medicare supplement plan</li>
+      </ul>
+
+      <h3>Step 3: Choose Your GIC Medicare Plan</h3>
+      <p>Compare the available GIC Medicare supplement plans based on:</p>
+      <ul>
+        <li><strong>Monthly premium cost</strong> - Varies by plan</li>
+        <li><strong>Provider network</strong> - Important if you have preferred doctors</li>
+        <li><strong>Out-of-pocket costs</strong> - Copays, deductibles, and coinsurance</li>
+        <li><strong>Geographic coverage</strong> - Especially important if you travel or live out of state part-time</li>
+        <li><strong>Prescription drug formulary</strong> - Ensure your medications are covered</li>
+      </ul>
+
+      <h3>Step 4: Submit Required Documentation</h3>
+      <p>The GIC will require proof of Medicare enrollment. Be prepared to provide:</p>
+      <ul>
+        <li>Copy of your Medicare card (front and back)</li>
+        <li>Medicare Part A and B effective dates</li>
+        <li>Completed GIC enrollment forms</li>
+      </ul>
+
+      <h3>Step 5: Confirm Your Coverage</h3>
+      <p>Before your 65th birthday, verify:</p>
+      <ul>
+        <li>Medicare coverage is active in the Medicare.gov portal</li>
+        <li>GIC has processed your enrollment in a Medicare supplement plan</li>
+        <li>You've received new insurance cards from both Medicare and your GIC plan</li>
+        <li>Your doctors and pharmacies have your new insurance information</li>
+      </ul>
+
+      <h2>Costs to Expect After the Transition</h2>
+      <p>Understanding the costs helps you budget appropriately. Include these in your retirement planning using our <a href="/calculator" title="Massachusetts Pension Calculator">pension calculator</a>.</p>
+
+      <h3>Medicare Part B Premium</h3>
+      <ul>
+        <li><strong>Standard 2025 premium:</strong> Approximately $185/month</li>
+        <li><strong>Income-adjusted premiums:</strong> Higher earners pay more (IRMAA surcharges)</li>
+        <li><strong>Payment:</strong> Typically deducted from Social Security benefits, or billed quarterly if not receiving SS</li>
+      </ul>
+
+      <h3>GIC Medicare Supplement Premium</h3>
+      <ul>
+        <li><strong>Varies by plan:</strong> Check the annual GIC Benefit Decision Guide for current rates</li>
+        <li><strong>State contribution:</strong> Typically 80% for those with 20+ years of service (may be prorated for shorter service)</li>
+        <li><strong>Your share:</strong> Usually 20% of premium (can be deducted from pension)</li>
+      </ul>
+
+      <h3>Out-of-Pocket Costs</h3>
+      <ul>
+        <li><strong>Copays for doctor visits and prescriptions</strong></li>
+        <li><strong>Annual deductibles</strong> (vary by plan)</li>
+        <li><strong>Coinsurance for certain services</strong></li>
+      </ul>
+
+      <h3>Total Monthly Healthcare Costs Example</h3>
+      <p>For a typical retiree with 20+ years of service:</p>
+      <ul>
+        <li>Medicare Part B: ~$185/month</li>
+        <li>GIC Medicare supplement (your 20% share): ~$30-80/month (varies by plan)</li>
+        <li>Dental/vision if elected: ~$30-50/month</li>
+        <li><strong>Total estimated: $245-315/month</strong></li>
+      </ul>
+
+      <h2>Common Mistakes to Avoid</h2>
+      <p>Learn from others' mistakes to ensure a smooth transition:</p>
+
+      <h3>Mistake #1: Assuming Someone Will Remind You</h3>
+      <p><strong>Reality:</strong> While GIC may send reminders, the responsibility is ultimately yours. Mark your calendar 4-6 months before your 65th birthday and start the process.</p>
+
+      <h3>Mistake #2: Waiting Until the Last Minute</h3>
+      <p><strong>Reality:</strong> Medicare enrollment can take 2-3 months to process. Starting early gives you time to resolve any issues before coverage gaps occur.</p>
+
+      <h3>Mistake #3: Not Enrolling in Part B Because of the Cost</h3>
+      <p><strong>Reality:</strong> The Part B premium is required to maintain GIC coverage. Skipping it means losing all GIC health benefits—a far greater cost.</p>
+
+      <h3>Mistake #4: Thinking GIC Coverage Continues Automatically</h3>
+      <p><strong>Reality:</strong> Your pre-65 GIC coverage will terminate at 65 if you don't transition to a Medicare supplement plan. This is not automatic.</p>
+
+      <h3>Mistake #5: Enrolling in a Non-GIC Medicare Advantage Plan</h3>
+      <p><strong>Reality:</strong> If you enroll in a private Medicare Advantage plan instead of Original Medicare with GIC supplemental coverage, you may lose your GIC benefits. GIC Medicare supplement plans require you to have Original Medicare (Parts A and B).</p>
+
+      <h2>Special Situations</h2>
+      <p>These circumstances require extra attention:</p>
+
+      <h3>If Your Spouse Is Also a State Retiree</h3>
+      <p>Each spouse must independently enroll in Medicare and GIC coverage when they turn 65. Your spouse's enrollment doesn't affect yours, and vice versa.</p>
+
+      <h3>If Your Spouse Is Under 65</h3>
+      <p>Your under-65 spouse can remain on your GIC coverage as a non-Medicare dependent. They'll transition to Medicare when they turn 65.</p>
+
+      <h3>If You Have End-Stage Renal Disease or a Disability</h3>
+      <p>You may be eligible for Medicare before 65. Contact Social Security and GIC immediately to understand your enrollment options and requirements.</p>
+
+      <h3>If You Move Out of Massachusetts</h3>
+      <p>Most GIC Medicare supplement plans provide nationwide coverage. However, review your plan's provider network and confirm coverage in your new location. The UniCare OME plan typically offers the most flexibility for out-of-state retirees.</p>
+
+      <h2>Resources and Contacts</h2>
+      <p>Keep these contacts handy as you navigate the transition:</p>
+
+      <h3>Medicare Enrollment</h3>
+      <ul>
+        <li><strong>Social Security:</strong> 1-800-772-1213 | ssa.gov/medicare</li>
+        <li><strong>Medicare:</strong> 1-800-MEDICARE (1-800-633-4227) | medicare.gov</li>
+      </ul>
+
+      <h3>GIC Retiree Services</h3>
+      <ul>
+        <li><strong>Phone:</strong> 617-727-2310, option 1</li>
+        <li><strong>Website:</strong> mass.gov/gic</li>
+        <li><strong>Email:</strong> Check the GIC website for current contact forms</li>
+      </ul>
+
+      <h3>Free Medicare Counseling</h3>
+      <ul>
+        <li><strong>SHINE Program:</strong> 1-800-243-4636 (free, unbiased Medicare counseling for Massachusetts residents)</li>
+        <li><strong>State Health Insurance Assistance Program (SHIP):</strong> Local counselors can help you understand your options</li>
+      </ul>
+
+      <h3>Massachusetts State Retirement Board</h3>
+      <ul>
+        <li><strong>Phone:</strong> 617-367-7770</li>
+        <li><strong>Website:</strong> mass.gov/retirement</li>
+      </ul>
+
+      <h2>Checklist: Your Age 65 Healthcare Transition</h2>
+      <p>Use this checklist to stay on track:</p>
+
+      <h3>6 Months Before Turning 65</h3>
+      <ul>
+        <li>☐ Mark your Medicare enrollment period on your calendar</li>
+        <li>☐ Review the GIC Benefit Decision Guide for Medicare plans</li>
+        <li>☐ Gather necessary documents (Social Security card, birth certificate)</li>
+      </ul>
+
+      <h3>3 Months Before Turning 65</h3>
+      <ul>
+        <li>☐ Apply for Medicare Parts A and B through Social Security</li>
+        <li>☐ Contact GIC to discuss Medicare supplement plan options</li>
+        <li>☐ Compare costs and benefits of available GIC Medicare plans</li>
+      </ul>
+
+      <h3>1 Month Before Turning 65</h3>
+      <ul>
+        <li>☐ Confirm Medicare enrollment is processed</li>
+        <li>☐ Submit GIC Medicare plan enrollment paperwork</li>
+        <li>☐ Receive your Medicare card in the mail</li>
+      </ul>
+
+      <h3>On Your 65th Birthday</h3>
+      <ul>
+        <li>☐ Verify Medicare coverage is active at medicare.gov</li>
+        <li>☐ Confirm GIC Medicare supplement coverage is active</li>
+        <li>☐ Update your doctors and pharmacies with new insurance information</li>
+      </ul>
+
+      <h2>Conclusion: Don't Let This Deadline Slip By</h2>
+      <p>Turning 65 is a milestone, but for Massachusetts state retirees, it's also a critical deadline that requires action. The transition from primary GIC coverage to Medicare with GIC supplemental coverage is mandatory—not optional. Missing this deadline can result in losing your health coverage entirely, facing lifetime premium penalties, and scrambling to find alternative insurance.</p>
+
+      <p>Start planning at least 6 months before your 65th birthday. Enroll in Medicare Parts A and B during your Initial Enrollment Period. Contact GIC to select your Medicare supplement plan. Confirm everything is in place before your birthday.</p>
+
+      <p>Your health coverage in retirement is too important to leave to chance. Take action now to protect yourself and your family.</p>
+
+      <p>For more retirement planning guidance, explore our <a href="/blog/retirement-healthcare-options-for-state-employees" title="Healthcare Options Guide">comprehensive healthcare options guide</a>, use our <a href="/calculator" title="Massachusetts Pension Calculator">pension calculator</a> to plan your retirement income, and review our <a href="/blog/retirement-planning-for-massachusetts-state-employees" title="Retirement Planning Timeline">retirement planning timeline</a> for a complete checklist.</p>
+    `,
+    relatedPosts: [
+      "retirement-healthcare-options-for-state-employees",
+      "retirement-planning-for-massachusetts-state-employees",
+      "massachusetts-cola-2026-complete-guide",
+      "understanding-massachusetts-pension-options",
+    ],
+  },
 ]
+
+// Pre-sorted blog posts by date (newest first)
+export const sortedBlogPosts = [...blogPosts].sort((a, b) =>
+  new Date(b.date).getTime() - new Date(a.date).getTime()
+)

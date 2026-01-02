@@ -24,10 +24,10 @@ export const STRIPE_CONFIG = {
 // Subscription Plans
 export const SUBSCRIPTION_PLANS = {
   monthly: {
-    // FIXED: Use the correct price ID created in Stripe account
-    priceId: process.env.STRIPE_MONTHLY_PRICE_ID || 'price_1RcUU4PBZ56spM5fuMVpBf87',
+    // Price ID from Stripe account (updated Dec 30, 2025)
+    priceId: process.env.STRIPE_MONTHLY_PRICE_ID || 'price_1Sk3isGAdpLX0D4NcwzoqdP2',
     name: 'Premium Monthly',
-    price: 9.99,
+    price: 6.99,
     interval: 'month' as const,
     features: [
       'Unlimited pension calculations',
@@ -41,15 +41,15 @@ export const SUBSCRIPTION_PLANS = {
     ]
   },
   annual: {
-    // FIXED: Use the correct price ID created in Stripe account
-    priceId: process.env.STRIPE_ANNUAL_PRICE_ID || 'price_1RcUU4PBZ56spM5ftG7swJG2',
+    // Price ID from Stripe account (updated Dec 30, 2025)
+    priceId: process.env.STRIPE_ANNUAL_PRICE_ID || 'price_1Sk3iuGAdpLX0D4NuAXsBEp7',
     name: 'Premium Annual',
-    price: 99.99,
+    price: 69.99,
     interval: 'year' as const,
-    savings: 'Save $19.89 (17% off)',
+    savings: 'Save $13.89 (17% off)',
     features: [
       'All monthly features included',
-      'Annual savings of $19.89',
+      'Annual savings of $13.89',
       'Extended calculation history',
       'Advanced portfolio analysis',
       'Dedicated account manager',
@@ -346,6 +346,7 @@ export const STRIPE_WEBHOOK_EVENTS = {
   CUSTOMER_CREATED: 'customer.created',
   CUSTOMER_UPDATED: 'customer.updated',
   PAYMENT_METHOD_ATTACHED: 'payment_method.attached',
+  CHECKOUT_SESSION_COMPLETED: 'checkout.session.completed',
 } as const
 
 // Error types

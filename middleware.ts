@@ -5,6 +5,7 @@ import { getCSP } from "@/lib/csp"
 export default withAuth(
   function middleware(req) {
     const isDevelopment = process.env.NODE_ENV !== 'production'
+    const isEmbedRoute = req.nextUrl.pathname.startsWith('/embed/')
 
     // Block access to development routes in production
     if (!isDevelopment && req.nextUrl.pathname.startsWith('/dev/')) {
@@ -14,7 +15,27 @@ export default withAuth(
     // Create a response
     const response = NextResponse.next()
 
-    // Add security headers
+    // For embed routes, use permissive headers to allow iframe embedding
+    if (isEmbedRoute) {
+      const embedCSP = [
+        "default-src 'self'",
+        "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+        "img-src 'self' data: https: blob:",
+        "font-src 'self' data: https://fonts.gstatic.com",
+        "connect-src 'self' https://*.supabase.co",
+        "frame-ancestors *",
+        "object-src 'none'"
+      ].join('; ')
+
+      response.headers.set('Content-Security-Policy', embedCSP)
+      // Don't set X-Frame-Options for embed routes (allows iframe embedding)
+      response.headers.set('X-Content-Type-Options', 'nosniff')
+      response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+      return response
+    }
+
+    // Add security headers for non-embed routes
     response.headers.set('Content-Security-Policy', getCSP(isDevelopment))
     response.headers.set('X-Frame-Options', 'DENY')
     response.headers.set('X-Content-Type-Options', 'nosniff')
@@ -32,13 +53,16 @@ export default withAuth(
     callbacks: {
       authorized: ({ token, req }) => {
         // Allow access to public routes
-        const publicRoutes = ["/", "/about", "/faq", "/blog", "/resources", "/contact", "/auth/signin", "/auth/error"]
+        const publicRoutes = [
+          "/", "/about", "/faq", "/blog", "/resources", "/contact",
+          "/auth/signin", "/auth/error", "/embed", "/tools", "/calculator"
+        ]
         const isPublicRoute = publicRoutes.some(route => req.nextUrl.pathname.startsWith(route))
-        
+
         if (isPublicRoute) {
           return true
         }
-        
+
         // Require authentication for protected routes
         return !!token
       },

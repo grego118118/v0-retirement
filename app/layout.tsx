@@ -3,8 +3,7 @@ import type { Metadata, Viewport } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
-import { Footer } from "@/components/layout/footer"
-import { Header } from "@/components/layout/header"
+import { LayoutWrapper } from "@/components/layout/layout-wrapper"
 import { SessionProvider } from "@/components/auth/session-provider"
 import { ProfileProvider } from "@/contexts/profile-context"
 import Script from "next/script"
@@ -116,11 +115,9 @@ export default function RootLayout({
             <SubscriptionListener />
             <AdSenseInitializer />
             <TrustedTypesSetup />
-            <div className="flex min-h-screen flex-col">
-              <Header />
-              <main className="flex-1">{children}</main>
-              <Footer />
-            </div>
+            <LayoutWrapper>
+              {children}
+            </LayoutWrapper>
             <Toaster />
             <Analytics />
           </ThemeProvider>

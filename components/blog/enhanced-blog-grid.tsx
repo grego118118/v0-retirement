@@ -12,7 +12,7 @@ import { BlogPost } from '@/types/ai-blog'
 import { useSession } from 'next-auth/react'
 import { Switch } from '@/components/ui/switch'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { blogPosts } from '@/lib/blog-data'
+import { sortedBlogPosts as blogPosts } from '@/lib/blog-data'
 
 interface EnhancedBlogGridProps {
   posts?: BlogPost[]
@@ -126,6 +126,9 @@ export function EnhancedBlogGrid({
           )
         }
 
+        // Sort by date (newest first)
+        filteredPosts.sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime())
+
         setDisplayPosts(filteredPosts)
         setError(null)
         setLoading(false)
@@ -173,10 +176,16 @@ export function EnhancedBlogGrid({
             p.seo_keywords?.some(keyword => keyword.toLowerCase().includes(query))
           )
         }
+        // Sort by date (newest first)
+        filteredPosts.sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime())
         setDisplayPosts(filteredPosts)
         setError(null)
       } else {
-        setDisplayPosts(data.posts)
+        // Sort API results by date (newest first)
+        const sortedPosts = [...data.posts].sort((a: BlogPost, b: BlogPost) =>
+          new Date(b.published_at || b.created_at).getTime() - new Date(a.published_at || a.created_at).getTime()
+        )
+        setDisplayPosts(sortedPosts)
         setError(null)
       }
     } catch (err) {
@@ -218,6 +227,9 @@ export function EnhancedBlogGrid({
           p.seo_keywords?.some(keyword => keyword.toLowerCase().includes(query))
         )
       }
+
+      // Sort by date (newest first)
+      filteredPosts.sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime())
 
       setDisplayPosts(filteredPosts)
       setError(null)

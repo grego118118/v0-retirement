@@ -71,6 +71,10 @@ export async function POST(request: NextRequest) {
         await handleCustomerUpdated(event.data.object as Stripe.Customer)
         break
 
+      case STRIPE_WEBHOOK_EVENTS.CHECKOUT_SESSION_COMPLETED:
+        await handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session)
+        break
+
       default:
         console.log(`Unhandled event type: ${event.type}`)
     }
@@ -351,6 +355,61 @@ async function handleCustomerUpdated(customer: Stripe.Customer) {
     }
   } catch (error) {
     console.error('Error handling customer updated:', error)
+    throw error
+  }
+}
+
+/**
+ * Handle checkout session completed
+ */
+async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
+  try {
+    console.log(`Checkout session completed: ${session.id}`)
+
+    const customerId = session.customer as string
+    const subscriptionId = session.subscription as string
+    const customerEmail = session.customer_email || session.customer_details?.email
+
+    if (!customerId || !customerEmail) {
+      console.error('Missing customer ID or email in checkout session')
+      return
+    }
+
+    // Find user by email or Stripe customer ID
+    let user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { stripeCustomerId: customerId },
+          { email: customerEmail }
+        ]
+      }
+    })
+
+    if (!user) {
+      console.log(`Creating new user for checkout: ${customerEmail}`)
+      user = await prisma.user.create({
+        data: {
+          email: customerEmail,
+          stripeCustomerId: customerId,
+          subscriptionId: subscriptionId,
+          subscriptionStatus: 'active',
+        }
+      })
+    } else {
+      // Update existing user with Stripe info
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          stripeCustomerId: customerId,
+          subscriptionId: subscriptionId,
+          subscriptionStatus: 'active',
+        }
+      })
+    }
+
+    console.log(`✅ Checkout completed for user ${customerEmail}, subscription: ${subscriptionId}`)
+  } catch (error) {
+    console.error('Error handling checkout completed:', error)
     throw error
   }
 }

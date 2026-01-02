@@ -1,6 +1,7 @@
 import { Metadata } from "next"
 import Link from "next/link"
 import { BreadcrumbStructuredData, FAQStructuredData } from "@/components/seo/structured-data"
+import { Breadcrumbs } from "@/components/seo/breadcrumbs"
 
 export const metadata: Metadata = {
   title: "Massachusetts Retirement Answers (Q&A Index)",
@@ -24,6 +25,14 @@ export default function AnswersIndexPage() {
     <div className="container py-10">
       <BreadcrumbStructuredData items={breadcrumbs} />
       <FAQStructuredData faqs={qas} />
+
+      <Breadcrumbs
+        items={[
+          { label: "Resources", href: "/resources" },
+          { label: "Answers" }
+        ]}
+        className="mb-4"
+      />
 
       <h1 className="text-3xl font-bold mb-4">Massachusetts Retirement Answers</h1>
       <p className="text-muted-foreground mb-6">Quick, accurate answers with links to detailed guides.</p>

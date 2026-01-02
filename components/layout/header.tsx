@@ -18,8 +18,21 @@ import {
   Wand2,
   Menu,
   X,
-  Crown
+  Crown,
+  FolderOpen,
+  ChevronDown,
+  TrendingUp,
+  Users,
+  FileText,
+  Shield
 } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu"
 import { useSubscriptionStatus } from "@/hooks/use-subscription"
 
 export function Header() {
@@ -140,6 +153,50 @@ export function Header() {
               <BookOpen className="h-4 w-4 text-orange-600 dark:text-orange-400" />
               Blog
             </Link>
+
+            {/* Resources Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger className={`nav-link flex items-center gap-1.5 outline-none ${
+                pathname?.startsWith("/resources") ? "nav-link-active" : ""
+              }`}>
+                <FolderOpen className="h-4 w-4 text-teal-600 dark:text-teal-400" />
+                Resources
+                <ChevronDown className="h-3 w-3 ml-0.5" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56">
+                <DropdownMenuItem asChild>
+                  <Link href="/resources" className="flex items-center gap-2 cursor-pointer">
+                    <FolderOpen className="h-4 w-4 text-teal-600" />
+                    All Resources
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/resources/cola" className="flex items-center gap-2 cursor-pointer">
+                    <TrendingUp className="h-4 w-4 text-green-600" />
+                    COLA Information
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/resources/groups" className="flex items-center gap-2 cursor-pointer">
+                    <Users className="h-4 w-4 text-blue-600" />
+                    Retirement Groups
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/resources/options" className="flex items-center gap-2 cursor-pointer">
+                    <FileText className="h-4 w-4 text-purple-600" />
+                    Pension Options
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/resources/wep-gpo" className="flex items-center gap-2 cursor-pointer">
+                    <Shield className="h-4 w-4 text-orange-600" />
+                    WEP/GPO
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             {/* Dynamic Pricing/Billing Link */}
             {session ? (
@@ -294,6 +351,57 @@ export function Header() {
                 <BookOpen className="h-5 w-5 text-orange-600 dark:text-orange-400 flex-shrink-0" />
                 <span className="font-medium">Blog</span>
               </Link>
+
+              {/* Resources Section */}
+              <div className="pt-2">
+                <Link
+                  href="/resources"
+                  onClick={closeMobileMenu}
+                  className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 min-h-[48px] ${
+                    pathname === "/resources"
+                      ? "bg-teal-100/90 dark:bg-teal-900/40 text-teal-800 dark:text-teal-200 shadow-sm border border-teal-200/50 dark:border-teal-700/50"
+                      : "text-gray-800 dark:text-gray-200 hover:bg-gray-200/80 dark:hover:bg-gray-700/60 hover:shadow-sm"
+                  }`}
+                >
+                  <FolderOpen className="h-5 w-5 text-teal-600 dark:text-teal-400 flex-shrink-0" />
+                  <span className="font-medium">Resources</span>
+                </Link>
+                {/* Resources Sub-items */}
+                <div className="ml-6 mt-1 space-y-1 border-l-2 border-teal-200 dark:border-teal-800 pl-3">
+                  <Link
+                    href="/resources/cola"
+                    onClick={closeMobileMenu}
+                    className="flex items-center gap-2 p-2 text-sm text-gray-600 dark:text-gray-400 hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
+                  >
+                    <TrendingUp className="h-4 w-4" />
+                    COLA Information
+                  </Link>
+                  <Link
+                    href="/resources/groups"
+                    onClick={closeMobileMenu}
+                    className="flex items-center gap-2 p-2 text-sm text-gray-600 dark:text-gray-400 hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
+                  >
+                    <Users className="h-4 w-4" />
+                    Retirement Groups
+                  </Link>
+                  <Link
+                    href="/resources/options"
+                    onClick={closeMobileMenu}
+                    className="flex items-center gap-2 p-2 text-sm text-gray-600 dark:text-gray-400 hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
+                  >
+                    <FileText className="h-4 w-4" />
+                    Pension Options
+                  </Link>
+                  <Link
+                    href="/resources/wep-gpo"
+                    onClick={closeMobileMenu}
+                    className="flex items-center gap-2 p-2 text-sm text-gray-600 dark:text-gray-400 hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
+                  >
+                    <Shield className="h-4 w-4" />
+                    WEP/GPO
+                  </Link>
+                </div>
+              </div>
 
               {/* Dynamic Pricing/Billing Link */}
               {session ? (

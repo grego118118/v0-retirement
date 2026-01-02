@@ -50,12 +50,12 @@ export default function RetirementGuidePage() {
     },
     {
       group: "Group 3",
-      description: "State Police",
+      description: "Massachusetts State Police ONLY",
       minAge: "Any age",
       minService: 20,
-      multiplier: "2.5% (flat rate)",
+      multiplier: "2.5% (flat rate - maximum in MA system)",
       maxBenefit: "80%",
-      examples: ["State Police officers", "State Police detectives"]
+      examples: ["MA State Police Troopers", "MSP Detectives", "MSP Command Staff"]
     },
     {
       group: "Group 4",
@@ -281,9 +281,12 @@ export default function RetirementGuidePage() {
                           <span className="font-medium">COLA Adjustments</span>
                         </div>
                         <p className="text-sm text-gray-600">
-                          Annual cost-of-living adjustments help protect your purchasing power. 
+                          Annual cost-of-living adjustments help protect your purchasing power.
                           Current rate is 3% on the first $13,000 of your annual benefit.
                         </p>
+                        <Link href="/blog/massachusetts-cola-2026-complete-guide" className="text-xs text-green-700 hover:underline mt-2 inline-block">
+                          Learn more about COLA →
+                        </Link>
                       </div>
                     </div>
                   </div>
@@ -372,6 +375,16 @@ export default function RetirementGuidePage() {
                     including pro-rated service calculations and modified benefit structures. Contact MSRB for specific details about your situation.
                   </p>
                 </div>
+
+                <div className="mt-6 text-center">
+                  <Button asChild variant="outline">
+                    <Link href="/blog/massachusetts-retirement-groups-1-4-complete-guide" className="inline-flex items-center gap-2">
+                      <BookOpen className="h-4 w-4" />
+                      Read Complete Groups Guide
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -431,12 +444,18 @@ export default function RetirementGuidePage() {
                     </div>
                   </div>
 
-                  <div className="text-center">
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
                     <Button asChild>
                       <Link href="/calculator" className="inline-flex items-center gap-2">
                         <Calculator className="h-4 w-4" />
                         Compare Options with Calculator
                         <ArrowRight className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                    <Button asChild variant="outline">
+                      <Link href="/blog/understanding-massachusetts-pension-options" className="inline-flex items-center gap-2">
+                        <BookOpen className="h-4 w-4" />
+                        Read Options Guide
                       </Link>
                     </Button>
                   </div>
@@ -509,6 +528,16 @@ export default function RetirementGuidePage() {
                     understanding your benefits now can help you make better career and financial decisions.
                   </p>
                 </div>
+
+                <div className="mt-6 text-center">
+                  <Button asChild variant="outline">
+                    <Link href="/blog/retirement-planning-for-massachusetts-state-employees" className="inline-flex items-center gap-2">
+                      <BookOpen className="h-4 w-4" />
+                      Read Complete Planning Timeline Guide
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -535,7 +564,10 @@ export default function RetirementGuidePage() {
                   <div className="space-y-3">
                     <div>
                       <h5 className="font-medium text-gray-900 text-sm">Years of Service</h5>
-                      <p className="text-sm text-gray-600">All creditable service time, including purchased service</p>
+                      <p className="text-sm text-gray-600">
+                        All creditable service time, including purchased service.
+                        <Link href="/blog/creditable-service-guide-for-ma-state-employees" className="text-primary hover:underline ml-1">Learn more</Link>
+                      </p>
                     </div>
                     <div>
                       <h5 className="font-medium text-gray-900 text-sm">Benefit Percentage</h5>
@@ -547,9 +579,16 @@ export default function RetirementGuidePage() {
                     </div>
                   </div>
 
-                  <Button asChild className="w-full">
-                    <Link href="/calculator">Calculate Your Pension</Link>
-                  </Button>
+                  <div className="space-y-2">
+                    <Button asChild className="w-full">
+                      <Link href="/calculator">Calculate Your Pension</Link>
+                    </Button>
+                    <Button asChild variant="ghost" size="sm" className="w-full text-xs">
+                      <Link href="/blog/maximizing-your-state-pension-benefits">
+                        Read: 5 Strategies to Maximize Your Pension →
+                      </Link>
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
 
@@ -578,9 +617,16 @@ export default function RetirementGuidePage() {
                     </div>
                   </div>
 
-                  <Button asChild variant="outline" className="w-full">
-                    <Link href="/resources" target="_blank">Learn More About WEP/GPO</Link>
-                  </Button>
+                  <div className="space-y-2">
+                    <Button asChild variant="outline" className="w-full">
+                      <Link href="/resources/wep-gpo">Learn More About WEP/GPO</Link>
+                    </Button>
+                    <Button asChild variant="ghost" size="sm" className="w-full text-xs">
+                      <Link href="/blog/social-security-fairness-act-what-massachusetts-state-employees-need-to-know">
+                        Read: Social Security Fairness Act Guide →
+                      </Link>
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
 
@@ -612,9 +658,16 @@ export default function RetirementGuidePage() {
                     </div>
                   </div>
 
-                  <Button asChild variant="outline" className="w-full">
-                    <Link href="https://www.medicare.gov/" target="_blank">Medicare Information</Link>
-                  </Button>
+                  <div className="space-y-2">
+                    <Button asChild variant="outline" className="w-full">
+                      <Link href="https://www.medicare.gov/" target="_blank">Medicare Information</Link>
+                    </Button>
+                    <Button asChild variant="ghost" size="sm" className="w-full text-xs">
+                      <Link href="/blog/retirement-healthcare-options-for-state-employees">
+                        Read: Healthcare Options Guide →
+                      </Link>
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
 

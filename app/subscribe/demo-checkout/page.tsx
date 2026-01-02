@@ -23,15 +23,15 @@ function DemoCheckoutContent() {
   const planDetails = {
     monthly: {
       name: "Monthly Plan",
-      price: "$9.99",
+      price: "$6.99",
       billing: "per month",
       description: "Cancel anytime"
     },
     annual: {
-      name: "Annual Plan", 
-      price: "$79",
+      name: "Annual Plan",
+      price: "$69.99",
       billing: "per year",
-      description: "Save 34% compared to monthly"
+      description: "Save 17% compared to monthly"
     }
   }
   

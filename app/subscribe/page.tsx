@@ -111,7 +111,7 @@ export default function SubscribePage() {
             <CardTitle className="text-2xl">Monthly</CardTitle>
             <CardDescription>Perfect for immediate planning needs</CardDescription>
             <div className="text-4xl font-bold mt-4">
-              $9.99
+              $6.99
               <span className="text-lg font-normal text-muted-foreground">/month</span>
             </div>
             <div className="text-muted-foreground">Cancel anytime</div>
@@ -145,18 +145,18 @@ export default function SubscribePage() {
           <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
             <Badge className="bg-primary text-primary-foreground">
               <Star className="mr-1 h-3 w-3" />
-              Best Value - Save 34%
+              Best Value - Save 17%
             </Badge>
           </div>
           <CardHeader className="text-center pb-2">
             <CardTitle className="text-2xl">Annual</CardTitle>
             <CardDescription>Best value for long-term planning</CardDescription>
             <div className="text-4xl font-bold mt-4">
-              $79
+              $69.99
               <span className="text-lg font-normal text-muted-foreground">/year</span>
             </div>
             <div className="text-muted-foreground">
-              <span className="line-through">$119.88</span> - Save $40.88
+              <span className="line-through">$83.88</span> - Save $13.89
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
