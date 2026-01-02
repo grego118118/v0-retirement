@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
 }
 
 async function updatePartnerAggregates(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   events: WidgetEvent[]
 ) {
   const today = new Date().toISOString().split("T")[0]
