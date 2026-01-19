@@ -1,6 +1,45 @@
 // This would typically come from a CMS or database
 export const blogPosts = [
   {
+    id: "ssfa-and-tax-bomb-tool-updates",
+    title: "Major Updates to SSFA Auditor & Tax Bomb Defuser Tools",
+    description:
+      "In response to the Social Security Fairness Act repeal, we've updated our core calculators with new logic, cleaner interfaces, and precise 'Back-Pay' auditing features.",
+    date: "January 18, 2026",
+    readTime: "5 min read",
+    author: "Greg O",
+    authorTitle: "Lead Developer",
+    category: "Product Updates",
+    tags: ["SSFA", "WEP elimination", "tax bomb", "tools", "update"],
+    image: "/images/blog/ssfa-tax-bomb-update.png",
+    content: `
+      <h2>New Tools for a New Era</h2>
+      <p>The recent passage of the <strong>Social Security Fairness Act</strong> has changed the landscape for Massachusetts public retirees. To keep pace with these legislative victories, we've rolled out significant updates to our two most critical specialized tools: the <a href="/ssfa-auditor">SSFA Back-Pay Auditor</a> and the <a href="/tax-bomb">Tax Bomb Defuser</a>.</p>
+
+      <h2>The SSFA Back-Pay Auditor: Now Live</h2>
+      <p>With the repeal of WEP (Windfall Elimination Provision) and GPO (Government Pension Offset), many retirees are owed retroactive benefits. Our updated **SSFA Auditor** now features:</p>
+      <ul>
+        <li><strong>Precise Back-Pay Calculations:</strong> Estimate your retroactive lump sum dating back to January 2024.</li>
+        <li><strong>Clean, Authoritative Interface:</strong> We've moved away from the complex legacy design to a clean, step-by-step wizard that guides you through the audit process.</li>
+        <li><strong>Real-Time Updates:</strong> As SSA implementation guidance evolves, our tool's logic updates automatically within 48 hours.</li>
+      </ul>
+
+      <h2>Defusing the "Tax Bomb" with Clarity</h2>
+      <p>The "Tax Bomb"—the stealth tax shift that can hit retirees who exceed certain income thresholds—remains a complex issue. We've completely restyled the <a href="/tax-bomb">Tax Bomb Defuser</a> to make it less intimidating and more actionable.</p>
+      <p>The new design uses clear visual signals (Green/Amber/Red) to indicate your risk level without using fear-based aesthetics. It's about empowerment through data.</p>
+
+      <h2>Try the New Tools Today</h2>
+      <p>These updates are part of our commitment to providing "Audit-as-a-Service" for state employees. We believe you shouldn't need a degree inactuarial science to understand your own benefits.</p>
+      <p><a href="/ssfa-auditor" class="btn btn-primary">Launch SSFA Auditor</a> | <a href="/tax-bomb">Launch Tax Bomb Defuser</a></p>
+    `,
+    relatedPosts: [
+      "social-security-fairness-act-what-massachusetts-state-employees-need-to-know",
+      "introducing-premium-interface-2026",
+      "maximizing-your-state-pension-benefits"
+    ],
+  },
+
+  {
     id: "massachusetts-cola-2026-complete-guide",
     title: "Massachusetts COLA 2026: Complete Guide to Cost of Living Adjustments for State Pensions",
     description:

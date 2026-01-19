@@ -32,21 +32,21 @@ describe('Age Calculation Fix - Cascading Effects', () => {
   it('should calculate correct years of service at retirement with fixed age', () => {
     const correctedProjection = calculateRetirementBenefitsProjection(correctedAgeParams)
     const incorrectProjection = calculateRetirementBenefitsProjection(incorrectAgeParams)
-    
+
     // Find the projection for age 55 (pension start age)
     const correctedPensionStart = correctedProjection.find(p => p.age === 55)
     const incorrectPensionStart = incorrectProjection.find(p => p.age === 55)
-    
+
     expect(correctedPensionStart).toBeDefined()
     expect(incorrectPensionStart).toBeDefined()
-    
+
     if (correctedPensionStart && incorrectPensionStart) {
       // With corrected age (52): 31 + (55 - 52) = 34 years of service
       expect(correctedPensionStart.yearsOfService).toBe(34)
-      
+
       // With incorrect age (53): 31 + (55 - 53) = 33 years of service
       expect(incorrectPensionStart.yearsOfService).toBe(33)
-      
+
       // The difference should be 1 year
       expect(correctedPensionStart.yearsOfService - incorrectPensionStart.yearsOfService).toBe(1)
     }
@@ -55,14 +55,14 @@ describe('Age Calculation Fix - Cascading Effects', () => {
   it('should affect pension benefit calculations due to additional year of service', () => {
     const correctedProjection = calculateRetirementBenefitsProjection(correctedAgeParams)
     const incorrectProjection = calculateRetirementBenefitsProjection(incorrectAgeParams)
-    
+
     const correctedPensionStart = correctedProjection.find(p => p.age === 55)
     const incorrectPensionStart = incorrectProjection.find(p => p.age === 55)
-    
+
     if (correctedPensionStart && incorrectPensionStart) {
       // With one additional year of service, the pension should be higher
       expect(correctedPensionStart.pensionWithOption).toBeGreaterThan(incorrectPensionStart.pensionWithOption)
-      
+
       // The difference should be approximately one year's worth of benefit
       // For Group 2 at age 55: 2.0% benefit factor
       // Additional benefit = $95,000 * 1 year * 2.0% = $1,900 annually
@@ -81,7 +81,7 @@ describe('Age Calculation Fix - Cascading Effects', () => {
     // With corrected age (52), years until retirement at 55 should be 3
     const yearsUntilRetirement = correctedAgeParams.plannedRetirementAge - correctedAgeParams.currentAge
     expect(yearsUntilRetirement).toBe(3)
-    
+
     // With incorrect age (53), years until retirement at 55 would be 2
     const incorrectYearsUntilRetirement = incorrectAgeParams.plannedRetirementAge - incorrectAgeParams.currentAge
     expect(incorrectYearsUntilRetirement).toBe(2)
@@ -89,7 +89,7 @@ describe('Age Calculation Fix - Cascading Effects', () => {
 
   it('should show correct progression in all projection years', () => {
     const projection = calculateRetirementBenefitsProjection(correctedAgeParams)
-    
+
     // All years should show 34 years of service (frozen at retirement)
     projection.forEach(year => {
       expect(year.yearsOfService).toBe(34)
@@ -100,10 +100,10 @@ describe('Age Calculation Fix - Cascading Effects', () => {
     // Test that pension retirement age validation works with corrected age
     const currentAge = 52
     const pensionRetirementAge = 55
-    
+
     // Should be valid (pension age > current age)
     expect(pensionRetirementAge).toBeGreaterThan(currentAge)
-    
+
     // Years until retirement should be positive
     const yearsUntilRetirement = pensionRetirementAge - currentAge
     expect(yearsUntilRetirement).toBeGreaterThan(0)
@@ -113,16 +113,16 @@ describe('Age Calculation Fix - Cascading Effects', () => {
   it('should affect COLA calculations due to higher base pension', () => {
     const correctedProjection = calculateRetirementBenefitsProjection(correctedAgeParams)
     const incorrectProjection = calculateRetirementBenefitsProjection(incorrectAgeParams)
-    
+
     // Find the second year (age 56) where COLA is first applied
     const correctedSecondYear = correctedProjection.find(p => p.age === 56)
     const incorrectSecondYear = incorrectProjection.find(p => p.age === 56)
-    
+
     if (correctedSecondYear && incorrectSecondYear) {
       // Both should have COLA applied
       expect(correctedSecondYear.colaAdjustment).toBeGreaterThan(0)
       expect(incorrectSecondYear.colaAdjustment).toBeGreaterThan(0)
-      
+
       // The COLA amount might be the same (capped at $390) but the total pension should be higher
       expect(correctedSecondYear.totalPensionAnnual).toBeGreaterThan(incorrectSecondYear.totalPensionAnnual)
     }
@@ -136,10 +136,10 @@ describe('Age Calculation Fix - Cascading Effects', () => {
       plannedRetirementAge: 55, // Minimum for Group 2
       currentYearsOfService: 20 // Minimum for retirement
     }
-    
+
     const projection = calculateRetirementBenefitsProjection(edgeCaseParams)
     expect(projection.length).toBeGreaterThan(0)
-    
+
     const firstYear = projection[0]
     expect(firstYear.age).toBe(55)
     expect(firstYear.yearsOfService).toBe(23) // 20 + (55 - 52)
@@ -172,10 +172,11 @@ describe('Age Calculation Fix - Cascading Effects', () => {
 
     it('should calculate correct age from parsed year', () => {
       const birthYear = extractYearFromDate('1973-01-01')
-      const currentAge = new Date().getFullYear() - birthYear
-      
+      const currentYear = new Date().getFullYear()
+      const currentAge = currentYear - birthYear
+
       expect(birthYear).toBe(1973)
-      expect(currentAge).toBe(52) // Assuming current year is 2025
+      expect(currentAge).toBe(currentYear - 1973)
     })
   })
 })

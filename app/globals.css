@@ -100,6 +100,10 @@ html {
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 238 100% 67%;
+
+    /* Massachusetts Retirement System Dark Mode Overrides */
+    --mrs-glass: rgba(2, 8, 23, 0.95);
+    --mrs-glass-border: rgba(255, 255, 255, 0.1);
   }
 }
 

@@ -23,33 +23,32 @@ import {
 } from "lucide-react"
 import { generateSEOMetadata } from "@/components/seo/metadata"
 import { OrganizationStructuredData, FAQStructuredData, HowToStructuredData, RETIREMENT_FAQS, PENSION_CALCULATION_STEPS } from "@/components/seo/structured-data"
+import { CalculatorSchema, FAQSchema } from "@/components/seo/schema-markup"
 import { NewsletterSignup } from "@/components/email/newsletter-signup"
 import { ResponsiveAd, PremiumAlternative } from "@/components/ads/adsense"
 import { AutoAds } from "@/components/ads/auto-ads"
 
 export const metadata = generateSEOMetadata({
-  title: "Massachusetts Pension Calculator | Free MSRB Retirement Tool 2025",
+  title: "Massachusetts Pension Calculator 2026 | Official MSRB Estimator",
   description:
-    "Calculate your MA state pension in 60 seconds - FREE. Official MSRB formulas for Groups 1-4. See monthly benefits, COLA projections & survivor options. Trusted by 5,000+ Massachusetts state employees.",
+    "Calculate your Massachusetts state pension in 60 seconds. See your exact monthly payout for Groups 1-4, compare Options A/B/C, and master the Tax Bomb using 2026 COLA rates.",
   path: "/",
   keywords: [
-    "Massachusetts pension calculator",
-    "MSRB pension calculator",
-    "Massachusetts retirement calculator",
-    "state employee pension estimator",
-    "MA pension calculator 2025",
-    "Massachusetts retirement system",
-    "Group 1 pension calculator",
-    "Group 4 pension calculator",
-    "state employee retirement",
-    "pension COLA calculator",
-    "Massachusetts state employee benefits",
+    "Massachusetts pension calculator 2026",
+    "MSRB pension estimator",
+    "MA state retirement calculator",
+    "Group 1 vs Group 4 pension",
+    "Massachusetts COLA 2026",
+    "Option C survivor benefits",
+    "social security windfall elimination ma"
   ],
 })
 
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
+      <CalculatorSchema />
+      <FAQSchema />
       <OrganizationStructuredData />
       {/* AEO: FAQ + HowTo structured data for rich answers */}
       <FAQStructuredData faqs={RETIREMENT_FAQS} />

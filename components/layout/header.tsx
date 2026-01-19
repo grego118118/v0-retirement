@@ -89,174 +89,195 @@ export function Header() {
     >
       <div className="mrs-page-wrapper">
         <div className="mrs-content-container flex h-14 items-center max-w-full overflow-x-hidden">
-        <div className="mr-2 md:mr-4 flex min-w-0 flex-shrink-0">
-          <Link
-            href="/"
-            className="mr-2 md:mr-6 flex items-center space-x-2 flex-shrink-0 group"
-            aria-label="Massachusetts Pension Calculator - Home"
-          >
-            <div className="transition-all duration-300 group-hover:scale-110">
-              <Image
-                src="/images/icon.svg"
-                alt="Mass Pension Logo"
-                width={32}
-                height={32}
-                className="h-8 w-8"
-              />
-            </div>
-            <span className="mrs-heading-3 text-sm md:text-base truncate font-semibold text-gray-800 dark:text-white">Mass Pension</span>
-          </Link>
-          {/* Desktop Navigation */}
-          <nav
-            className="hidden lg:flex items-center space-x-3 xl:space-x-4 text-sm font-medium"
-            role="navigation"
-            aria-label="Main navigation"
-          >
+          <div className="mr-2 md:mr-4 flex min-w-0 flex-shrink-0">
             <Link
-              href="/calculator"
-              className={`nav-link flex items-center gap-1.5 ${
-                isActive("/calculator") ? "nav-link-active" : ""
-              }`}
+              href="/"
+              className="mr-2 md:mr-6 flex items-center space-x-2 flex-shrink-0 group"
+              aria-label="Massachusetts Pension Calculator - Home"
             >
-              <Calculator className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-              Calculator
+              <div className="transition-all duration-300 group-hover:scale-110">
+                <Image
+                  src="/images/icon.svg"
+                  alt="Mass Pension Logo"
+                  width={32}
+                  height={32}
+                  className="h-8 w-8"
+                />
+              </div>
+              <span className="mrs-heading-3 text-sm md:text-base truncate font-semibold text-gray-800 dark:text-white">Mass Pension</span>
             </Link>
-
-            {session && (
-              <>
-                <Link
-                  href="/wizard"
-                  className={`nav-link flex items-center gap-1.5 ${
-                    isActive("/wizard") ? "nav-link-active" : ""
-                  }`}
-                >
-                  <Wand2 className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                  Retirement Wizard
-                </Link>
-                <Link
-                  href="/dashboard"
-                  className={`nav-link flex items-center gap-1.5 ${
-                    isActive("/dashboard") ? "nav-link-active" : ""
-                  }`}
-                >
-                  <LayoutDashboard className="h-4 w-4 text-green-600 dark:text-green-400" />
-                  Dashboard
-                </Link>
-              </>
-            )}
-            <Link
-              href="/blog"
-              className={`nav-link flex items-center gap-1.5 ${
-                isActive("/blog") ? "nav-link-active" : ""
-              }`}
+            {/* Desktop Navigation */}
+            <nav
+              className="hidden lg:flex items-center space-x-3 xl:space-x-4 text-sm font-medium"
+              role="navigation"
+              aria-label="Main navigation"
             >
-              <BookOpen className="h-4 w-4 text-orange-600 dark:text-orange-400" />
-              Blog
-            </Link>
-
-            {/* Resources Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger className={`nav-link flex items-center gap-1.5 outline-none ${
-                pathname?.startsWith("/resources") ? "nav-link-active" : ""
-              }`}>
-                <FolderOpen className="h-4 w-4 text-teal-600 dark:text-teal-400" />
-                Resources
-                <ChevronDown className="h-3 w-3 ml-0.5" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56">
-                <DropdownMenuItem asChild>
-                  <Link href="/resources" className="flex items-center gap-2 cursor-pointer">
-                    <FolderOpen className="h-4 w-4 text-teal-600" />
-                    All Resources
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href="/resources/cola" className="flex items-center gap-2 cursor-pointer">
-                    <TrendingUp className="h-4 w-4 text-green-600" />
-                    COLA Information
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/resources/groups" className="flex items-center gap-2 cursor-pointer">
-                    <Users className="h-4 w-4 text-blue-600" />
-                    Retirement Groups
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/resources/options" className="flex items-center gap-2 cursor-pointer">
-                    <FileText className="h-4 w-4 text-purple-600" />
-                    Pension Options
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/resources/wep-gpo" className="flex items-center gap-2 cursor-pointer">
-                    <Shield className="h-4 w-4 text-orange-600" />
-                    WEP/GPO
-                  </Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Dynamic Pricing/Billing Link */}
-            {session ? (
               <Link
-                href="/billing"
-                className={`nav-link flex items-center gap-1.5 ${
-                  isActive("/billing") ? "nav-link-active" : ""
-                }`}
+                href="/calculator"
+                className={`nav-link flex items-center gap-1.5 ${isActive("/calculator") ? "nav-link-active" : ""
+                  }`}
               >
-                <CreditCard className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
-                Billing
+                <Calculator className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                Calculator
               </Link>
-            ) : (
+
+              {session && (
+                <>
+                  <Link
+                    href="/wizard"
+                    className={`nav-link flex items-center gap-1.5 ${isActive("/wizard") ? "nav-link-active" : ""
+                      }`}
+                  >
+                    <Wand2 className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                    Retirement Wizard
+                  </Link>
+                  <Link
+                    href="/dashboard"
+                    className={`nav-link flex items-center gap-1.5 ${isActive("/dashboard") ? "nav-link-active" : ""
+                      }`}
+                  >
+                    <LayoutDashboard className="h-4 w-4 text-green-600 dark:text-green-400" />
+                    Dashboard
+                  </Link>
+                </>
+              )}
+
               <Link
-                href="/pricing"
-                className={`nav-link flex items-center gap-1.5 ${
-                  isActive("/pricing") ? "nav-link-active" : ""
-                }`}
+                href="/ssfa-auditor"
+                className={`nav-link flex items-center gap-1.5 ${isActive("/ssfa-auditor") ? "nav-link-active" : ""
+                  }`}
               >
-                <DollarSign className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
-                Pricing
+                <Shield className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />
+                SSFA Auditor
               </Link>
-            )}
-          </nav>
 
-          {/* Mobile Hamburger Menu Button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-800"
-            onClick={toggleMobileMenu}
-            aria-label={isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
-            aria-expanded={isMobileMenuOpen}
-            aria-controls="mobile-navigation-menu"
-          >
-            {isMobileMenuOpen ? (
-              <X className="h-5 w-5 text-gray-700 dark:text-gray-300" />
-            ) : (
-              <Menu className="h-5 w-5 text-gray-700 dark:text-gray-300" />
-            )}
-          </Button>
-        </div>
-        <div className="ml-auto flex items-center space-x-2 md:space-x-4 flex-shrink-0">
-          <ModeToggle />
+              <Link
+                href="/tax-bomb"
+                className={`nav-link flex items-center gap-1.5 ${isActive("/tax-bomb") ? "nav-link-active" : ""
+                  }`}
+              >
+                <TrendingUp className="h-4 w-4 text-red-600 dark:text-red-400" />
+                Tax Bomb
+              </Link>
 
-          {/* Premium Status Indicator */}
-          {session && isPremium && subscriptionStatus === 'premium' && (
-            <div
-              className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs font-medium shadow-sm animate-pulse"
-              title="Premium Member"
-              aria-label="Premium subscription active"
-              role="status"
+              <Link
+                href="/blog"
+                className={`nav-link flex items-center gap-1.5 ${isActive("/blog") ? "nav-link-active" : ""
+                  }`}
+              >
+                <BookOpen className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                Blog
+              </Link>
+
+              <Link
+                href="/about"
+                className={`nav-link flex items-center gap-1.5 ${isActive("/about") ? "nav-link-active" : ""
+                  }`}
+              >
+                <Users className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                About
+              </Link>
+
+              {/* Resources Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger className={`nav-link flex items-center gap-1.5 outline-none ${pathname?.startsWith("/resources") ? "nav-link-active" : ""
+                  }`}>
+                  <FolderOpen className="h-4 w-4 text-teal-600 dark:text-teal-400" />
+                  Resources
+                  <ChevronDown className="h-3 w-3 ml-0.5" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-56">
+                  <DropdownMenuItem asChild>
+                    <Link href="/resources" className="flex items-center gap-2 cursor-pointer">
+                      <FolderOpen className="h-4 w-4 text-teal-600" />
+                      All Resources
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/resources/cola" className="flex items-center gap-2 cursor-pointer">
+                      <TrendingUp className="h-4 w-4 text-green-600" />
+                      COLA Information
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/resources/groups" className="flex items-center gap-2 cursor-pointer">
+                      <Users className="h-4 w-4 text-blue-600" />
+                      Retirement Groups
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/resources/options" className="flex items-center gap-2 cursor-pointer">
+                      <FileText className="h-4 w-4 text-purple-600" />
+                      Pension Options
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/resources/wep-gpo" className="flex items-center gap-2 cursor-pointer">
+                      <Shield className="h-4 w-4 text-orange-600" />
+                      WEP/GPO
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Dynamic Pricing/Billing Link */}
+              {session ? (
+                <Link
+                  href="/billing"
+                  className={`nav-link flex items-center gap-1.5 ${isActive("/billing") ? "nav-link-active" : ""
+                    }`}
+                >
+                  <CreditCard className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                  Billing
+                </Link>
+              ) : (
+                <Link
+                  href="/pricing"
+                  className={`nav-link flex items-center gap-1.5 ${isActive("/pricing") ? "nav-link-active" : ""
+                    }`}
+                >
+                  <DollarSign className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                  Pricing
+                </Link>
+              )}
+            </nav>
+
+            {/* Mobile Hamburger Menu Button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-800"
+              onClick={toggleMobileMenu}
+              aria-label={isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+              aria-expanded={isMobileMenuOpen}
+              aria-controls="mobile-navigation-menu"
             >
-              <Crown className="h-3 w-3" />
-              <span className="hidden sm:inline">Premium</span>
-            </div>
-          )}
+              {isMobileMenuOpen ? (
+                <X className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+              ) : (
+                <Menu className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+              )}
+            </Button>
+          </div>
+          <div className="ml-auto flex items-center space-x-2 md:space-x-4 flex-shrink-0">
+            <ModeToggle />
 
-          <UserMenu />
-        </div>
+            {/* Premium Status Indicator */}
+            {session && isPremium && subscriptionStatus === 'premium' && (
+              <div
+                className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs font-medium shadow-sm animate-pulse"
+                title="Premium Member"
+                aria-label="Premium subscription active"
+                role="status"
+              >
+                <Crown className="h-3 w-3" />
+                <span className="hidden sm:inline">Premium</span>
+              </div>
+            )}
+
+            <UserMenu />
+          </div>
         </div>
       </div>
 
@@ -296,15 +317,14 @@ export function Header() {
             </div>
 
             {/* Mobile Menu Content */}
-            <nav className="flex flex-col p-4 space-y-2 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
+            <nav className="flex flex-col p-4 space-y-2 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm max-h-[calc(100vh-64px)] overflow-y-auto">
               <Link
                 href="/calculator"
                 onClick={closeMobileMenu}
-                className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 min-h-[48px] ${
-                  isActive("/calculator")
-                    ? "bg-blue-100/90 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200 shadow-sm border border-blue-200/50 dark:border-blue-700/50"
-                    : "text-gray-800 dark:text-gray-200 hover:bg-gray-200/80 dark:hover:bg-gray-700/60 hover:shadow-sm"
-                }`}
+                className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 min-h-[48px] ${isActive("/calculator")
+                  ? "bg-blue-100/90 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200 shadow-sm border border-blue-200/50 dark:border-blue-700/50"
+                  : "text-gray-800 dark:text-gray-200 hover:bg-gray-200/80 dark:hover:bg-gray-700/60 hover:shadow-sm"
+                  }`}
               >
                 <Calculator className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
                 <span className="font-medium">Calculator</span>
@@ -315,11 +335,10 @@ export function Header() {
                   <Link
                     href="/wizard"
                     onClick={closeMobileMenu}
-                    className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 min-h-[48px] ${
-                      isActive("/wizard")
-                        ? "bg-purple-100/90 dark:bg-purple-900/40 text-purple-800 dark:text-purple-200 shadow-sm border border-purple-200/50 dark:border-purple-700/50"
-                        : "text-gray-800 dark:text-gray-200 hover:bg-gray-200/80 dark:hover:bg-gray-700/60 hover:shadow-sm"
-                    }`}
+                    className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 min-h-[48px] ${isActive("/wizard")
+                      ? "bg-purple-100/90 dark:bg-purple-900/40 text-purple-800 dark:text-purple-200 shadow-sm border border-purple-200/50 dark:border-purple-700/50"
+                      : "text-gray-800 dark:text-gray-200 hover:bg-gray-200/80 dark:hover:bg-gray-700/60 hover:shadow-sm"
+                      }`}
                   >
                     <Wand2 className="h-5 w-5 text-purple-600 dark:text-purple-400 flex-shrink-0" />
                     <span className="font-medium">Retirement Wizard</span>
@@ -327,11 +346,10 @@ export function Header() {
                   <Link
                     href="/dashboard"
                     onClick={closeMobileMenu}
-                    className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 min-h-[48px] ${
-                      isActive("/dashboard")
-                        ? "bg-green-100/90 dark:bg-green-900/40 text-green-800 dark:text-green-200 shadow-sm border border-green-200/50 dark:border-green-700/50"
-                        : "text-gray-800 dark:text-gray-200 hover:bg-gray-200/80 dark:hover:bg-gray-700/60 hover:shadow-sm"
-                    }`}
+                    className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 min-h-[48px] ${isActive("/dashboard")
+                      ? "bg-green-100/90 dark:bg-green-900/40 text-green-800 dark:text-green-200 shadow-sm border border-green-200/50 dark:border-green-700/50"
+                      : "text-gray-800 dark:text-gray-200 hover:bg-gray-200/80 dark:hover:bg-gray-700/60 hover:shadow-sm"
+                      }`}
                   >
                     <LayoutDashboard className="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0" />
                     <span className="font-medium">Dashboard</span>
@@ -340,16 +358,51 @@ export function Header() {
               )}
 
               <Link
+                href="/ssfa-auditor"
+                onClick={closeMobileMenu}
+                className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 min-h-[48px] ${isActive("/ssfa-auditor")
+                  ? "bg-cyan-100/90 dark:bg-cyan-900/40 text-cyan-800 dark:text-cyan-200 shadow-sm border border-cyan-200/50 dark:border-cyan-700/50"
+                  : "text-gray-800 dark:text-gray-200 hover:bg-gray-200/80 dark:hover:bg-gray-700/60 hover:shadow-sm"
+                  }`}
+              >
+                <Shield className="h-5 w-5 text-cyan-600 dark:text-cyan-400 flex-shrink-0" />
+                <span className="font-medium">SSFA Auditor</span>
+              </Link>
+
+              <Link
+                href="/tax-bomb"
+                onClick={closeMobileMenu}
+                className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 min-h-[48px] ${isActive("/tax-bomb")
+                  ? "bg-red-100/90 dark:bg-red-900/40 text-red-800 dark:text-red-200 shadow-sm border border-red-200/50 dark:border-red-700/50"
+                  : "text-gray-800 dark:text-gray-200 hover:bg-gray-200/80 dark:hover:bg-gray-700/60 hover:shadow-sm"
+                  }`}
+              >
+                <TrendingUp className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0" />
+                <span className="font-medium">Tax Bomb Auditor</span>
+              </Link>
+
+              <Link
                 href="/blog"
                 onClick={closeMobileMenu}
-                className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 min-h-[48px] ${
-                  isActive("/blog")
-                    ? "bg-orange-100/90 dark:bg-orange-900/40 text-orange-800 dark:text-orange-200 shadow-sm border border-orange-200/50 dark:border-orange-700/50"
-                    : "text-gray-800 dark:text-gray-200 hover:bg-gray-200/80 dark:hover:bg-gray-700/60 hover:shadow-sm"
-                }`}
+                className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 min-h-[48px] ${isActive("/blog")
+                  ? "bg-orange-100/90 dark:bg-orange-900/40 text-orange-800 dark:text-orange-200 shadow-sm border border-orange-200/50 dark:border-orange-700/50"
+                  : "text-gray-800 dark:text-gray-200 hover:bg-gray-200/80 dark:hover:bg-gray-700/60 hover:shadow-sm"
+                  }`}
               >
                 <BookOpen className="h-5 w-5 text-orange-600 dark:text-orange-400 flex-shrink-0" />
                 <span className="font-medium">Blog</span>
+              </Link>
+
+              <Link
+                href="/about"
+                onClick={closeMobileMenu}
+                className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 min-h-[48px] ${isActive("/about")
+                  ? "bg-blue-100/90 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200 shadow-sm border border-blue-200/50 dark:border-blue-700/50"
+                  : "text-gray-800 dark:text-gray-200 hover:bg-gray-200/80 dark:hover:bg-gray-700/60 hover:shadow-sm"
+                  }`}
+              >
+                <Users className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                <span className="font-medium">About</span>
               </Link>
 
               {/* Resources Section */}
@@ -357,11 +410,10 @@ export function Header() {
                 <Link
                   href="/resources"
                   onClick={closeMobileMenu}
-                  className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 min-h-[48px] ${
-                    pathname === "/resources"
-                      ? "bg-teal-100/90 dark:bg-teal-900/40 text-teal-800 dark:text-teal-200 shadow-sm border border-teal-200/50 dark:border-teal-700/50"
-                      : "text-gray-800 dark:text-gray-200 hover:bg-gray-200/80 dark:hover:bg-gray-700/60 hover:shadow-sm"
-                  }`}
+                  className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 min-h-[48px] ${pathname === "/resources"
+                    ? "bg-teal-100/90 dark:bg-teal-900/40 text-teal-800 dark:text-teal-200 shadow-sm border border-teal-200/50 dark:border-teal-700/50"
+                    : "text-gray-800 dark:text-gray-200 hover:bg-gray-200/80 dark:hover:bg-gray-700/60 hover:shadow-sm"
+                    }`}
                 >
                   <FolderOpen className="h-5 w-5 text-teal-600 dark:text-teal-400 flex-shrink-0" />
                   <span className="font-medium">Resources</span>
@@ -408,11 +460,10 @@ export function Header() {
                 <Link
                   href="/billing"
                   onClick={closeMobileMenu}
-                  className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 min-h-[48px] ${
-                    isActive("/billing")
-                      ? "bg-indigo-100/90 dark:bg-indigo-900/40 text-indigo-800 dark:text-indigo-200 shadow-sm border border-indigo-200/50 dark:border-indigo-700/50"
-                      : "text-gray-800 dark:text-gray-200 hover:bg-gray-200/80 dark:hover:bg-gray-700/60 hover:shadow-sm"
-                  }`}
+                  className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 min-h-[48px] ${isActive("/billing")
+                    ? "bg-indigo-100/90 dark:bg-indigo-900/40 text-indigo-800 dark:text-indigo-200 shadow-sm border border-indigo-200/50 dark:border-indigo-700/50"
+                    : "text-gray-800 dark:text-gray-200 hover:bg-gray-200/80 dark:hover:bg-gray-700/60 hover:shadow-sm"
+                    }`}
                 >
                   <CreditCard className="h-5 w-5 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
                   <span className="font-medium">Billing</span>
@@ -421,11 +472,10 @@ export function Header() {
                 <Link
                   href="/pricing"
                   onClick={closeMobileMenu}
-                  className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 min-h-[48px] ${
-                    isActive("/pricing")
-                      ? "bg-indigo-100/90 dark:bg-indigo-900/40 text-indigo-800 dark:text-indigo-200 shadow-sm border border-indigo-200/50 dark:border-indigo-700/50"
-                      : "text-gray-800 dark:text-gray-200 hover:bg-gray-200/80 dark:hover:bg-gray-700/60 hover:shadow-sm"
-                  }`}
+                  className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 min-h-[48px] ${isActive("/pricing")
+                    ? "bg-indigo-100/90 dark:bg-indigo-900/40 text-indigo-800 dark:text-indigo-200 shadow-sm border border-indigo-200/50 dark:border-indigo-700/50"
+                    : "text-gray-800 dark:text-gray-200 hover:bg-gray-200/80 dark:hover:bg-gray-700/60 hover:shadow-sm"
+                    }`}
                 >
                   <DollarSign className="h-5 w-5 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
                   <span className="font-medium">Pricing</span>

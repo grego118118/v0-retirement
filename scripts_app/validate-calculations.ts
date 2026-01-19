@@ -14,6 +14,8 @@ import {
   type ComparisonInput
 } from '../lib/validation/calculation-comparison-tool'
 
+
+
 import { writeFileSync } from 'fs'
 import { join } from 'path'
 
@@ -150,7 +152,7 @@ async function runValidation() {
 
   // Generate detailed report
   const detailedReport = generateDiscrepancyReport(report)
-  
+
   // Save report to file
   const reportPath = join(process.cwd(), 'validation-report.txt')
   const timestamp = new Date().toISOString()
@@ -168,9 +170,9 @@ Critical Tests Failed: ${criticalFailed}/${CRITICAL_TEST_CASES.length}
 COMPREHENSIVE TEST RESULTS:
 ${report.summary}
 
-${criticalFailed === 0 && report.discrepanciesFound === 0 
-  ? '🎉 ALL TESTS PASSED - Calculations are consistent!' 
-  : '⚠️  DISCREPANCIES FOUND - Review required before deployment'}
+${criticalFailed === 0 && report.discrepanciesFound === 0
+      ? '🎉 ALL TESTS PASSED - Calculations are consistent!'
+      : '⚠️  DISCREPANCIES FOUND - Review required before deployment'}
   `
 
   writeFileSync(reportPath, fullReport)

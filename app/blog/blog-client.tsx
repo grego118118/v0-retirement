@@ -12,6 +12,7 @@ import { useState } from 'react'
 
 export default function BlogClientComponent() {
   const [selectedCategory, setSelectedCategory] = useState('all')
+
   const [searchQuery, setSearchQuery] = useState('')
 
   return (
@@ -79,6 +80,7 @@ export default function BlogClientComponent() {
               selectedCategory={selectedCategory}
               searchQuery={searchQuery}
             />
+
 
           </div>
         </div>

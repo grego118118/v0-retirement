@@ -47,15 +47,46 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   })
 }
 
+import { prisma } from "@/lib/prisma"
+
+// keep existing imports...
+
 export default async function BlogPostPage({ params }: PageProps) {
   const { slug } = await params
-  const post = blogPosts.find((post) => post.id === slug)
+
+  // 1. Try static file first (legacy/fastest)
+  let post: any = blogPosts.find((post) => post.id === slug)
+
+  // 2. If not found, try Database
+  if (!post) {
+    const dbPost = await prisma.blogPost.findUnique({
+      where: { slug: slug }
+    })
+
+    if (dbPost && dbPost.status === 'published') {
+      post = {
+        id: dbPost.slug,
+        title: dbPost.title,
+        description: dbPost.excerpt || "",
+        date: dbPost.publishedAt ? new Date(dbPost.publishedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : "",
+        readTime: "5 min read", // Default since not in DB yet
+        author: "Greg O", // Default or fetch relation
+        authorTitle: "Retirement Specialist",
+        category: "General", // Need to fetch category relation if strictly needed, or default
+        tags: dbPost.seoKeywords,
+        image: dbPost.featuredImageUrl || "/images/blog/default-blog-image.svg",
+        content: dbPost.content,
+        relatedPosts: [] // DB related posts logic would be complex, leaving empty for now
+      }
+    }
+  }
 
   if (!post) {
     notFound()
   }
 
   const relatedPosts = post.relatedPosts ? blogPosts.filter((p) => post.relatedPosts?.includes(p.id)) : []
+
 
   // Check if this is the Social Security Fairness Act post
   const isSSFAPost = post.id === "social-security-fairness-act-what-massachusetts-state-employees-need-to-know"

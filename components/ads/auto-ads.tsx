@@ -86,12 +86,12 @@ export function AutoAds() {
  * This component creates a placeholder area where Auto Ads might appear.
  * It's useful for layout purposes and provides visual feedback in development.
  */
-export function AutoAdsPlaceholder({ 
+export function AutoAdsPlaceholder({
   className = "my-4",
-  minHeight = "250px" 
-}: { 
+  minHeight = "250px"
+}: {
   className?: string
-  minHeight?: string 
+  minHeight?: string
 }) {
   const { isPremium, subscriptionStatus } = useSubscriptionStatus()
   const [isClient, setIsClient] = useState(false)
@@ -108,10 +108,13 @@ export function AutoAdsPlaceholder({
   // Don't render in development - show placeholder instead
   if (process.env.NODE_ENV === 'development') {
     return (
-      <div className={`border-2 border-dashed border-blue-300 p-4 text-center text-blue-600 ${className}`}>
+      <div
+        className={`border-2 border-dashed border-blue-300 p-4 text-center text-blue-600 flex flex-col justify-center items-center ${className}`}
+        style={{ minHeight }}
+      >
         <p className="text-sm font-medium">Auto Ads Placeholder</p>
-        <p className="text-xs">Auto Ads will appear here in production for free users</p>
-        <p className="text-xs mt-1">Publisher: {process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID || "ca-pub-8456317857596950"}</p>
+        <p className="text-xs mt-1">Auto Ads will appear here in production for free users</p>
+        <p className="text-xs mt-1 opacity-70">Publisher: {process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID || "ca-pub-8456317857596950"}</p>
       </div>
     )
   }
@@ -123,7 +126,7 @@ export function AutoAdsPlaceholder({
 
   // Create a placeholder area for Auto Ads
   return (
-    <div 
+    <div
       className={`auto-ads-placeholder ${className}`}
       style={{ minHeight }}
       data-auto-ads="true"
@@ -139,14 +142,14 @@ export function AutoAdsPlaceholder({
  * This component tries Auto Ads first, then falls back to manual ad units
  * if Auto Ads don't appear within a reasonable time.
  */
-export function SmartAds({ 
+export function SmartAds({
   className = "my-4",
   fallbackSlot,
-  timeout = 10000 
-}: { 
+  timeout = 10000
+}: {
   className?: string
   fallbackSlot?: string
-  timeout?: number 
+  timeout?: number
 }) {
   const { isPremium, subscriptionStatus } = useSubscriptionStatus()
   const [isClient, setIsClient] = useState(false)
@@ -194,11 +197,11 @@ export function SmartAds({
     <div className={className}>
       {/* Auto Ads placeholder */}
       <AutoAdsPlaceholder className="mb-2" />
-      
+
       {/* Manual fallback if provided and timeout reached */}
       {showFallback && fallbackSlot && (
         <div className="mt-4">
-          <div 
+          <div
             className="manual-ad-fallback"
             data-fallback-slot={fallbackSlot}
           >

@@ -1,137 +1,136 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import type { Metadata } from "next"
-import { BreadcrumbStructuredData } from "@/components/seo/structured-data"
+import TrustShield from "@/components/marketing/TrustShield";
+import { User, Cpu, Landmark, ShieldCheck, Mail, ArrowRight } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import Link from "next/link";
 
-export const metadata: Metadata = {
-  title: "About Mass Pension | Massachusetts Retirement Calculator",
-  description:
-    "Learn how Mass Pension helps Massachusetts state employees calculate their retirement benefits using official MSRB formulas. Trusted by thousands of state workers for accurate pension estimates.",
-  keywords: "about Mass Pension, Massachusetts pension calculator, MSRB calculator, state employee retirement tool, pension estimator about, Massachusetts retirement planning",
-  openGraph: {
-    title: "About Mass Pension | Massachusetts Retirement Calculator",
-    description: "Learn how Mass Pension helps Massachusetts state employees calculate their retirement benefits.",
-    type: "website",
-  },
-}
+
+export const metadata = {
+  title: "About the Developer | MassPension.com",
+  description: "The story behind MassPension.com — bringing modern digital transparency to Massachusetts public employee benefits.",
+};
+
 
 export default function AboutPage() {
   return (
-    <>
-      <BreadcrumbStructuredData
-        items={[
-          { name: "Home", url: "https://www.masspension.com" },
-          { name: "About", url: "https://www.masspension.com/about" },
-        ]}
-      />
-      <div className="container py-12">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold tracking-tight mb-6">About the Massachusetts Pension Estimator</h1>
-
-        <div className="space-y-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>Our Mission</CardTitle>
-              <CardDescription>
-                Helping Massachusetts state employees make informed retirement decisions
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                The Massachusetts Pension Estimator was created to help state employees understand their retirement
-                benefits and make informed decisions about when to retire. Our tool provides accurate estimates based on
-                the official Massachusetts retirement system formulas and factors.
+    <div className="flex flex-col min-h-screen">
+      {/* Hero Section - Matching Site Standard */}
+      <section className="bg-gradient-to-br from-blue-600 via-indigo-700 to-purple-800 text-white py-16 md:py-24 relative overflow-hidden">
+        <div className="absolute inset-0 bg-black/10"></div>
+        <div className="container mrs-page-wrapper relative z-10">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="space-y-6">
+              <Badge className="bg-blue-500/20 text-blue-100 border-blue-400/30">
+                <User className="w-3 h-3 mr-1" />
+                Mission & Purpose
+              </Badge>
+              <h1 className="text-4xl md:text-6xl font-bold tracking-tight leading-tight">
+                Bringing <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-400">Clarity</span> to the Commonwealth.
+              </h1>
+              <p className="text-xl md:text-2xl text-blue-100 leading-relaxed max-w-xl">
+                MassPension.com was born out of a simple observation: Massachusetts public employees often have the most complex benefits but the least modern tools to manage them.
               </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>How It Works</CardTitle>
-              <CardDescription>Understanding the calculation process</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground mb-4">
-                Our pension calculator uses the same formulas and factors as the Massachusetts State Retirement Board to
-                estimate your pension benefits. The calculation takes into account:
-              </p>
-              <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-                <li>Your age at retirement</li>
-                <li>Your years of creditable service</li>
-                <li>Your group classification</li>
-                <li>Your highest three consecutive years of regular compensation</li>
-                <li>Your retirement option selection (A, B, or C)</li>
-                <li>When you entered state service (before or after April 2, 2012)</li>
-              </ul>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Data Privacy</CardTitle>
-              <CardDescription>How we handle your information</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground mb-4">
-                For your convenience, the pension calculator saves your inputs locally on your device. This means:
-              </p>
-              <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-                <li>Your data stays on your device and is not sent to any server</li>
-                <li>When you return to the calculator, your previous inputs will be automatically loaded</li>
-                <li>You can clear your saved data at any time using the clear button in the calculator</li>
-                <li>If you use private browsing or clear your browser data, your saved inputs will be removed</li>
-              </ul>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Important Disclaimer</CardTitle>
-              <CardDescription>Please read before using the calculator</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                This calculator provides unofficial estimates for informational purposes only. It is not financial
-                advice. The actual amount of your pension will be determined by the Massachusetts State Retirement Board
-                based on verification of your age, membership status, creditable service, "regular compensation"
-                amounts, group classification, and statutory limits. We recommend consulting with the State Retirement
-                Board for official calculations and information.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Contact Information</CardTitle>
-              <CardDescription>Get in touch with the Massachusetts State Retirement Board</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground mb-4">
-                For official pension calculations and information, please contact:
-              </p>
-              <div className="space-y-2 text-muted-foreground">
-                <p>
-                  <strong>Massachusetts State Retirement Board</strong>
-                </p>
-                <p>One Winter Street, 8th Floor</p>
-                <p>Boston, MA 02108</p>
-                <p>Phone: (617) 367-7770</p>
-                <p>
-                  Website:{" "}
-                  <a
-                    href="https://www.mass.gov/orgs/massachusetts-state-retirement-board"
-                    className="text-primary hover:underline"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    www.mass.gov/orgs/massachusetts-state-retirement-board
+              <div className="pt-4">
+                <Button size="lg" className="bg-white text-blue-700 hover:bg-blue-50 font-bold rounded-xl" asChild>
+                  <a href="mailto:hello@masspension.com">
+                    <Mail className="mr-2 h-5 w-5" />
+                    Contact Research Team
                   </a>
-                </p>
+                </Button>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+
+            <div className="relative hidden lg:block">
+              <div className="aspect-square rounded-3xl overflow-hidden bg-white/10 border border-white/20 backdrop-blur-sm relative group shadow-2xl">
+                <Image
+                  src="/images/about-hero.webp"
+                  alt="Developed in Western Massachusetts"
+                  fill
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                  priority
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+                <div className="absolute bottom-8 left-8 right-8">
+                  <p className="text-white font-bold text-2xl mb-2">Developed in Western MA</p>
+                  <p className="text-blue-100/90 text-sm italic leading-relaxed">
+                    "Built by technologists in the Pioneer Valley, for the retirees who built our communities."
+                  </p>
+                </div>
+              </div>
+            </div>
+
+          </div>
         </div>
-      </div>
-      </div>
-    </>
-  )
+      </section>
+
+      {/* Main Content Sections */}
+      <main className="flex-1 bg-slate-50 py-12 md:py-20">
+        <div className="container mrs-page-wrapper">
+          {/* Trust Ticker */}
+          <div className="mb-20">
+            <TrustShield />
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="bg-white p-8 md:p-10 rounded-3xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+              <div className="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center mb-6">
+                <Landmark className="text-blue-600" size={24} />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 mb-4">Regulatory Accuracy</h3>
+              <p className="text-slate-600 leading-relaxed text-sm">
+                We stay deep in the weeds of PERAC memos and MSRB policy updates. When a new law like the Social Security Fairness Act passes, we update our logic within 48 hours.
+              </p>
+            </div>
+
+            <div className="bg-white p-8 md:p-10 rounded-3xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-100 flex items-center justify-center mb-6">
+                <Cpu className="text-indigo-600" size={24} />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 mb-4">Modern User Experience</h3>
+              <p className="text-slate-600 leading-relaxed text-sm">
+                Benefit calculations shouldn't require a 40-page PDF and a calculator. Our "Audit-as-a-Service" model simplifies complex math into clear, visual signals.
+              </p>
+            </div>
+
+            <div className="bg-white p-8 md:p-10 rounded-3xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+              <div className="w-12 h-12 rounded-2xl bg-green-100 flex items-center justify-center mb-6">
+                <ShieldCheck className="text-green-600" size={24} />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 mb-4">Data Sovereignty</h3>
+              <p className="text-slate-600 leading-relaxed text-sm">
+                We pioneered the "No-Store" guarantee. Your pension data is processed in your browser's memory and vanishes the moment you close the tab. Security by design.
+              </p>
+            </div>
+          </div>
+
+          {/* Mission Detail Section */}
+          <div className="mt-20 bg-white rounded-3xl p-8 md:p-12 shadow-sm border border-slate-200">
+            <div className="max-w-3xl">
+              <h2 className="text-3xl font-bold text-slate-900 mb-6">Our Commitment to Massachusetts</h2>
+              <p className="text-lg text-slate-600 mb-8 leading-relaxed">
+                MassPension.com is a private research entity focused on bridging the gap between "official state statutes" and "actionable user experience." We believe that transparency is the ultimate service.
+              </p>
+              <Link
+                href="/methodology"
+                className="flex items-center gap-2 text-blue-600 font-bold hover:gap-3 transition-all w-fit"
+              >
+                Learn more about our research methodology <ArrowRight size={20} />
+              </Link>
+
+            </div>
+          </div>
+
+          {/* Disclaimer Section */}
+          <div className="mt-20 p-8 md:p-12 rounded-3xl bg-slate-100 border border-slate-200 text-center">
+            <h4 className="text-slate-900 font-bold mb-4 uppercase tracking-widest text-xs">Official Disclosure</h4>
+            <p className="text-slate-500 text-sm max-w-4xl mx-auto leading-relaxed">
+              MassPension.com is a private, third-party research and educational platform. We are NOT affiliated with, endorsed by, or representing the Massachusetts State Retirement Board (MSRB), the Massachusetts Teachers' Retirement System (MTRS), PERAC, or any government agency. All calculators provide estimates based on current publicly available statutes and are for planning purposes only.
+            </p>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
 }
+

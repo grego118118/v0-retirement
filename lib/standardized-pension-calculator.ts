@@ -4,7 +4,8 @@
  * Integrates with existing pension calculation logic and maintains sub-2-second performance
  */
 
-import { getBenefitFactor, checkEligibility } from './pension-calculations'
+import { getBenefitFactor, checkEligibility, calculateAnnualPension } from './pension-calculations'
+
 
 // TypeScript interfaces and types
 export type RetirementGroup = 'Group 1' | 'Group 2' | 'Group 3' | 'Group 4'
@@ -28,25 +29,25 @@ export interface QuickPensionEstimate {
  */
 export function calculateCurrentAge(dateOfBirth: string | Date): number {
   if (!dateOfBirth) return 0
-  
+
   try {
     const birthDate = typeof dateOfBirth === 'string' ? new Date(dateOfBirth) : dateOfBirth
-    
+
     // Validate date
     if (isNaN(birthDate.getTime())) {
       console.warn('Invalid birth date provided to calculateCurrentAge:', dateOfBirth)
       return 0
     }
-    
+
     const today = new Date()
     let age = today.getFullYear() - birthDate.getFullYear()
     const monthDiff = today.getMonth() - birthDate.getMonth()
-    
+
     // Adjust age if birthday hasn't occurred this year
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
       age--
     }
-    
+
     return Math.max(0, age) // Ensure non-negative age
   } catch (error) {
     console.error('Error calculating current age:', error)
@@ -61,20 +62,20 @@ export function calculateCurrentAge(dateOfBirth: string | Date): number {
  */
 export function calculateYearsOfService(membershipDate: string | Date): number {
   if (!membershipDate) return 0
-  
+
   try {
     const startDate = typeof membershipDate === 'string' ? new Date(membershipDate) : membershipDate
-    
+
     // Validate date
     if (isNaN(startDate.getTime())) {
       console.warn('Invalid membership date provided to calculateYearsOfService:', membershipDate)
       return 0
     }
-    
+
     const today = new Date()
     const diffTime = today.getTime() - startDate.getTime()
     const diffYears = diffTime / (1000 * 60 * 60 * 24 * 365.25) // Account for leap years
-    
+
     return Math.max(0, Math.round(diffYears * 100) / 100) // Round to 2 decimal places, ensure non-negative
   } catch (error) {
     console.error('Error calculating years of service:', error)
@@ -119,7 +120,7 @@ export function calculateQuickPensionEstimate(
   try {
     // Convert retirement group to format expected by existing functions
     const groupKey = retirementGroup.replace(' ', '_').toUpperCase()
-    
+
     // Determine service entry period for benefit factor calculation
     let serviceEntry = 'before_2012'
     if (membershipDate) {
@@ -134,9 +135,9 @@ export function calculateQuickPensionEstimate(
 
     // Check eligibility using existing function
     const eligibility = checkEligibility(
-      Math.floor(retirementAge), 
-      projectedYearsOfService, 
-      groupKey, 
+      Math.floor(retirementAge),
+      projectedYearsOfService,
+      groupKey,
       serviceEntry
     )
 
@@ -153,7 +154,7 @@ export function calculateQuickPensionEstimate(
     let totalBenefitPercentage = benefitMultiplier * projectedYearsOfService
     let annualPension = averageSalary * totalBenefitPercentage
     const maxPensionAllowed = averageSalary * MAX_PENSION_PERCENTAGE
-    
+
     // Apply 80% cap
     const cappedAt80Percent = annualPension > maxPensionAllowed
     if (cappedAt80Percent) {
@@ -317,21 +318,18 @@ export function calculateStandardizedPension(input: StandardizedPensionInput): S
       annualBenefit = maxBenefit
     }
 
-    // Apply retirement option adjustments (simplified for comparison)
-    if (retirementOption === 'B') {
-      // Age-based reduction for Option B
-      let reductionPercent = 0.01 // 1% base reduction
-      if (retirementAge >= 60 && retirementAge < 70) {
-        reductionPercent = 0.01 + ((retirementAge - 50) / 20) * 0.04 // Interpolate between 1% and 5%
-      } else if (retirementAge >= 70) {
-        reductionPercent = 0.05 // 5% max reduction
-      }
-      annualBenefit = annualBenefit * (1 - reductionPercent)
-    } else if (retirementOption === 'C' && beneficiaryAge) {
-      // Simplified Option C reduction (would need full lookup table for exact match)
-      const reductionPercent = 0.10 // Approximate 10% reduction
-      annualBenefit = annualBenefit * (1 - reductionPercent)
-    }
+    // Use the authoritative calculation logic for all options including B and C
+    // This ensures consistency across the application and matches MSRB-validated results
+    annualBenefit = calculateAnnualPension(
+      averageSalary,
+      retirementAge,
+      yearsOfService,
+      retirementOption,
+      groupKey,
+      serviceEntry,
+      beneficiaryAge ? String(beneficiaryAge) : undefined
+    )
+
 
     return {
       annualBenefit: Math.round(annualBenefit),

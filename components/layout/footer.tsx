@@ -76,6 +76,19 @@ export function Footer() {
                   </Link>
                 </li>
                 <li>
+                  <Link href="/ssfa-auditor" className="text-gray-600 hover:text-blue-700 transition-colors flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>
+                    SSFA Back-Pay Auditor
+                  </Link>
+                </li>
+
+                <li>
+                  <Link href="/tax-bomb" className="text-gray-600 hover:text-blue-700 transition-colors flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 bg-red-400 rounded-full"></span>
+                    Tax Bomb Auditor
+                  </Link>
+                </li>
+                <li>
                   <Link href="/social-security" className="text-gray-600 hover:text-blue-700 transition-colors flex items-center gap-2">
                     <span className="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>
                     Social Security Calculator
@@ -292,6 +305,18 @@ export function Footer() {
                   </Link>
                 </li>
                 <li>
+                  <Link href="/ssfa-auditor" className="text-gray-600 hover:text-indigo-700 transition-colors flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full"></span>
+                    SSFA Auditor
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/tax-bomb" className="text-gray-600 hover:text-indigo-700 transition-colors flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 bg-red-400 rounded-full"></span>
+                    Tax Bomb
+                  </Link>
+                </li>
+                <li>
                   <Link href="/pricing" className="text-gray-600 hover:text-indigo-700 transition-colors flex items-center gap-2">
                     <span className="w-1.5 h-1.5 bg-indigo-400 rounded-full"></span>
                     Premium Features
@@ -307,12 +332,6 @@ export function Footer() {
                   <Link href="/contact" className="text-gray-600 hover:text-indigo-700 transition-colors flex items-center gap-2">
                     <span className="w-1.5 h-1.5 bg-indigo-400 rounded-full"></span>
                     📧 Contact Support
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/faq" className="text-gray-600 hover:text-indigo-700 transition-colors flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 bg-indigo-400 rounded-full"></span>
-                    ❓ FAQ
                   </Link>
                 </li>
               </ul>

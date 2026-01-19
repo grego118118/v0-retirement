@@ -114,56 +114,58 @@ export function PricingSection() {
   }
 
   return (
-    <section className="py-16 bg-muted/30">
-      <div className="container px-4 md:px-6">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold tracking-tight mb-4">
+    <section className="py-12">
+      <div className="container lg:px-0">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 mb-4">
             Choose Your Retirement Planning Level
           </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+          <p className="text-slate-600 text-lg max-w-2xl mx-auto">
             Start with our free calculator or unlock advanced features to optimize your Massachusetts state pension
           </p>
         </div>
 
         {/* Current Subscription Alert */}
         {subscriptionData?.isPremium && (
-          <Alert className="max-w-2xl mx-auto mb-8 border-green-200 bg-green-50">
-            <Crown className="h-4 w-4 text-green-600" />
-            <AlertDescription className="text-green-800">
+          <Alert className="max-w-2xl mx-auto mb-12 border-blue-200 bg-blue-50 shadow-sm">
+            <Crown className="h-5 w-5 text-blue-600" />
+            <AlertDescription className="text-blue-800 font-medium">
               You currently have a Premium subscription ({subscriptionData.subscriptionPlan}).
-              <Link href="/subscription/portal" className="underline ml-1">
+              <Link href="/subscription/portal" className="underline ml-2 hover:text-blue-900 transition-colors">
                 Manage your subscription
               </Link>
             </AlertDescription>
           </Alert>
         )}
 
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
           {/* Free Plan */}
-          <Card className="relative">
-            <CardHeader className="text-center pb-2">
-              <CardTitle className="text-2xl">Free Calculator</CardTitle>
-              <CardDescription>Perfect for basic pension planning</CardDescription>
-              <div className="text-4xl font-bold mt-4">$0</div>
-              <div className="text-muted-foreground">Forever free</div>
+          <Card className="relative bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow flex flex-col">
+            <CardHeader className="text-center pb-6 border-b border-slate-50">
+              <CardTitle className="text-2xl font-bold text-slate-900">Free Calculator</CardTitle>
+              <CardDescription className="text-slate-500">Perfect for basic pension planning</CardDescription>
+              <div className="text-5xl font-bold text-slate-900 mt-6">$0</div>
+              <div className="text-slate-400 text-sm mt-1 uppercase tracking-widest font-bold">Forever free</div>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-3">
+            <CardContent className="space-y-6 pt-8 flex-grow">
+              <div className="space-y-4">
                 {features.free.map((feature, index) => (
                   <div key={index} className="flex items-center gap-3">
                     <Check className="h-5 w-5 text-green-500 flex-shrink-0" />
-                    <span className="text-sm">{feature}</span>
+                    <span className="text-sm text-slate-600 font-medium">{feature}</span>
                   </div>
                 ))}
                 {features.freeLimitations.slice(0, 4).map((feature, index) => (
-                  <div key={index} className="flex items-center gap-3 opacity-50">
-                    <X className="h-5 w-5 text-red-500 flex-shrink-0" />
-                    <span className="text-sm line-through">{feature}</span>
+                  <div key={index} className="flex items-center gap-3 opacity-40">
+                    <X className="h-5 w-5 text-slate-300 flex-shrink-0" />
+                    <span className="text-sm text-slate-400 line-through">{feature}</span>
                   </div>
                 ))}
               </div>
+            </CardContent>
+            <div className="p-6 pt-0">
               <Button
-                className="w-full"
+                className="w-full h-12 font-bold"
                 variant="outline"
                 disabled={!session}
                 asChild
@@ -172,35 +174,40 @@ export function PricingSection() {
                   {session ? 'Current Plan' : 'Start Free Calculator'}
                 </Link>
               </Button>
-            </CardContent>
+            </div>
           </Card>
 
           {/* Monthly Premium Plan */}
-          <Card className="relative">
-            <CardHeader className="text-center pb-2">
-              <CardTitle className="text-2xl flex items-center justify-center gap-2">
-                <Crown className="h-5 w-5 text-amber-600" />
+          <Card className="relative bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow flex flex-col overflow-hidden">
+            <div className="absolute top-0 inset-x-0 h-1 bg-blue-600"></div>
+            <CardHeader className="text-center pb-6 border-b border-slate-50">
+              <CardTitle className="text-2xl font-bold text-slate-900 flex items-center justify-center gap-2">
+                <Crown className="h-5 w-5 text-blue-600" />
                 Premium Monthly
               </CardTitle>
-              <CardDescription>Full access to all features</CardDescription>
-              <div className="text-4xl font-bold mt-4">
+              <CardDescription className="text-slate-500">Full access to all features</CardDescription>
+              <div className="text-5xl font-bold text-slate-900 mt-6">
                 ${SUBSCRIPTION_PLANS.monthly.price}
-                <span className="text-lg font-normal text-muted-foreground">/month</span>
+                <span className="text-lg font-normal text-slate-400 ml-1">/mo</span>
               </div>
-              <div className="text-muted-foreground">Billed monthly</div>
+              <div className="text-slate-400 text-sm mt-1 uppercase tracking-widest font-bold">Billed monthly</div>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-3">
+            <CardContent className="space-y-6 pt-8 flex-grow">
+              <div className="space-y-4">
                 {features.premium.slice(0, 8).map((feature, index) => (
                   <div key={index} className="flex items-center gap-3">
-                    <Check className="h-5 w-5 text-green-500 flex-shrink-0" />
-                    <span className="text-sm">{feature}</span>
+                    <Check className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                    <span className="text-sm text-slate-600 font-medium">{feature}</span>
                   </div>
                 ))}
-                <div className="text-sm text-muted-foreground">+ 4 more features...</div>
+                <div className="text-xs text-center text-slate-400 bg-slate-50 py-2 rounded-lg font-bold uppercase tracking-tighter italic">
+                  + 4 additional premium features
+                </div>
               </div>
+            </CardContent>
+            <div className="p-6 pt-0">
               <Button
-                className="w-full bg-amber-600 hover:bg-amber-700"
+                className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-lg shadow-blue-600/20"
                 onClick={() => handleUpgrade('monthly')}
                 disabled={checkoutLoading === 'monthly' || subscriptionData?.isPremium}
               >
@@ -215,43 +222,47 @@ export function PricingSection() {
                   'Choose Monthly'
                 )}
               </Button>
-              <p className="text-xs text-center text-muted-foreground">
+              <p className="text-xs text-center text-slate-400 mt-4 font-medium uppercase tracking-widest">
                 Cancel anytime
               </p>
-            </CardContent>
+            </div>
           </Card>
 
           {/* Annual Premium Plan */}
-          <Card className="relative border-2 border-amber-300 shadow-lg">
-            <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-amber-500">
-              <Star className="mr-1 h-3 w-3" />
-              Best Value
+          <Card className="relative bg-white border-blue-200 shadow-xl flex flex-col overflow-hidden ring-2 ring-blue-600/10">
+            <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-blue-600 to-indigo-700"></div>
+            <Badge className="absolute top-4 right-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-bold border-none shadow-sm">
+              <Star className="mr-1 h-3 w-3 fill-current" />
+              BEST VALUE
             </Badge>
-            <CardHeader className="text-center pb-2">
-              <CardTitle className="text-2xl flex items-center justify-center gap-2">
-                <Crown className="h-5 w-5 text-amber-600" />
+            <CardHeader className="text-center pb-6 border-b border-slate-50 pt-10">
+              <CardTitle className="text-2xl font-bold text-slate-900 flex items-center justify-center gap-2">
+                <Crown className="h-5 w-5 text-indigo-600" />
                 Premium Annual
               </CardTitle>
-              <CardDescription>Save 17% with annual billing</CardDescription>
-              <div className="text-4xl font-bold mt-4">
+              <CardDescription className="text-slate-500">Save 17% with annual billing</CardDescription>
+              <div className="text-5xl font-bold text-slate-900 mt-6">
                 ${SUBSCRIPTION_PLANS.annual.price}
-                <span className="text-lg font-normal text-muted-foreground">/year</span>
+                <span className="text-lg font-normal text-slate-400 ml-1">/yr</span>
               </div>
-              <div className="text-green-600 font-medium">
+              <div className="text-green-600 font-bold text-sm mt-2 flex items-center justify-center gap-1 bg-green-50 py-1 px-3 rounded-full w-fit mx-auto">
+                <Check className="w-3 h-3" />
                 {SUBSCRIPTION_PLANS.annual.savings}
               </div>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-3">
+            <CardContent className="space-y-6 pt-8 flex-grow">
+              <div className="space-y-4">
                 {features.premium.map((feature, index) => (
                   <div key={index} className="flex items-center gap-3">
-                    <Check className="h-5 w-5 text-green-500 flex-shrink-0" />
-                    <span className="text-sm">{feature}</span>
+                    <Check className="h-5 w-5 text-indigo-600 flex-shrink-0" />
+                    <span className="text-sm text-slate-600 font-medium">{feature}</span>
                   </div>
                 ))}
               </div>
+            </CardContent>
+            <div className="p-6 pt-0">
               <Button
-                className="w-full bg-amber-600 hover:bg-amber-700"
+                className="w-full h-12 bg-gradient-to-r from-blue-600 to-indigo-700 hover:opacity-90 text-white font-bold shadow-lg shadow-blue-600/30"
                 onClick={() => handleUpgrade('annual')}
                 disabled={checkoutLoading === 'annual' || subscriptionData?.isPremium}
               >
@@ -266,33 +277,29 @@ export function PricingSection() {
                   'Choose Annual'
                 )}
               </Button>
-              <p className="text-xs text-center text-muted-foreground">
+              <p className="text-[10px] text-center text-slate-400 mt-4 font-bold uppercase tracking-widest">
                 30-day money-back guarantee
               </p>
-            </CardContent>
+            </div>
           </Card>
         </div>
 
         {/* Enterprise Section */}
-        <div className="mt-12 text-center">
-          <Card className="max-w-2xl mx-auto">
-            <CardHeader>
-              <CardTitle>For Organizations</CardTitle>
-              <CardDescription>
-                HR departments, unions, and financial advisors
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
-                White-label solutions, bulk licenses, and custom integrations available
+        <div className="mt-20">
+          <div className="max-w-4xl mx-auto bg-slate-100 rounded-3xl p-8 md:p-12 border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="text-center md:text-left">
+              <h3 className="text-2xl font-bold text-slate-900 mb-2">For Organizations</h3>
+              <p className="text-slate-600">
+                HR departments, unions, and financial advisors. White-label solutions, bulk licenses, and custom integrations available.
               </p>
-              <Button variant="outline" asChild>
-                <Link href="/contact">Contact Sales</Link>
-              </Button>
-            </CardContent>
-          </Card>
+            </div>
+            <Button variant="outline" size="lg" className="border-slate-300 font-bold bg-white shrink-0 h-14 px-8" asChild>
+              <Link href="/contact">Contact Sales Team</Link>
+            </Button>
+          </div>
         </div>
       </div>
     </section>
   )
+
 } 

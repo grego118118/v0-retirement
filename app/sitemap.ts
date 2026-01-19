@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next"
 import { blogPosts } from "@/lib/blog-data"
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://www.masspension.com"
   const lastModified = new Date()
 
@@ -17,7 +17,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: `${baseUrl}/calculator`,
       lastModified,
       changeFrequency: "monthly" as const,
-      priority: 0.9,
+      priority: 1.0,
+    },
+    {
+      url: `${baseUrl}/ssfa-auditor`,
+      lastModified,
+      changeFrequency: "monthly" as const,
+      priority: 1.0,
+    },
+    {
+      url: `${baseUrl}/tax-bomb`,
+      lastModified,
+      changeFrequency: "monthly" as const,
+      priority: 1.0,
     },
     {
       url: `${baseUrl}/wizard`,
@@ -167,14 +179,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ]
 
-  // Dynamic blog posts from actual data - ensures sitemap matches real content
-  const dynamicBlogPosts = blogPosts.map((post) => ({
-    url: `${baseUrl}/blog/${post.id}`,
-    lastModified: post.date ? new Date(post.date) : lastModified,
-    changeFrequency: "monthly" as const,
-    priority: 0.7,
-  }))
-
   // Utility pages for specific retirement groups
   const utilityPages = [
     {
@@ -203,5 +207,38 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ]
 
-  return [...staticPages, ...resourcePages, ...blogPages, ...dynamicBlogPosts, ...utilityPages]
+  // Dynamic blog posts - Try DB first, fallback to static
+  let blogPostUrls: MetadataRoute.Sitemap = []
+
+  try {
+    // Dynamic import to avoid build-time static errors if DB not present
+    const { prisma } = await import("@/lib/prisma")
+    const dbPosts = await prisma.blogPost.findMany({
+      where: { status: 'published' },
+      select: { slug: true, publishedAt: true }
+    })
+
+    if (dbPosts.length > 0) {
+      blogPostUrls = dbPosts.map((post) => ({
+        url: `${baseUrl}/blog/${post.slug}`,
+        lastModified: post.publishedAt || lastModified,
+        changeFrequency: "monthly" as const,
+        priority: 0.7,
+      }))
+    }
+  } catch (e) {
+    console.warn("Sitemap: Failed to fetch from DB, using static fallback")
+  }
+
+  // Fallback to static if DB empty or failed
+  if (blogPostUrls.length === 0) {
+    blogPostUrls = blogPosts.map((post) => ({
+      url: `${baseUrl}/blog/${post.id}`,
+      lastModified: post.date ? new Date(post.date) : lastModified,
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
+    }))
+  }
+
+  return [...staticPages, ...resourcePages, ...blogPages, ...blogPostUrls, ...utilityPages]
 }
