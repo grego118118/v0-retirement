@@ -181,7 +181,7 @@ export default async function BlogPostPage({ params }: PageProps) {
 
             <div className="flex justify-between items-center mb-8">
               <div className="flex flex-wrap gap-2">
-                {post.tags.map((tag) => (
+                {post.tags.map((tag: string) => (
                   <Badge key={tag} variant="outline" className="flex items-center gap-1">
                     <Tag className="h-3 w-3" /> {tag}
                   </Badge>
