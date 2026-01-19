@@ -24,7 +24,8 @@ import {
   TrendingUp,
   Users,
   FileText,
-  Shield
+  Shield,
+  Bot
 } from "lucide-react"
 import {
   DropdownMenu,
@@ -131,6 +132,15 @@ export function Header() {
                     <Wand2 className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                     Retirement Wizard
                   </Link>
+
+                  <Link
+                    href="/chatbot"
+                    className={`nav-link flex items-center gap-1.5 ${isActive("/chatbot") ? "nav-link-active" : ""
+                      }`}
+                  >
+                    <Bot className="h-4 w-4 text-pink-600 dark:text-pink-400" />
+                    Assistant
+                  </Link>
                   <Link
                     href="/dashboard"
                     className={`nav-link flex items-center gap-1.5 ${isActive("/dashboard") ? "nav-link-active" : ""
@@ -178,9 +188,8 @@ export function Header() {
                 About
               </Link>
 
-              {/* Resources Dropdown */}
               <DropdownMenu>
-                <DropdownMenuTrigger className={`nav-link flex items-center gap-1.5 outline-none ${pathname?.startsWith("/resources") ? "nav-link-active" : ""
+                <DropdownMenuTrigger suppressHydrationWarning className={`nav-link flex items-center gap-1.5 outline-none ${pathname?.startsWith("/resources") ? "nav-link-active" : ""
                   }`}>
                   <FolderOpen className="h-4 w-4 text-teal-600 dark:text-teal-400" />
                   Resources
@@ -342,6 +351,18 @@ export function Header() {
                   >
                     <Wand2 className="h-5 w-5 text-purple-600 dark:text-purple-400 flex-shrink-0" />
                     <span className="font-medium">Retirement Wizard</span>
+                  </Link>
+
+                  <Link
+                    href="/chatbot"
+                    onClick={closeMobileMenu}
+                    className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 min-h-[48px] ${isActive("/chatbot")
+                      ? "bg-pink-100/90 dark:bg-pink-900/40 text-pink-800 dark:text-pink-200 shadow-sm border border-pink-200/50 dark:border-pink-700/50"
+                      : "text-gray-800 dark:text-gray-200 hover:bg-gray-200/80 dark:hover:bg-gray-700/60 hover:shadow-sm"
+                      }`}
+                  >
+                    <Bot className="h-5 w-5 text-pink-600 dark:text-pink-400 flex-shrink-0" />
+                    <span className="font-medium">Assistant</span>
                   </Link>
                   <Link
                     href="/dashboard"

@@ -20,7 +20,7 @@ export function NewsletterSignup({ variant = "default", className = "" }: Newsle
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!email || !email.includes("@")) {
       toast.error("Please enter a valid email address")
       return
@@ -82,12 +82,14 @@ export function NewsletterSignup({ variant = "default", className = "" }: Newsle
             onChange={(e) => setEmail(e.target.value)}
             className="text-sm"
             disabled={isLoading}
+            suppressHydrationWarning
           />
-          <Button 
-            type="submit" 
-            size="sm" 
+          <Button
+            type="submit"
+            size="sm"
             className="w-full"
             disabled={isLoading}
+            suppressHydrationWarning
           >
             {isLoading ? "Subscribing..." : "Subscribe"}
           </Button>
@@ -106,8 +108,9 @@ export function NewsletterSignup({ variant = "default", className = "" }: Newsle
           onChange={(e) => setEmail(e.target.value)}
           className="flex-1"
           disabled={isLoading}
+          suppressHydrationWarning
         />
-        <Button type="submit" disabled={isLoading}>
+        <Button type="submit" disabled={isLoading} suppressHydrationWarning>
           {isLoading ? "..." : "Subscribe"}
         </Button>
       </form>
@@ -135,13 +138,14 @@ export function NewsletterSignup({ variant = "default", className = "" }: Newsle
               onChange={(e) => setEmail(e.target.value)}
               disabled={isLoading}
               required
+              suppressHydrationWarning
             />
           </div>
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button type="submit" className="w-full" disabled={isLoading} suppressHydrationWarning>
             {isLoading ? "Subscribing..." : "Subscribe to Newsletter"}
           </Button>
         </form>
-        
+
         <div className="mt-4 space-y-2">
           <p className="text-xs text-gray-500 text-center">
             What you'll receive:

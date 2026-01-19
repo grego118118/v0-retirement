@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
-import { Calculator, Home, User, BookOpen, Phone, HelpCircle, Info, FolderOpen, ChevronDown, TrendingUp, Users, FileText, Shield } from 'lucide-react'
+import { Calculator, Home, User, BookOpen, Phone, HelpCircle, Info, FolderOpen, ChevronDown, TrendingUp, Users, FileText, Shield, Bot } from 'lucide-react'
 
 export function MainBranchNavigation() {
   const { data: session } = useSession()
@@ -39,6 +39,12 @@ export function MainBranchNavigation() {
       icon: User,
       description: 'Your retirement overview',
       requiresAuth: true
+    },
+    {
+      name: 'Assistant',
+      href: '/chatbot',
+      icon: Bot,
+      description: 'AI Pension Assistant'
     },
     {
       name: 'Blog',
@@ -103,7 +109,7 @@ export function MainBranchNavigation() {
                 if (item.hasDropdown && item.dropdownItems) {
                   return (
                     <DropdownMenu key={item.name}>
-                      <DropdownMenuTrigger className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors outline-none">
+                      <DropdownMenuTrigger suppressHydrationWarning className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors outline-none">
                         <Icon className="h-4 w-4 mr-1" />
                         {item.name}
                         <ChevronDown className="h-3 w-3 ml-1" />

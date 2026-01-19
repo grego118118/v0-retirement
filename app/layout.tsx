@@ -13,6 +13,7 @@ import { SubscriptionListener } from "@/components/layout/subscription-listener"
 import { AdSenseInitializer } from "@/components/ads/adsense-initializer"
 import { TrustedTypesSetup } from "@/components/layout/trusted-types-setup"
 import { Analytics } from "@vercel/analytics/next"
+import { FloatingChatbot } from "@/components/pension-chatbot/FloatingChatbot"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -111,16 +112,17 @@ export default function RootLayout({
         <SessionProvider>
           <ProfileProvider>
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <ResourceOptimizer />
-            <SubscriptionListener />
-            <AdSenseInitializer />
-            <TrustedTypesSetup />
-            <LayoutWrapper>
-              {children}
-            </LayoutWrapper>
-            <Toaster />
-            <Analytics />
-          </ThemeProvider>
+              <ResourceOptimizer />
+              <SubscriptionListener />
+              <AdSenseInitializer />
+              <TrustedTypesSetup />
+              <LayoutWrapper>
+                {children}
+              </LayoutWrapper>
+              <Toaster />
+              <FloatingChatbot />
+              <Analytics />
+            </ThemeProvider>
           </ProfileProvider>
         </SessionProvider>
       </body>
