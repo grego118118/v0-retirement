@@ -226,4 +226,9 @@ const sentryWebpackPluginOptions = {
 }
 
 module.exports = process.env.NODE_ENV === 'production'
-  ? withSentryConfig(nextConfig, se
+  ? withSentryConfig(nextConfig, sentryWebpackPluginOptions)
+  : nextConfig
+*/
+
+// Temporarily export nextConfig directly without Sentry
+module.exports = nextConfig
