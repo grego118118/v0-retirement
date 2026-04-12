@@ -316,5 +316,3 @@ export default async function BlogPostPage({ params }: PageProps) {
   )
 }
 
-export async function generateStaticParams() {
-  return b
