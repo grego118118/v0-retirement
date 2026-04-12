@@ -115,7 +115,7 @@ export function Header() {
             >
               <Link
                 href="/calculator"
-                className={`nav-link text-slate-300 hover:text-white hover:bg-white/10 flex items-center gap-1.5 ${isActive("/calculator") ? "text-white bg-white/10" : ""
+                className={`nav-link text-slate-100 hover:text-white hover:bg-white/10 flex items-center gap-1.5 ${isActive("/calculator") ? "text-white bg-white/10" : ""
                   }`}
               >
                 <Calculator className="h-4 w-4 text-mrs-gold-500" />
@@ -126,7 +126,7 @@ export function Header() {
                 <>
                   <Link
                     href="/wizard"
-                    className={`nav-link text-slate-300 hover:text-white hover:bg-white/10 flex items-center gap-1.5 ${isActive("/wizard") ? "text-white bg-white/10" : ""
+                    className={`nav-link text-slate-100 hover:text-white hover:bg-white/10 flex items-center gap-1.5 ${isActive("/wizard") ? "text-white bg-white/10" : ""
                       }`}
                   >
                     <Wand2 className="h-4 w-4 text-purple-400" />
@@ -135,7 +135,7 @@ export function Header() {
 
                   <Link
                     href="/chatbot"
-                    className={`nav-link text-slate-300 hover:text-white hover:bg-white/10 flex items-center gap-1.5 ${isActive("/chatbot") ? "text-white bg-white/10" : ""
+                    className={`nav-link text-slate-100 hover:text-white hover:bg-white/10 flex items-center gap-1.5 ${isActive("/chatbot") ? "text-white bg-white/10" : ""
                       }`}
                   >
                     <Bot className="h-4 w-4 text-pink-400" />
@@ -143,7 +143,7 @@ export function Header() {
                   </Link>
                   <Link
                     href="/dashboard"
-                    className={`nav-link text-slate-300 hover:text-white hover:bg-white/10 flex items-center gap-1.5 ${isActive("/dashboard") ? "text-white bg-white/10" : ""
+                    className={`nav-link text-slate-100 hover:text-white hover:bg-white/10 flex items-center gap-1.5 ${isActive("/dashboard") ? "text-white bg-white/10" : ""
                       }`}
                   >
                     <LayoutDashboard className="h-4 w-4 text-green-400" />
@@ -154,7 +154,7 @@ export function Header() {
 
               <Link
                 href="/ssfa-auditor"
-                className={`nav-link text-slate-300 hover:text-white hover:bg-white/10 flex items-center gap-1.5 ${isActive("/ssfa-auditor") ? "text-white bg-white/10" : ""
+                className={`nav-link text-slate-100 hover:text-white hover:bg-white/10 flex items-center gap-1.5 ${isActive("/ssfa-auditor") ? "text-white bg-white/10" : ""
                   }`}
               >
                 <Shield className="h-4 w-4 text-cyan-400" />
@@ -163,7 +163,7 @@ export function Header() {
 
               <Link
                 href="/tax-bomb"
-                className={`nav-link text-slate-300 hover:text-white hover:bg-white/10 flex items-center gap-1.5 ${isActive("/tax-bomb") ? "text-white bg-white/10" : ""
+                className={`nav-link text-slate-100 hover:text-white hover:bg-white/10 flex items-center gap-1.5 ${isActive("/tax-bomb") ? "text-white bg-white/10" : ""
                   }`}
               >
                 <TrendingUp className="h-4 w-4 text-red-400" />
@@ -172,7 +172,7 @@ export function Header() {
 
               <Link
                 href="/blog"
-                className={`nav-link text-slate-300 hover:text-white hover:bg-white/10 flex items-center gap-1.5 ${isActive("/blog") ? "text-white bg-white/10" : ""
+                className={`nav-link text-slate-100 hover:text-white hover:bg-white/10 flex items-center gap-1.5 ${isActive("/blog") ? "text-white bg-white/10" : ""
                   }`}
               >
                 <BookOpen className="h-4 w-4 text-orange-400" />
@@ -181,7 +181,7 @@ export function Header() {
 
               <Link
                 href="/about"
-                className={`nav-link text-slate-300 hover:text-white hover:bg-white/10 flex items-center gap-1.5 ${isActive("/about") ? "text-white bg-white/10" : ""
+                className={`nav-link text-slate-100 hover:text-white hover:bg-white/10 flex items-center gap-1.5 ${isActive("/about") ? "text-white bg-white/10" : ""
                   }`}
               >
                 <Users className="h-4 w-4 text-blue-400" />
@@ -189,7 +189,7 @@ export function Header() {
               </Link>
 
               <DropdownMenu>
-                <DropdownMenuTrigger suppressHydrationWarning className={`nav-link text-slate-300 hover:text-white hover:bg-white/10 flex items-center gap-1.5 outline-none ${pathname?.startsWith("/resources") ? "text-white bg-white/10" : ""
+                <DropdownMenuTrigger suppressHydrationWarning className={`nav-link text-slate-100 hover:text-white hover:bg-white/10 flex items-center gap-1.5 outline-none ${pathname?.startsWith("/resources") ? "text-white bg-white/10" : ""
                   }`}>
                   <FolderOpen className="h-4 w-4 text-teal-400" />
                   Resources
@@ -234,7 +234,7 @@ export function Header() {
               {session ? (
                 <Link
                   href="/billing"
-                  className={`nav-link text-slate-300 hover:text-white hover:bg-white/10 flex items-center gap-1.5 ${isActive("/billing") ? "text-white bg-white/10" : ""
+                  className={`nav-link text-slate-100 hover:text-white hover:bg-white/10 flex items-center gap-1.5 ${isActive("/billing") ? "text-white bg-white/10" : ""
                     }`}
                 >
                   <CreditCard className="h-4 w-4 text-indigo-400" />
@@ -243,7 +243,7 @@ export function Header() {
               ) : (
                 <Link
                   href="/pricing"
-                  className={`nav-link text-slate-300 hover:text-white hover:bg-white/10 flex items-center gap-1.5 ${isActive("/pricing") ? "text-white bg-white/10" : ""
+                  className={`nav-link text-slate-100 hover:text-white hover:bg-white/10 flex items-center gap-1.5 ${isActive("/pricing") ? "text-white bg-white/10" : ""
                     }`}
                 >
                   <DollarSign className="h-4 w-4 text-mrs-gold-400" />
@@ -256,7 +256,7 @@ export function Header() {
             <Button
               variant="ghost"
               size="sm"
-              className="lg:hidden p-2 text-slate-300 hover:bg-white/10 hover:text-white"
+              className="lg:hidden p-2 text-slate-100 hover:bg-white/10 hover:text-white"
               onClick={toggleMobileMenu}
               aria-label={isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
               aria-expanded={isMobileMenuOpen}
@@ -320,7 +320,7 @@ export function Header() {
                 size="sm"
                 onClick={closeMobileMenu}
                 aria-label="Close navigation menu"
-                className="p-2 text-slate-300 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
+                className="p-2 text-slate-100 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
               >
                 <X className="h-5 w-5" />
               </Button>
@@ -333,7 +333,7 @@ export function Header() {
                 onClick={closeMobileMenu}
                 className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 min-h-[48px] ${isActive("/calculator")
                   ? "bg-white/10 text-white shadow-sm border border-mrs-gold-500/30"
-                  : "text-slate-300 hover:bg-white/5 hover:text-white"
+                  : "text-slate-100 hover:bg-white/5 hover:text-white"
                   }`}
               >
                 <Calculator className="h-5 w-5 text-mrs-gold-500 flex-shrink-0" />
@@ -347,7 +347,7 @@ export function Header() {
                     onClick={closeMobileMenu}
                     className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 min-h-[48px] ${isActive("/wizard")
                       ? "bg-white/10 text-white shadow-sm"
-                      : "text-slate-300 hover:bg-white/5 hover:text-white"
+                      : "text-slate-100 hover:bg-white/5 hover:text-white"
                       }`}
                   >
                     <Wand2 className="h-5 w-5 text-purple-400 flex-shrink-0" />
@@ -359,7 +359,7 @@ export function Header() {
                     onClick={closeMobileMenu}
                     className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 min-h-[48px] ${isActive("/chatbot")
                       ? "bg-white/10 text-white shadow-sm"
-                      : "text-slate-300 hover:bg-white/5 hover:text-white"
+                      : "text-slate-100 hover:bg-white/5 hover:text-white"
                       }`}
                   >
                     <Bot className="h-5 w-5 text-pink-400 flex-shrink-0" />
@@ -370,7 +370,7 @@ export function Header() {
                     onClick={closeMobileMenu}
                     className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 min-h-[48px] ${isActive("/dashboard")
                       ? "bg-white/10 text-white shadow-sm"
-                      : "text-slate-300 hover:bg-white/5 hover:text-white"
+                      : "text-slate-100 hover:bg-white/5 hover:text-white"
                       }`}
                   >
                     <LayoutDashboard className="h-5 w-5 text-green-400 flex-shrink-0" />
@@ -384,7 +384,7 @@ export function Header() {
                 onClick={closeMobileMenu}
                 className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 min-h-[48px] ${isActive("/ssfa-auditor")
                   ? "bg-white/10 text-white shadow-sm"
-                  : "text-slate-300 hover:bg-white/5 hover:text-white"
+                  : "text-slate-100 hover:bg-white/5 hover:text-white"
                   }`}
               >
                 <Shield className="h-5 w-5 text-cyan-400 flex-shrink-0" />
@@ -396,7 +396,7 @@ export function Header() {
                 onClick={closeMobileMenu}
                 className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 min-h-[48px] ${isActive("/tax-bomb")
                   ? "bg-white/10 text-white shadow-sm"
-                  : "text-slate-300 hover:bg-white/5 hover:text-white"
+                  : "text-slate-100 hover:bg-white/5 hover:text-white"
                   }`}
               >
                 <TrendingUp className="h-5 w-5 text-red-400 flex-shrink-0" />
@@ -408,7 +408,7 @@ export function Header() {
                 onClick={closeMobileMenu}
                 className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 min-h-[48px] ${isActive("/blog")
                   ? "bg-white/10 text-white shadow-sm"
-                  : "text-slate-300 hover:bg-white/5 hover:text-white"
+                  : "text-slate-100 hover:bg-white/5 hover:text-white"
                   }`}
               >
                 <BookOpen className="h-5 w-5 text-orange-400 flex-shrink-0" />
@@ -420,7 +420,7 @@ export function Header() {
                 onClick={closeMobileMenu}
                 className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 min-h-[48px] ${isActive("/about")
                   ? "bg-white/10 text-white shadow-sm"
-                  : "text-slate-300 hover:bg-white/5 hover:text-white"
+                  : "text-slate-100 hover:bg-white/5 hover:text-white"
                   }`}
               >
                 <Users className="h-5 w-5 text-blue-400 flex-shrink-0" />
@@ -434,7 +434,7 @@ export function Header() {
                   onClick={closeMobileMenu}
                   className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 min-h-[48px] ${pathname === "/resources"
                     ? "bg-white/10 text-white shadow-sm"
-                    : "text-slate-300 hover:bg-white/5 hover:text-white"
+                    : "text-slate-100 hover:bg-white/5 hover:text-white"
                     }`}
                 >
                   <FolderOpen className="h-5 w-5 text-teal-400 flex-shrink-0" />
@@ -484,7 +484,7 @@ export function Header() {
                   onClick={closeMobileMenu}
                   className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 min-h-[48px] ${isActive("/billing")
                     ? "bg-white/10 text-white shadow-sm"
-                    : "text-slate-300 hover:bg-white/5 hover:text-white"
+                    : "text-slate-100 hover:bg-white/5 hover:text-white"
                     }`}
                 >
                   <CreditCard className="h-5 w-5 text-indigo-400 flex-shrink-0" />
@@ -496,7 +496,7 @@ export function Header() {
                   onClick={closeMobileMenu}
                   className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 min-h-[48px] ${isActive("/pricing")
                     ? "bg-white/10 text-white shadow-sm"
-                    : "text-slate-300 hover:bg-white/5 hover:text-white"
+                    : "text-slate-100 hover:bg-white/5 hover:text-white"
                     }`}
                 >
                   <DollarSign className="h-5 w-5 text-mrs-gold-400 flex-shrink-0" />

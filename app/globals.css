@@ -446,7 +446,7 @@ a.no-underline {
 /* Navigation Link Styles - Fixed for Dark Header */
 .nav-link {
   @apply px-4 py-2 rounded-md font-medium transition-all duration-300 whitespace-nowrap;
-  @apply text-slate-300;
+  @apply text-slate-100;
   background: transparent;
   position: relative;
   z-index: 1;
@@ -467,7 +467,7 @@ a.no-underline {
 
 .nav-link-mobile {
   @apply px-3 py-2 rounded-md font-medium transition-all duration-300 whitespace-nowrap text-xs;
-  @apply text-slate-300;
+  @apply text-slate-100;
   background: transparent;
   position: relative;
   z-index: 1;
