@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Production PDF Generation</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        button { padding: 10px 20px; margin: 10px 0; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .result { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 4px; }
+        .success { background: #d4edda; border-color: #c3e6cb; color: #155724; }
+        .error { background: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Test Production PDF Generation</h1>
+        <p>This page tests the production PDF generation API with proper date handling.</p>
+        
+        <button onclick="testPDFGeneration()">Test PDF Generation</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function testPDFGeneration() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div class="result">Testing PDF generation...</div>';
+            
+            try {
+                // Test data with proper date handling
+                const testData = {
+                    reportType: 'pension',
+                    data: {
+                        currentAge: 55,
+                        plannedRetirementAge: 60,
+                        retirementGroup: 'Group 1',
+                        serviceEntry: 'before_2012',
+                        averageSalary: 75000,
+                        yearsOfService: 25,
+                        projectedYearsAtRetirement: 30,
+                        basePension: 45000,
+                        benefitFactor: 0.025,
+                        totalBenefitPercentage: 62.5,
+                        cappedAt80Percent: false,
+                        options: {
+                            A: { 
+                                annual: 45000, 
+                                monthly: 3750, 
+                                description: 'Option A: Full Allowance (100%)' 
+                            },
+                            B: { 
+                                annual: 44550, 
+                                monthly: 3712.50, 
+                                description: 'Option B: Annuity Protection (1% reduction)', 
+                                reduction: 0.01 
+                            },
+                            C: { 
+                                annual: 41827.50, 
+                                monthly: 3485.63, 
+                                description: 'Option C: Joint & Survivor (66.67%)', 
+                                reduction: 0.0705, 
+                                survivorAnnual: 27885, 
+                                survivorMonthly: 2323.75
+                            }
+                        },
+                        // Test different date formats
+                        calculationDate: new Date().toISOString() // ISO string format
+                    },
+                    options: {
+                        reportType: 'basic',
+                        includeCharts: false,
+                        includeCOLAProjections: true
+                    }
+                };
+
+                console.log('Sending PDF generation request:', testData);
+
+                const response = await fetch('/api/pdf/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(testData)
+                });
+
+                if (response.ok) {
+                    // PDF generation successful
+                    const blob = await response.blob();
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = 'test-pension-calculation.pdf';
+                    link.click();
+                    URL.revokeObjectURL(url);
+
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            <h3>✅ PDF Generation Successful!</h3>
+                            <p>PDF size: ${blob.size} bytes</p>
+                            <p>The PDF should have been downloaded automatically.</p>
+                        </div>
+                    `;
+                } else {
+                    // Error occurred
+                    const errorData = await response.json();
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            <h3>❌ PDF Generation Failed</h3>
+                            <p><strong>Status:</strong> ${response.status}</p>
+                            <p><strong>Error:</strong> ${errorData.error || 'Unknown error'}</p>
+                            <pre>${JSON.stringify(errorData, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+
+            } catch (error) {
+                console.error('PDF generation error:', error);
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h3>❌ Request Failed</h3>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

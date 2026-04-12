@@ -1,0 +1,281 @@
+{
+  "name": "Massachusetts Retirement - Daily Content Generation (Fixed)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * 1-5"
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Daily Content Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "url": "https://www.masspension.com/api/admin/blog/analytics/costs",
+        "authentication": "headerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$env.CRON_SECRET}}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000,
+          "retry": {
+            "enabled": true,
+            "maxTries": 2,
+            "waitBetween": 3000
+          }
+        }
+      },
+      "id": "check-budget",
+      "name": "Check Monthly Budget",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [460, 300],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "budget-check",
+              "leftValue": "={{$json.budget_utilization || 0}}",
+              "rightValue": 90,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "budget-gate",
+      "name": "Budget Check",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "https://www.masspension.com/api/admin/blog/generate/random",
+        "authentication": "headerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$env.CRON_SECRET}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "ai_model",
+              "value": "gpt-4-turbo-preview"
+            },
+            {
+              "name": "word_count",
+              "value": 1200
+            },
+            {
+              "name": "complexity",
+              "value": "intermediate"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 120000,
+          "retry": {
+            "enabled": true,
+            "maxTries": 3,
+            "waitBetween": 5000
+          }
+        }
+      },
+      "id": "generate-content",
+      "name": "Generate AI Content",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [900, 300],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "https://discord.com/api/webhooks/1396209486326141059/BwNh_3jFBkv3_B3se7GdbDOmegzfk5P8C6sApMNHReICmaTZiT_IIn02cilQ9QL0yPFq",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "⚠️ **Budget Alert**: AI content generation paused\n\n💰 **Budget Utilization**: {{$json.budget_utilization || 'Unknown'}}%\n📊 **Monthly Spend**: ${{$json.monthly_total || '0.00'}}\n🚫 **Action**: Content generation skipped to prevent overspend\n\n🔧 **Next Steps**:\n1. Review budget limits in admin dashboard\n2. Optimize AI model selection for cost efficiency\n3. Consider increasing monthly budget if needed\n\n📈 **Dashboard**: https://www.masspension.com/admin/blog/analytics"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "discord-budget-alert",
+      "name": "Discord Budget Alert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [680, 480]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "https://discord.com/api/webhooks/1396209486326141059/BwNh_3jFBkv3_B3se7GdbDOmegzfk5P8C6sApMNHReICmaTZiT_IIn02cilQ9QL0yPFq",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "❌ **Content Generation Failed**\n\n🚨 **Error**: {{$json.error || 'Unknown error during content generation'}}\n⏰ **Time**: {{new Date().toLocaleString()}}\n🔄 **Retry**: Workflow will retry automatically\n\n📊 **Check**: \n- API endpoints status\n- AI service quotas\n- Database connectivity\n\n🔗 **Admin Dashboard**: https://www.masspension.com/admin/blog/analytics"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "discord-error-notification",
+      "name": "Discord Error Alert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [900, 480]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "https://discord.com/api/webhooks/1396207186786652290/GJVGuDbZJdxDweZ7ClbXxiE5VcTiVHGtH4kXdTG4gl-cNphF4W84LF9iEOU08wMJEeEq",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "🤖 **AI Content Generated Successfully!**\n\n📝 **Title**: {{$json.post?.title || 'Content Generated'}}\n⭐ **Quality Score**: {{$json.post?.quality_score || 'N/A'}}/100\n🔍 **Status**: {{$json.post?.status || 'Generated'}}\n🎯 **Model**: {{$json.post?.ai_model_used || 'AI Model'}}\n\n📊 **Details**:\n- Generated: {{new Date().toLocaleString()}}\n- Ready for review\n\n🔗 **Review**: https://www.masspension.com/admin/blog/review"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "discord-success-notification",
+      "name": "Discord Success Alert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1120, 300]
+    }
+  ],
+  "connections": {
+    "Daily Content Schedule": {
+      "main": [
+        [
+          {
+            "node": "Check Monthly Budget",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Monthly Budget": {
+      "main": [
+        [
+          {
+            "node": "Budget Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ],
+      "error": [
+        [
+          {
+            "node": "Budget Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Budget Check": {
+      "main": [
+        [
+          {
+            "node": "Generate AI Content",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Discord Budget Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate AI Content": {
+      "main": [
+        [
+          {
+            "node": "Discord Success Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ],
+      "error": [
+        [
+          {
+            "node": "Discord Error Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": {},
+  "tags": ["ai-content", "massachusetts-retirement", "automation", "discord", "fixed"],
+  "triggerCount": 1,
+  "updatedAt": "2024-01-15T09:00:00.000Z",
+  "versionId": "1"
+}

@@ -1,3 +1,5 @@
+export const maxDuration = 60
+
 /**
  * Weekly Auto-Blog Generator
  * Generates one high-quality Massachusetts retirement blog post per week

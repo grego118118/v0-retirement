@@ -1,0 +1,182 @@
+<context>
+# Overview  
+The Massachusetts Retirement System (MRS) application is a comprehensive web-based platform designed to help Massachusetts state employees calculate, plan, and optimize their retirement benefits. The application addresses the complex challenge of understanding pension calculations, Social Security integration, and retirement planning for state employees across different retirement groups (Group 1-4). It provides personalized calculations, real-time data persistence, and professional-grade reporting tools to help users make informed retirement decisions.
+
+# Core Features  
+## Profile Management System
+- Personal information collection (date of birth, membership date, retirement group)
+- Employment data tracking (current salary, average highest 3 years, years of service)
+- Retirement planning preferences (planned retirement age, benefit options)
+- Real-time form validation and auto-save functionality
+- Cross-page data persistence and synchronization
+
+## Pension Calculator Engine
+- Massachusetts Retirement System benefit calculations for Groups 1-4
+- Support for different benefit multipliers (2.0% for Groups 1-2, 2.5% for Groups 3-4)
+- Retirement option calculations (Option A, B, C with survivor benefits)
+- COLA (Cost of Living Adjustment) integration with current 3% rate on first $13,000
+- Early retirement eligibility validation
+
+## Social Security Integration
+- Combined pension and Social Security benefit calculations
+- Social Security Fairness Act impact analysis
+- Medicare premium deductions ($174.70/month standard)
+- Tax implications calculator for federal and Massachusetts state taxes
+- Spousal benefits calculator (50% of higher earner)
+
+## Dashboard and Reporting
+- Real-time overview cards showing pension, Social Security, and combined benefits
+- Interactive charts and data visualizations using Recharts
+- PDF report generation for retirement planning
+- Action items and recommendations based on user profile
+- Responsive design for mobile, tablet, and desktop (375px/768px/1024px/1920px breakpoints)
+
+# User Experience  
+## User Personas
+- **Primary**: Massachusetts state employees (teachers, general employees, public safety)
+- **Secondary**: HR professionals and retirement counselors
+- **Tertiary**: Spouses and family members planning joint retirement
+
+## Key User Flows
+1. **Authentication Flow**: Google OAuth → Dashboard → Profile Setup
+2. **Profile Creation**: Personal Info → Employment Data → Retirement Planning → Save
+3. **Calculation Flow**: Profile Data → Calculator → Results → PDF Export
+4. **Planning Flow**: Current Benefits → Optimization Suggestions → Action Items
+
+## UI/UX Considerations
+- Professional government-appropriate design with blue/green/purple color scheme
+- WCAG 2.1 AA compliance for accessibility
+- 44px minimum touch targets for mobile usability
+- Sub-2-second performance requirements
+- Consistent typography hierarchy and spacing (12px minimum between elements)
+</context>
+<PRD>
+# Technical Architecture  
+## System Components
+- **Frontend**: Next.js 15 with React 19, TypeScript, Tailwind CSS
+- **Authentication**: NextAuth.js with Google OAuth provider
+- **Database**: SQLite with Prisma ORM (migration path to PostgreSQL)
+- **UI Components**: Radix UI primitives with custom design system
+- **State Management**: React hooks with real-time form synchronization
+- **Charts**: Recharts for data visualization
+- **PDF Generation**: Browser-native printing with styled components
+
+## Data Models
+- **User**: NextAuth.js user model with Google OAuth integration
+- **RetirementProfile**: Personal, employment, and retirement planning data
+- **CalculationResults**: Saved pension and Social Security calculations
+- **ActionItems**: Personalized recommendations and next steps
+
+## APIs and Integrations
+- `/api/profile`: Profile CRUD operations with real-time updates
+- `/api/retirement/calculations`: Pension calculation engine
+- `/api/social-security`: Social Security benefit calculations
+- Google OAuth API for authentication
+- Future: Integration with official MRS data sources
+
+## Infrastructure Requirements
+- Development: Local SQLite database
+- Production: PostgreSQL with Docker containerization
+- CI/CD: GitHub Actions with automated testing
+- Monitoring: Sentry for error tracking
+- Performance: Sub-2-second page load requirements
+
+# Development Roadmap  
+## Phase 1: Core Profile System (Current Focus)
+- Fix profile page data persistence issues
+- Implement real-time form updates without infinite re-render loops
+- Ensure cross-page data flow between profile and dashboard
+- Complete end-to-end testing of profile functionality
+- Resolve saveProfile function network/API errors
+
+## Phase 2: Enhanced Calculator Integration
+- Integrate profile data with pension calculator
+- Implement Social Security calculation engine
+- Add combined benefit calculations and optimization
+- Create interactive charts and visualizations
+- Build PDF report generation system
+
+## Phase 3: Advanced Features
+- Social Security Fairness Act impact calculator
+- Tax implications calculator (federal and MA state)
+- Spousal benefits calculator
+- COLA adjustment projections
+- Retirement scenario modeling
+
+## Phase 4: Production Deployment
+- PostgreSQL migration and optimization
+- Docker containerization and CI/CD pipeline
+- Security hardening and performance optimization
+- Comprehensive testing suite and monitoring
+- User acceptance testing and documentation
+
+# Logical Dependency Chain
+## Foundation Layer (Priority 1)
+1. **Profile Data Persistence**: Fix saveProfile function and API connectivity
+2. **Real-time Updates**: Resolve infinite re-render loops in form components
+3. **Cross-page Integration**: Ensure profile data flows to dashboard correctly
+4. **Authentication Stability**: Verify NextAuth.js session management
+
+## Core Functionality (Priority 2)
+5. **Calculator Integration**: Connect profile data to pension calculations
+6. **Dashboard Enhancement**: Real-time data display and overview cards
+7. **Form Validation**: Comprehensive input validation and error handling
+8. **Responsive Design**: Mobile/tablet/desktop breakpoint compliance
+
+## Advanced Features (Priority 3)
+9. **Social Security Integration**: Combined benefit calculations
+10. **PDF Reporting**: Professional report generation
+11. **Data Visualization**: Interactive charts and graphs
+12. **Performance Optimization**: Sub-2-second load times
+
+# Risks and Mitigations  
+## Technical Challenges
+- **Risk**: Complex state management causing infinite re-renders
+- **Mitigation**: Implement useCallback with proper dependency arrays, debounced updates
+
+- **Risk**: API connectivity and data persistence failures
+- **Mitigation**: Enhanced error handling, comprehensive logging, fallback mechanisms
+
+- **Risk**: Cross-page data synchronization issues
+- **Mitigation**: Centralized state management, consistent data flow patterns
+
+## MVP Scope Management
+- **Risk**: Feature creep affecting core functionality
+- **Mitigation**: Focus on profile system completion before advanced features
+
+- **Risk**: Performance degradation with complex calculations
+- **Mitigation**: Optimize calculation algorithms, implement caching strategies
+
+## Resource Constraints
+- **Risk**: Authentication and session management complexity
+- **Mitigation**: Leverage NextAuth.js best practices, thorough testing
+
+- **Risk**: Database migration complexity (SQLite to PostgreSQL)
+- **Mitigation**: Plan migration strategy early, maintain compatibility
+
+# Appendix  
+## Current Implementation Status
+- ✅ Basic project structure and authentication
+- ✅ Profile page UI components and forms
+- ✅ Dashboard layout and overview cards
+- ✅ Pension calculator basic functionality
+- 🔄 Profile data persistence (current focus)
+- ❌ Real-time cross-page data flow
+- ❌ Social Security integration
+- ❌ PDF reporting system
+
+## Technical Specifications
+- Next.js 15.2.4 with React 19
+- TypeScript 5.8.3 for type safety
+- Tailwind CSS 3.4.0 for styling
+- Prisma 6.9.0 for database management
+- NextAuth.js 4.24.11 for authentication
+- Radix UI components for accessibility
+
+## Research Findings
+- Massachusetts Retirement System Groups 1-4 benefit structures
+- Social Security Fairness Act impact on state employees
+- COLA adjustment rates and application methods
+- Responsive design requirements for government applications
+- Accessibility compliance standards (WCAG 2.1 AA)
+</PRD>

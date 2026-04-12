@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Tab Responsiveness Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles to simulate our tab components */
+        .tab-trigger {
+            @apply inline-flex items-center justify-center whitespace-nowrap rounded-sm min-h-[44px] px-3 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 touch-manipulation;
+        }
+        .tab-trigger.active {
+            @apply bg-white text-slate-900 shadow-sm;
+        }
+        .tab-trigger:not(.active) {
+            @apply text-slate-600;
+        }
+        .tabs-list {
+            @apply inline-flex min-h-[44px] h-auto items-center justify-center rounded-md bg-slate-100 p-1 text-slate-600;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 p-4">
+    <div class="max-w-4xl mx-auto space-y-8">
+        <h1 class="text-2xl font-bold text-center mb-8">Mobile Tab Responsiveness Test</h1>
+        
+        <!-- Test 1: Pension Calculator Tabs (5 tabs) -->
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h2 class="text-lg font-semibold mb-4">Pension Calculator Tabs (5 tabs)</h2>
+            <div class="tabs-list grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1 h-auto p-1">
+                <button class="tab-trigger active text-xs sm:text-sm px-2 sm:px-3 py-2">
+                    <span class="hidden sm:inline">Projection Table</span>
+                    <span class="sm:hidden">Projection</span>
+                </button>
+                <button class="tab-trigger text-xs sm:text-sm px-2 sm:px-3 py-2">
+                    <span class="hidden sm:inline">Calculation Details</span>
+                    <span class="sm:hidden">Details</span>
+                </button>
+                <button class="tab-trigger text-xs sm:text-sm px-2 sm:px-3 py-2 col-span-2 sm:col-span-1">
+                    <span class="hidden lg:inline">Social Security</span>
+                    <span class="lg:hidden">Social Sec.</span>
+                </button>
+                <button class="tab-trigger text-xs sm:text-sm px-2 sm:px-3 py-2 col-span-2 sm:col-span-1">
+                    <span class="hidden lg:inline">Combined Analysis</span>
+                    <span class="lg:hidden">Combined</span>
+                </button>
+                <button class="tab-trigger text-xs sm:text-sm px-2 sm:px-3 py-2 col-span-2 sm:col-span-1">
+                    <span class="hidden sm:inline">MSRB Test</span>
+                    <span class="sm:hidden">MSRB</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Test 2: Pension Results Tabs (4 tabs) -->
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h2 class="text-lg font-semibold mb-4">Pension Results Tabs (4 tabs)</h2>
+            <div class="tabs-list grid w-full grid-cols-2 sm:grid-cols-4 gap-1 h-auto p-1">
+                <button class="tab-trigger active text-sm px-3 py-2">Overview</button>
+                <button class="tab-trigger text-sm px-3 py-2">
+                    <span class="hidden sm:inline">COLA Adjustments</span>
+                    <span class="sm:hidden">COLA</span>
+                </button>
+                <button class="tab-trigger text-sm px-3 py-2">Projections</button>
+                <button class="tab-trigger text-sm px-3 py-2">Scenarios</button>
+            </div>
+        </div>
+
+        <!-- Test 3: Dashboard Tabs (3 tabs) -->
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h2 class="text-lg font-semibold mb-4">Dashboard Tabs (3 tabs)</h2>
+            <div class="tabs-list grid grid-cols-3 w-full h-auto">
+                <button class="tab-trigger active px-4 sm:px-6 py-3 text-sm sm:text-base min-h-[44px]">Overview</button>
+                <button class="tab-trigger px-4 sm:px-6 py-3 text-sm sm:text-base min-h-[44px]">
+                    <span class="hidden sm:inline">Calculations</span>
+                    <span class="sm:hidden">Calc</span>
+                </button>
+                <button class="tab-trigger px-4 sm:px-6 py-3 text-sm sm:text-base min-h-[44px]">Profile</button>
+            </div>
+        </div>
+
+        <!-- Test 4: Search Tabs (5 tabs) -->
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h2 class="text-lg font-semibold mb-4">Search Tabs (5 tabs)</h2>
+            <div class="tabs-list grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1 h-auto p-1">
+                <button class="tab-trigger active text-xs sm:text-sm px-2 sm:px-3 py-2">All Results</button>
+                <button class="tab-trigger text-xs sm:text-sm px-2 sm:px-3 py-2">Pages</button>
+                <button class="tab-trigger text-xs sm:text-sm px-2 sm:px-3 py-2">Blog</button>
+                <button class="tab-trigger text-xs sm:text-sm px-2 sm:px-3 py-2 col-span-2 sm:col-span-1">Resources</button>
+                <button class="tab-trigger text-xs sm:text-sm px-2 sm:px-3 py-2 col-span-2 sm:col-span-1">FAQ</button>
+            </div>
+        </div>
+
+        <!-- Test 5: Chart Showcase Tabs (3 tabs with icons) -->
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h2 class="text-lg font-semibold mb-4">Chart Showcase Tabs (3 tabs with icons)</h2>
+            <div class="tabs-list grid w-full grid-cols-3 h-auto p-1">
+                <button class="tab-trigger active flex flex-col sm:flex-row items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 py-2">
+                    <svg class="h-3 w-3 sm:h-4 sm:w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                    </svg>
+                    <span class="hidden sm:inline">Benefit Projections</span>
+                    <span class="sm:hidden">Projections</span>
+                </button>
+                <button class="tab-trigger flex flex-col sm:flex-row items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 py-2">
+                    <svg class="h-3 w-3 sm:h-4 sm:w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                    </svg>
+                    <span class="hidden sm:inline">Income Comparison</span>
+                    <span class="sm:hidden">Comparison</span>
+                </button>
+                <button class="tab-trigger flex flex-col sm:flex-row items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 py-2">
+                    <svg class="h-3 w-3 sm:h-4 sm:w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
+                    </svg>
+                    <span class="hidden sm:inline">Income Breakdown</span>
+                    <span class="sm:hidden">Breakdown</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Breakpoint Indicators -->
+        <div class="bg-blue-50 p-4 rounded-lg">
+            <h3 class="font-semibold mb-2">Current Breakpoint:</h3>
+            <div class="space-y-1 text-sm">
+                <div class="sm:hidden text-red-600 font-medium">📱 Mobile (< 640px)</div>
+                <div class="hidden sm:block md:hidden text-orange-600 font-medium">📱 Small (640px - 768px)</div>
+                <div class="hidden md:block lg:hidden text-yellow-600 font-medium">💻 Medium (768px - 1024px)</div>
+                <div class="hidden lg:block xl:hidden text-green-600 font-medium">🖥️ Large (1024px - 1280px)</div>
+                <div class="hidden xl:block text-blue-600 font-medium">🖥️ Extra Large (≥ 1280px)</div>
+            </div>
+        </div>
+
+        <!-- Touch Target Test -->
+        <div class="bg-yellow-50 p-4 rounded-lg">
+            <h3 class="font-semibold mb-2">Touch Target Test (44px minimum):</h3>
+            <p class="text-sm text-gray-600 mb-4">All tabs should be at least 44px tall for comfortable touch interaction.</p>
+            <div class="space-y-2">
+                <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 bg-green-500 rounded"></div>
+                    <span class="text-sm">✅ Meets 44px minimum height requirement</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 bg-red-500 rounded"></div>
+                    <span class="text-sm">❌ Below 44px minimum height requirement</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add click handlers for demonstration
+        document.querySelectorAll('.tab-trigger').forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from siblings
+                this.parentElement.querySelectorAll('.tab-trigger').forEach(sibling => {
+                    sibling.classList.remove('active');
+                });
+                // Add active class to clicked button
+                this.classList.add('active');
+            });
+        });
+
+        // Log current viewport width for debugging
+        function logViewportWidth() {
+            console.log('Viewport width:', window.innerWidth);
+        }
+        
+        window.addEventListener('resize', logViewportWidth);
+        logViewportWidth();
+    </script>
+</body>
+</html>

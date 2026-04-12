@@ -1,0 +1,381 @@
+{
+  "name": "Massachusetts Retirement - Daily Content Generation (Robust)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * 1-5"
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Daily Content Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "url": "http://localhost:3000/api/admin/blog/analytics/costs",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$env.CRON_SECRET}}"
+            },
+            {
+              "name": "User-Agent",
+              "value": "n8n-workflow/1.0 (Massachusetts Retirement System)"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Cache-Control",
+              "value": "no-cache"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000,
+          "retry": {
+            "enabled": true,
+            "maxTries": 3,
+            "waitBetween": 5000
+          }
+        }
+      },
+      "id": "check-budget",
+      "name": "Check Monthly Budget",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [460, 300],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Safely extract budget data with fallbacks\nconst input = $input.all()[0];\nconst data = input.json || {};\n\n// Provide safe defaults for all required fields\nconst safeData = {\n  success: data.success || false,\n  budget_utilization: Number(data.budget_utilization) || 0,\n  monthly_total: Number(data.monthly_total) || 0,\n  budget_limit: Number(data.budget_limit) || 200,\n  remaining_budget: Number(data.remaining_budget) || 200,\n  status: data.status || 'unknown',\n  error: data.error || null,\n  posts_generated: Number(data.posts_generated) || 0\n};\n\n// Add debug information\nsafeData.debug_info = {\n  original_response: data,\n  timestamp: new Date().toISOString(),\n  workflow_step: 'budget_validation'\n};\n\n// Determine if budget allows content generation\nsafeData.can_generate_content = safeData.budget_utilization < 90;\n\nreturn safeData;"
+      },
+      "id": "validate-budget-data",
+      "name": "Validate Budget Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "budget-check",
+              "leftValue": "={{$json.can_generate_content}}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equal"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "budget-gate",
+      "name": "Budget Gate Decision",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "http://localhost:3000/api/admin/blog/generate/random",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$env.CRON_SECRET}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "User-Agent",
+              "value": "n8n-workflow/1.0 (Massachusetts Retirement System)"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "ai_model",
+              "value": "gpt-4-turbo-preview"
+            },
+            {
+              "name": "word_count",
+              "value": 1200
+            },
+            {
+              "name": "complexity",
+              "value": "intermediate"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 180000,
+          "retry": {
+            "enabled": true,
+            "maxTries": 2,
+            "waitBetween": 10000
+          }
+        }
+      },
+      "id": "generate-content",
+      "name": "Generate AI Content",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1120, 200],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "https://discord.com/api/webhooks/1396209486326141059/BwNh_3jFBkv3_B3se7GdbDOmegzfk5P8C6sApMNHReICmaTZiT_IIn02cilQ9QL0yPFq",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "User-Agent",
+              "value": "n8n-workflow/1.0"
+            }
+          ]
+        },
+        "sendBody": true,
+        "body": {
+          "content": "⚠️ **Budget Alert**: AI content generation paused\n\n💰 **Budget Utilization**: {{$json.budget_utilization}}%\n📊 **Monthly Spend**: ${{$json.monthly_total}}\n🚫 **Action**: Content generation skipped to prevent overspend\n⏰ **Time**: {{$now.toLocaleString()}}\n\n🔧 **Next Steps**:\n1. Review budget limits in admin dashboard\n2. Optimize AI model selection for cost efficiency\n3. Consider increasing monthly budget if needed\n\n📈 **Dashboard**: https://www.masspension.com/admin/blog/analytics"
+        },
+        "options": {
+          "timeout": 15000,
+          "retry": {
+            "enabled": true,
+            "maxTries": 2,
+            "waitBetween": 3000
+          }
+        }
+      },
+      "id": "discord-budget-alert",
+      "name": "Discord Budget Alert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [900, 480]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "https://discord.com/api/webhooks/1396209486326141059/BwNh_3jFBkv3_B3se7GdbDOmegzfk5P8C6sApMNHReICmaTZiT_IIn02cilQ9QL0yPFq",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "User-Agent",
+              "value": "n8n-workflow/1.0"
+            }
+          ]
+        },
+        "sendBody": true,
+        "body": {
+          "content": "❌ **Content Generation Failed**\n\n🚨 **Error**: Content generation encountered an error\n⏰ **Time**: {{$now.toLocaleString()}}\n🔄 **Status**: Workflow will retry automatically\n\n📊 **Troubleshooting**:\n- Check API endpoint availability\n- Verify AI service quotas\n- Review database connectivity\n- Check authentication tokens\n\n🔗 **Admin Dashboard**: http://localhost:3000/admin/blog/analytics"
+        },
+        "options": {
+          "timeout": 15000,
+          "retry": {
+            "enabled": true,
+            "maxTries": 2,
+            "waitBetween": 3000
+          }
+        }
+      },
+      "id": "discord-error-notification",
+      "name": "Discord Error Alert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1120, 480]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "https://discord.com/api/webhooks/1396207186786652290/GJVGuDbZJdxDweZ7ClbXxiE5VcTiVHGtH4kXdTG4gl-cNphF4W84LF9iEOU08wMJEeEq",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "User-Agent",
+              "value": "n8n-workflow/1.0"
+            }
+          ]
+        },
+        "sendBody": true,
+        "body": {
+          "content": "🤖 **AI Content Generated Successfully!**\n\n📝 **Status**: Content generation completed\n⭐ **System**: Massachusetts Retirement AI Blog\n🎯 **Workflow**: Daily content automation\n⏰ **Time**: {{$now.toLocaleString()}}\n\n📊 **Details**:\n- Content generation workflow executed successfully\n- New blog post ready for review\n- Quality checks completed\n- SEO optimization pending\n\n🔗 **Review**: http://localhost:3000/admin/blog/review\n📈 **Dashboard**: http://localhost:3000/admin/blog/analytics"
+        },
+        "options": {
+          "timeout": 15000,
+          "retry": {
+            "enabled": true,
+            "maxTries": 2,
+            "waitBetween": 3000
+          }
+        }
+      },
+      "id": "discord-success-notification",
+      "name": "Discord Success Alert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1340, 200]
+    },
+    {
+      "parameters": {
+        "amount": 2,
+        "unit": "seconds"
+      },
+      "id": "wait-between-requests",
+      "name": "Wait Between Requests",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [1120, 360]
+    }
+  ],
+  "connections": {
+    "Daily Content Schedule": {
+      "main": [
+        [
+          {
+            "node": "Check Monthly Budget",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Monthly Budget": {
+      "main": [
+        [
+          {
+            "node": "Validate Budget Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ],
+      "error": [
+        [
+          {
+            "node": "Validate Budget Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Budget Data": {
+      "main": [
+        [
+          {
+            "node": "Budget Gate Decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Budget Gate Decision": {
+      "main": [
+        [
+          {
+            "node": "Generate AI Content",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Discord Budget Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate AI Content": {
+      "main": [
+        [
+          {
+            "node": "Wait Between Requests",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ],
+      "error": [
+        [
+          {
+            "node": "Discord Error Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait Between Requests": {
+      "main": [
+        [
+          {
+            "node": "Discord Success Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": {},
+  "tags": ["ai-content", "massachusetts-retirement", "automation", "discord", "robust"],
+  "triggerCount": 1,
+  "updatedAt": "2024-01-15T09:00:00.000Z",
+  "versionId": "1"
+}

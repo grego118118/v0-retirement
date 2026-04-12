@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Security Calculator Fix Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007cba;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #005a87;
+        }
+        .results {
+            background-color: #e8f4f8;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 15px;
+        }
+        .combined-results {
+            background-color: #f0f8e8;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 15px;
+        }
+        .error {
+            color: red;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Social Security Calculator Fix Test</h1>
+    
+    <div class="container">
+        <h2>Test Summary</h2>
+        <p>This test verifies the fixes for:</p>
+        <ul>
+            <li>✅ Form initialization with empty/appropriate values (no hardcoded defaults)</li>
+            <li>✅ Data flow between Social Security calculator and Combined Calculator</li>
+            <li>✅ Auto-calculation when Social Security data changes</li>
+        </ul>
+    </div>
+
+    <div class="container">
+        <h2>Social Security Calculator</h2>
+        <form id="socialSecurityForm">
+            <div class="form-group">
+                <label for="currentAge">Current Age:</label>
+                <input type="number" id="currentAge" placeholder="Enter your current age" min="18" max="100">
+                <div class="error" id="currentAgeError"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="retirementAge">Planned Retirement Age:</label>
+                <input type="number" id="retirementAge" placeholder="Enter planned retirement age" min="50" max="75">
+                <div class="error" id="retirementAgeError"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="estimatedBenefit">Estimated Monthly Benefit ($):</label>
+                <input type="number" id="estimatedBenefit" placeholder="Enter your SSA.gov estimate" min="0" max="10000" step="1">
+                <div class="error" id="estimatedBenefitError"></div>
+            </div>
+            
+            <button type="submit">Calculate Social Security Benefits</button>
+            <button type="button" onclick="clearForm()">Start New Calculation</button>
+        </form>
+        
+        <div id="socialSecurityResults" class="results" style="display: none;">
+            <h3>Social Security Calculation Results</h3>
+            <div id="ssResultsContent"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Combined Retirement Calculator</h2>
+        <p>Pension Monthly Benefit: <strong>$4,465</strong> (example)</p>
+        <button onclick="calculateCombined()">Calculate Combined Benefits</button>
+        
+        <div id="combinedResults" class="combined-results" style="display: none;">
+            <h3>Combined Monthly Income</h3>
+            <div id="combinedResultsContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // Simulate the fixed Social Security calculator behavior
+        let socialSecurityData = {
+            currentAge: 0,
+            retirementAge: 0,
+            estimatedBenefit: 0
+        };
+        
+        let socialSecurityResults = null;
+        const pensionData = { monthlyBenefit: 4465 }; // Example pension data
+
+        // Form validation and submission
+        document.getElementById('socialSecurityForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Clear previous errors
+            document.querySelectorAll('.error').forEach(el => el.textContent = '');
+            
+            // Get form values
+            const currentAge = parseInt(document.getElementById('currentAge').value) || 0;
+            const retirementAge = parseInt(document.getElementById('retirementAge').value) || 0;
+            const estimatedBenefit = parseFloat(document.getElementById('estimatedBenefit').value) || 0;
+            
+            // Validation
+            let hasErrors = false;
+            
+            if (!currentAge || currentAge < 18 || currentAge > 100) {
+                document.getElementById('currentAgeError').textContent = 'Please enter a valid current age (18-100)';
+                hasErrors = true;
+            }
+            
+            if (!retirementAge || retirementAge < 50 || retirementAge > 75) {
+                document.getElementById('retirementAgeError').textContent = 'Please enter a valid retirement age (50-75)';
+                hasErrors = true;
+            }
+            
+            if (estimatedBenefit <= 0) {
+                document.getElementById('estimatedBenefitError').textContent = 'Please enter a valid estimated monthly benefit amount';
+                hasErrors = true;
+            }
+            
+            if (retirementAge <= currentAge) {
+                document.getElementById('retirementAgeError').textContent = 'Retirement age must be greater than current age';
+                hasErrors = true;
+            }
+            
+            if (hasErrors) return;
+            
+            // Update data
+            socialSecurityData = { currentAge, retirementAge, estimatedBenefit };
+            
+            // Calculate results
+            socialSecurityResults = {
+                currentAge,
+                retirementAge,
+                estimatedMonthlyBenefit: estimatedBenefit,
+                estimatedAnnualBenefit: estimatedBenefit * 12,
+                yearsUntilRetirement: Math.max(0, retirementAge - currentAge),
+                fullRetirementAge: 67
+            };
+            
+            // Display results
+            displaySocialSecurityResults();
+            
+            // Auto-calculate combined results (simulating the useEffect behavior)
+            setTimeout(calculateCombined, 100);
+        });
+
+        function displaySocialSecurityResults() {
+            const resultsDiv = document.getElementById('socialSecurityResults');
+            const contentDiv = document.getElementById('ssResultsContent');
+            
+            contentDiv.innerHTML = `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span>Monthly Benefit:</span>
+                            <span style="font-weight: bold;">$${socialSecurityResults.estimatedMonthlyBenefit.toLocaleString()}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span>Annual Benefit:</span>
+                            <span style="font-weight: bold;">$${socialSecurityResults.estimatedAnnualBenefit.toLocaleString()}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>Years Until Retirement:</span>
+                            <span style="font-weight: bold;">${socialSecurityResults.yearsUntilRetirement} years</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>Full Retirement Age:</span>
+                            <span style="font-weight: bold;">${socialSecurityResults.fullRetirementAge}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            resultsDiv.style.display = 'block';
+        }
+
+        function calculateCombined() {
+            const pensionAmount = pensionData.monthlyBenefit || 0;
+            const ssAmount = socialSecurityResults?.estimatedMonthlyBenefit || 0;
+            const total = pensionAmount + ssAmount;
+            
+            console.log('🔄 Combined Calculator - Calculating with:', {
+                pensionAmount,
+                ssAmount,
+                total,
+                socialSecurityResults
+            });
+            
+            const results = {
+                pension: pensionAmount,
+                socialSecurity: ssAmount,
+                total: total,
+                annual: total * 12
+            };
+            
+            // Display combined results
+            const resultsDiv = document.getElementById('combinedResults');
+            const contentDiv = document.getElementById('combinedResultsContent');
+            
+            contentDiv.innerHTML = `
+                <div style="margin-bottom: 10px;">Pension: $${results.pension.toLocaleString()}</div>
+                <div style="margin-bottom: 10px;">Social Security: $${results.socialSecurity.toLocaleString()}</div>
+                <div style="font-weight: bold; margin-bottom: 10px;">Total: $${results.total.toLocaleString()}</div>
+                <div style="font-size: 14px; color: #666;">Annual: $${results.annual.toLocaleString()}</div>
+                ${ssAmount > 0 ? '<div class="success" style="margin-top: 10px;">✅ Social Security data successfully integrated!</div>' : '<div style="color: orange; margin-top: 10px;">⚠️ No Social Security data available</div>'}
+            `;
+            
+            resultsDiv.style.display = 'block';
+        }
+
+        function clearForm() {
+            // Reset form to empty values (simulating the fix)
+            document.getElementById('currentAge').value = '';
+            document.getElementById('retirementAge').value = '';
+            document.getElementById('estimatedBenefit').value = '';
+            
+            // Clear errors
+            document.querySelectorAll('.error').forEach(el => el.textContent = '');
+            
+            // Hide results
+            document.getElementById('socialSecurityResults').style.display = 'none';
+            document.getElementById('combinedResults').style.display = 'none';
+            
+            // Reset data
+            socialSecurityData = { currentAge: 0, retirementAge: 0, estimatedBenefit: 0 };
+            socialSecurityResults = null;
+            
+            console.log('🧹 Form cleared - reset to empty values');
+        }
+
+        // Test the fixes on page load
+        window.addEventListener('load', function() {
+            console.log('✅ Page loaded - form starts with empty values (no hardcoded defaults)');
+            console.log('✅ Combined calculator ready to receive Social Security data');
+            
+            // Verify form starts empty
+            const currentAge = document.getElementById('currentAge').value;
+            const retirementAge = document.getElementById('retirementAge').value;
+            const estimatedBenefit = document.getElementById('estimatedBenefit').value;
+            
+            if (currentAge === '' && retirementAge === '' && estimatedBenefit === '') {
+                console.log('✅ PASS: Form initialization - all fields start empty');
+            } else {
+                console.log('❌ FAIL: Form initialization - fields have default values');
+            }
+        });
+    </script>
+</body>
+</html>

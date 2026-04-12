@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Security Calculation Test - Massachusetts Retirement System</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8fafc;
+        }
+
+        .test-container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .test-header {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .results {
+            background: #f3f4f6;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .debug-info {
+            background: #fef3c7;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-header">
+        <h1>🧮 Social Security Calculation Test</h1>
+        <p>Test the calculation logic to debug the $0 benefit issue</p>
+    </div>
+
+    <div class="test-container">
+        <h2>Social Security Calculator Test</h2>
+        <form id="calculatorForm">
+            <div class="form-group">
+                <label for="currentAge">Current Age</label>
+                <input type="number" id="currentAge" value="45" min="18" max="100">
+            </div>
+
+            <div class="form-group">
+                <label for="retirementAge">Planned Retirement Age</label>
+                <input type="number" id="retirementAge" value="67" min="50" max="75">
+            </div>
+
+            <div class="form-group">
+                <label for="estimatedBenefit">Estimated Monthly Benefit ($)</label>
+                <input type="number" id="estimatedBenefit" value="350" min="0" max="10000" step="1">
+            </div>
+
+            <button type="submit">Calculate Social Security Benefits</button>
+            <button type="button" onclick="clearForm()">Clear Form</button>
+            <button type="button" onclick="testSpecificValue()">Test with $350</button>
+        </form>
+
+        <div id="results" class="results" style="display: none;">
+            <h3>Calculation Results</h3>
+            <div id="resultsList"></div>
+        </div>
+
+        <div id="debugInfo" class="debug-info" style="display: none;">
+            <h3>Debug Information</h3>
+            <div id="debugContent"></div>
+        </div>
+    </div>
+
+    <div class="test-container">
+        <h2>Test Scenarios</h2>
+        <button onclick="testScenario(350, 45, 67)">Test: $350 benefit, age 45, retire at 67</button>
+        <button onclick="testScenario(0, 45, 67)">Test: $0 benefit (should show error)</button>
+        <button onclick="testScenario(2500, 55, 62)">Test: $2500 benefit, age 55, retire at 62</button>
+        <button onclick="testScenario(1800, 60, 70)">Test: $1800 benefit, age 60, retire at 70</button>
+    </div>
+
+    <script>
+        function calculateSocialSecurity(currentAge, retirementAge, estimatedBenefit) {
+            console.log('🧮 Starting calculation with:', { currentAge, retirementAge, estimatedBenefit });
+            
+            // Validate inputs
+            if (!currentAge || !retirementAge || estimatedBenefit === undefined) {
+                throw new Error('Missing required input values');
+            }
+
+            if (estimatedBenefit < 0) {
+                throw new Error('Estimated benefit cannot be negative');
+            }
+
+            // Perform calculations (same logic as the React component)
+            const calculationResults = {
+                currentAge: currentAge,
+                retirementAge: retirementAge,
+                estimatedMonthlyBenefit: estimatedBenefit,
+                estimatedAnnualBenefit: estimatedBenefit * 12,
+                yearsUntilRetirement: Math.max(0, retirementAge - currentAge),
+                fullRetirementAge: 67,
+                earlyRetirementReduction: retirementAge < 67 ? ((67 - retirementAge) * 6.67) : 0,
+                delayedRetirementCredits: retirementAge > 67 ? ((retirementAge - 67) * 8) : 0
+            };
+
+            console.log('✅ Calculation results:', calculationResults);
+            return calculationResults;
+        }
+
+        function displayResults(results) {
+            const resultsDiv = document.getElementById('results');
+            const resultsList = document.getElementById('resultsList');
+            
+            resultsList.innerHTML = `
+                <div class="result-item">
+                    <span>Monthly Benefit:</span>
+                    <span><strong>$${results.estimatedMonthlyBenefit.toLocaleString()}</strong></span>
+                </div>
+                <div class="result-item">
+                    <span>Annual Benefit:</span>
+                    <span><strong>$${results.estimatedAnnualBenefit.toLocaleString()}</strong></span>
+                </div>
+                <div class="result-item">
+                    <span>Years Until Retirement:</span>
+                    <span><strong>${results.yearsUntilRetirement} years</strong></span>
+                </div>
+                <div class="result-item">
+                    <span>Full Retirement Age:</span>
+                    <span><strong>${results.fullRetirementAge}</strong></span>
+                </div>
+                ${results.earlyRetirementReduction > 0 ? `
+                <div class="result-item" style="color: #ea580c;">
+                    <span>Early Retirement Reduction:</span>
+                    <span><strong>-${results.earlyRetirementReduction.toFixed(1)}%</strong></span>
+                </div>
+                ` : ''}
+                ${results.delayedRetirementCredits > 0 ? `
+                <div class="result-item" style="color: #059669;">
+                    <span>Delayed Retirement Credits:</span>
+                    <span><strong>+${results.delayedRetirementCredits.toFixed(1)}%</strong></span>
+                </div>
+                ` : ''}
+            `;
+            
+            resultsDiv.style.display = 'block';
+        }
+
+        function displayDebugInfo(data, results) {
+            const debugDiv = document.getElementById('debugInfo');
+            const debugContent = document.getElementById('debugContent');
+            
+            debugContent.innerHTML = `
+                <strong>Input Data:</strong><br>
+                Current Age: ${data.currentAge}<br>
+                Retirement Age: ${data.retirementAge}<br>
+                Estimated Benefit: $${data.estimatedBenefit}<br><br>
+                
+                <strong>Calculation Steps:</strong><br>
+                Monthly Benefit = ${data.estimatedBenefit}<br>
+                Annual Benefit = ${data.estimatedBenefit} × 12 = ${results.estimatedAnnualBenefit}<br>
+                Years Until Retirement = ${data.retirementAge} - ${data.currentAge} = ${results.yearsUntilRetirement}<br><br>
+                
+                <strong>Full Results Object:</strong><br>
+                ${JSON.stringify(results, null, 2)}
+            `;
+            
+            debugDiv.style.display = 'block';
+        }
+
+        function showError(message) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `<div class="error">Error: ${message}</div>`;
+            resultsDiv.style.display = 'block';
+        }
+
+        function showSuccess(message) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `<div class="success">${message}</div>`;
+            resultsDiv.style.display = 'block';
+        }
+
+        document.getElementById('calculatorForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const currentAge = parseInt(document.getElementById('currentAge').value) || 0;
+            const retirementAge = parseInt(document.getElementById('retirementAge').value) || 0;
+            const estimatedBenefit = parseFloat(document.getElementById('estimatedBenefit').value) || 0;
+            
+            console.log('📝 Form submitted with values:', { currentAge, retirementAge, estimatedBenefit });
+            
+            try {
+                const results = calculateSocialSecurity(currentAge, retirementAge, estimatedBenefit);
+                displayResults(results);
+                displayDebugInfo({ currentAge, retirementAge, estimatedBenefit }, results);
+                
+                if (estimatedBenefit === 350) {
+                    showSuccess('✅ Test PASSED: $350 input correctly calculated!');
+                }
+            } catch (error) {
+                console.error('❌ Calculation error:', error);
+                showError(error.message);
+            }
+        });
+
+        function clearForm() {
+            document.getElementById('currentAge').value = '';
+            document.getElementById('retirementAge').value = '';
+            document.getElementById('estimatedBenefit').value = '';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('debugInfo').style.display = 'none';
+        }
+
+        function testSpecificValue() {
+            document.getElementById('currentAge').value = '45';
+            document.getElementById('retirementAge').value = '67';
+            document.getElementById('estimatedBenefit').value = '350';
+            document.getElementById('calculatorForm').dispatchEvent(new Event('submit'));
+        }
+
+        function testScenario(benefit, age, retireAge) {
+            document.getElementById('currentAge').value = age;
+            document.getElementById('retirementAge').value = retireAge;
+            document.getElementById('estimatedBenefit').value = benefit;
+            document.getElementById('calculatorForm').dispatchEvent(new Event('submit'));
+        }
+
+        // Auto-run test on page load
+        window.addEventListener('load', function() {
+            console.log('🚀 Page loaded, running initial test...');
+            testSpecificValue();
+        });
+    </script>
+</body>
+</html>

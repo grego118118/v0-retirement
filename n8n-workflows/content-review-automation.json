@@ -1,0 +1,499 @@
+{
+  "name": "Massachusetts Retirement - Content Review Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "content-review-webhook",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "https://www.masspension.com"
+        }
+      },
+      "id": "review-webhook",
+      "name": "Content Review Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "content-review-webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "review-action",
+              "leftValue": "={{$json.body.action}}",
+              "rightValue": "review_submitted",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "review-action-filter",
+      "name": "Review Action Filter",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "approval-status",
+              "leftValue": "={{$json.body.review_status}}",
+              "rightValue": "approved",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "approval-decision",
+      "name": "Approval Decision",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "url": "https://www.masspension.com/api/admin/blog/posts/{{$json.body.post_id}}",
+        "authentication": "headerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$env.CRON_SECRET}}"
+            }
+          ]
+        }
+      },
+      "id": "get-post-details",
+      "name": "Get Post Details",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [900, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Calculate optimal publish time based on content type and audience\nconst post = $input.all()[0].json;\nconst reviewData = $input.all()[1].json.body;\n\nconst now = new Date();\nlet publishTime;\n\n// Determine optimal publish time based on content category\nif (post.auto_generated_tags?.includes('COLA')) {\n  // COLA content: Publish immediately (time-sensitive)\n  publishTime = new Date(now.getTime() + 5 * 60 * 1000); // 5 minutes from now\n} else if (post.auto_generated_tags?.includes('Group 4') || post.auto_generated_tags?.includes('Public Safety')) {\n  // Public safety content: Publish during business hours\n  const nextBusinessDay = new Date(now);\n  nextBusinessDay.setHours(10, 0, 0, 0); // 10 AM\n  if (nextBusinessDay <= now || now.getDay() === 0 || now.getDay() === 6) {\n    // If it's weekend or past 10 AM, schedule for next Monday\n    nextBusinessDay.setDate(nextBusinessDay.getDate() + (8 - nextBusinessDay.getDay()) % 7);\n  }\n  publishTime = nextBusinessDay;\n} else {\n  // General content: Publish in 2 hours for final review\n  publishTime = new Date(now.getTime() + 2 * 60 * 60 * 1000);\n}\n\n// Add social media scheduling suggestions\nconst socialSchedule = {\n  immediate: publishTime,\n  linkedin: new Date(publishTime.getTime() + 30 * 60 * 1000), // 30 min after publish\n  twitter: new Date(publishTime.getTime() + 60 * 60 * 1000), // 1 hour after publish\n  newsletter: post.content_quality_score > 90 ? 'include_in_weekly' : 'skip'\n};\n\nreturn {\n  post: post,\n  review: reviewData,\n  publish_schedule: {\n    publish_time: publishTime.toISOString(),\n    social_schedule: socialSchedule,\n    priority: post.content_quality_score > 90 ? 'high' : 'normal',\n    seo_focus: post.auto_generated_tags?.slice(0, 3) || ['Massachusetts retirement']\n  }\n};"
+      },
+      "id": "calculate-publish-schedule",
+      "name": "Calculate Publish Schedule",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 200]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "https://www.masspension.com/api/admin/blog/schedule-publish",
+        "authentication": "headerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$env.CRON_SECRET}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "post_id",
+              "value": "={{$json.post.id}}"
+            },
+            {
+              "name": "scheduled_publish_at",
+              "value": "={{$json.publish_schedule.publish_time}}"
+            },
+            {
+              "name": "priority",
+              "value": "={{$json.publish_schedule.priority}}"
+            },
+            {
+              "name": "seo_focus_keywords",
+              "value": "={{$json.publish_schedule.seo_focus}}"
+            }
+          ]
+        }
+      },
+      "id": "schedule-publication",
+      "name": "Schedule Publication",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1340, 200]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "https://discord.com/api/webhooks/1396209486326141059/BwNh_3jFBkv3_B3se7GdbDOmegzfk5P8C6sApMNHReICmaTZiT_IIn02cilQ9QL0yPFq",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "✅ **Content Approved & Scheduled**\n\n📝 **Title**: {{$json.post.title}}\n👤 **Reviewer**: {{$json.review.reviewer_name || 'Admin'}}\n⭐ **Rating**: {{$json.review.content_quality_rating}}/5\n📅 **Publish Time**: {{new Date($json.publish_schedule.publish_time).toLocaleString()}}\n🎯 **Priority**: {{$json.publish_schedule.priority}}\n\n📊 **Post Details**:\n- Quality Score: {{$json.post.content_quality_score}}/100\n- Category: {{$json.post.auto_generated_tags?.[0] || 'General'}}\n- Word Count: ~{{Math.round($json.post.content?.split(' ').length || 0)}} words\n\n🚀 **Next Steps**:\n- Auto-publish at scheduled time\n- Social media promotion\n- SEO monitoring\n\n🔗 **Preview**: https://www.masspension.com/blog/{{$json.post.slug}}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "discord-approval-success-notification",
+      "name": "Discord Approval Success",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1560, 200]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "rejection-status",
+              "leftValue": "={{$json.body.review_status}}",
+              "rightValue": "rejected",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "rejection-check",
+      "name": "Rejection Check",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [900, 400]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "https://discord.com/api/webhooks/1396209486326141059/BwNh_3jFBkv3_B3se7GdbDOmegzfk5P8C6sApMNHReICmaTZiT_IIn02cilQ9QL0yPFq",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "❌ **Content Rejected**\n\n📝 **Title**: {{$json.body.post_title || 'Unknown Post'}}\n👤 **Reviewer**: {{$json.body.reviewer_name || 'Admin'}}\n📝 **Reason**: {{$json.body.review_notes || 'No specific reason provided'}}\n⭐ **Rating**: {{$json.body.content_quality_rating || 'Not rated'}}/5\n\n🔧 **Suggested Actions**:\n{{$json.body.suggested_changes || 'No specific suggestions provided'}}\n\n📊 **Options**:\n1. Regenerate content with different prompt\n2. Manual editing and resubmission\n3. Archive and try different topic\n\n🔗 **Admin**: https://www.masspension.com/admin/blog/review"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "discord-rejection-notification",
+      "name": "Discord Rejection Notification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1120, 400]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "needs-changes-status",
+              "leftValue": "={{$json.body.review_status}}",
+              "rightValue": "needs_changes",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "needs-changes-check",
+      "name": "Needs Changes Check",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [900, 600]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "https://discord.com/api/webhooks/1396207186786652290/GJVGuDbZJdxDweZ7ClbXxiE5VcTiVHGtH4kXdTG4gl-cNphF4W84LF9iEOU08wMJEeEq",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "🔄 **Content Needs Changes**\n\n📝 **Title**: {{$json.body.post_title || 'Unknown Post'}}\n👤 **Reviewer**: {{$json.body.reviewer_name || 'Admin'}}\n📝 **Feedback**: {{$json.body.review_notes || 'No specific feedback provided'}}\n⭐ **Current Rating**: {{$json.body.content_quality_rating || 'Not rated'}}/5\n\n✏️ **Requested Changes**:\n{{$json.body.suggested_changes || 'No specific changes requested'}}\n\n🔧 **Next Steps**:\n1. AI will attempt to incorporate feedback\n2. Regenerate content with improvements\n3. Resubmit for review\n\n⏰ **Timeline**: Changes will be processed within 1 hour\n🔗 **Track Progress**: https://www.masspension.com/admin/blog/review"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "discord-changes-notification",
+      "name": "Discord Changes Needed Notification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1120, 600]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "https://www.masspension.com/api/admin/blog/regenerate",
+        "authentication": "headerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$env.CRON_SECRET}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "post_id",
+              "value": "={{$json.body.post_id}}"
+            },
+            {
+              "name": "feedback",
+              "value": "={{$json.body.review_notes}}"
+            },
+            {
+              "name": "suggested_changes",
+              "value": "={{$json.body.suggested_changes}}"
+            },
+            {
+              "name": "target_quality_score",
+              "value": 85
+            }
+          ]
+        }
+      },
+      "id": "trigger-regeneration",
+      "name": "Trigger Content Regeneration",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1340, 600]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"success\",\n  \"message\": \"Review processed successfully\",\n  \"action_taken\": \"{{$json.action_taken || 'processed'}}\",\n  \"timestamp\": \"{{new Date().toISOString()}}\"\n}"
+      },
+      "id": "webhook-response",
+      "name": "Webhook Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1560, 400]
+    }
+  ],
+  "connections": {
+    "Content Review Webhook": {
+      "main": [
+        [
+          {
+            "node": "Review Action Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Review Action Filter": {
+      "main": [
+        [
+          {
+            "node": "Approval Decision",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Approval Decision": {
+      "main": [
+        [
+          {
+            "node": "Get Post Details",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Rejection Check",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Needs Changes Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Post Details": {
+      "main": [
+        [
+          {
+            "node": "Calculate Publish Schedule",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Publish Schedule": {
+      "main": [
+        [
+          {
+            "node": "Schedule Publication",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Publication": {
+      "main": [
+        [
+          {
+            "node": "Discord Approval Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rejection Check": {
+      "main": [
+        [
+          {
+            "node": "Discord Rejection Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs Changes Check": {
+      "main": [
+        [
+          {
+            "node": "Discord Changes Needed Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Discord Changes Needed Notification": {
+      "main": [
+        [
+          {
+            "node": "Trigger Content Regeneration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Discord Rejection Notification": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trigger Content Regeneration": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Discord Approval Success": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": {},
+  "tags": ["content-review", "automation", "webhook"],
+  "triggerCount": 1,
+  "updatedAt": "2024-01-15T11:00:00.000Z",
+  "versionId": "1"
+}

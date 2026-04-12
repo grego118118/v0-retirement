@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Margin Testing Tool</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .test-container {
+            background: white;
+            margin: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .viewport-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            z-index: 1000;
+        }
+
+        .margin-indicator {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            background: rgba(255, 0, 0, 0.2);
+            border: 2px solid red;
+            z-index: 999;
+            pointer-events: none;
+        }
+
+        .margin-left {
+            left: 0;
+        }
+
+        .margin-right {
+            right: 0;
+        }
+
+        .content-area {
+            background: rgba(0, 255, 0, 0.1);
+            border: 2px dashed green;
+            min-height: 200px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .breakpoint-info {
+            background: #f0f0f0;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border-left: 4px solid #007acc;
+        }
+
+        .current-breakpoint {
+            background: #e7f3ff;
+            border-left-color: #0066cc;
+            font-weight: bold;
+        }
+
+        .test-text {
+            line-height: 1.6;
+            margin: 15px 0;
+        }
+
+        /* Massachusetts Retirement System margin classes for testing */
+        .mrs-page-wrapper {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: hidden;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
+        @media (min-width: 376px) {
+            .mrs-page-wrapper {
+                padding-left: 1.25rem;
+                padding-right: 1.25rem;
+            }
+        }
+
+        @media (min-width: 641px) {
+            .mrs-page-wrapper {
+                padding-left: 1.5rem;
+                padding-right: 1.5rem;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .mrs-page-wrapper {
+                padding-left: 2rem;
+                padding-right: 2rem;
+            }
+        }
+
+        @media (min-width: 1025px) {
+            .mrs-page-wrapper {
+                padding-left: 2.5rem;
+                padding-right: 2.5rem;
+            }
+        }
+
+        @media (min-width: 1441px) {
+            .mrs-page-wrapper {
+                padding-left: 3rem;
+                padding-right: 3rem;
+            }
+        }
+
+        .mrs-content-container {
+            margin-left: auto;
+            margin-right: auto;
+            width: 100%;
+            max-width: 1400px;
+        }
+    </style>
+</head>
+<body>
+    <div class="viewport-info" id="viewportInfo">
+        Viewport: <span id="dimensions"></span><br>
+        Breakpoint: <span id="breakpoint"></span><br>
+        Expected Margin: <span id="expectedMargin"></span>
+    </div>
+
+    <div class="margin-indicator margin-left" id="marginLeft"></div>
+    <div class="margin-indicator margin-right" id="marginRight"></div>
+
+    <div class="mrs-page-wrapper">
+        <div class="mrs-content-container">
+            <div class="test-container">
+                <h1>Massachusetts Retirement System - Margin Testing</h1>
+                
+                <div class="breakpoint-info" id="breakpoint375">
+                    <strong>375px and below:</strong> 1rem (16px) margins
+                </div>
+                
+                <div class="breakpoint-info" id="breakpoint376">
+                    <strong>376px - 640px:</strong> 1.25rem (20px) margins
+                </div>
+                
+                <div class="breakpoint-info" id="breakpoint641">
+                    <strong>641px - 768px:</strong> 1.5rem (24px) margins
+                </div>
+                
+                <div class="breakpoint-info" id="breakpoint769">
+                    <strong>769px - 1024px:</strong> 2rem (32px) margins
+                </div>
+                
+                <div class="breakpoint-info" id="breakpoint1025">
+                    <strong>1025px - 1440px:</strong> 2.5rem (40px) margins
+                </div>
+                
+                <div class="breakpoint-info" id="breakpoint1441">
+                    <strong>1441px and above:</strong> 3rem (48px) margins
+                </div>
+
+                <div class="content-area">
+                    <h2>Content Area</h2>
+                    <p class="test-text">
+                        This content area shows how the margins create breathing room between the content and the browser edges.
+                        The red indicators on the left and right show the actual margin areas.
+                    </p>
+                    <p class="test-text">
+                        Resize your browser window to see how the margins adjust responsively across different breakpoints.
+                        The current breakpoint and expected margin size are shown in the top-right corner.
+                    </p>
+                </div>
+
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                    <h3>Testing Instructions:</h3>
+                    <ol>
+                        <li>Resize your browser window to different widths</li>
+                        <li>Check that content never touches the browser edges</li>
+                        <li>Verify margins increase appropriately at larger screen sizes</li>
+                        <li>Ensure touch targets remain accessible (44px minimum)</li>
+                        <li>Test on mobile (375px), tablet (768px), desktop (1024px), and large desktop (1920px)</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateViewportInfo() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            
+            document.getElementById('dimensions').textContent = `${width}x${height}`;
+            
+            let breakpoint = '';
+            let expectedMargin = '';
+            let marginPx = 0;
+            
+            // Clear all current breakpoint highlights
+            document.querySelectorAll('.breakpoint-info').forEach(el => {
+                el.classList.remove('current-breakpoint');
+            });
+            
+            if (width <= 375) {
+                breakpoint = '≤375px (Small Mobile)';
+                expectedMargin = '1rem (16px)';
+                marginPx = 16;
+                document.getElementById('breakpoint375').classList.add('current-breakpoint');
+            } else if (width <= 640) {
+                breakpoint = '376px-640px (Mobile)';
+                expectedMargin = '1.25rem (20px)';
+                marginPx = 20;
+                document.getElementById('breakpoint376').classList.add('current-breakpoint');
+            } else if (width <= 768) {
+                breakpoint = '641px-768px (Large Mobile/Small Tablet)';
+                expectedMargin = '1.5rem (24px)';
+                marginPx = 24;
+                document.getElementById('breakpoint641').classList.add('current-breakpoint');
+            } else if (width <= 1024) {
+                breakpoint = '769px-1024px (Tablet/Small Desktop)';
+                expectedMargin = '2rem (32px)';
+                marginPx = 32;
+                document.getElementById('breakpoint769').classList.add('current-breakpoint');
+            } else if (width <= 1440) {
+                breakpoint = '1025px-1440px (Desktop)';
+                expectedMargin = '2.5rem (40px)';
+                marginPx = 40;
+                document.getElementById('breakpoint1025').classList.add('current-breakpoint');
+            } else {
+                breakpoint = '≥1441px (Large Desktop)';
+                expectedMargin = '3rem (48px)';
+                marginPx = 48;
+                document.getElementById('breakpoint1441').classList.add('current-breakpoint');
+            }
+            
+            document.getElementById('breakpoint').textContent = breakpoint;
+            document.getElementById('expectedMargin').textContent = expectedMargin;
+            
+            // Update margin indicators
+            document.getElementById('marginLeft').style.width = marginPx + 'px';
+            document.getElementById('marginRight').style.width = marginPx + 'px';
+        }
+        
+        // Update on load and resize
+        updateViewportInfo();
+        window.addEventListener('resize', updateViewportInfo);
+    </script>
+</body>
+</html>

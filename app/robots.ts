@@ -1,0 +1,52 @@
+import type { MetadataRoute } from "next"
+
+export default function robots(): MetadataRoute.Robots {
+  return {
+    rules: {
+      userAgent: "*",
+      allow: [
+        "/",
+        "/calculator",
+        "/wizard",
+        "/dashboard",
+        "/blog",
+        "/resources",
+        "/faq",
+        "/about",
+        "/contact",
+        "/pricing",
+        "/social-security",
+        "/guides",
+        "/checklist",
+        "/methodology",
+        "/benefits",
+      ],
+      disallow: [
+        "/api/",
+        "/admin/",
+        "/dev/",
+        "/debug/",
+        "/_next/",
+        "/auth/",
+        "/auth/signin",
+        "/auth/signup",
+        "/auth/signout",
+        "/search",
+        "/api/auth/",
+        "/api/calculations/",
+        "/api/debug/",
+        "/api/health/",
+        "/api/newsletter/",
+        "/api/pdf/",
+        "/api/pension-calculation/",
+        "/api/profile/",
+        "/api/retirement/",
+        "/api/stripe/",
+        "/api/subscription/",
+        "/api/test*",
+        "/api/email/",
+      ],
+    },
+    sitemap: "https://www.masspension.com/sitemap.xml",
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "name": "Discord Success Alert - Simple Version",
+  "parameters": {
+    "httpMethod": "POST",
+    "url": "https://discord.com/api/webhooks/1396207186786652290/GJVGuDbZJdxDweZ7ClbXxiE5VcTiVHGtH4kXdTG4gl-cNphF4W84LF9iEOU08wMJEeEq",
+    "sendHeaders": true,
+    "headerParameters": {
+      "parameters": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ]
+    },
+    "sendBody": true,
+    "body": {
+      "content": "🤖 **AI Content Generated Successfully!**\n\n📝 **Status**: Content generation completed\n⏰ **Time**: Generated automatically\n🎯 **System**: Massachusetts Retirement AI Blog\n\n📊 **Details**:\n- Workflow executed successfully\n- Content ready for review\n- Check admin dashboard for details\n\n🔗 **Review**: https://www.masspension.com/admin/blog/review"
+    },
+    "options": {
+      "timeout": 10000,
+      "retry": {
+        "enabled": true,
+        "maxTries": 2,
+        "waitBetween": 2000
+      }
+    }
+  },
+  "id": "discord-success-simple",
+  "name": "Discord Success Alert (Simple)",
+  "type": "n8n-nodes-base.httpRequest",
+  "typeVersion": 4,
+  "position": [1120, 300]
+}

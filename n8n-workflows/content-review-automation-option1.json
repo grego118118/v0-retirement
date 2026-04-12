@@ -1,0 +1,284 @@
+{
+  "name": "Content Review Automation (Option 1: Hard-coded Secret)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "http://localhost:3000/webhook/content-review-webhook",
+        "options": {
+          "allowUnauthorizedCerts": false,
+          "timeout": 10000
+        }
+      },
+      "id": "webhook-trigger",
+      "name": "Content Review Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [680, 200],
+      "webhookId": "content-review-webhook"
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "url": "http://localhost:3000/api/admin/blog/posts/={{$json.body.post_id}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 462c44a146ca26604411330b9cc568e9cc10a60e09745f4b7e26f8a80983c140"
+            }
+          ]
+        }
+      },
+      "id": "get-post-details",
+      "name": "Get Post Details",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [900, 200]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "http://localhost:3000/api/admin/blog/review",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 462c44a146ca26604411330b9cc568e9cc10a60e09745f4b7e26f8a80983c140"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "post_id",
+              "value": "={{$json.id}}"
+            },
+            {
+              "name": "action",
+              "value": "auto_review"
+            },
+            {
+              "name": "review_type",
+              "value": "quality_check"
+            }
+          ]
+        }
+      },
+      "id": "auto-review",
+      "name": "Automated Quality Review",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1120, 200]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "quality-check",
+              "leftValue": "={{$json.quality_score}}",
+              "rightValue": 85,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "quality-decision",
+      "name": "Quality Check Decision",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1340, 200]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "http://localhost:3000/api/admin/blog/publish",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 462c44a146ca26604411330b9cc568e9cc10a60e09745f4b7e26f8a80983c140"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "post_id",
+              "value": "={{$('get-post-details').item.json.id}}"
+            },
+            {
+              "name": "publish_immediately",
+              "value": true
+            }
+          ]
+        }
+      },
+      "id": "auto-publish",
+      "name": "Auto Publish",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1560, 140]
+    },
+    {
+      "parameters": {
+        "url": "https://discord.com/api/webhooks/1396207186786652290/GJVGuDbZJdxDweZ7ClbXxiE5VcTiVHGtH4kXdTG4gl-cNphF4W84LF9iEOU08wMJEeEq",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "✅ **Content Auto-Published**\\n\\n📝 **Post Details:**\\n- Title: {{$('get-post-details').item.json.title}}\\n- Quality Score: {{$('auto-review').item.json.quality_score}}\\n- Word Count: {{$('get-post-details').item.json.word_count}}\\n\\n🎯 **Review Results:**\\n- Status: Auto-approved\\n- SEO Score: {{$('auto-review').item.json.seo_score}}\\n\\n⏰ Published: {{new Date().toLocaleString()}}"
+            }
+          ]
+        }
+      },
+      "id": "discord-publish-notification",
+      "name": "Discord Publish Notification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1780, 140]
+    },
+    {
+      "parameters": {
+        "url": "https://discord.com/api/webhooks/1396209486326141059/BwNh_3jFBkv3_B3se7GdbDOmegzfk5P8C6sApMNHReICmaTZiT_IIn02cilQ9QL0yPFq",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "⚠️ **Manual Review Required**\\n\\n📝 **Post Details:**\\n- Title: {{$('get-post-details').item.json.title}}\\n- Quality Score: {{$('auto-review').item.json.quality_score}}\\n- Issues Found: {{$('auto-review').item.json.issues_count}}\\n\\n🔍 **Review Needed:**\\n- Quality below threshold (85%)\\n- Manual approval required\\n\\n⏰ Time: {{new Date().toLocaleString()}}"
+            }
+          ]
+        }
+      },
+      "id": "discord-review-notification",
+      "name": "Discord Review Required",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1560, 260]
+    }
+  ],
+  "connections": {
+    "webhook-trigger": {
+      "main": [
+        [
+          {
+            "node": "get-post-details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get-post-details": {
+      "main": [
+        [
+          {
+            "node": "auto-review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "auto-review": {
+      "main": [
+        [
+          {
+            "node": "quality-decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "quality-decision": {
+      "main": [
+        [
+          {
+            "node": "auto-publish",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "discord-review-notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "auto-publish": {
+      "main": [
+        [
+          {
+            "node": "discord-publish-notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2024-01-15T10:00:00.000Z",
+      "updatedAt": "2024-01-15T10:00:00.000Z",
+      "id": "mass-retirement-automation",
+      "name": "Massachusetts Retirement"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2024-01-15T10:00:00.000Z",
+  "versionId": "option1-hardcoded-secret-1.0"
+}

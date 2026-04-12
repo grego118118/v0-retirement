@@ -1,0 +1,16 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="32" height="32" rx="6" fill="#2563eb" />
+  
+  <!-- Simplified building icon for favicon -->
+  <g transform="translate(6, 6)">
+    <!-- Building bars -->
+    <rect x="1" y="14" width="3" height="6" fill="white"/>
+    <rect x="5" y="11" width="3" height="9" fill="white"/>
+    <rect x="9" y="8" width="3" height="12" fill="white"/>
+    <rect x="13" y="5" width="3" height="15" fill="white"/>
+    
+    <!-- Small growth indicator -->
+    <rect x="17" y="2" width="2" height="2" fill="#10b981"/>
+  </g>
+</svg>
