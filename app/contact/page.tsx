@@ -91,7 +91,7 @@ export default function ContactPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-gray-700 text-sm">
+              <p className="text-gray-700 dark:text-slate-300 text-sm">
                 For application issues, login problems, or technical difficulties.
               </p>
 
@@ -99,8 +99,8 @@ export default function ContactPage() {
                 <div className="flex items-start gap-3">
                   <Mail className="h-5 w-5 text-purple-600 mt-0.5" />
                   <div>
-                    <h4 className="font-semibold text-gray-900">Email Support</h4>
-                    <p className="text-gray-700">
+                    <h4 className="font-semibold text-gray-900 dark:text-slate-100">Email Support</h4>
+                    <p className="text-gray-700 dark:text-slate-300">
                       <a href="mailto:support@retirementplanner.app" className="text-purple-600 hover:text-purple-800">
                         support@retirementplanner.app
                       </a>
@@ -112,8 +112,8 @@ export default function ContactPage() {
                 <div className="flex items-start gap-3">
                   <HelpCircle className="h-5 w-5 text-purple-600 mt-0.5" />
                   <div>
-                    <h4 className="font-semibold text-gray-900">Online Help Center</h4>
-                    <p className="text-gray-700">
+                    <h4 className="font-semibold text-gray-900 dark:text-slate-100">Online Help Center</h4>
+                    <p className="text-gray-700 dark:text-slate-300">
                       <Link href="/help" className="text-purple-600 hover:text-purple-800">
                         Visit Help Center
                       </Link>
@@ -145,7 +145,7 @@ export default function ContactPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-gray-700 text-sm">
+              <p className="text-gray-700 dark:text-slate-300 text-sm">
                 For questions about retirement benefits, calculations, or planning guidance.
               </p>
 
@@ -153,8 +153,8 @@ export default function ContactPage() {
                 <div className="flex items-start gap-3">
                   <Mail className="h-5 w-5 text-green-600 mt-0.5" />
                   <div>
-                    <h4 className="font-semibold text-gray-900">Planning Inquiries</h4>
-                    <p className="text-gray-700">
+                    <h4 className="font-semibold text-gray-900 dark:text-slate-100">Planning Inquiries</h4>
+                    <p className="text-gray-700 dark:text-slate-300">
                       <a href="mailto:planning@retirementplanner.app" className="text-green-600 hover:text-green-800">
                         planning@retirementplanner.app
                       </a>
@@ -166,8 +166,8 @@ export default function ContactPage() {
                 <div className="flex items-start gap-3">
                   <HelpCircle className="h-5 w-5 text-green-600 mt-0.5" />
                   <div>
-                    <h4 className="font-semibold text-gray-900">Planning Resources</h4>
-                    <p className="text-gray-700">
+                    <h4 className="font-semibold text-gray-900 dark:text-slate-100">Planning Resources</h4>
+                    <p className="text-gray-700 dark:text-slate-300">
                       <Link href="/guides" className="text-green-600 hover:text-green-800">
                         Retirement Planning Guides
                       </Link>
@@ -211,22 +211,22 @@ export default function ContactPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">For Official Information</h4>
-                  <p className="text-gray-700 text-sm">
+                  <h4 className="font-semibold text-gray-900 dark:text-slate-100 mb-2">For Official Information</h4>
+                  <p className="text-gray-700 dark:text-slate-300 text-sm">
                     For official retirement benefit estimates and authoritative information, please contact:
                   </p>
-                  <ul className="text-gray-700 text-sm mt-2 space-y-1">
+                  <ul className="text-gray-700 dark:text-slate-300 text-sm mt-2 space-y-1">
                     <li>• Your local retirement board</li>
                     <li>• Massachusetts State Retirement Board</li>
                     <li>• Your HR department</li>
                   </ul>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Application Support</h4>
-                  <p className="text-gray-700 text-sm">
+                  <h4 className="font-semibold text-gray-900 dark:text-slate-100 mb-2">Application Support</h4>
+                  <p className="text-gray-700 dark:text-slate-300 text-sm">
                     For questions about using this planning tool:
                   </p>
-                  <ul className="text-gray-700 text-sm mt-2 space-y-1">
+                  <ul className="text-gray-700 dark:text-slate-300 text-sm mt-2 space-y-1">
                     <li>• Use the contact methods above</li>
                     <li>• Check our FAQ section</li>
                     <li>• Review the user guide</li>
@@ -283,14 +283,14 @@ export default function ContactPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <p className="text-gray-700">
+              <p className="text-gray-700 dark:text-slate-300">
                 Many common questions can be answered quickly through our self-service resources:
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Quick Resources</h4>
-                  <ul className="space-y-2 text-gray-700 text-sm">
+                  <h4 className="font-semibold text-gray-900 dark:text-slate-100 mb-2">Quick Resources</h4>
+                  <ul className="space-y-2 text-gray-700 dark:text-slate-300 text-sm">
                     <li>
                       <Link href="/faq" className="text-indigo-600 hover:text-indigo-800 transition-colors">
                         → Frequently Asked Questions
@@ -314,8 +314,8 @@ export default function ContactPage() {
                   </ul>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Common Issues</h4>
-                  <ul className="space-y-2 text-gray-700 text-sm">
+                  <h4 className="font-semibold text-gray-900 dark:text-slate-100 mb-2">Common Issues</h4>
+                  <ul className="space-y-2 text-gray-700 dark:text-slate-300 text-sm">
                     <li>• Login problems: Try password reset first</li>
                     <li>• Calculator errors: Check input data accuracy</li>
                     <li>• Missing data: Verify with HR department</li>

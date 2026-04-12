@@ -82,8 +82,8 @@ export default function AboutPage() {
               <div className="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center mb-6">
                 <Landmark className="text-blue-600" size={24} />
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-4">Regulatory Accuracy</h3>
-              <p className="text-slate-600 leading-relaxed text-sm">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Regulatory Accuracy</h3>
+              <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-sm">
                 We stay deep in the weeds of PERAC memos and MSRB policy updates. When a new law like the Social Security Fairness Act passes, we update our logic within 48 hours.
               </p>
             </div>
@@ -92,8 +92,8 @@ export default function AboutPage() {
               <div className="w-12 h-12 rounded-2xl bg-indigo-100 flex items-center justify-center mb-6">
                 <Cpu className="text-indigo-600" size={24} />
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-4">Modern User Experience</h3>
-              <p className="text-slate-600 leading-relaxed text-sm">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Modern User Experience</h3>
+              <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-sm">
                 Benefit calculations shouldn't require a 40-page PDF and a calculator. Our "Audit-as-a-Service" model simplifies complex math into clear, visual signals.
               </p>
             </div>
@@ -102,18 +102,18 @@ export default function AboutPage() {
               <div className="w-12 h-12 rounded-2xl bg-green-100 flex items-center justify-center mb-6">
                 <ShieldCheck className="text-green-600" size={24} />
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-4">Data Sovereignty</h3>
-              <p className="text-slate-600 leading-relaxed text-sm">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Data Sovereignty</h3>
+              <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-sm">
                 We pioneered the "No-Store" guarantee. Your pension data is processed in your browser's memory and vanishes the moment you close the tab. Security by design.
               </p>
             </div>
           </div>
 
           {/* Mission Detail Section */}
-          <div className="mt-20 bg-white rounded-3xl p-8 md:p-12 shadow-sm border border-slate-200">
+          <div className="mt-20 bg-white dark:bg-slate-800 rounded-3xl p-8 md:p-12 shadow-sm border border-slate-200 dark:border-slate-700">
             <div className="max-w-3xl">
-              <h2 className="text-3xl font-bold text-slate-900 mb-6">Our Commitment to Massachusetts</h2>
-              <p className="text-lg text-slate-600 mb-8 leading-relaxed">
+              <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-6">Our Commitment to Massachusetts</h2>
+              <p className="text-lg text-slate-600 dark:text-slate-300 mb-8 leading-relaxed">
                 MassPension.com is a private research entity focused on bridging the gap between "official state statutes" and "actionable user experience." We believe that transparency is the ultimate service.
               </p>
               <Link
@@ -127,9 +127,9 @@ export default function AboutPage() {
           </div>
 
           {/* Disclaimer Section */}
-          <div className="mt-20 p-8 md:p-12 rounded-3xl bg-slate-100 border border-slate-200 text-center">
-            <h4 className="text-slate-900 font-bold mb-4 uppercase tracking-widest text-xs">Official Disclosure</h4>
-            <p className="text-slate-500 text-sm max-w-4xl mx-auto leading-relaxed">
+          <div className="mt-20 p-8 md:p-12 rounded-3xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-center">
+            <h4 className="text-slate-900 dark:text-slate-200 font-bold mb-4 uppercase tracking-widest text-xs">Official Disclosure</h4>
+            <p className="text-slate-500 dark:text-slate-400 text-sm max-w-4xl mx-auto leading-relaxed">
               MassPension.com is a private, third-party research and educational platform. We are NOT affiliated with, endorsed by, or representing the Massachusetts State Retirement Board (MSRB), the Massachusetts Teachers' Retirement System (MTRS), PERAC, or any government agency. All calculators provide estimates based on current publicly available statutes and are for planning purposes only.
             </p>
           </div>

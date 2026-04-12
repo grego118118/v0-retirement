@@ -49,16 +49,16 @@ export default function TaxBombPage() {
                         {/* Left Column: Copy/Strategy */}
                         <div className="space-y-8 order-2 lg:order-1">
                             <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 md:p-10 shadow-sm border border-slate-200 dark:border-slate-700">
-                                <h3 className="text-2xl font-bold text-mrs-navy-900 mb-6 italic">"The Stealth Tax Shift"</h3>
-                                <p className="text-slate-600 leading-relaxed mb-8">
+                                <h3 className="text-2xl font-bold text-mrs-navy-900 dark:text-white mb-6 italic">"The Stealth Tax Shift"</h3>
+                                <p className="text-slate-600 dark:text-slate-300 leading-relaxed mb-8">
                                     Under current IRS rules, if your income exceeds certain thresholds, your Social Security benefits are no longer "tax-free."
                                     By receiving the benefits you earned, you might inadvertently push yourself into a higher tax bracket.
                                 </p>
 
                                 <div className="p-8 rounded-3xl bg-blue-50 border border-blue-100 relative mb-8">
                                     <Zap className="text-blue-600 absolute -top-4 -left-4" size={40} />
-                                    <h4 className="text-mrs-navy-900 font-bold mb-4">The SMART Plan Reflector</h4>
-                                    <p className="text-slate-600 text-sm leading-relaxed mb-6">
+                                    <h4 className="text-mrs-navy-900 dark:text-white font-bold mb-4">The SMART Plan Reflector</h4>
+                                    <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed mb-6">
                                         Massachusetts state and local employees have a unique weapon: the <strong>Section 457(b) SMART Plan</strong>.
                                         Unlike a 401(k), the SMART plan has higher catch-up limits and allows you to "defer" your SS windfall directly into a pre-tax account.
                                     </p>
@@ -73,8 +73,8 @@ export default function TaxBombPage() {
                                             <Landmark className="w-5 h-5 text-blue-600" />
                                         </div>
                                         <div>
-                                            <h4 className="font-bold text-mrs-navy-900 text-sm mb-1">IRS Form 1040-SR</h4>
-                                            <p className="text-xs text-slate-500">Planning for the senior-specific tax return.</p>
+                                            <h4 className="font-bold text-mrs-navy-900 dark:text-white text-sm mb-1">IRS Form 1040-SR</h4>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400">Planning for the senior-specific tax return.</p>
                                         </div>
                                     </div>
                                     <div className="flex gap-4">
@@ -82,8 +82,8 @@ export default function TaxBombPage() {
                                             <ShieldAlert className="w-5 h-5 text-red-600" />
                                         </div>
                                         <div>
-                                            <h4 className="font-bold text-mrs-navy-900 text-sm mb-1">Bracket Creep</h4>
-                                            <p className="text-xs text-slate-500">Avoiding the 22% and 24% tax cliffs.</p>
+                                            <h4 className="font-bold text-mrs-navy-900 dark:text-white text-sm mb-1">Bracket Creep</h4>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400">Avoiding the 22% and 24% tax cliffs.</p>
                                         </div>
                                     </div>
                                 </div>

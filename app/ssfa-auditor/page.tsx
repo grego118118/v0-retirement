@@ -52,8 +52,8 @@ export default function SSFAAuditorPage() {
                         {/* Info/Copy Column */}
                         <div className="order-1 lg:order-2 space-y-8">
                             <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 md:p-10 shadow-sm border border-slate-200 dark:border-slate-700">
-                                <h3 className="text-2xl font-bold text-mrs-navy-900 mb-6">Why an Audit is Necessary</h3>
-                                <p className="text-slate-600 leading-relaxed mb-8">
+                                <h3 className="text-2xl font-bold text-mrs-navy-900 dark:text-white mb-6">Why an Audit is Necessary</h3>
+                                <p className="text-slate-600 dark:text-slate-300 leading-relaxed mb-8">
                                     The Social Security Administration processes millions of adjustments. Historically, "manual computation" cases (like retroactive WEP/GPO repeals) take 12-18 months to normalize.
                                     <strong className="text-blue-700"> Our audit tool helps you verify the exact lump-sum check you should expect.</strong>
                                 </p>
@@ -64,8 +64,8 @@ export default function SSFAAuditorPage() {
                                             <CheckCircle className="w-5 h-5 text-blue-600" />
                                         </div>
                                         <div>
-                                            <h4 className="font-bold text-mrs-navy-900 mb-1">2024 Retroactivity</h4>
-                                            <p className="text-sm text-slate-500">The law covers the full 2024 calendar year, providing a substantial retroactive payment for those already retired.</p>
+                                            <h4 className="font-bold text-mrs-navy-900 dark:text-white mb-1">2024 Retroactivity</h4>
+                                            <p className="text-sm text-slate-500 dark:text-slate-400">The law covers the full 2024 calendar year, providing a substantial retroactive payment for those already retired.</p>
                                         </div>
                                     </div>
 
@@ -74,8 +74,8 @@ export default function SSFAAuditorPage() {
                                             <TrendingUp className="w-5 h-5 text-green-600" />
                                         </div>
                                         <div>
-                                            <h4 className="font-bold text-mrs-navy-900 mb-1">Immediate Increase</h4>
-                                            <p className="text-sm text-slate-500">Stop the monthly "penalties" on your next check and see your permanent benefit increase reflected instantly.</p>
+                                            <h4 className="font-bold text-mrs-navy-900 dark:text-white mb-1">Immediate Increase</h4>
+                                            <p className="text-sm text-slate-500 dark:text-slate-400">Stop the monthly "penalties" on your next check and see your permanent benefit increase reflected instantly.</p>
                                         </div>
                                     </div>
 
@@ -84,8 +84,8 @@ export default function SSFAAuditorPage() {
                                             <Shield className="w-5 h-5 text-purple-600" />
                                         </div>
                                         <div>
-                                            <h4 className="font-bold text-mrs-navy-900 mb-1">Survivor Benefit Reset</h4>
-                                            <p className="text-sm text-slate-500">GPO repeal specifically targets widow/widower benefits, restoring dignity and financial security.</p>
+                                            <h4 className="font-bold text-mrs-navy-900 dark:text-white mb-1">Survivor Benefit Reset</h4>
+                                            <p className="text-sm text-slate-500 dark:text-slate-400">GPO repeal specifically targets widow/widower benefits, restoring dignity and financial security.</p>
                                         </div>
                                     </div>
                                 </div>

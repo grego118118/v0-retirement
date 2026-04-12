@@ -79,15 +79,15 @@ export default function CalculatorPage() {
 
           {/* Group-Specific Calculators for SEO */}
           <div className="mt-16 border-t border-slate-200 pt-12">
-            <h2 className="text-3xl font-heading font-bold mb-6 text-center text-mrs-navy-900">Calculate by Retirement Group</h2>
-            <p className="text-center text-slate-600 mb-10 max-w-2xl mx-auto">Get group-specific information and optimized calculations for your specific classification</p>
+            <h2 className="text-3xl font-heading font-bold mb-6 text-center text-mrs-navy-900 dark:text-white">Calculate by Retirement Group</h2>
+            <p className="text-center text-slate-600 dark:text-slate-300 mb-10 max-w-2xl mx-auto">Get group-specific information and optimized calculations for your specific classification</p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               <Link href="/calculator/group-1" className="group" title="Group 1 Pension Calculator - General Employees">
                 <Card className="h-full hover:shadow-xl transition-all hover:border-mrs-gold-400 hover:-translate-y-1 border-slate-200 bg-white">
                   <CardContent className="pt-8 text-center">
                     <div className="w-14 h-14 rounded-full bg-slate-100 text-mrs-navy-900 flex items-center justify-center mx-auto mb-4 font-bold text-xl border border-slate-200 group-hover:bg-mrs-gold-500 group-hover:text-white transition-colors">1</div>
-                    <p className="text-lg font-bold text-mrs-navy-900 mb-1">Group 1</p>
-                    <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">Teachers, General</p>
+                    <p className="text-lg font-bold text-mrs-navy-900 dark:text-white mb-1">Group 1</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wide">Teachers, General</p>
                   </CardContent>
                 </Card>
               </Link>
@@ -95,8 +95,8 @@ export default function CalculatorPage() {
                 <Card className="h-full hover:shadow-xl transition-all hover:border-mrs-gold-400 hover:-translate-y-1 border-slate-200 bg-white">
                   <CardContent className="pt-8 text-center">
                     <div className="w-14 h-14 rounded-full bg-slate-100 text-mrs-navy-900 flex items-center justify-center mx-auto mb-4 font-bold text-xl border border-slate-200 group-hover:bg-mrs-gold-500 group-hover:text-white transition-colors">2</div>
-                    <p className="text-lg font-bold text-mrs-navy-900 mb-1">Group 2</p>
-                    <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">Probation, Court</p>
+                    <p className="text-lg font-bold text-mrs-navy-900 dark:text-white mb-1">Group 2</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wide">Probation, Court</p>
                   </CardContent>
                 </Card>
               </Link>
@@ -104,8 +104,8 @@ export default function CalculatorPage() {
                 <Card className="h-full hover:shadow-xl transition-all hover:border-mrs-gold-400 hover:-translate-y-1 border-slate-200 bg-white">
                   <CardContent className="pt-8 text-center">
                     <div className="w-14 h-14 rounded-full bg-slate-100 text-mrs-navy-900 flex items-center justify-center mx-auto mb-4 font-bold text-xl border border-slate-200 group-hover:bg-mrs-gold-500 group-hover:text-white transition-colors">3</div>
-                    <p className="text-lg font-bold text-mrs-navy-900 mb-1">Group 3</p>
-                    <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">State Police</p>
+                    <p className="text-lg font-bold text-mrs-navy-900 dark:text-white mb-1">Group 3</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wide">State Police</p>
                   </CardContent>
                 </Card>
               </Link>
@@ -113,8 +113,8 @@ export default function CalculatorPage() {
                 <Card className="h-full hover:shadow-xl transition-all hover:border-mrs-gold-400 hover:-translate-y-1 border-slate-200 bg-white">
                   <CardContent className="pt-8 text-center">
                     <div className="w-14 h-14 rounded-full bg-slate-100 text-mrs-navy-900 flex items-center justify-center mx-auto mb-4 font-bold text-xl border border-slate-200 group-hover:bg-mrs-gold-500 group-hover:text-white transition-colors">4</div>
-                    <p className="text-lg font-bold text-mrs-navy-900 mb-1">Group 4</p>
-                    <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">Police, Fire</p>
+                    <p className="text-lg font-bold text-mrs-navy-900 dark:text-white mb-1">Group 4</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wide">Police, Fire</p>
                   </CardContent>
                 </Card>
               </Link>
