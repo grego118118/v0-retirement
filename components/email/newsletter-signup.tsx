@@ -11,9 +11,10 @@ import { toast } from "sonner"
 interface NewsletterSignupProps {
   variant?: "default" | "compact" | "inline"
   className?: string
+  dark?: boolean
 }
 
-export function NewsletterSignup({ variant = "default", className = "" }: NewsletterSignupProps) {
+export function NewsletterSignup({ variant = "default", className = "", dark = false }: NewsletterSignupProps) {
   const [email, setEmail] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [isSubscribed, setIsSubscribed] = useState(false)
@@ -123,8 +124,8 @@ export function NewsletterSignup({ variant = "default", className = "" }: Newsle
         <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
           <Mail className="h-6 w-6 text-blue-600" />
         </div>
-        <CardTitle className="text-xl">Stay Informed</CardTitle>
-        <CardDescription>
+        <CardTitle className={`text-xl ${dark ? "text-white" : ""}`}>Stay Informed</CardTitle>
+        <CardDescription className={dark ? "text-blue-100" : ""}>
           Get the latest Massachusetts retirement planning tips, COLA updates, and calculator enhancements delivered to your inbox.
         </CardDescription>
       </CardHeader>
@@ -138,6 +139,7 @@ export function NewsletterSignup({ variant = "default", className = "" }: Newsle
               onChange={(e) => setEmail(e.target.value)}
               disabled={isLoading}
               required
+              className={dark ? "bg-white/90 border-white/20 text-gray-900 placeholder:text-gray-500" : ""}
               suppressHydrationWarning
             />
           </div>
@@ -147,28 +149,28 @@ export function NewsletterSignup({ variant = "default", className = "" }: Newsle
         </form>
 
         <div className="mt-4 space-y-2">
-          <p className="text-xs text-gray-500 text-center">
+          <p className={`text-xs text-center ${dark ? "text-blue-200" : "text-gray-500"}`}>
             What you'll receive:
           </p>
-          <ul className="text-xs text-gray-600 space-y-1">
+          <ul className={`text-xs space-y-1 ${dark ? "text-blue-100" : "text-gray-600"}`}>
             <li className="flex items-center gap-2">
-              <CheckCircle className="h-3 w-3 text-green-600" />
+              <CheckCircle className={`h-3 w-3 ${dark ? "text-mrs-gold-400" : "text-green-600"}`} />
               Monthly retirement planning tips
             </li>
             <li className="flex items-center gap-2">
-              <CheckCircle className="h-3 w-3 text-green-600" />
+              <CheckCircle className={`h-3 w-3 ${dark ? "text-mrs-gold-400" : "text-green-600"}`} />
               Massachusetts COLA and benefit updates
             </li>
             <li className="flex items-center gap-2">
-              <CheckCircle className="h-3 w-3 text-green-600" />
+              <CheckCircle className={`h-3 w-3 ${dark ? "text-mrs-gold-400" : "text-green-600"}`} />
               New calculator features and improvements
             </li>
             <li className="flex items-center gap-2">
-              <CheckCircle className="h-3 w-3 text-green-600" />
+              <CheckCircle className={`h-3 w-3 ${dark ? "text-mrs-gold-400" : "text-green-600"}`} />
               Exclusive retirement planning resources
             </li>
           </ul>
-          <p className="text-xs text-gray-500 text-center mt-2">
+          <p className={`text-xs text-center mt-2 ${dark ? "text-blue-300/70" : "text-gray-500"}`}>
             No spam. Unsubscribe anytime.
           </p>
         </div>
