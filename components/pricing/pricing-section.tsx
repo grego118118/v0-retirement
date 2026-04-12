@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Check, X, Crown, Loader2, Star } from "lucide-react"
+import { Check, X, Crown, Loader2, Star, Shield, Lock, Award } from "lucide-react"
 import Link from "next/link"
 import { SUBSCRIPTION_PLANS } from "@/lib/stripe/config"
 
@@ -117,10 +117,10 @@ export function PricingSection() {
     <section className="py-12">
       <div className="container lg:px-0">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 dark:text-white mb-4">
             Choose Your Retirement Planning Level
           </h2>
-          <p className="text-slate-600 text-lg max-w-2xl mx-auto">
+          <p className="text-slate-600 dark:text-slate-300 text-lg max-w-2xl mx-auto">
             Start with our free calculator or unlock advanced features to optimize your Massachusetts state pension
           </p>
         </div>
@@ -140,7 +140,7 @@ export function PricingSection() {
 
         <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
           {/* Free Plan */}
-          <Card className="relative bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow flex flex-col">
+          <Card className="relative bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow flex flex-col">
             <CardHeader className="text-center pb-6 border-b border-slate-50">
               <CardTitle className="text-2xl font-bold text-slate-900">Free Calculator</CardTitle>
               <CardDescription className="text-slate-500">Perfect for basic pension planning</CardDescription>
@@ -178,17 +178,17 @@ export function PricingSection() {
           </Card>
 
           {/* Monthly Premium Plan */}
-          <Card className="relative bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow flex flex-col overflow-hidden">
-            <div className="absolute top-0 inset-x-0 h-1 bg-blue-600"></div>
+          <Card className="relative bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow flex flex-col overflow-hidden">
+            <div className="absolute top-0 inset-x-0 h-1 bg-mrs-navy-800"></div>
             <CardHeader className="text-center pb-6 border-b border-slate-50">
-              <CardTitle className="text-2xl font-bold text-slate-900 flex items-center justify-center gap-2">
-                <Crown className="h-5 w-5 text-blue-600" />
+              <CardTitle className="text-2xl font-heading font-bold text-mrs-navy-900 flex items-center justify-center gap-2">
+                <Crown className="h-5 w-5 text-mrs-navy-700" />
                 Premium Monthly
               </CardTitle>
               <CardDescription className="text-slate-500">Full access to all features</CardDescription>
-              <div className="text-5xl font-bold text-slate-900 mt-6">
+              <div className="text-5xl font-heading font-bold text-mrs-navy-900 mt-6">
                 ${SUBSCRIPTION_PLANS.monthly.price}
-                <span className="text-lg font-normal text-slate-400 ml-1">/mo</span>
+                <span className="text-lg font-sans font-normal text-slate-400 ml-1">/mo</span>
               </div>
               <div className="text-slate-400 text-sm mt-1 uppercase tracking-widest font-bold">Billed monthly</div>
             </CardHeader>
@@ -196,7 +196,7 @@ export function PricingSection() {
               <div className="space-y-4">
                 {features.premium.slice(0, 8).map((feature, index) => (
                   <div key={index} className="flex items-center gap-3">
-                    <Check className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                    <Check className="h-5 w-5 text-mrs-blue-600 flex-shrink-0" />
                     <span className="text-sm text-slate-600 font-medium">{feature}</span>
                   </div>
                 ))}
@@ -207,7 +207,7 @@ export function PricingSection() {
             </CardContent>
             <div className="p-6 pt-0">
               <Button
-                className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-lg shadow-blue-600/20"
+                className="w-full h-12 bg-mrs-navy-800 hover:bg-mrs-navy-900 text-white font-bold shadow-lg shadow-mrs-navy-900/10"
                 onClick={() => handleUpgrade('monthly')}
                 disabled={checkoutLoading === 'monthly' || subscriptionData?.isPremium}
               >
@@ -229,23 +229,23 @@ export function PricingSection() {
           </Card>
 
           {/* Annual Premium Plan */}
-          <Card className="relative bg-white border-blue-200 shadow-xl flex flex-col overflow-hidden ring-2 ring-blue-600/10">
-            <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-blue-600 to-indigo-700"></div>
-            <Badge className="absolute top-4 right-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-bold border-none shadow-sm">
+          <Card className="relative bg-white dark:bg-slate-800 border-mrs-gold-400/30 shadow-xl flex flex-col overflow-hidden ring-2 ring-mrs-gold-400/20 scale-[1.02] hover:scale-[1.04] transition-transform duration-200">
+            <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-mrs-gold-500 to-mrs-gold-600"></div>
+            <Badge className="absolute top-4 right-4 bg-gradient-to-r from-mrs-gold-400 to-mrs-gold-600 text-white font-bold border-none shadow-sm">
               <Star className="mr-1 h-3 w-3 fill-current" />
               BEST VALUE
             </Badge>
             <CardHeader className="text-center pb-6 border-b border-slate-50 pt-10">
-              <CardTitle className="text-2xl font-bold text-slate-900 flex items-center justify-center gap-2">
-                <Crown className="h-5 w-5 text-indigo-600" />
+              <CardTitle className="text-2xl font-heading font-bold text-mrs-navy-900 flex items-center justify-center gap-2">
+                <Crown className="h-5 w-5 text-mrs-gold-600" />
                 Premium Annual
               </CardTitle>
               <CardDescription className="text-slate-500">Save 17% with annual billing</CardDescription>
-              <div className="text-5xl font-bold text-slate-900 mt-6">
+              <div className="text-5xl font-heading font-bold text-mrs-navy-900 mt-6">
                 ${SUBSCRIPTION_PLANS.annual.price}
-                <span className="text-lg font-normal text-slate-400 ml-1">/yr</span>
+                <span className="text-lg font-sans font-normal text-slate-400 ml-1">/yr</span>
               </div>
-              <div className="text-green-600 font-bold text-sm mt-2 flex items-center justify-center gap-1 bg-green-50 py-1 px-3 rounded-full w-fit mx-auto">
+              <div className="text-mrs-gold-600 font-bold text-sm mt-2 flex items-center justify-center gap-1 bg-mrs-gold-50 py-1 px-3 rounded-full w-fit mx-auto border border-mrs-gold-200">
                 <Check className="w-3 h-3" />
                 {SUBSCRIPTION_PLANS.annual.savings}
               </div>
@@ -254,7 +254,7 @@ export function PricingSection() {
               <div className="space-y-4">
                 {features.premium.map((feature, index) => (
                   <div key={index} className="flex items-center gap-3">
-                    <Check className="h-5 w-5 text-indigo-600 flex-shrink-0" />
+                    <Check className="h-5 w-5 text-mrs-gold-600 flex-shrink-0" />
                     <span className="text-sm text-slate-600 font-medium">{feature}</span>
                   </div>
                 ))}
@@ -262,7 +262,7 @@ export function PricingSection() {
             </CardContent>
             <div className="p-6 pt-0">
               <Button
-                className="w-full h-12 bg-gradient-to-r from-blue-600 to-indigo-700 hover:opacity-90 text-white font-bold shadow-lg shadow-blue-600/30"
+                className="w-full h-12 bg-gradient-to-r from-mrs-gold-500 to-mrs-gold-600 hover:from-mrs-gold-400 hover:to-mrs-gold-500 text-white font-bold shadow-lg shadow-mrs-gold-600/20"
                 onClick={() => handleUpgrade('annual')}
                 disabled={checkoutLoading === 'annual' || subscriptionData?.isPremium}
               >
@@ -282,6 +282,26 @@ export function PricingSection() {
               </p>
             </div>
           </Card>
+        </div>
+
+        {/* Trust Badges */}
+        <div className="flex flex-wrap items-center justify-center gap-6 mt-12 text-sm text-slate-500">
+          <div className="flex items-center gap-2">
+            <Shield className="h-4 w-4 text-green-600" />
+            <span>Bank-Level Security</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Lock className="h-4 w-4 text-blue-600" />
+            <span>No Data Stored</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Award className="h-4 w-4 text-mrs-gold-600" />
+            <span>MSRB-Accurate Formulas</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Check className="h-4 w-4 text-green-600" />
+            <span>Cancel Anytime</span>
+          </div>
         </div>
 
         {/* Enterprise Section */}

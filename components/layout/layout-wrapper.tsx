@@ -3,6 +3,8 @@
 import { usePathname } from "next/navigation"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
+import { BackToTop } from "@/components/ui/back-to-top"
+import { MobileCTA } from "@/components/layout/mobile-cta"
 
 interface LayoutWrapperProps {
   children: React.ReactNode
@@ -31,6 +33,8 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
       <Header />
       <main className="flex-1">{children}</main>
       <Footer />
+      <BackToTop />
+      <MobileCTA />
     </div>
   )
 }

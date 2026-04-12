@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
+import { Breadcrumbs } from "@/components/seo/breadcrumbs";
 
 
 export const metadata = {
@@ -16,23 +17,23 @@ export default function AboutPage() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section - Matching Site Standard */}
-      <section className="bg-gradient-to-br from-blue-600 via-indigo-700 to-purple-800 text-white py-16 md:py-24 relative overflow-hidden">
+      <section className="bg-mrs-navy-900 text-white py-16 md:py-24 relative overflow-hidden">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="container mrs-page-wrapper relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
-              <Badge className="bg-blue-500/20 text-blue-100 border-blue-400/30">
+              <Badge className="bg-mrs-gold-500/20 text-mrs-gold-100 border-mrs-gold-400/30 font-heading">
                 <User className="w-3 h-3 mr-1" />
                 Mission & Purpose
               </Badge>
-              <h1 className="text-4xl md:text-6xl font-bold tracking-tight leading-tight">
-                Bringing <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-400">Clarity</span> to the Commonwealth.
+              <h1 className="text-4xl md:text-6xl font-heading font-bold tracking-tight leading-tight">
+                Bringing <span className="text-transparent bg-clip-text bg-gradient-to-r from-mrs-gold-300 to-mrs-gold-500">Clarity</span> to the Commonwealth.
               </h1>
-              <p className="text-xl md:text-2xl text-blue-100 leading-relaxed max-w-xl">
+              <p className="text-xl md:text-2xl text-blue-100 leading-relaxed max-w-xl font-sans">
                 MassPension.com was born out of a simple observation: Massachusetts public employees often have the most complex benefits but the least modern tools to manage them.
               </p>
               <div className="pt-4">
-                <Button size="lg" className="bg-white text-blue-700 hover:bg-blue-50 font-bold rounded-xl" asChild>
+                <Button size="lg" className="bg-white text-mrs-navy-900 hover:bg-slate-100 font-bold rounded-xl" asChild>
                   <a href="mailto:hello@masspension.com">
                     <Mail className="mr-2 h-5 w-5" />
                     Contact Research Team
@@ -52,8 +53,8 @@ export default function AboutPage() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
                 <div className="absolute bottom-8 left-8 right-8">
-                  <p className="text-white font-bold text-2xl mb-2">Developed in Western MA</p>
-                  <p className="text-blue-100/90 text-sm italic leading-relaxed">
+                  <p className="text-white font-bold text-2xl mb-2 font-heading">Developed in Western MA</p>
+                  <p className="text-blue-100/90 text-sm italic leading-relaxed font-sans">
                     "Built by technologists in the Pioneer Valley, for the retirees who built our communities."
                   </p>
                 </div>
@@ -65,15 +66,19 @@ export default function AboutPage() {
       </section>
 
       {/* Main Content Sections */}
-      <main className="flex-1 bg-slate-50 py-12 md:py-20">
+      <main className="flex-1 bg-slate-50 dark:bg-slate-900 py-12 md:py-20">
         <div className="container mrs-page-wrapper">
+          <Breadcrumbs
+            items={[{ label: "About" }]}
+            className="mb-8"
+          />
           {/* Trust Ticker */}
           <div className="mb-20">
             <TrustShield />
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-white p-8 md:p-10 rounded-3xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+            <div className="bg-white dark:bg-slate-800 p-8 md:p-10 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 hover:shadow-md transition-shadow">
               <div className="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center mb-6">
                 <Landmark className="text-blue-600" size={24} />
               </div>
@@ -83,7 +88,7 @@ export default function AboutPage() {
               </p>
             </div>
 
-            <div className="bg-white p-8 md:p-10 rounded-3xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+            <div className="bg-white dark:bg-slate-800 p-8 md:p-10 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 hover:shadow-md transition-shadow">
               <div className="w-12 h-12 rounded-2xl bg-indigo-100 flex items-center justify-center mb-6">
                 <Cpu className="text-indigo-600" size={24} />
               </div>
@@ -93,7 +98,7 @@ export default function AboutPage() {
               </p>
             </div>
 
-            <div className="bg-white p-8 md:p-10 rounded-3xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+            <div className="bg-white dark:bg-slate-800 p-8 md:p-10 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 hover:shadow-md transition-shadow">
               <div className="w-12 h-12 rounded-2xl bg-green-100 flex items-center justify-center mb-6">
                 <ShieldCheck className="text-green-600" size={24} />
               </div>

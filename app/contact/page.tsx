@@ -2,6 +2,7 @@ import { Metadata } from "next"
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Mail, Clock, MapPin, MessageSquare, HelpCircle, AlertCircle, CheckCircle } from "lucide-react"
+import { Breadcrumbs } from "@/components/seo/breadcrumbs"
 
 export const metadata: Metadata = {
   title: "Contact Support | Massachusetts Retirement System",
@@ -17,20 +18,26 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-100">
-      <div className="container mx-auto px-4 py-12 max-w-4xl">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <div className="flex justify-center mb-4">
-            <div className="p-3 bg-orange-600 rounded-full">
-              <Mail className="h-8 w-8 text-white" />
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+      <div className="bg-mrs-navy-900 pb-24 pt-16">
+        <div className="container mx-auto px-4 max-w-4xl text-center">
+          <div className="flex justify-center mb-6">
+            <div className="p-4 bg-mrs-navy-800 rounded-full border border-mrs-navy-700 shadow-lg">
+              <Mail className="h-8 w-8 text-mrs-gold-400" />
             </div>
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Contact Support</h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <h1 className="text-4xl font-heading font-bold text-white mb-4">Contact Support</h1>
+          <p className="text-xl text-slate-300 max-w-2xl mx-auto font-sans">
             We're here to help with your retirement planning questions and technical support needs.
           </p>
         </div>
+      </div>
+
+      <div className="container mx-auto px-4 py-8 max-w-4xl -mt-16">
+        <Breadcrumbs
+          items={[{ label: "Contact" }]}
+          className="mb-6"
+        />
 
         {/* Response Time Expectations */}
         <Card className="mb-8 bg-blue-50 border-blue-200">

@@ -11,6 +11,7 @@ import { Crown, Calculator, Users, Building, FileText, Download } from "lucide-r
 import Link from "next/link"
 import { ResponsiveAd, PremiumAlternative } from "@/components/ads/adsense"
 import { AutoAds, SmartAds } from "@/components/ads/auto-ads"
+import { Breadcrumbs } from "@/components/seo/breadcrumbs"
 
 // Feature-specific messaging
 const featureMessages = {
@@ -58,7 +59,7 @@ function PricingPageContent() {
 
     <div className="flex flex-col min-h-screen whitespace-normal">
       {/* Hero Section - Matching Site Standard */}
-      <section className="bg-gradient-to-br from-blue-600 via-indigo-700 to-purple-800 text-white py-16 md:py-24 relative overflow-hidden">
+      <section className="bg-mrs-navy-900 text-white py-16 md:py-24 relative overflow-hidden">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="container mrs-page-wrapper relative z-10">
           <div className="max-w-4xl mx-auto text-center">
@@ -76,8 +77,12 @@ function PricingPageContent() {
         </div>
       </section>
 
-      <main className="flex-1 bg-slate-50 py-12 md:py-20">
+      <main className="flex-1 bg-slate-50 dark:bg-slate-900 py-12 md:py-20">
         <div className="container mrs-page-wrapper">
+          <Breadcrumbs
+            items={[{ label: "Pricing" }]}
+            className="mb-8"
+          />
           {/* Feature-specific highlight banner */}
           {featureConfig.highlight && (
             <div className="mb-12 p-6 bg-amber-50 border border-amber-200 rounded-2xl text-center shadow-sm">
@@ -298,7 +303,7 @@ function PricingPageContent() {
 export default function PricingPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-muted-foreground">Loading pricing information...</p>

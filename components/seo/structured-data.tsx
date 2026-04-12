@@ -301,6 +301,41 @@ export function HowToStructuredData({ title, description, steps }: HowToStructur
   )
 }
 
+export function LocalBusinessStructuredData() {
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "ProfessionalService",
+    "name": "MassPension.com",
+    "description": "Massachusetts state employee pension calculator and retirement planning platform using official MSRB formulas.",
+    "url": "https://www.masspension.com",
+    "areaServed": {
+      "@type": "State",
+      "name": "Massachusetts",
+      "sameAs": "https://en.wikipedia.org/wiki/Massachusetts"
+    },
+    "serviceType": ["Pension Calculator", "Retirement Planning", "Social Security Optimization"],
+    "audience": {
+      "@type": "Audience",
+      "audienceType": "Massachusetts State Employees"
+    },
+    "knowsAbout": [
+      "Massachusetts State Retirement Board",
+      "MSRB pension calculations",
+      "Social Security Fairness Act",
+      "WEP and GPO elimination",
+      "Massachusetts COLA adjustments"
+    ],
+    "priceRange": "Free - $69.99/year"
+  }
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+    />
+  )
+}
+
 // Pre-defined FAQ data for common retirement questions
 export const RETIREMENT_FAQS = [
   {

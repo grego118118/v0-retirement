@@ -23,6 +23,8 @@ export const metadata: Metadata = generateSEOMetadata({
   ],
 })
 
+export const revalidate = 3600 // Revalidate every hour for content freshness
+
 export default function BlogPage() {
   return (
     <>

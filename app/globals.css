@@ -31,7 +31,8 @@ html {
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 238 100% 67%;
+    --primary: 215 28% 17%;
+    /* Navy #1e293b equivalent roughly */
     --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -40,8 +41,9 @@ html {
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 43 74% 49%;
+    /* Muted Gold #d4af37 roughly HSL */
+    --accent-foreground: 210 40% 98%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
@@ -52,20 +54,21 @@ html {
 
     --radius: 0.5rem;
 
-    /* Massachusetts Retirement System Design Variables */
-    --mrs-gradient-primary: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-    --mrs-gradient-hero: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+    /* Massachusetts Retirement System Design Variables - Financial Trust Theme */
+    --mrs-gradient-primary: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+    --mrs-gradient-hero: linear-gradient(135deg, #0a1628 0%, #0f172a 50%, #1e3a8a 100%);
     --mrs-gradient-surface: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-    --mrs-gradient-accent: linear-gradient(135deg, #059669 0%, #10b981 100%);
-    --mrs-gradient-gold: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+    --mrs-gradient-accent: linear-gradient(135deg, #d4af37 0%, #ca8a04 100%);
+    --mrs-gradient-gold: linear-gradient(135deg, #d4af37 0%, #ca8a04 100%);
 
-    /* Massachusetts Colors */
-    --mrs-navy-200: #bfdbfe;
-    --mrs-navy-600: #1e3a8a;
-    --mrs-blue-600: #1e40af;
-    --mrs-green-600: #059669;
-    --mrs-purple-600: #7c3aed;
-    --mrs-gold-500: #f59e0b;
+    /* Massachusetts Colors - Refined for Trust */
+    --mrs-navy-900: #0f172a;
+    --mrs-navy-800: #1e293b;
+    --mrs-navy-700: #334155;
+    --mrs-blue-600: #0369a1;
+    --mrs-gold-600: #ca8a04;
+    --mrs-gold-500: #d4af37;
+    --mrs-gold-400: #facc15;
 
     /* Glass Effect and Surfaces */
     --mrs-glass: rgba(255, 255, 255, 0.95);
@@ -102,6 +105,20 @@ html {
     --ring: 238 100% 67%;
 
     /* Massachusetts Retirement System Dark Mode Overrides */
+    --mrs-gradient-primary: linear-gradient(135deg, #020817 0%, #1e3a8a 100%);
+    --mrs-gradient-hero: linear-gradient(135deg, #020817 0%, #0f172a 50%, #1e3a8a 100%);
+    --mrs-gradient-surface: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    --mrs-gradient-accent: linear-gradient(135deg, #d4af37 0%, #ca8a04 100%);
+    --mrs-gradient-gold: linear-gradient(135deg, #d4af37 0%, #ca8a04 100%);
+
+    --mrs-navy-900: #020817;
+    --mrs-navy-800: #0f172a;
+    --mrs-navy-700: #1e293b;
+    --mrs-blue-600: #38bdf8;
+    --mrs-gold-600: #eab308;
+    --mrs-gold-500: #d4af37;
+    --mrs-gold-400: #fbbf24;
+
     --mrs-glass: rgba(2, 8, 23, 0.95);
     --mrs-glass-border: rgba(255, 255, 255, 0.1);
   }
@@ -111,6 +128,7 @@ html {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -126,9 +144,11 @@ html {
   0% {
     transform: translateY(0px);
   }
+
   50% {
     transform: translateY(-10px);
   }
+
   100% {
     transform: translateY(0px);
   }
@@ -140,10 +160,13 @@ html {
 
 /* Subtle pulsating glow animation for CTA buttons */
 @keyframes pulse-glow {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4);
     transform: scale(1);
   }
+
   50% {
     box-shadow: 0 0 20px 4px rgba(99, 102, 241, 0.3);
     transform: scale(1.02);
@@ -214,9 +237,11 @@ input[type="number"]::-webkit-outer-spin-button {
   h1 {
     @apply text-2xl;
   }
+
   h2 {
     @apply text-xl;
   }
+
   h3 {
     @apply text-lg;
   }
@@ -227,21 +252,27 @@ input[type="number"]::-webkit-outer-spin-button {
   .dashboard-title {
     @apply text-4xl font-bold;
   }
+
   .dashboard-subtitle {
     @apply text-base;
   }
+
   .card-title {
     @apply text-xl font-semibold;
   }
+
   .card-description {
     @apply text-sm;
   }
+
   .metric-value {
     @apply text-3xl font-bold;
   }
+
   .metric-label {
     @apply text-sm;
   }
+
   .button-text {
     @apply text-base;
   }
@@ -251,9 +282,11 @@ input[type="number"]::-webkit-outer-spin-button {
   .dashboard-title {
     @apply text-5xl font-bold;
   }
+
   .metric-value {
     @apply text-4xl font-bold;
   }
+
   .card-title {
     @apply text-2xl font-semibold;
   }
@@ -263,12 +296,15 @@ input[type="number"]::-webkit-outer-spin-button {
   .dashboard-title {
     @apply text-6xl font-bold;
   }
+
   .metric-value {
     @apply text-5xl font-bold;
   }
+
   .card-title {
     @apply text-3xl font-semibold;
   }
+
   .card-description {
     @apply text-base;
   }
@@ -282,6 +318,32 @@ a.no-underline {
 /* Prevent content jumping during navigation */
 .fixed-height-container {
   min-height: 100vh;
+}
+
+/* Micro-interaction Utility Classes */
+.mrs-card-hover {
+  @apply transition-all duration-200;
+}
+
+.mrs-card-hover:hover {
+  @apply shadow-lg -translate-y-1;
+}
+
+.mrs-btn-scale {
+  @apply transition-transform duration-150;
+}
+
+.mrs-btn-scale:hover {
+  transform: scale(1.02);
+}
+
+.mrs-btn-scale:active {
+  transform: scale(0.98);
+}
+
+/* Safe area padding for mobile sticky elements */
+.safe-area-pb {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 /* Massachusetts Retirement System Utility Classes */
@@ -344,6 +406,7 @@ a.no-underline {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -354,6 +417,7 @@ a.no-underline {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -369,10 +433,10 @@ a.no-underline {
   @apply max-w-7xl mx-auto;
 }
 
-/* Navigation Link Styles - Fixed Hover Issue */
+/* Navigation Link Styles - Fixed for Dark Header */
 .nav-link {
   @apply px-4 py-2 rounded-md font-medium transition-all duration-300 whitespace-nowrap;
-  @apply text-gray-700 dark:text-gray-200;
+  @apply text-slate-300;
   background: transparent;
   position: relative;
   z-index: 1;
@@ -380,7 +444,7 @@ a.no-underline {
 
 .nav-link:hover {
   @apply text-white shadow-md;
-  background: var(--mrs-gradient-primary) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
   transform: translateY(-1px);
   border-color: transparent !important;
   outline: none !important;
@@ -388,12 +452,12 @@ a.no-underline {
 
 .nav-link-active {
   @apply text-white shadow-md;
-  background: var(--mrs-gradient-primary) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
 }
 
 .nav-link-mobile {
   @apply px-3 py-2 rounded-md font-medium transition-all duration-300 whitespace-nowrap text-xs;
-  @apply text-gray-700 dark:text-gray-200;
+  @apply text-slate-300;
   background: transparent;
   position: relative;
   z-index: 1;
@@ -401,7 +465,7 @@ a.no-underline {
 
 .nav-link-mobile:hover {
   @apply text-white shadow-md;
-  background: var(--mrs-gradient-primary) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
   transform: translateY(-1px);
   border-color: transparent !important;
   outline: none !important;
