@@ -19,6 +19,10 @@ const config = {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ["var(--font-source-sans)", "sans-serif"],
+        heading: ["var(--font-lexend)", "sans-serif"],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -52,6 +56,22 @@ const config = {
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
+        },
+        // MRS Custom Colors - Using direct hex values for reliable production builds
+        mrs: {
+          navy: {
+            900: "#0f172a",
+            800: "#1e293b",
+            700: "#334155",
+          },
+          blue: {
+            600: "#0369a1",
+          },
+          gold: {
+            600: "#ca8a04",
+            500: "#d4af37",
+            400: "#facc15",
+          },
         },
       },
       borderRadius: {
