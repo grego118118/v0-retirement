@@ -25,32 +25,34 @@ html {
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
 
-    --card: 0 0% 100%;
+    /* Subtle off-white card — distinguishable from pure white background */
+    --card: 210 30% 98%;
     --card-foreground: 222.2 84% 4.9%;
 
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
+    /* Navy #1e293b */
     --primary: 215 28% 17%;
-    /* Navy #1e293b equivalent roughly */
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 210 30% 94%;
+    --secondary-foreground: 215 28% 17%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 210 30% 94%;
+    --muted-foreground: 215 16% 47%;
 
+    /* Gold accent — readable dark navy text on gold */
     --accent: 43 74% 49%;
-    /* Muted Gold #d4af37 roughly HSL */
-    --accent-foreground: 210 40% 98%;
+    --accent-foreground: 222 45% 10%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 238 100% 67%;
+    --border: 214 25% 89%;
+    --input: 214 25% 89%;
+    /* Gold focus ring — on-brand */
+    --ring: 43 74% 49%;
 
     --radius: 0.5rem;
 
@@ -76,51 +78,59 @@ html {
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* Deep rich navy — the base canvas */
+    --background: 222 47% 7%;
+    --foreground: 210 30% 93%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    /* Cards are visibly elevated above the background */
+    --card: 220 42% 12%;
+    --card-foreground: 210 30% 93%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    /* Popovers/dropdowns slightly lighter still */
+    --popover: 220 40% 14%;
+    --popover-foreground: 210 30% 93%;
 
-    --primary: 238 100% 67%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    /* GOLD as primary in dark mode — flagship brand color */
+    --primary: 43 72% 55%;
+    --primary-foreground: 222 45% 8%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    /* Dark navy secondary */
+    --secondary: 220 32% 18%;
+    --secondary-foreground: 210 25% 82%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 220 32% 15%;
+    --muted-foreground: 215 18% 62%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    /* Gold accent — consistent with primary */
+    --accent: 43 72% 55%;
+    --accent-foreground: 222 45% 8%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 40%;
+    --destructive-foreground: 210 30% 93%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 238 100% 67%;
+    /* Subtle navy border — visible but not distracting */
+    --border: 220 28% 21%;
+    --input: 220 35% 15%;
+    /* Gold focus ring */
+    --ring: 43 72% 55%;
 
     /* Massachusetts Retirement System Dark Mode Overrides */
-    --mrs-gradient-primary: linear-gradient(135deg, #020817 0%, #1e3a8a 100%);
-    --mrs-gradient-hero: linear-gradient(135deg, #020817 0%, #0f172a 50%, #1e3a8a 100%);
-    --mrs-gradient-surface: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    --mrs-gradient-primary: linear-gradient(135deg, #080f1f 0%, #132255 100%);
+    --mrs-gradient-hero: linear-gradient(135deg, #080f1f 0%, #0d1b38 50%, #132255 100%);
+    --mrs-gradient-surface: linear-gradient(135deg, #0d1b38 0%, #1a2d50 100%);
     --mrs-gradient-accent: linear-gradient(135deg, #d4af37 0%, #ca8a04 100%);
     --mrs-gradient-gold: linear-gradient(135deg, #d4af37 0%, #ca8a04 100%);
 
-    --mrs-navy-900: #020817;
-    --mrs-navy-800: #0f172a;
-    --mrs-navy-700: #1e293b;
-    --mrs-blue-600: #38bdf8;
-    --mrs-gold-600: #eab308;
-    --mrs-gold-500: #d4af37;
-    --mrs-gold-400: #fbbf24;
+    --mrs-navy-900: #080f1f;
+    --mrs-navy-800: #0d1b38;
+    --mrs-navy-700: #1a2d50;
+    --mrs-blue-600: #60a5fa;
+    --mrs-gold-600: #d4af37;
+    --mrs-gold-500: #e2c45a;
+    --mrs-gold-400: #f0d878;
 
-    --mrs-glass: rgba(2, 8, 23, 0.95);
-    --mrs-glass-border: rgba(255, 255, 255, 0.1);
+    --mrs-glass: rgba(8, 15, 31, 0.96);
+    --mrs-glass-border: rgba(212, 175, 55, 0.15);
   }
 }
 
@@ -158,17 +168,17 @@ html {
   animation: float 4s ease-in-out infinite;
 }
 
-/* Subtle pulsating glow animation for CTA buttons */
+/* Subtle pulsating glow animation for CTA buttons — uses brand gold */
 @keyframes pulse-glow {
 
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4);
+    box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.45);
     transform: scale(1);
   }
 
   50% {
-    box-shadow: 0 0 20px 4px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 0 18px 4px rgba(212, 175, 55, 0.25);
     transform: scale(1.02);
   }
 }
@@ -476,31 +486,4 @@ a.no-underline {
 .nav-link-mobile {
   display: inline-block;
   visibility: visible !important;
-  opacity: 1 !important;
-  pointer-events: auto !important;
-}
-
-/* Fix any potential z-index conflicts */
-nav {
-  position: relative;
-  z-index: 40;
-}
-
-header {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-}
-
-/* Ensure navigation links have proper stacking context */
-.nav-link,
-.nav-link-mobile {
-  position: relative;
-  z-index: 41;
-}
-
-/* Prevent any overlay issues */
-.nav-link:hover,
-.nav-link-mobile:hover {
-  z-index: 42;
-}
+  opaci

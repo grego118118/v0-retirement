@@ -69,7 +69,7 @@ export default async function BlogPostPage({ params }: PageProps) {
         title: dbPost.title,
         description: dbPost.excerpt || "",
         date: dbPost.publishedAt ? new Date(dbPost.publishedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : "",
-        readTime: "5 min read", // Default since not in DB yet
+        readTime: `${Math.ceil((dbPost.content?.replace(/<[^>]*>/g, '').split(/\s+/).length || 1000) / 200)} min read`,
         author: "Greg O", // Default or fetch relation
         authorTitle: "Retirement Specialist",
         category: "General", // Need to fetch category relation if strictly needed, or default
@@ -317,7 +317,4 @@ export default async function BlogPostPage({ params }: PageProps) {
 }
 
 export async function generateStaticParams() {
-  return blogPosts.map((post) => ({
-    slug: post.id,
-  }))
-}
+  return b

@@ -118,6 +118,12 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'image.pollinations.ai',
+        port: '',
+        pathname: '/**',
+      },
     ],
     formats: ['image/webp', 'image/avif'],
   },
@@ -220,9 +226,4 @@ const sentryWebpackPluginOptions = {
 }
 
 module.exports = process.env.NODE_ENV === 'production'
-  ? withSentryConfig(nextConfig, sentryWebpackPluginOptions)
-  : nextConfig
-*/
-
-// Temporarily export nextConfig directly without Sentry
-module.exports = nextConfig
+  ? withSentryConfig(nextConfig, se
