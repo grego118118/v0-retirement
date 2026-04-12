@@ -486,4 +486,31 @@ a.no-underline {
 .nav-link-mobile {
   display: inline-block;
   visibility: visible !important;
-  opaci
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* Fix any potential z-index conflicts */
+nav {
+  position: relative;
+  z-index: 40;
+}
+
+header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+/* Ensure navigation links have proper stacking context */
+.nav-link,
+.nav-link-mobile {
+  position: relative;
+  z-index: 41;
+}
+
+/* Prevent any overlay issues */
+.nav-link:hover,
+.nav-link-mobile:hover {
+  z-index: 42;
+}
