@@ -27,7 +27,7 @@ export default function AboutPage() {
                 Mission & Purpose
               </Badge>
               <h1 className="text-4xl md:text-6xl font-heading font-bold tracking-tight leading-tight">
-                Bringing <span className="text-transparent bg-clip-text bg-gradient-to-r from-mrs-gold-300 to-mrs-gold-500">Clarity</span> to the Commonwealth.
+                Bringing <span className="text-transparent bg-clip-text bg-gradient-to-r from-mrs-gold-400 to-mrs-gold-600">Clarity</span> to the Commonwealth.
               </h1>
               <p className="text-xl md:text-2xl text-blue-100 leading-relaxed max-w-xl font-sans">
                 MassPension.com was born out of a simple observation: Massachusetts public employees often have the most complex benefits but the least modern tools to manage them.

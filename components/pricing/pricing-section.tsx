@@ -141,24 +141,24 @@ export function PricingSection() {
         <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
           {/* Free Plan */}
           <Card className="relative bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow flex flex-col">
-            <CardHeader className="text-center pb-6 border-b border-slate-50">
-              <CardTitle className="text-2xl font-bold text-slate-900">Free Calculator</CardTitle>
-              <CardDescription className="text-slate-500">Perfect for basic pension planning</CardDescription>
-              <div className="text-5xl font-bold text-slate-900 mt-6">$0</div>
-              <div className="text-slate-400 text-sm mt-1 uppercase tracking-widest font-bold">Forever free</div>
+            <CardHeader className="text-center pb-6 border-b border-slate-50 dark:border-slate-700">
+              <CardTitle className="text-2xl font-bold text-slate-900 dark:text-white">Free Calculator</CardTitle>
+              <CardDescription className="text-slate-500 dark:text-slate-400">Perfect for basic pension planning</CardDescription>
+              <div className="text-5xl font-bold text-slate-900 dark:text-white mt-6">$0</div>
+              <div className="text-slate-400 dark:text-slate-500 text-sm mt-1 uppercase tracking-widest font-bold">Forever free</div>
             </CardHeader>
             <CardContent className="space-y-6 pt-8 flex-grow">
               <div className="space-y-4">
                 {features.free.map((feature, index) => (
                   <div key={index} className="flex items-center gap-3">
                     <Check className="h-5 w-5 text-green-500 flex-shrink-0" />
-                    <span className="text-sm text-slate-600 font-medium">{feature}</span>
+                    <span className="text-sm text-slate-600 dark:text-slate-300 font-medium">{feature}</span>
                   </div>
                 ))}
                 {features.freeLimitations.slice(0, 4).map((feature, index) => (
                   <div key={index} className="flex items-center gap-3 opacity-40">
                     <X className="h-5 w-5 text-slate-300 flex-shrink-0" />
-                    <span className="text-sm text-slate-400 line-through">{feature}</span>
+                    <span className="text-sm text-slate-400 dark:text-slate-500 line-through">{feature}</span>
                   </div>
                 ))}
               </div>
@@ -180,27 +180,27 @@ export function PricingSection() {
           {/* Monthly Premium Plan */}
           <Card className="relative bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow flex flex-col overflow-hidden">
             <div className="absolute top-0 inset-x-0 h-1 bg-mrs-navy-800"></div>
-            <CardHeader className="text-center pb-6 border-b border-slate-50">
-              <CardTitle className="text-2xl font-heading font-bold text-mrs-navy-900 flex items-center justify-center gap-2">
-                <Crown className="h-5 w-5 text-mrs-navy-700" />
+            <CardHeader className="text-center pb-6 border-b border-slate-50 dark:border-slate-700">
+              <CardTitle className="text-2xl font-heading font-bold text-mrs-navy-900 dark:text-white flex items-center justify-center gap-2">
+                <Crown className="h-5 w-5 text-mrs-navy-700 dark:text-slate-400" />
                 Premium Monthly
               </CardTitle>
-              <CardDescription className="text-slate-500">Full access to all features</CardDescription>
-              <div className="text-5xl font-heading font-bold text-mrs-navy-900 mt-6">
+              <CardDescription className="text-slate-500 dark:text-slate-400">Full access to all features</CardDescription>
+              <div className="text-5xl font-heading font-bold text-mrs-navy-900 dark:text-white mt-6">
                 ${SUBSCRIPTION_PLANS.monthly.price}
-                <span className="text-lg font-sans font-normal text-slate-400 ml-1">/mo</span>
+                <span className="text-lg font-sans font-normal text-slate-400 dark:text-slate-500 ml-1">/mo</span>
               </div>
-              <div className="text-slate-400 text-sm mt-1 uppercase tracking-widest font-bold">Billed monthly</div>
+              <div className="text-slate-400 dark:text-slate-500 text-sm mt-1 uppercase tracking-widest font-bold">Billed monthly</div>
             </CardHeader>
             <CardContent className="space-y-6 pt-8 flex-grow">
               <div className="space-y-4">
                 {features.premium.slice(0, 8).map((feature, index) => (
                   <div key={index} className="flex items-center gap-3">
                     <Check className="h-5 w-5 text-mrs-blue-600 flex-shrink-0" />
-                    <span className="text-sm text-slate-600 font-medium">{feature}</span>
+                    <span className="text-sm text-slate-600 dark:text-slate-300 font-medium">{feature}</span>
                   </div>
                 ))}
-                <div className="text-xs text-center text-slate-400 bg-slate-50 py-2 rounded-lg font-bold uppercase tracking-tighter italic">
+                <div className="text-xs text-center text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-700/50 py-2 rounded-lg font-bold uppercase tracking-tighter italic">
                   + 4 additional premium features
                 </div>
               </div>
@@ -235,17 +235,17 @@ export function PricingSection() {
               <Star className="mr-1 h-3 w-3 fill-current" />
               BEST VALUE
             </Badge>
-            <CardHeader className="text-center pb-6 border-b border-slate-50 pt-10">
-              <CardTitle className="text-2xl font-heading font-bold text-mrs-navy-900 flex items-center justify-center gap-2">
+            <CardHeader className="text-center pb-6 border-b border-slate-50 dark:border-slate-700 pt-10">
+              <CardTitle className="text-2xl font-heading font-bold text-mrs-navy-900 dark:text-white flex items-center justify-center gap-2">
                 <Crown className="h-5 w-5 text-mrs-gold-600" />
                 Premium Annual
               </CardTitle>
-              <CardDescription className="text-slate-500">Save 17% with annual billing</CardDescription>
-              <div className="text-5xl font-heading font-bold text-mrs-navy-900 mt-6">
+              <CardDescription className="text-slate-500 dark:text-slate-400">Save 17% with annual billing</CardDescription>
+              <div className="text-5xl font-heading font-bold text-mrs-navy-900 dark:text-white mt-6">
                 ${SUBSCRIPTION_PLANS.annual.price}
-                <span className="text-lg font-sans font-normal text-slate-400 ml-1">/yr</span>
+                <span className="text-lg font-sans font-normal text-slate-400 dark:text-slate-500 ml-1">/yr</span>
               </div>
-              <div className="text-mrs-gold-600 font-bold text-sm mt-2 flex items-center justify-center gap-1 bg-mrs-gold-50 py-1 px-3 rounded-full w-fit mx-auto border border-mrs-gold-200">
+              <div className="text-mrs-gold-600 font-bold text-sm mt-2 flex items-center justify-center gap-1 bg-mrs-gold-50 dark:bg-mrs-gold-500/10 py-1 px-3 rounded-full w-fit mx-auto border border-mrs-gold-200 dark:border-mrs-gold-500/30">
                 <Check className="w-3 h-3" />
                 {SUBSCRIPTION_PLANS.annual.savings}
               </div>
@@ -255,7 +255,7 @@ export function PricingSection() {
                 {features.premium.map((feature, index) => (
                   <div key={index} className="flex items-center gap-3">
                     <Check className="h-5 w-5 text-mrs-gold-600 flex-shrink-0" />
-                    <span className="text-sm text-slate-600 font-medium">{feature}</span>
+                    <span className="text-sm text-slate-600 dark:text-slate-300 font-medium">{feature}</span>
                   </div>
                 ))}
               </div>
@@ -285,7 +285,7 @@ export function PricingSection() {
         </div>
 
         {/* Trust Badges */}
-        <div className="flex flex-wrap items-center justify-center gap-6 mt-12 text-sm text-slate-500">
+        <div className="flex flex-wrap items-center justify-center gap-6 mt-12 text-sm text-slate-500 dark:text-slate-400">
           <div className="flex items-center gap-2">
             <Shield className="h-4 w-4 text-green-600" />
             <span>Bank-Level Security</span>
@@ -306,10 +306,10 @@ export function PricingSection() {
 
         {/* Enterprise Section */}
         <div className="mt-20">
-          <div className="max-w-4xl mx-auto bg-slate-100 rounded-3xl p-8 md:p-12 border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-8">
+          <div className="max-w-4xl mx-auto bg-slate-100 dark:bg-slate-800 rounded-3xl p-8 md:p-12 border border-slate-200 dark:border-slate-700 flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="text-center md:text-left">
-              <h3 className="text-2xl font-bold text-slate-900 mb-2">For Organizations</h3>
-              <p className="text-slate-600">
+              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">For Organizations</h3>
+              <p className="text-slate-600 dark:text-slate-300">
                 HR departments, unions, and financial advisors. White-label solutions, bulk licenses, and custom integrations available.
               </p>
             </div>
