@@ -1,75 +1,103 @@
-# MassPension.com Repository
+# MassPension.com
 
-This repository contains the Mass Pension Next.js application. The application now lives at the repository root (flattened from `v0-retirement/` on 2025-10-25).
+Massachusetts public employee pension calculator implementing official MSRB (Massachusetts State Retirement Board) formulas for Groups 1–4. Helps state employees model retirement scenarios, compare Options A/B/C, project COLA adjustments, and estimate healthcare costs.
 
-## Repository layout
+**Stack:** Next.js 15 · React 19 · TypeScript · Prisma 6 · Supabase (PostgreSQL) · NextAuth.js · Stripe · Tailwind CSS · Radix UI
 
-- Repository root ← Application root (use this for all dev, build, and deploy commands)
-  - package.json, next.config.js, app/, components/, lib/, prisma/, public/, styles/
-  - tsconfig.json, tsconfig.build.json, tsconfig.production.json
-  - vercel.json (function/runtime overrides for the app)
-  - scripts_app/ (migrated from v0-retirement/scripts)
-- archive_root/   ← Quarantined legacy folders from the original repository root (not used)
-  - app_legacy/, components_legacy/, lib_legacy/, public_legacy/
-- archive_flatten_backup/ ← Backup from flattening step (not used)
+---
 
-Rationale: the legacy root-level app/, components/, lib/, public/ folders caused editor path resolution confusion and potential deployment misconfiguration. They have been moved to `archive_root/`.
-
-## Development
-
-From the repository root:
+## Getting started
 
 ```bash
 npm ci
-npm run dev
+cp .env.example .env.local   # fill in required values (see Environment Variables below)
+npm run db:generate           # generate Prisma client
+npm run dev                   # http://localhost:3000
 ```
 
-Useful scripts (run at repository root):
-
-- Type check: `npm run type-check`
-- Build: `npm run build`
-- Tests: `npm test`, `npm run test:watch`, `npm run test:coverage`
-- Prisma: `npx prisma generate`, `npm run db:migrate`
-
-Path aliases:
-- `@/*` resolves relative to the repository root. Example: `import { foo } from '@/lib/utils'`.
-
-## Prisma & Database
-
-- Prisma schema: `prisma/schema.prisma`
-- Datasource uses `DATABASE_URL` (PostgreSQL/Supabase). Configure in Vercel Environment Variables.
-- `binaryTargets` includes `rhel-openssl-3.0.x` for Vercel Linux compatibility.
-
-Common commands (run at repository root):
+## Development commands
 
 ```bash
-npx prisma generate
-npm run db:migrate
-npx prisma studio
+npm run dev              # dev server
+npm run build            # production build (Prisma generate + Next build)
+npm run type-check       # TypeScript strict check
+npm run lint             # ESLint
+
+npm test                 # Jest
+npm run test:watch       # watch mode
+npm run test:coverage    # coverage report
+npm run test:integration # integration tests only
+
+# Pension math validation
+npm run validate-calculations   # validate calc outputs against known values
+npm run validate:msrb           # run full MSRB audit
+
+# Database
+npm run db:generate      # regenerate Prisma client after schema changes
+npm run db:migrate       # deploy pending migrations
+npm run db:studio        # Prisma Studio GUI
+npm run db:seed          # seed initial data
 ```
+
+Running a single test file:
+```bash
+npx jest __tests__/unit/pension-calculations.test.ts
+```
+
+## Environment variables
+
+Required in `.env.local` for local development:
+
+```
+DATABASE_URL=postgresql://...
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=<secret>
+GOOGLE_CLIENT_ID=<id>
+GOOGLE_CLIENT_SECRET=<secret>
+NEXT_PUBLIC_SUPABASE_URL=https://...supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<key>
+GEMINI_API_KEY=<key>
+CRON_SECRET=<secret>
+```
+
+## Architecture
+
+```
+app/              Next.js App Router — pages and API routes
+components/       React components; components/ui/ holds Shadcn/Radix primitives
+lib/              Business logic — pension math, AI, email, database helpers
+hooks/            Custom React hooks (use-retirement-data.ts is the central state hook)
+contexts/         React Context providers
+prisma/           Schema + migrations (multi-schema: auth + public)
+__tests__/        Jest test suite
+scripts_app/      Deploy, backup, and validation scripts
+```
+
+Path alias: `@/*` resolves to the repository root.
+
+### Pension calculations
+
+Core domain lives in `lib/pension-calculations.ts` (MSRB factor tables, Groups 1–4, pre/post April 2 2012 hire date rules, Options A/B/C) and `lib/standardized-pension-calculator.ts`. After any change to calculation logic, run `npm run validate:msrb` to verify correctness against MSRB published tables.
+
+### Database
+
+Prisma uses the `multiSchema` preview feature with two schemas:
+- `auth` — Supabase-managed authentication tables (do not migrate manually)
+- `public` — application tables
+
+After schema changes: `npm run db:generate`, then `npm run db:migrate` for production.
 
 ## Deployment (Vercel)
 
-- Ensure Project Root Directory is the repository root (.) in Vercel Dashboard → Settings → General.
-- Use defaults for install/build unless overridden by `vercel.json`.
-- Required env vars (Production):
-  - `DATABASE_URL`, `NEXTAUTH_URL`, `NEXTAUTH_SECRET`
-  - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` (if using Google OAuth)
-  - Optional: `SEED_SECRET` (temporary admin seeding)
+- Set **Project Root Directory** to `.` in Vercel Dashboard → Settings → General
+- `vercel.json` at the root contains function/runtime overrides
+- Required production env vars: `DATABASE_URL`, `NEXTAUTH_URL`, `NEXTAUTH_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
 
-## Notes about quarantine (2025-10-25)
+## Repository layout notes
 
-Performed actions to eliminate ambiguity:
-- Moved root `app/` → `archive_root/app_legacy/`
-- Moved root `components/` → `archive_root/components_legacy/`
-- Moved root `lib/` → `archive_root/lib_legacy/`
-- Moved root `public/` → `archive_root/public_legacy/`
-- Renamed root `vercel.json` → `vercel.root.ignore.json`
-- Renamed root `tsconfig.json` → `tsconfig.workspace.json`
+The application was flattened to the repository root on 2025-10-25 (previously nested under `v0-retirement/`). Legacy folders are quarantined and unused:
 
-If you need to restore any legacy files, copy from `archive_root/*_legacy/` back to the repository root, but note this is not recommended.
+- `archive_root/` — legacy `app/`, `components/`, `lib/`, `public/` from the old root
+- `archive_flatten_backup/` — backup snapshot from the flattening step
 
-## Optional: Editor tips
-
-Open the repository root in your editor. If you have a previous workspace pinned to `v0-retirement/`, update it to the repository root.
-
+Do not import from these directories.
