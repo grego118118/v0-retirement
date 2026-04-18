@@ -21,7 +21,9 @@ import {
   checkEligibility,
   getBenefitFactor,
   generateProjectionTable,
+  calculateMultiGroupPension,
 } from "@/lib/pension-calculations"
+import { FREE_TIER_LIMITS } from "@/lib/stripe/config"
 import { parseGroupParam, getDefaultRetirementAge as getGroupDefaultAge } from "@/lib/utils/group-param-parser"
 import EligibilityInfo from "./eligibility-info"
 import PensionResults from "./pension-results"
@@ -121,6 +123,12 @@ export default function PensionCalculator() {
     currentAge: "",
     membershipDate: "",
     additionalService: "",
+    // Multi-group career support (V1: up to 2 segments). The main `group` field
+    // above represents the retirement group (last segment); `secondaryGroup`
+    // captures earlier service in a different group.
+    enableMultiGroup: false,
+    secondaryGroup: "",
+    secondaryGroupYears: "",
   })
 
   const [showNotification, setShowNotification] = useState(false)
@@ -311,6 +319,9 @@ export default function PensionCalculator() {
         currentAge: "",
         membershipDate: "",
         additionalService: "",
+        enableMultiGroup: false,
+        secondaryGroup: "",
+        secondaryGroupYears: "",
       }
 
       setFormData(widgetFormData)
@@ -521,6 +532,9 @@ export default function PensionCalculator() {
         currentAge: "",
         membershipDate: "",
         additionalService: "",
+        enableMultiGroup: false,
+        secondaryGroup: "",
+        secondaryGroupYears: "",
       })
       setIsFormDirty(false)
       setShowNotification(false)
@@ -702,6 +716,107 @@ export default function PensionCalculator() {
       const enteredYOS = Number.parseFloat(formData.yearsOfService)
       const group = formData.group
       const serviceEntry = formData.serviceEntryDate
+
+      // Multi-group career path: 5 yrs Group 4 + 30 yrs Group 2 = 12.5% + 60% = 72.5%
+      // See calculateMultiGroupPension() in lib/pension-calculations.ts.
+      if (formData.enableMultiGroup && formData.secondaryGroup && formData.secondaryGroupYears) {
+        // Soft paywall: free tier gets one multi-group preview calc, tracked in localStorage.
+        const LIMIT = FREE_TIER_LIMITS.maxMultiGroupCalculations
+        const USAGE_KEY = "masspension_multi_group_used_count"
+        const prevCount = typeof window !== "undefined"
+          ? Number.parseInt(localStorage.getItem(USAGE_KEY) || "0", 10) || 0
+          : 0
+        if (!isPremium && prevCount >= LIMIT) {
+          setErrors([
+            "You've used your free multi-group calculation. Upgrade to Premium to run unlimited multi-group scenarios — the only MA tool that correctly handles career transitions between Groups 1–4.",
+          ])
+          setIsCalculating(false)
+          return
+        }
+
+        const secondaryYears = Number.parseFloat(formData.secondaryGroupYears)
+        const primaryYears = enteredYOS - secondaryYears
+        if (Number.isNaN(secondaryYears) || secondaryYears <= 0 || primaryYears <= 0) {
+          setErrors([
+            "Years in the earlier group must be positive and less than your total years of service.",
+          ])
+          setIsCalculating(false)
+          return
+        }
+        if (formData.secondaryGroup === group) {
+          setErrors(["Earlier group must be different from your retirement group."])
+          setIsCalculating(false)
+          return
+        }
+
+        const salary1 = Number.parseFloat(formData.salary1)
+        const salary2 = Number.parseFloat(formData.salary2)
+        const salary3 = Number.parseFloat(formData.salary3)
+        const averageSalary = (salary1 + salary2 + salary3) / 3
+
+        const multiResult = calculateMultiGroupPension(
+          [
+            { group: formData.secondaryGroup, yearsOfService: secondaryYears },
+            { group, yearsOfService: primaryYears },
+          ],
+          enteredAge,
+          averageSalary,
+          formData.retirementOption as "A" | "B" | "C",
+          serviceEntry,
+          formData.beneficiaryAge,
+        )
+
+        if (!multiResult.eligible) {
+          setEligibilityWarning(
+            multiResult.eligibilityMessage ||
+              "Combined service does not meet retirement eligibility requirements.",
+          )
+          setIsCalculating(false)
+          return
+        }
+
+        if (typeof window !== "undefined") {
+          localStorage.setItem(USAGE_KEY, String(prevCount + 1))
+        }
+
+        // Projection table uses the retirement group (last segment) with total YOS.
+        const projectionData = generateProjectionTable(
+          group,
+          enteredAge,
+          enteredYOS,
+          averageSalary,
+          formData.retirementOption,
+          formData.beneficiaryAge,
+          serviceEntry,
+        )
+
+        setCalculationResult({
+          selectedOption: multiResult.optionDescription,
+          optionWarning: multiResult.optionWarning,
+          annualPension: multiResult.annualPension,
+          monthlyPension: multiResult.monthlyPension,
+          survivorAnnualPension: multiResult.survivorAnnualPension,
+          survivorMonthlyPension: multiResult.survivorMonthlyPension,
+          retirementOption: formData.retirementOption,
+          beneficiaryAge: formData.beneficiaryAge,
+          details: {
+            averageSalary,
+            group,
+            age: enteredAge,
+            yearsOfService: enteredYOS,
+            basePercentage: multiResult.basePercentage * 100,
+            baseAnnualPension: multiResult.baseAnnualPension,
+            cappedBase: multiResult.cappedBase,
+            careerSegments: multiResult.segmentBreakdown,
+          },
+          projectionData,
+        })
+
+        setShowResults(true)
+        setCurrentStep(2)
+        setIsCalculating(false)
+        return
+      }
 
       // Check eligibility
       const eligibility = checkEligibility(Math.floor(enteredAge), enteredYOS, group, serviceEntry)
@@ -1027,6 +1142,73 @@ export default function PensionCalculator() {
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
+
+                <div className="mt-4 border-t border-green-200 dark:border-green-800 pt-4">
+                  <div className="flex items-center gap-2">
+                    <input
+                      id="enableMultiGroup"
+                      type="checkbox"
+                      checked={!!formData.enableMultiGroup}
+                      onChange={(e) =>
+                        setFormData({ ...formData, enableMultiGroup: e.target.checked })
+                      }
+                      className="h-4 w-4 rounded border-green-300 text-green-600 focus:ring-green-500"
+                    />
+                    <Label htmlFor="enableMultiGroup" className="cursor-pointer">
+                      I worked in multiple groups during my career
+                    </Label>
+                    {!isPremium && (
+                      <Badge variant="secondary" className="bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200">
+                        <Crown className="mr-1 h-3 w-3" />
+                        1 free preview
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="mt-2 text-xs text-green-800 dark:text-green-200">
+                    Example: 5 years in Group 4 (corrections) + 30 years in Group 2 at age 55 = 12.5% + 60% = 72.5% of
+                    average salary. Each segment earns its group&apos;s benefit factor; the 80% cap applies to the combined
+                    benefit.
+                  </p>
+
+                  {formData.enableMultiGroup && (
+                    <div className="mt-4 grid gap-4 rounded-lg bg-white dark:bg-green-950/30 p-4 border border-green-200 dark:border-green-800">
+                      <div className="space-y-2">
+                        <Label htmlFor="secondaryGroup">Earlier group (before your retirement group)</Label>
+                        <Select
+                          value={formData.secondaryGroup || ""}
+                          onValueChange={(value) => handleSelectChange("secondaryGroup", value)}
+                        >
+                          <SelectTrigger id="secondaryGroup">
+                            <SelectValue placeholder="Select earlier group" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="GROUP_1">Group I (General Employees)</SelectItem>
+                            <SelectItem value="GROUP_2">Group II (Probation/Court Officers)</SelectItem>
+                            <SelectItem value="GROUP_3">Group III (MA State Police ONLY)</SelectItem>
+                            <SelectItem value="GROUP_4">Group IV (Municipal Police/Fire/Corrections)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="secondaryGroupYears">Years worked in the earlier group</Label>
+                        <Input
+                          id="secondaryGroupYears"
+                          name="secondaryGroupYears"
+                          type="number"
+                          min="0"
+                          step="0.5"
+                          placeholder="e.g., 5"
+                          value={formData.secondaryGroupYears}
+                          onChange={handleInputChange}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Your total years of service above must include these earlier years. The remainder is applied
+                          to your retirement group.
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </fieldset>
 

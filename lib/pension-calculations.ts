@@ -559,6 +559,137 @@ export function calculateAnnualPension(
   return optionResult.pension
 }
 
+/**
+ * A single segment of a multi-group career.
+ * Example: { group: "GROUP_4", yearsOfService: 5 } means 5 years worked in Group 4.
+ */
+export interface CareerSegment {
+  group: string
+  yearsOfService: number
+}
+
+export interface MultiGroupPensionResult {
+  annualPension: number
+  monthlyPension: number
+  survivorAnnualPension: number
+  survivorMonthlyPension: number
+  basePercentage: number
+  baseAnnualPension: number
+  cappedBase: boolean
+  eligible: boolean
+  eligibilityMessage: string
+  optionDescription: string
+  optionWarning: string
+  retirementGroup: string
+  totalYearsOfService: number
+  segmentBreakdown: Array<{
+    group: string
+    yearsOfService: number
+    benefitFactor: number
+    segmentPercentage: number
+  }>
+}
+
+/**
+ * Calculate a prorated MA pension for a career that spans multiple groups.
+ *
+ * Per MGL c. 32 §3(2)(f), each segment earns its own benefit factor based on
+ * (group, retirement age), the per-segment percentages sum, the 80% cap is
+ * applied to the combined benefit, and option/veteran adjustments are applied
+ * to the combined base using the retirement group (the last segment).
+ *
+ * Eligibility uses the retirement group (last segment) for minimum age and
+ * the sum of segment years for minimum service.
+ *
+ * V1 scope: supports 1..N segments with a shared serviceEntry and shared
+ * average salary. Total segment years are used when determining whether the
+ * pre-2012 factor table applies (the 30+ YOS exception).
+ */
+export function calculateMultiGroupPension(
+  segments: CareerSegment[],
+  retirementAge: number,
+  averageSalary: number,
+  option: "A" | "B" | "C" = "A",
+  serviceEntry: string = "before_2012",
+  beneficiaryAgeStr: string = "",
+  isVeteran: boolean = false,
+): MultiGroupPensionResult {
+  const retirementGroup = segments.length > 0 ? segments[segments.length - 1].group : "GROUP_2"
+  const totalYearsOfService = segments.reduce((sum, s) => sum + s.yearsOfService, 0)
+
+  const eligibility = checkEligibility(Math.floor(retirementAge), totalYearsOfService, retirementGroup, serviceEntry)
+
+  const segmentBreakdown = segments.map(seg => {
+    const factor = getBenefitFactor(Math.floor(retirementAge), seg.group, serviceEntry, totalYearsOfService)
+    return {
+      group: seg.group,
+      yearsOfService: seg.yearsOfService,
+      benefitFactor: factor,
+      segmentPercentage: factor * seg.yearsOfService,
+    }
+  })
+
+  if (!eligibility.eligible || segmentBreakdown.some(s => s.benefitFactor === 0)) {
+    return {
+      annualPension: 0,
+      monthlyPension: 0,
+      survivorAnnualPension: 0,
+      survivorMonthlyPension: 0,
+      basePercentage: 0,
+      baseAnnualPension: 0,
+      cappedBase: false,
+      eligible: false,
+      eligibilityMessage: eligibility.eligible
+        ? "One or more segments has no applicable benefit factor at the retirement age."
+        : eligibility.message,
+      optionDescription: "",
+      optionWarning: "",
+      retirementGroup,
+      totalYearsOfService,
+      segmentBreakdown,
+    }
+  }
+
+  let basePercentage = segmentBreakdown.reduce((sum, s) => sum + s.segmentPercentage, 0)
+  let baseAnnualPension = averageSalary * basePercentage
+  const maxPension = averageSalary * MAX_PENSION_PERCENTAGE_OF_SALARY
+  let cappedBase = false
+  if (baseAnnualPension > maxPension) {
+    baseAnnualPension = maxPension
+    basePercentage = MAX_PENSION_PERCENTAGE_OF_SALARY
+    cappedBase = true
+  }
+  if (baseAnnualPension < 0) baseAnnualPension = 0
+
+  const veteranBenefit = calculateVeteranBenefit(isVeteran, retirementAge, totalYearsOfService)
+  const pensionWithVeteran = baseAnnualPension + veteranBenefit
+
+  const optionResult = calculatePensionWithOption(
+    pensionWithVeteran,
+    option,
+    retirementAge,
+    beneficiaryAgeStr,
+    retirementGroup,
+  )
+
+  return {
+    annualPension: optionResult.pension,
+    monthlyPension: optionResult.pension / 12,
+    survivorAnnualPension: optionResult.survivorPension,
+    survivorMonthlyPension: optionResult.survivorPension / 12,
+    basePercentage,
+    baseAnnualPension,
+    cappedBase,
+    eligible: true,
+    eligibilityMessage: "",
+    optionDescription: optionResult.description,
+    optionWarning: optionResult.warning,
+    retirementGroup,
+    totalYearsOfService,
+    segmentBreakdown,
+  }
+}
+
 	// ---------------------------------------------------------------------------
 	// Legacy-compatible types & helper functions
 	// ---------------------------------------------------------------------------

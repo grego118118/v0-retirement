@@ -65,6 +65,7 @@ export const FREE_TIER_LIMITS = {
   maxSocialSecurityCalculations: 1,
   maxWizardUses: 0, // No wizard access for free users
   maxPdfReports: 0,
+  maxMultiGroupCalculations: 1, // 1 free preview of the multi-group (career-transition) calculator
   features: [
     'Basic pension calculator',
     'Limited calculation history',
@@ -115,6 +116,13 @@ export const PREMIUM_FEATURES = {
     description: 'Advanced tax planning and withdrawal strategies',
     required: true,
     freeLimit: 0,
+    premiumUnlimited: true
+  },
+  multi_group: {
+    name: 'Multi-Group Career Calculator',
+    description: 'Prorated pension calculation for careers that span multiple MA retirement groups (e.g., 5 years in Group 4 corrections plus 30 years in Group 2). Free tier includes one preview calculation.',
+    required: true,
+    freeLimit: 1,
     premiumUnlimited: true
   }
 } as const
