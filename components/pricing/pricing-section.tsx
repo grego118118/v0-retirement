@@ -14,6 +14,7 @@ interface SubscriptionData {
   isPremium: boolean
   subscriptionPlan: string
   subscriptionStatus: string
+  hasUsedTrial?: boolean
 }
 
 const features = {
@@ -55,6 +56,12 @@ export function PricingSection() {
   const [subscriptionData, setSubscriptionData] = useState<SubscriptionData | null>(null)
   const [loading, setLoading] = useState(true)
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null)
+
+  // A logged-in user who has never subscribed qualifies for the 14-day free trial.
+  const trialEligible =
+    !!session?.user &&
+    !subscriptionData?.isPremium &&
+    !subscriptionData?.hasUsedTrial
 
   useEffect(() => {
     async function fetchSubscriptionData() {
@@ -218,12 +225,14 @@ export function PricingSection() {
                   </>
                 ) : subscriptionData?.isPremium ? (
                   'Current Plan'
+                ) : trialEligible ? (
+                  'Start 14-Day Free Trial'
                 ) : (
                   'Choose Monthly'
                 )}
               </Button>
               <p className="text-xs text-center text-slate-400 mt-4 font-medium uppercase tracking-widest">
-                Cancel anytime
+                {trialEligible ? 'No card charged today · Cancel anytime' : 'Cancel anytime'}
               </p>
             </div>
           </Card>
@@ -273,12 +282,14 @@ export function PricingSection() {
                   </>
                 ) : subscriptionData?.isPremium ? (
                   'Current Plan'
+                ) : trialEligible ? (
+                  'Start 14-Day Free Trial'
                 ) : (
                   'Choose Annual'
                 )}
               </Button>
               <p className="text-[10px] text-center text-slate-400 mt-4 font-bold uppercase tracking-widest">
-                30-day money-back guarantee
+                {trialEligible ? 'No card charged today · 30-day money-back guarantee' : '30-day money-back guarantee'}
               </p>
             </div>
           </Card>

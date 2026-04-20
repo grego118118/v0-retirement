@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import { stripe, STRIPE_CONFIG, STRIPE_WEBHOOK_EVENTS, getSubscriptionPlan } from '@/lib/stripe/config'
 import { prisma } from '@/lib/prisma'
+import { emailService } from '@/lib/email/email-service'
 import type Stripe from 'stripe'
 
 // Force dynamic rendering to prevent static generation issues with Prisma
@@ -53,6 +54,10 @@ export async function POST(request: NextRequest) {
 
       case STRIPE_WEBHOOK_EVENTS.CUSTOMER_SUBSCRIPTION_DELETED:
         await handleSubscriptionDeleted(event.data.object as Stripe.Subscription)
+        break
+
+      case STRIPE_WEBHOOK_EVENTS.CUSTOMER_SUBSCRIPTION_TRIAL_WILL_END:
+        await handleTrialWillEnd(event.data.object as Stripe.Subscription)
         break
 
       case STRIPE_WEBHOOK_EVENTS.INVOICE_PAYMENT_SUCCEEDED:
@@ -167,6 +172,55 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     console.log(`Updated user ${user.email} subscription: ${subscription.status}, plan: ${plan}`)
   } catch (error) {
     console.error('Error handling subscription updated:', error)
+    throw error
+  }
+}
+
+/**
+ * Handle trial-ending notification (fires ~3 days before trial ends).
+ * Sends a reminder email so the user can cancel or keep the subscription.
+ */
+async function handleTrialWillEnd(subscription: Stripe.Subscription) {
+  try {
+    const customerId = subscription.customer as string
+    const trialEnd = subscription.trial_end ? new Date(subscription.trial_end * 1000) : null
+
+    const user = await prisma.user.findFirst({
+      where: { stripeCustomerId: customerId }
+    })
+
+    if (!user?.email) {
+      console.error(`User not found or missing email for Stripe customer: ${customerId}`)
+      return
+    }
+
+    const planLabel = getSubscriptionPlan(subscription.items.data[0]?.price.id || '')
+    const endsOn = trialEnd
+      ? trialEnd.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+      : 'soon'
+    const portalUrl = `${STRIPE_CONFIG.customerPortalUrl}`
+
+    await emailService.sendEmail({
+      to: user.email,
+      subject: `Your MassPension free trial ends ${endsOn}`,
+      html: `
+        <p>Hi${user.name ? ` ${user.name}` : ''},</p>
+        <p>Your 14-day MassPension Premium trial ends on <strong>${endsOn}</strong>. On that day, your ${planLabel} plan begins and your card will be charged.</p>
+        <p>Nothing to do if you want to continue — just keep using MassPension. To cancel before billing, visit your <a href="${portalUrl}">subscription portal</a>.</p>
+        <p>During your trial, remember to run:</p>
+        <ul>
+          <li>Your multi-group career calculation (if you've worked across Groups 1–4)</li>
+          <li>Social Security + WEP/GPO integration</li>
+          <li>Professional PDF retirement report</li>
+        </ul>
+        <p>— The MassPension team</p>
+      `,
+      text: `Your MassPension Premium trial ends ${endsOn}. Manage or cancel at ${portalUrl}.`,
+    })
+
+    console.log(`Sent trial_will_end email to ${user.email}`)
+  } catch (error) {
+    console.error('Error handling trial will end:', error)
     throw error
   }
 }

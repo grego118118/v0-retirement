@@ -54,13 +54,24 @@ export class StripeService {
     priceId: string,
     userEmail: string,
     successUrl?: string,
-    cancelUrl?: string
+    cancelUrl?: string,
+    trialPeriodDays?: number
   ): Promise<string> {
     if (!stripe) {
       throw new StripeError('Stripe is not configured. Please add STRIPE_SECRET_KEY to environment variables.')
     }
 
     try {
+      const subscriptionData: Record<string, unknown> = {
+        metadata: {
+          user_email: userEmail,
+          plan: getSubscriptionPlan(priceId),
+        },
+      }
+      if (trialPeriodDays && trialPeriodDays > 0) {
+        subscriptionData.trial_period_days = trialPeriodDays
+      }
+
       const session = await stripe.checkout.sessions.create({
         customer: customerId,
         payment_method_types: ['card'],
@@ -83,13 +94,8 @@ export class StripeService {
           user_email: userEmail,
           plan: getSubscriptionPlan(priceId),
         },
-        subscription_data: {
-          metadata: {
-            user_email: userEmail,
-            plan: getSubscriptionPlan(priceId),
-          },
-        },
-      })
+        subscription_data: subscriptionData,
+      } as any)
 
       if (!session.url) {
         throw new StripeError('Failed to create checkout session URL')
