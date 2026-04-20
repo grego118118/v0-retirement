@@ -8,11 +8,80 @@ import { Crown, Lock } from "lucide-react"
 import Link from "next/link"
 import { useSubscriptionStatus } from "@/hooks/use-subscription"
 import { logPremium } from "@/lib/utils/debug"
+import { FREE_TIER_LIMITS } from "@/lib/stripe/config"
+
+type PaywallVariant =
+  | "saves_limit"
+  | "ss_limit"
+  | "wizard"
+  | "pdf"
+  | "multi_group"
+  | "generic"
+
+interface VariantCopy {
+  badge: string
+  title: string
+  description: string
+  highlight?: string
+  primaryCta: string
+}
+
+const VARIANT_COPY: Record<PaywallVariant, VariantCopy> = {
+  saves_limit: {
+    badge: "You've hit your save limit",
+    title: `${FREE_TIER_LIMITS.maxSavedCalculations} of ${FREE_TIER_LIMITS.maxSavedCalculations} free saves used`,
+    description:
+      "Your prior calculations are still here — start a 14-day free trial to save unlimited scenarios and compare them side-by-side.",
+    highlight: "Most users save 5–8 scenarios before making a final retirement decision.",
+    primaryCta: "Start 14-Day Free Trial",
+  },
+  ss_limit: {
+    badge: "Unlock multi-scenario Social Security",
+    title: "Compare more than one Social Security scenario",
+    description:
+      "You've used your free Social Security calculation. Premium unlocks unlimited scenarios so you can model early vs. full vs. delayed claiming — typical difference is $400–$1,200 /month.",
+    highlight: "WEP/GPO impact on MA state employees can reduce SS by up to 50%. Model it before you file.",
+    primaryCta: "Start 14-Day Free Trial",
+  },
+  wizard: {
+    badge: "Full guided analysis",
+    title: "The Combined Retirement Wizard is Premium",
+    description:
+      "The wizard walks you through pension, Social Security, taxes, and COLA in one guided flow — and flags optimizations most users miss on their first calculation.",
+    highlight: "Covers Option A/B/C tradeoffs, WEP/GPO, and tax-withdrawal sequencing in ~8 minutes.",
+    primaryCta: "Start 14-Day Free Trial",
+  },
+  pdf: {
+    badge: "Professional PDF report",
+    title: "Download your retirement report",
+    description:
+      "Premium generates a shareable PDF with your pension math, Social Security integration, COLA projections, and tax estimates — ready to hand to your spouse, CPA, or financial advisor.",
+    highlight: "Most advisors charge $400+ to produce an equivalent retirement report.",
+    primaryCta: "Start 14-Day Free Trial",
+  },
+  multi_group: {
+    badge: "Multi-group career calculation",
+    title: "You've run your free multi-group calculation",
+    description:
+      "Premium unlocks unlimited multi-group scenarios — MassPension is the only MA tool that correctly prorates benefits across career transitions between Groups 1–4.",
+    highlight:
+      "Example: 5 years Group 4 corrections + 30 years Group 2 mental health = combined 72.5% of average salary, not what either MSRB single-group calc would show.",
+    primaryCta: "Start 14-Day Free Trial",
+  },
+  generic: {
+    badge: "Premium Feature",
+    title: "Unlock this feature",
+    description:
+      "Upgrade to Premium to unlock this feature and the complete MassPension toolkit.",
+    primaryCta: "Start 14-Day Free Trial",
+  },
+}
 
 interface PremiumGateProps {
   feature: string
-  title: string
-  description: string
+  title?: string
+  description?: string
+  variant?: PaywallVariant
   children: ReactNode
   fallback?: ReactNode
   showPreview?: boolean
@@ -22,6 +91,7 @@ export function PremiumGate({
   feature,
   title,
   description,
+  variant = "generic",
   children,
   fallback,
   showPreview = false
@@ -49,6 +119,10 @@ export function PremiumGate({
     return <>{fallback}</>
   }
 
+  const copy = VARIANT_COPY[variant] ?? VARIANT_COPY.generic
+  const resolvedTitle = title ?? copy.title
+  const resolvedDescription = description ?? copy.description
+
   return (
     <Card className="relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20" />
@@ -59,26 +133,31 @@ export function PremiumGate({
           </div>
           <Badge variant="secondary" className="mx-auto mb-2 bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200">
             <Lock className="mr-1 h-3 w-3" />
-            Premium Feature
+            {copy.badge}
           </Badge>
-          <CardTitle className="text-xl">{title}</CardTitle>
-          <CardDescription>{description}</CardDescription>
+          <CardTitle className="text-xl">{resolvedTitle}</CardTitle>
+          <CardDescription>{resolvedDescription}</CardDescription>
         </CardHeader>
         <CardContent className="text-center space-y-4">
           {showPreview && (
-            <div className="opacity-50 pointer-events-none">
+            <div className="opacity-50 pointer-events-none blur-[2px] select-none">
               {children}
             </div>
           )}
           <div className="space-y-3">
+            {copy.highlight && (
+              <p className="text-sm font-medium text-amber-900 dark:text-amber-200 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/40 rounded-md px-3 py-2">
+                {copy.highlight}
+              </p>
+            )}
             <p className="text-sm text-muted-foreground">
-              Upgrade to Premium to unlock this feature and many more advanced retirement planning tools.
+              14-day free trial · No card charged today · Cancel anytime from your portal.
             </p>
             <div className="flex flex-col sm:flex-row gap-2 justify-center">
               <Button asChild>
-                <Link href="/subscribe">
+                <Link href="/pricing">
                   <Crown className="mr-2 h-4 w-4" />
-                  Upgrade to Premium
+                  {copy.primaryCta}
                 </Link>
               </Button>
               <Button variant="outline" asChild>

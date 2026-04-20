@@ -212,8 +212,7 @@ export default function SocialSecurityPage() {
       <div className="mb-12">
         <PremiumGate
           feature="social_security"
-          title="Social Security Benefit Integration"
-          description="Enter your official SSA.gov benefit estimates and combine them with your pension for comprehensive retirement planning"
+          variant="ss_limit"
           showPreview={false}
         >
           <SocialSecurityCalculator />

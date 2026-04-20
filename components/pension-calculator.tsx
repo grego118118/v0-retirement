@@ -36,6 +36,7 @@ import { useSession } from "next-auth/react"
 import { useRetirementData } from "@/hooks/use-retirement-data"
 import { useSubscriptionStatus } from "@/hooks/use-subscription"
 import { EnhancedPremiumGate } from "@/components/premium/enhanced-premium-gate"
+import { UsageBanner } from "@/components/premium/usage-banner"
 import {
   Dialog,
   DialogContent,
@@ -2182,6 +2183,16 @@ export default function PensionCalculator() {
 
   return (
     <>
+      {/* Approaching-limit nudge: shown when user is 1 away from or at the saves limit. */}
+      {!isPremium && (
+        <UsageBanner
+          feature="saves"
+          currentUsage={savedCalculationsCount}
+          limit={maxSavedCalculations === Infinity ? 0 : maxSavedCalculations}
+          className="mb-4"
+        />
+      )}
+
       {/* Mobile-First Layout: Calculator Form First */}
       <div className="lg:hidden">
         {/* Mobile: Calculator Form Card - Appears First */}
