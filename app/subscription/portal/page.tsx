@@ -6,19 +6,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { 
-  CreditCard, 
-  Crown, 
-  Calendar, 
-  FileText, 
+import {
+  CreditCard,
+  Crown,
+  Calendar,
+  FileText,
   ExternalLink,
   AlertTriangle,
   CheckCircle,
   Loader2,
-  ArrowLeft
+  ArrowLeft,
+  Sparkles
 } from "lucide-react"
 import Link from "next/link"
-import { getSubscriptionDisplayStatus } from "@/lib/stripe/config"
+import { getSubscriptionDisplayStatus, SUBSCRIPTION_PLANS } from "@/lib/stripe/config"
 
 interface SubscriptionData {
   isPremium: boolean
@@ -49,6 +50,37 @@ export default function SubscriptionPortalPage() {
   const [loading, setLoading] = useState(true)
   const [portalLoading, setPortalLoading] = useState(false)
   const [stripeNotConfigured, setStripeNotConfigured] = useState(false)
+  const [switchingPlan, setSwitchingPlan] = useState(false)
+  const [switchError, setSwitchError] = useState<string | null>(null)
+
+  const handleSwitchToAnnual = async () => {
+    setSwitchingPlan(true)
+    setSwitchError(null)
+    try {
+      const response = await fetch('/api/stripe/switch-plan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ targetPlan: 'annual' }),
+      })
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        throw new Error(data?.error || 'Failed to switch plan')
+      }
+
+      // Refresh subscription data so the banner disappears.
+      const statusResponse = await fetch('/api/subscription/status')
+      if (statusResponse.ok) {
+        const data = await statusResponse.json()
+        setSubscriptionData(data)
+      }
+    } catch (error: any) {
+      console.error('Switch to annual failed:', error)
+      setSwitchError(error?.message || 'Failed to switch plan')
+    } finally {
+      setSwitchingPlan(false)
+    }
+  }
 
   useEffect(() => {
     async function fetchData() {
@@ -288,6 +320,48 @@ export default function SubscriptionPortalPage() {
               Manage your subscription, billing, and payment information.
             </p>
           </div>
+
+          {/* Annual upsell banner: shown only when user is on the monthly plan. */}
+          {subscriptionData.subscriptionPlan === 'monthly' && !subscriptionData.cancelAtPeriodEnd && (
+            <Card className="mb-8 border-mrs-gold-400/40 bg-gradient-to-r from-mrs-gold-50 to-amber-50 dark:from-mrs-gold-500/10 dark:to-amber-500/10">
+              <CardContent className="py-5 flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
+                <div className="flex items-start gap-3 flex-1">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-mrs-gold-500/20">
+                    <Sparkles className="h-5 w-5 text-mrs-gold-700 dark:text-mrs-gold-400" />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-slate-900 dark:text-white">
+                      Switch to annual and save $13.89/year
+                    </div>
+                    <div className="text-sm text-slate-600 dark:text-slate-300 mt-1">
+                      Monthly: ${(SUBSCRIPTION_PLANS.monthly.price * 12).toFixed(2)}/yr · Annual: ${SUBSCRIPTION_PLANS.annual.price}/yr.
+                      Stripe prorates the change automatically — you're credited for the unused portion of this month.
+                    </div>
+                    {switchError && (
+                      <div className="text-sm text-red-600 dark:text-red-400 mt-2">{switchError}</div>
+                    )}
+                  </div>
+                </div>
+                <Button
+                  onClick={handleSwitchToAnnual}
+                  disabled={switchingPlan}
+                  className="bg-gradient-to-r from-mrs-gold-500 to-mrs-gold-600 hover:from-mrs-gold-400 hover:to-mrs-gold-500 text-white font-bold shadow-md shrink-0"
+                >
+                  {switchingPlan ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Switching...
+                    </>
+                  ) : (
+                    <>
+                      <Crown className="mr-2 h-4 w-4" />
+                      Switch to Annual
+                    </>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+          )}
 
           <div className="grid lg:grid-cols-2 gap-8">
             {/* Subscription Details */}
