@@ -20,6 +20,7 @@ import {
 } from "lucide-react"
 import { CombinedCalculationWizard } from "@/components/wizard/combined-calculation-wizard"
 import { PremiumGate } from "@/components/premium/premium-gate"
+import { ExitIntentModal } from "@/components/premium/exit-intent-modal"
 import { CombinedCalculationData } from "@/lib/wizard/wizard-types"
 
 export default function WizardPage() {
@@ -334,6 +335,7 @@ export default function WizardPage() {
           </div>
         </CardContent>
       </Card>
+      <ExitIntentModal />
     </div>
   )
 }

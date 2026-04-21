@@ -7,6 +7,7 @@ import { Crown, DollarSign, TrendingUp, Calculator, Check, Users, ExternalLink, 
 import Link from "next/link"
 import { SocialSecurityCalculator } from "@/components/social-security/social-security-calculator"
 import { PremiumGate } from "@/components/premium/premium-gate"
+import { ExitIntentModal } from "@/components/premium/exit-intent-modal"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export const metadata = generateSEOMetadata({
@@ -333,6 +334,7 @@ export default function SocialSecurityPage() {
         </CardContent>
       </Card>
     </div>
+    <ExitIntentModal />
     </>
   )
 }
