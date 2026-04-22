@@ -8,7 +8,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth/auth-config'
 import { prisma } from '@/lib/prisma'
 import { StripeService } from '@/lib/stripe/service'
-import { SUBSCRIPTION_PLANS } from '@/lib/stripe/config'
+import { SUBSCRIPTION_PLANS, TRIAL_PERIOD_DAYS } from '@/lib/stripe/config'
 
 // Force dynamic rendering to prevent static generation issues with Prisma
 export const dynamic = 'force-dynamic'
@@ -101,13 +101,23 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // First-time customer heuristic: no prior subscriptionId and no active/past status.
+    // These users get the 14-day free trial. Returning subscribers go straight to paid.
+    const isFirstTimeCustomer =
+      !user.subscriptionId &&
+      (user.subscriptionStatus === null ||
+        user.subscriptionStatus === undefined ||
+        user.subscriptionStatus === 'free')
+    const trialDays = isFirstTimeCustomer ? TRIAL_PERIOD_DAYS : undefined
+
     // Create checkout session
     const checkoutUrl = await StripeService.createCheckoutSession(
       customerId,
       priceId,
       userEmail,
       successUrl,
-      cancelUrl
+      cancelUrl,
+      trialDays
     )
 
     console.log(`Created checkout session for ${userEmail}: ${checkoutUrl}`)

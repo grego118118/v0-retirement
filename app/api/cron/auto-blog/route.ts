@@ -1,4 +1,5 @@
 export const maxDuration = 60
+export const dynamic = 'force-dynamic'
 
 /**
  * Weekly Auto-Blog Generator
@@ -11,13 +12,21 @@ export const maxDuration = 60
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
-// Supabase client for direct database access
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-)
+// Lazy Supabase client — do NOT instantiate at module load (breaks `next build`
+// "Collecting page data" when env vars aren't injected).
+let _supabase: SupabaseClient | null = null
+function getSupabase(): SupabaseClient {
+  if (_supabase) return _supabase
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!url || !key) {
+    throw new Error('Supabase env vars (NEXT_PUBLIC_SUPABASE_URL + service/anon key) are not configured')
+  }
+  _supabase = createClient(url, key)
+  return _supabase
+}
 
 // ─── Topic Pool ────────────────────────────────────────────────────────────────
 // Covers retirement trends, planning tips, and policy/legislative updates
@@ -86,7 +95,7 @@ export async function GET(request: NextRequest) {
     const slug = generateSlug(content.title)
     const now = new Date().toISOString()
 
-    const { data, error } = await supabase.from('blog_posts').insert({
+    const { data, error } = await getSupabase().from('blog_posts').insert({
       id: slug,
       title: content.title,
       slug: slug,
@@ -108,7 +117,7 @@ export async function GET(request: NextRequest) {
     if (error) {
       console.error('Database error:', error)
       // Try with camelCase columns as fallback (Prisma schema uses camelCase)
-      const { data: data2, error: error2 } = await supabase.from('blog_posts').insert({
+      const { data: data2, error: error2 } = await getSupabase().from('blog_posts').insert({
         id: slug,
         title: content.title,
         slug: slug,
@@ -158,7 +167,7 @@ export async function GET(request: NextRequest) {
 async function pickUnusedTopic() {
   try {
     // Fetch recent post titles to avoid repetition
-    const { data: recentPosts } = await supabase
+    const { data: recentPosts } = await getSupabase()
       .from('blog_posts')
       .select('title')
       .order('created_at', { ascending: false })

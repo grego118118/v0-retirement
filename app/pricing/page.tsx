@@ -12,6 +12,7 @@ import Link from "next/link"
 import { ResponsiveAd, PremiumAlternative } from "@/components/ads/adsense"
 import { AutoAds, SmartAds } from "@/components/ads/auto-ads"
 import { Breadcrumbs } from "@/components/seo/breadcrumbs"
+import { ExitIntentModal } from "@/components/premium/exit-intent-modal"
 
 // Feature-specific messaging
 const featureMessages = {
@@ -295,6 +296,7 @@ function PricingPageContent() {
           </div>
         </div>
       </main>
+      <ExitIntentModal />
     </div>
   )
 

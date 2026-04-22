@@ -7,6 +7,7 @@ import { Crown, DollarSign, TrendingUp, Calculator, Check, Users, ExternalLink, 
 import Link from "next/link"
 import { SocialSecurityCalculator } from "@/components/social-security/social-security-calculator"
 import { PremiumGate } from "@/components/premium/premium-gate"
+import { ExitIntentModal } from "@/components/premium/exit-intent-modal"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export const metadata = generateSEOMetadata({
@@ -212,8 +213,7 @@ export default function SocialSecurityPage() {
       <div className="mb-12">
         <PremiumGate
           feature="social_security"
-          title="Social Security Benefit Integration"
-          description="Enter your official SSA.gov benefit estimates and combine them with your pension for comprehensive retirement planning"
+          variant="ss_limit"
           showPreview={false}
         >
           <SocialSecurityCalculator />
@@ -334,6 +334,7 @@ export default function SocialSecurityPage() {
         </CardContent>
       </Card>
     </div>
+    <ExitIntentModal />
     </>
   )
 }

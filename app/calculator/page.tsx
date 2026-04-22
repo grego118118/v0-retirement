@@ -12,6 +12,7 @@ import { ArrowRight, BookOpen, Users, DollarSign, Calculator, TrendingUp, FileTe
 import { Badge } from "@/components/ui/badge"
 import { Breadcrumbs } from "@/components/seo/breadcrumbs"
 import { RelatedTools } from "@/components/seo/related-tools"
+import { ExitIntentModal } from "@/components/premium/exit-intent-modal"
 
 export const metadata = generateSEOMetadata({
   title: "MA State Pension Calculator 2025 | Free MSRB Tool - Results in 60 Seconds",
@@ -261,6 +262,7 @@ export default function CalculatorPage() {
           <RelatedTools currentSlug="calculator" />
         </div>
       </div>
+      <ExitIntentModal />
     </>
   )
 }

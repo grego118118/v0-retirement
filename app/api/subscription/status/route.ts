@@ -38,6 +38,7 @@ interface SubscriptionResponse {
   currentPeriodEnd?: string
   cancelAtPeriodEnd?: boolean
   trialEnd?: string
+  hasUsedTrial?: boolean
   customerId?: string
   subscriptionId?: string
   usageLimits: {
@@ -118,6 +119,7 @@ export async function GET(request: NextRequest) {
             isSubscriptionActive(sub.status)
           ) || customer.subscriptions[0]
 
+          // If we see any subscription (active or historical), the user has already used their trial.
           subscriptionData = {
             isPremium: isSubscriptionActive(activeSubscription.status),
             subscriptionStatus: activeSubscription.status,
@@ -126,6 +128,7 @@ export async function GET(request: NextRequest) {
             currentPeriodEnd: safeToISOString(activeSubscription.currentPeriodEnd),
             cancelAtPeriodEnd: activeSubscription.cancelAtPeriodEnd,
             trialEnd: safeToISOString(activeSubscription.trialEnd),
+            hasUsedTrial: true,
             customerId: customer.id,
             subscriptionId: activeSubscription.id,
             usageLimits: getUsageLimits(activeSubscription.plan),
@@ -162,6 +165,7 @@ function getFreeUserData(user: any, calculationsCount: number): SubscriptionResp
     subscriptionStatus: 'inactive',
     subscriptionPlan: 'free',
     savedCalculationsCount: calculationsCount,
+    hasUsedTrial: Boolean(user?.subscriptionId) || user?.subscriptionStatus === 'canceled',
     usageLimits: getUsageLimits('free'),
     currentUsage: {
       savedCalculations: calculationsCount,

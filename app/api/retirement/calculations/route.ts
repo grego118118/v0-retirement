@@ -31,6 +31,19 @@ const calculationSchema = z.object({
     combinedMonthlyIncome: z.number().min(0).optional(),
     replacementRatio: z.number().min(0).max(2).optional(),
   }).optional(),
+  // Multi-group career segments. When present, the pension was calculated as a
+  // prorated benefit across multiple MA retirement groups. The retirementGroup
+  // field above stores the last/retirement segment's group for backward compat.
+  careerSegments: z
+    .array(
+      z.object({
+        group: z.enum(["1", "2", "3", "4"]),
+        yearsOfService: z.number().positive(),
+      }),
+    )
+    .min(2)
+    .max(2)
+    .optional(),
 })
 
 // GET - Retrieve all user's calculations
@@ -92,9 +105,10 @@ export async function GET(request: NextRequest) {
           createdAt: new Date("2024-01-15T10:30:00Z"),
           updatedAt: new Date("2024-01-15T10:30:00Z"),
           socialSecurityData: null,
+          careerSegments: null,
         },
         {
-          id: "mock-2", 
+          id: "mock-2",
           userId: session.user.id,
           calculationName: "Early Retirement - Age 62",
           retirementDate: new Date("2026-06-15"),
@@ -113,6 +127,7 @@ export async function GET(request: NextRequest) {
           createdAt: new Date("2024-01-10T14:15:00Z"),
           updatedAt: new Date("2024-01-10T14:15:00Z"),
           socialSecurityData: null,
+          careerSegments: null,
         },
         {
           id: "mock-3",
@@ -134,6 +149,7 @@ export async function GET(request: NextRequest) {
           createdAt: new Date("2024-01-08T09:45:00Z"),
           updatedAt: new Date("2024-01-08T09:45:00Z"),
           socialSecurityData: null,
+          careerSegments: null,
         },
         {
           id: "mock-4",
@@ -155,6 +171,7 @@ export async function GET(request: NextRequest) {
           createdAt: new Date("2024-01-05T16:20:00Z"),
           updatedAt: new Date("2024-01-05T16:20:00Z"),
           socialSecurityData: null,
+          careerSegments: null,
         },
         {
           id: "mock-5",
@@ -185,6 +202,7 @@ export async function GET(request: NextRequest) {
             combinedMonthlyIncome: 7265,
             replacementRatio: 0.85,
           }),
+          careerSegments: null,
         }
       ]
       
@@ -318,6 +336,7 @@ export async function POST(request: NextRequest) {
         notes: validatedData.notes,
         isFavorite: validatedData.isFavorite || false,
         socialSecurityData: validatedData.socialSecurityData ? JSON.stringify(validatedData.socialSecurityData) : null,
+        careerSegments: validatedData.careerSegments ?? undefined,
       }
     })
 

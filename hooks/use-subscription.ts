@@ -164,12 +164,13 @@ export function useSubscriptionStatus() {
   const upgradeRequired = (feature: string): boolean => {
     const isUpgradeRequired = !subscriptionData.isPremium && [
       'unlimited_saves',
-      'pdf_export', 
+      'pdf_export',
       'excel_export',
       'advanced_scenarios',
       'comparison_tools',
       'social_security',
-      '401k_integration'
+      '401k_integration',
+      'multi_group'
     ].includes(feature)
     
     console.log(`upgradeRequired(${feature}): isPremium=${subscriptionData.isPremium}, required=${isUpgradeRequired}`)

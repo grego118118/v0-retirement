@@ -386,6 +386,7 @@ model RetirementCalculation {
   benefitReduction   Float?
   survivorBenefit    Float?
   socialSecurityData String?
+  careerSegments     Json?
   notes              String?
   isFavorite         Boolean  @default(false)
   createdAt          DateTime @default(now())

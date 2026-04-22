@@ -4,6 +4,7 @@ import {
   calculateAverageHighestSalary,
   calculateRetirementEligibility,
   calculateCOLAProjection,
+  calculateMultiGroupPension,
   type PensionCalculationResult,
   type EmployeeGroup
 } from '@/lib/pension-calculations'
@@ -268,6 +269,137 @@ describe('Pension Calculations', () => {
       expect(result.averageSalary).toBe(0)
       expect(result.annualPension).toBe(0)
       expect(result.monthlyPension).toBe(0)
+    })
+  })
+
+  describe('calculateMultiGroupPension', () => {
+    it('matches the single-segment path for a 1-segment career', () => {
+      const result = calculateMultiGroupPension(
+        [{ group: 'GROUP_2', yearsOfService: 30 }],
+        55,
+        75000,
+        'A',
+        'before_2012',
+      )
+      expect(result.eligible).toBe(true)
+      expect(result.totalYearsOfService).toBe(30)
+      expect(result.retirementGroup).toBe('GROUP_2')
+      expect(result.basePercentage).toBeCloseTo(0.6, 5)
+      expect(result.baseAnnualPension).toBeCloseTo(75000 * 0.6, 2)
+      expect(result.annualPension).toBeCloseTo(75000 * 0.6, 2)
+      expect(result.cappedBase).toBe(false)
+    })
+
+    it('correctly prorates 5 yrs Group 4 + 30 yrs Group 2 at age 55 (the canonical user scenario)', () => {
+      // Segment 1: 5 yrs * 2.5% (Group 4 at age 55) = 12.5%
+      // Segment 2: 30 yrs * 2.0% (Group 2 at age 55) = 60.0%
+      // Combined: 72.5% (under 80% cap)
+      const averageSalary = 80000
+      const result = calculateMultiGroupPension(
+        [
+          { group: 'GROUP_4', yearsOfService: 5 },
+          { group: 'GROUP_2', yearsOfService: 30 },
+        ],
+        55,
+        averageSalary,
+        'A',
+        'before_2012',
+      )
+      expect(result.eligible).toBe(true)
+      expect(result.totalYearsOfService).toBe(35)
+      expect(result.retirementGroup).toBe('GROUP_2') // retirement group is the last segment
+      expect(result.basePercentage).toBeCloseTo(0.725, 5)
+      expect(result.baseAnnualPension).toBeCloseTo(averageSalary * 0.725, 2)
+      expect(result.cappedBase).toBe(false)
+      expect(result.segmentBreakdown).toHaveLength(2)
+      expect(result.segmentBreakdown[0].benefitFactor).toBeCloseTo(0.025, 5)
+      expect(result.segmentBreakdown[1].benefitFactor).toBeCloseTo(0.02, 5)
+      expect(result.segmentBreakdown[0].segmentPercentage).toBeCloseTo(0.125, 5)
+      expect(result.segmentBreakdown[1].segmentPercentage).toBeCloseTo(0.6, 5)
+    })
+
+    it('applies the 80% cap to the combined benefit', () => {
+      // 30 yrs Group 4 at 55 (2.5%) + 20 yrs Group 2 at 55 (2.0%) = 75% + 40% = 115% -> capped to 80%
+      const averageSalary = 80000
+      const result = calculateMultiGroupPension(
+        [
+          { group: 'GROUP_4', yearsOfService: 30 },
+          { group: 'GROUP_2', yearsOfService: 20 },
+        ],
+        55,
+        averageSalary,
+        'A',
+        'before_2012',
+      )
+      expect(result.eligible).toBe(true)
+      expect(result.cappedBase).toBe(true)
+      expect(result.basePercentage).toBeCloseTo(0.8, 5)
+      expect(result.baseAnnualPension).toBeCloseTo(averageSalary * 0.8, 2)
+    })
+
+    it('applies Option B 1% reduction to the combined base', () => {
+      const averageSalary = 80000
+      const resultA = calculateMultiGroupPension(
+        [
+          { group: 'GROUP_4', yearsOfService: 5 },
+          { group: 'GROUP_2', yearsOfService: 30 },
+        ],
+        55,
+        averageSalary,
+        'A',
+        'before_2012',
+      )
+      const resultB = calculateMultiGroupPension(
+        [
+          { group: 'GROUP_4', yearsOfService: 5 },
+          { group: 'GROUP_2', yearsOfService: 30 },
+        ],
+        55,
+        averageSalary,
+        'B',
+        'before_2012',
+      )
+      expect(resultB.annualPension).toBeCloseTo(resultA.annualPension * 0.99, 2)
+    })
+
+    it('reports ineligibility when combined service does not meet minimums', () => {
+      // Group 1 post-2012 requires age 60 and 10+ YOS. 5 + 3 = 8 < 10 fails.
+      const result = calculateMultiGroupPension(
+        [
+          { group: 'GROUP_2', yearsOfService: 5 },
+          { group: 'GROUP_1', yearsOfService: 3 },
+        ],
+        60,
+        75000,
+        'A',
+        'after_2012',
+      )
+      expect(result.eligible).toBe(false)
+      expect(result.annualPension).toBe(0)
+    })
+
+    it('uses the retirement group (last segment) for option C reduction factor', () => {
+      // GROUP_1 uses different Option C factors than GROUP_2/3/4.
+      // A career ending in Group 1 at age 60 with a 58 beneficiary should use
+      // GROUP_1_OPTION_C_FACTORS ("60-58" = 0.9065).
+      const result = calculateMultiGroupPension(
+        [
+          { group: 'GROUP_2', yearsOfService: 10 },
+          { group: 'GROUP_1', yearsOfService: 20 },
+        ],
+        60,
+        80000,
+        'C',
+        'before_2012',
+        '58',
+      )
+      expect(result.eligible).toBe(true)
+      expect(result.retirementGroup).toBe('GROUP_1')
+      // Base combined percent at age 60: 10*0.025 + 20*0.02 = 0.25 + 0.4 = 0.65
+      // Base annual = 52000 ; Option C factor (60-58 in GROUP_1) = 0.9065
+      expect(result.baseAnnualPension).toBeCloseTo(52000, 2)
+      expect(result.annualPension).toBeCloseTo(52000 * 0.9065, 0)
+      expect(result.survivorAnnualPension).toBeCloseTo(result.annualPension * (2 / 3), 0)
     })
   })
 })
