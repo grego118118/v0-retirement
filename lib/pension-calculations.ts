@@ -690,6 +690,100 @@ export function calculateMultiGroupPension(
   }
 }
 
+/**
+ * Projection table for multi-group careers. Holds earlier segments constant
+ * and grows only the retirement (final) segment year-over-year, routing each
+ * row through calculateMultiGroupPension so the blended base% and 80% cap
+ * reflect the actual career mix — not a single-group approximation.
+ *
+ * The "factor" column shows the retirement-group's benefit factor at the
+ * projected age (the factor that applies to the incremental year of service),
+ * matching the single-group table's semantics.
+ */
+export function generateMultiGroupProjectionTable(
+  segments: CareerSegment[],
+  projectionStartAge: number,
+  averageSalary: number,
+  selectedOption: string,
+  beneficiaryAgeStr: string,
+  serviceEntry: string,
+) {
+  if (segments.length === 0) {
+    return { rows: [], title: "Pension Projection" }
+  }
+
+  const retirementGroup = segments[segments.length - 1].group
+  const retirementGroupIdx = segments.length - 1
+  const groupMaxAgeLimits: Record<string, number> = {
+    GROUP_1: 70,
+    GROUP_2: 68,
+    GROUP_3: 68,
+    GROUP_4: 65,
+  }
+  const maxAge = groupMaxAgeLimits[retirementGroup] ?? 70
+  const maxIterations = 30
+
+  const rows: Array<{
+    age: number
+    yearsOfService: number
+    factor: number
+    totalBenefitPercentage: number
+    annualPension: number
+    monthlyPension: number
+    survivorAnnual: number | string
+    survivorMonthly: number | string
+  }> = []
+
+  for (let yearOffset = 0; yearOffset < maxIterations; yearOffset++) {
+    const currentAge = projectionStartAge + yearOffset
+    if (Math.floor(currentAge) > maxAge) break
+
+    const projSegments = segments.map((seg, idx) =>
+      idx === retirementGroupIdx
+        ? { ...seg, yearsOfService: seg.yearsOfService + yearOffset }
+        : seg,
+    )
+
+    const result = calculateMultiGroupPension(
+      projSegments,
+      currentAge,
+      averageSalary,
+      selectedOption as "A" | "B" | "C",
+      serviceEntry,
+      beneficiaryAgeStr,
+    )
+
+    if (!result.eligible) continue
+
+    const currentTotalYOS = projSegments.reduce((s, seg) => s + seg.yearsOfService, 0)
+    const retirementGroupFactor = getBenefitFactor(
+      Math.floor(currentAge),
+      retirementGroup,
+      serviceEntry,
+      currentTotalYOS,
+    )
+
+    rows.push({
+      age: currentAge,
+      yearsOfService: currentTotalYOS,
+      factor: retirementGroupFactor,
+      totalBenefitPercentage: result.basePercentage,
+      annualPension: result.annualPension,
+      monthlyPension: result.monthlyPension,
+      survivorAnnual: selectedOption === "C" ? result.survivorAnnualPension : "N/A",
+      survivorMonthly: selectedOption === "C" ? result.survivorMonthlyPension : "N/A",
+    })
+
+    if (result.basePercentage >= MAX_PENSION_PERCENTAGE_OF_SALARY) break
+  }
+
+  const groupLabels = segments.map(s => s.group.replace("_", " ")).join(" + ")
+  return {
+    rows,
+    title: `Multi-Group Pension Projection (${groupLabels}, From Age ${projectionStartAge} up to 80% Max)`,
+  }
+}
+
 	// ---------------------------------------------------------------------------
 	// Legacy-compatible types & helper functions
 	// ---------------------------------------------------------------------------
