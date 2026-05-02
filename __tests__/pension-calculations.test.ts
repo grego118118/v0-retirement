@@ -5,6 +5,7 @@ import {
   calculateRetirementEligibility,
   calculateCOLAProjection,
   calculateMultiGroupPension,
+  generateMultiGroupProjectionTable,
   type PensionCalculationResult,
   type EmployeeGroup
 } from '@/lib/pension-calculations'
@@ -400,6 +401,69 @@ describe('Pension Calculations', () => {
       expect(result.baseAnnualPension).toBeCloseTo(52000, 2)
       expect(result.annualPension).toBeCloseTo(52000 * 0.9065, 0)
       expect(result.survivorAnnualPension).toBeCloseTo(result.annualPension * (2 / 3), 0)
+    })
+  })
+
+  describe('generateMultiGroupProjectionTable', () => {
+    it('rows reflect blended base% (not retirement-group single-group approximation)', () => {
+      // 5 yrs Group 4 + 26 yrs Group 2, age 55. Retiring row:
+      //   - Single-group would show 2.0% * 31 = 62.0% (wrong for multi-group).
+      //   - Multi-group should show 2.5%*5 + 2.0%*26 = 0.125 + 0.520 = 0.645 = 64.5%.
+      const rows = generateMultiGroupProjectionTable(
+        [
+          { group: 'GROUP_4', yearsOfService: 5 },
+          { group: 'GROUP_2', yearsOfService: 26 },
+        ],
+        55,
+        80000,
+        'A',
+        '',
+        'before_2012',
+      ).rows
+
+      expect(rows.length).toBeGreaterThan(0)
+      const retirementRow = rows[0]
+      expect(retirementRow.age).toBe(55)
+      expect(retirementRow.yearsOfService).toBe(31)
+      // Critical: must be 64.5%, not 62.0% single-group value.
+      expect(retirementRow.totalBenefitPercentage).toBeCloseTo(0.645, 4)
+      expect(retirementRow.annualPension).toBeCloseTo(80000 * 0.645, 2)
+    })
+
+    it('caps at 80% once combined percentage exceeds the limit', () => {
+      const { rows } = generateMultiGroupProjectionTable(
+        [
+          { group: 'GROUP_4', yearsOfService: 5 },
+          { group: 'GROUP_2', yearsOfService: 30 },
+        ],
+        55,
+        80000,
+        'A',
+        '',
+        'before_2012',
+      )
+      const lastRow = rows[rows.length - 1]
+      expect(lastRow.totalBenefitPercentage).toBeLessThanOrEqual(0.8 + 1e-9)
+      // With a starting base of 72.5%, the projection should reach the 80% cap.
+      const cappedRow = rows.find(r => r.totalBenefitPercentage >= 0.8 - 1e-9)
+      expect(cappedRow).toBeDefined()
+    })
+
+    it('title labels both segment groups for clarity', () => {
+      const { title } = generateMultiGroupProjectionTable(
+        [
+          { group: 'GROUP_4', yearsOfService: 5 },
+          { group: 'GROUP_2', yearsOfService: 26 },
+        ],
+        55,
+        80000,
+        'A',
+        '',
+        'before_2012',
+      )
+      expect(title).toContain('GROUP 4')
+      expect(title).toContain('GROUP 2')
+      expect(title).toContain('Multi-Group')
     })
   })
 })

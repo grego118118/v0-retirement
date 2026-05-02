@@ -21,6 +21,7 @@ import {
   checkEligibility,
   getBenefitFactor,
   generateProjectionTable,
+  generateMultiGroupProjectionTable,
   calculateMultiGroupPension,
 } from "@/lib/pension-calculations"
 import { FREE_TIER_LIMITS } from "@/lib/stripe/config"
@@ -780,11 +781,15 @@ export default function PensionCalculator() {
           localStorage.setItem(USAGE_KEY, String(prevCount + 1))
         }
 
-        // Projection table uses the retirement group (last segment) with total YOS.
-        const projectionData = generateProjectionTable(
-          group,
+        // Multi-group projection: hold earlier segment(s) constant and grow
+        // only the retirement-segment YOS year over year via calculateMultiGroupPension,
+        // so blended base% and 80% cap reflect the real career mix.
+        const projectionData = generateMultiGroupProjectionTable(
+          [
+            { group: formData.secondaryGroup, yearsOfService: secondaryYears },
+            { group, yearsOfService: primaryYears },
+          ],
           enteredAge,
-          enteredYOS,
           averageSalary,
           formData.retirementOption,
           formData.beneficiaryAge,
