@@ -186,8 +186,21 @@ export async function GET(request: NextRequest) {
   }
 
   // STAGE 2: PICK — filter out already-targeted keywords
-  const supabase = getSupabase()
-  const recentKeywords = await getRecentKeywords(supabase)
+  let supabase: ReturnType<typeof getSupabase>
+  try {
+    supabase = getSupabase()
+  } catch (err) {
+    return NextResponse.json(
+      { success: false, error: `Supabase not configured: ${(err as Error).message}` },
+      { status: 500 }
+    )
+  }
+  let recentKeywords: string[] = []
+  try {
+    recentKeywords = await getRecentKeywords(supabase)
+  } catch {
+    // Non-fatal — proceed without deduplication
+  }
 
   const freshOpportunities = opportunities
     .filter((opp) => {
@@ -216,13 +229,17 @@ export async function GET(request: NextRequest) {
       const imageUrl = makeImageUrl(content.title)
       const now = new Date().toISOString()
 
-      const { data, error } = await supabase.from('blog_posts').insert({
-        id: slug,
-        title: content.title,
-        slug,
-        content: content.body,
-        excerpt: content.excerpt,
+      const basePayload = {
+        id: slug, title: content.title, slug,
+        content: content.body, excerpt: content.excerpt,
         status: shouldPublish ? 'published' : 'draft',
+      }
+
+      let dbError: string | undefined
+
+      // Try snake_case first (matches Supabase column names)
+      const { error: err1 } = await supabase.from('blog_posts').insert({
+        ...basePayload,
         is_ai_generated: true,
         ai_model: 'gemini-2.0-flash',
         fact_check_status: shouldPublish ? 'approved' : 'pending',
@@ -234,6 +251,24 @@ export async function GET(request: NextRequest) {
         created_at: now,
         updated_at: now,
       }).select().single()
+
+      if (err1) {
+        // Fallback: camelCase (Prisma-managed schema)
+        const { error: err2 } = await supabase.from('blog_posts').insert({
+          ...basePayload,
+          isAiGenerated: true,
+          aiModelUsed: 'gemini-2.0-flash',
+          factCheckStatus: shouldPublish ? 'approved' : 'pending',
+          seoDescription: content.metaDescription,
+          seoKeywords: content.keywords,
+          featuredImageUrl: imageUrl,
+          contentQualityScore: qualityScore,
+          publishedAt: shouldPublish ? now : null,
+          createdAt: now,
+          updatedAt: now,
+        }).select().single()
+        if (err2) dbError = err2.message
+      }
 
       const postUrl = `${baseUrl}/blog/${slug}`
 
@@ -252,7 +287,7 @@ export async function GET(request: NextRequest) {
         url: postUrl,
         indexingSubmitted: shouldPublish && !indexResult.error,
         indexingNotifyTime: indexResult.notifyTime,
-        dbError: error?.message,
+        dbError,
       })
     } catch (err) {
       errors.push(`Failed for "${query}": ${(err as Error).message}`)
