@@ -293,7 +293,7 @@ export async function GET(request: NextRequest) {
         published: shouldPublish,
         url: postUrl,
         indexingSubmitted: shouldPublish && !indexError,
-        indexingNotifyTime,
+        indexingNotifyTime: indexNotifyTime,
         dbError,
       })
     } catch (err) {
