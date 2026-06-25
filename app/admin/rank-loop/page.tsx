@@ -102,10 +102,27 @@ export default function RankLoopPage() {
     try {
       const res = await fetch('/api/cron/rank-loop', { method: 'POST' })
       const data = await res.json()
-      setLastRun(data)
+      // Normalize: ensure arrays always exist before setting state
+      setLastRun({
+        ranAt: data.ranAt ?? new Date().toISOString(),
+        gscConfigured: data.gscConfigured ?? false,
+        opportunitiesFound: data.opportunitiesFound ?? 0,
+        postsGenerated: data.postsGenerated ?? 0,
+        results: Array.isArray(data.results) ? data.results : [],
+        errors: Array.isArray(data.errors)
+          ? data.errors
+          : [data.error ?? 'Unknown error — check server logs'],
+      })
       await loadOpportunities()
     } catch (err) {
-      console.error('Loop run failed:', err)
+      setLastRun({
+        ranAt: new Date().toISOString(),
+        gscConfigured: false,
+        opportunitiesFound: 0,
+        postsGenerated: 0,
+        results: [],
+        errors: [`Network error: ${err instanceof Error ? err.message : String(err)}`],
+      })
     } finally {
       setRunning(false)
     }
@@ -123,10 +140,10 @@ export default function RankLoopPage() {
       })
       const data = await res.json()
       const result = data.result
-      if (result.error) {
-        setIndexResult(`Error: ${result.error}`)
+      if (!result || result.error) {
+        setIndexResult(`Error: ${result?.error ?? 'No response from indexing API'}`)
       } else {
-        setIndexResult(`Submitted! Notify time: ${result.notifyTime || 'pending'}`)
+        setIndexResult(`Submitted! Notify time: ${result.notifyTime ?? 'pending'}`)
         setIndexUrl('')
       }
     } catch {
@@ -206,7 +223,7 @@ export default function RankLoopPage() {
               <Stat label="GSC Connected" value={lastRun.gscConfigured ? 'Yes' : 'No'} />
               <Stat label="Errors" value={lastRun.errors.length} />
             </div>
-            {lastRun.results.map((r) => (
+            {(lastRun.results ?? []).map((r) => (
               <div key={r.slug} className="flex items-start gap-3 p-3 bg-white rounded-lg mb-2">
                 <CheckCircle className={`w-4 h-4 mt-0.5 ${r.published ? 'text-green-500' : 'text-yellow-500'}`} />
                 <div className="flex-1 min-w-0">
@@ -227,7 +244,7 @@ export default function RankLoopPage() {
                 )}
               </div>
             ))}
-            {lastRun.errors.map((e, i) => (
+            {(lastRun.errors ?? []).map((e, i) => (
               <p key={i} className="text-xs text-red-600 flex items-center gap-1">
                 <AlertCircle className="w-3 h-3" /> {e}
               </p>
