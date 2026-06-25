@@ -8,20 +8,9 @@ export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth/auth-config'
+import { isSeoAuthorized } from '@/lib/seo/admin-auth'
 import { getKeywordOpportunities } from '@/lib/seo/google-search-console'
 import { submitUrlForIndexing } from '@/lib/seo/google-indexing'
-
-// ─── Auth ──────────────────────────────────────────────────────────────────────
-async function isAuthorized(request: NextRequest): Promise<boolean> {
-  const isVercelCron = request.headers.get('x-vercel-cron') === '1'
-  const authHeader = request.headers.get('authorization')
-  const cronSecret = process.env.CRON_SECRET
-  if (isVercelCron || authHeader === `Bearer ${cronSecret}`) return true
-  const session = await getServerSession(authOptions)
-  return !!session?.user
-}
 
 // ─── Supabase ──────────────────────────────────────────────────────────────────
 function buildSupabase(): SupabaseClient | null {
@@ -173,7 +162,7 @@ const FALLBACK_TOPICS = [
 
 // ─── Main handler ──────────────────────────────────────────────────────────────
 export async function GET(request: NextRequest) {
-  if (!await isAuthorized(request)) {
+  if (!await isSeoAuthorized(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

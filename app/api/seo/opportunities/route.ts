@@ -1,16 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth/auth-config'
+import { isSeoAuthorized } from '@/lib/seo/admin-auth'
 import { getKeywordOpportunities, getPagePerformance } from '@/lib/seo/google-search-console'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
-  const session = await getServerSession(authOptions)
-  const authHeader = request.headers.get('authorization')
-  const cronSecret = process.env.CRON_SECRET
-
-  if (!session?.user && authHeader !== `Bearer ${cronSecret}`) {
+  if (!await isSeoAuthorized(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
