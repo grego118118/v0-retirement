@@ -150,8 +150,9 @@ async function getRecentKeywords(supabase: ReturnType<typeof createClient>): Pro
   if (!data) return []
   const keywords: string[] = []
   for (const post of data) {
-    if (Array.isArray(post.seo_keywords)) keywords.push(...post.seo_keywords)
-    if (post.title) keywords.push(...post.title.toLowerCase().split(/\s+/))
+    const p = post as { seo_keywords?: string[]; title?: string }
+    if (Array.isArray(p.seo_keywords)) keywords.push(...p.seo_keywords)
+    if (p.title) keywords.push(...p.title.toLowerCase().split(/\s+/))
   }
   return keywords.map((k: string) => k.toLowerCase())
 }
