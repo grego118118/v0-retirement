@@ -38,12 +38,11 @@ export async function POST(request: NextRequest) {
     const featureCheck = canAccessFeature(subscriptionInfo.userType, 'pdf_reports', 0)
     console.log(`🔍 PDF Generation: Feature check result:`, featureCheck)
 
-    // Additional fallback check for development/testing
-    const FALLBACK_PREMIUM_USERS = [
-      'premium@example.com',
-      'test@premium.com',
-      'grego118@gmail.com'
-    ]
+    // Additional fallback check for local development/testing only - never
+    // grant free access to a paid feature in production via a hardcoded list.
+    const FALLBACK_PREMIUM_USERS = process.env.NODE_ENV === 'production'
+      ? []
+      : ['premium@example.com', 'test@premium.com']
     const isFallbackPremium = FALLBACK_PREMIUM_USERS.includes(session.user.email)
 
     if (!featureCheck.hasAccess && !isFallbackPremium) {

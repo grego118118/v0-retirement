@@ -19,6 +19,10 @@ node_modules/
 .env.development.local
 .env.test.local
 .env.production.local
+.1env.local
+env.local.temp
+env.local.temp*
+*.env.temp
 
 # Editor directories and files
 .idea

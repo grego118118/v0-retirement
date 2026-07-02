@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Download, Printer, Crown, TrendingUp, DollarSign, Calendar, Info, AlertTriangle, Calculator } from "lucide-react"
+import { SocialShare } from "@/components/seo/social-share"
 import { motion } from "framer-motion"
 import { PremiumBadge } from "@/components/premium/premium-gate"
 import { useSubscriptionStatus } from "@/hooks/use-subscription"
@@ -144,6 +145,12 @@ export default function PensionResults({ result }: PensionResultsProps) {
           <h2 className="text-2xl font-bold tracking-tight mb-1">Your Estimated Pension</h2>
           <p className="text-md font-medium text-primary">{result.selectedOption}</p>
         </motion.div>
+        <div className="flex justify-center mt-4">
+          <SocialShare
+            url="https://www.masspension.com/calculator"
+            title={`I just estimated my Massachusetts state pension: ${formatCurrency(result.monthlyPension)}/month. Calculate yours free →`}
+          />
+        </div>
       </div>
 
       <Tabs defaultValue="overview" className="w-full">

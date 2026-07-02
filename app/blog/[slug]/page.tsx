@@ -4,7 +4,8 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { CalendarIcon, Clock, ArrowLeft, Share2, Bookmark, User, Tag } from "lucide-react"
+import { CalendarIcon, Clock, ArrowLeft, User, Tag } from "lucide-react"
+import { SocialShare } from "@/components/seo/social-share"
 import { blogPosts } from "@/lib/blog-data"
 import BlogPostClient from "./page-client"
 // Import the TableOfContents component
@@ -188,14 +189,10 @@ export default async function BlogPostPage({ params }: PageProps) {
                 ))}
               </div>
 
-              <div className="flex gap-2">
-                <Button variant="ghost" size="icon" title="Share article">
-                  <Share2 className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="icon" title="Bookmark article">
-                  <Bookmark className="h-4 w-4" />
-                </Button>
-              </div>
+              <SocialShare
+                url={`https://www.masspension.com/blog/${post.id}`}
+                title={post.title}
+              />
             </div>
           </div>
 
@@ -220,6 +217,17 @@ export default async function BlogPostPage({ params }: PageProps) {
 
             {/* Table of Contents */}
             <TableOfContents />
+          </div>
+
+          {/* Post-article share prompt */}
+          <div className="flex items-center justify-between flex-wrap gap-4 mb-12 py-6 border-y">
+            <p className="text-sm font-medium text-muted-foreground">
+              Found this helpful? Share it with a coworker.
+            </p>
+            <SocialShare
+              url={`https://www.masspension.com/blog/${post.id}`}
+              title={post.title}
+            />
           </div>
 
           {/* Calculator CTA */}

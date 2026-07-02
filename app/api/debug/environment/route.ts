@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { blockInProduction } from '@/lib/api/debug-guard'
 
 // Force dynamic rendering to prevent static generation issues with Prisma
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
+  const blocked = blockInProduction()
+  if (blocked) return blocked
+
   try {
     // Environment variable check
     const envCheck = {

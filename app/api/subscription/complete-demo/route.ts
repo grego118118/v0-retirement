@@ -9,8 +9,16 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(request: Request) {
   try {
+    // This endpoint grants premium access WITHOUT collecting payment. It exists
+    // purely so the checkout flow can be exercised when Stripe isn't configured
+    // locally. It must never be reachable in production - otherwise any signed-in
+    // user could grant themselves free premium access.
+    if (process.env.NODE_ENV === 'production') {
+      return NextResponse.json({ error: "Not found" }, { status: 404 })
+    }
+
     const session = await getServerSession(authOptions)
-    
+
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 })
     }

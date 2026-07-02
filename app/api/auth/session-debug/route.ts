@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth/auth-config"
+import { blockInProduction } from '@/lib/api/debug-guard'
 
 export async function GET(request: Request) {
+  const blocked = blockInProduction()
+  if (blocked) return blocked
+
   try {
     console.log("Session debug request started")
     

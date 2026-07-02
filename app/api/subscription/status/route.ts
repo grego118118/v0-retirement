@@ -23,12 +23,12 @@ const safeToISOString = (date: Date | null | undefined): string | undefined => {
   }
 };
 
-// Fallback premium users for development (when Stripe is not configured)
-const FALLBACK_PREMIUM_USERS = [
-  'premium@example.com',
-  'test@premium.com',
-  'grego118@gmail.com'
-]
+// Fallback premium users for local development only (when Stripe is not configured).
+// Never populated in production - premium status there must come from the
+// database (subscriptionStatus, kept in sync via Stripe webhooks) only.
+const FALLBACK_PREMIUM_USERS = process.env.NODE_ENV === 'production'
+  ? []
+  : ['premium@example.com', 'test@premium.com']
 
 interface SubscriptionResponse {
   isPremium: boolean

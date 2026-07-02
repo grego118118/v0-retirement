@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { Resend } from "resend"
 import { prisma } from "@/lib/prisma"
+import { rateLimit } from "@/lib/utils/rate-limit"
 
 // Force dynamic rendering to prevent static generation issues with Prisma
 export const dynamic = 'force-dynamic'
@@ -14,11 +15,24 @@ const getResend = () => {
   return resendInstance
 }
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const subscribeRateLimit = rateLimit({
+  interval: 60 * 60 * 1000,
+  uniqueTokenPerInterval: 2000,
+})
+
 export async function POST(request: NextRequest) {
   try {
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
+    try {
+      await subscribeRateLimit.check(10, ip)
+    } catch {
+      return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 })
+    }
+
     const { email } = await request.json()
 
-    if (!email || !email.includes("@")) {
+    if (!email || typeof email !== "string" || !EMAIL_REGEX.test(email)) {
       return NextResponse.json(
         { error: "Valid email address is required" },
         { status: 400 }

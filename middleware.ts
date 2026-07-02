@@ -54,10 +54,13 @@ export default withAuth(
       authorized: ({ token, req }) => {
         // Allow access to public routes
         const publicRoutes = [
-          "/", "/about", "/faq", "/blog", "/resources", "/contact",
+          "/about", "/faq", "/blog", "/resources", "/contact",
           "/auth/signin", "/auth/error", "/embed", "/tools", "/calculator"
         ]
-        const isPublicRoute = publicRoutes.some(route => req.nextUrl.pathname.startsWith(route))
+        const pathname = req.nextUrl.pathname
+        const isPublicRoute =
+          pathname === "/" ||
+          publicRoutes.some(route => pathname === route || pathname.startsWith(`${route}/`))
 
         if (isPublicRoute) {
           return true
