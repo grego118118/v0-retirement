@@ -23,7 +23,9 @@ const subscribeRateLimit = rateLimit({
 
 export async function POST(request: NextRequest) {
   try {
-    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
+      || request.headers.get("x-real-ip")?.trim()
+      || "unknown"
     try {
       await subscribeRateLimit.check(10, ip)
     } catch {
