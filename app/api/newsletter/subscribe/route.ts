@@ -15,7 +15,11 @@ const getResend = () => {
   return resendInstance
 }
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+// Linear-time email check: character classes exclude the delimiters that
+// follow them ('@' and '.'), so the regex cannot backtrack polynomially on
+// attacker-controlled input (CodeQL js/polynomial-redos).
+const EMAIL_REGEX = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/
+const MAX_EMAIL_LENGTH = 254 // RFC 5321
 const subscribeRateLimit = rateLimit({
   interval: 60 * 60 * 1000,
   uniqueTokenPerInterval: 2000,
@@ -34,7 +38,7 @@ export async function POST(request: NextRequest) {
 
     const { email } = await request.json()
 
-    if (!email || typeof email !== "string" || !EMAIL_REGEX.test(email)) {
+    if (!email || typeof email !== "string" || email.length > MAX_EMAIL_LENGTH || !EMAIL_REGEX.test(email)) {
       return NextResponse.json(
         { error: "Valid email address is required" },
         { status: 400 }

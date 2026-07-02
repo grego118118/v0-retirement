@@ -10,7 +10,12 @@ const signupRateLimit = rateLimit({
   uniqueTokenPerInterval: 1000,
 })
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+// Linear-time email check: character classes exclude the delimiters that
+// follow them ('@' and '.'), so the regex cannot backtrack polynomially on
+// attacker-controlled input (CodeQL js/polynomial-redos).
+const EMAIL_REGEX = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/
+const MAX_EMAIL_LENGTH = 254 // RFC 5321
+const MAX_PASSWORD_LENGTH = 128 // bcrypt only uses the first 72 bytes anyway
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,12 +34,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: "Email and password are required" }, { status: 400 })
     }
 
-    if (!EMAIL_REGEX.test(email)) {
+    if (email.length > MAX_EMAIL_LENGTH || !EMAIL_REGEX.test(email)) {
       return NextResponse.json({ message: "Please provide a valid email address" }, { status: 400 })
     }
 
-    if (password.length < 8) {
-      return NextResponse.json({ message: "Password must be at least 8 characters" }, { status: 400 })
+    if (password.length < 8 || password.length > MAX_PASSWORD_LENGTH) {
+      return NextResponse.json({ message: "Password must be between 8 and 128 characters" }, { status: 400 })
     }
 
     // Check if user already exists
