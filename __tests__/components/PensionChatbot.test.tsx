@@ -94,6 +94,17 @@ describe("PensionChatbot", () => {
             jest.advanceTimersByTime(2000)
         })
 
+        await waitFor(() => {
+            expect(screen.getByText(/Which pension option/i)).toBeInTheDocument()
+        })
+
+        // Select Option A (maximum allowance, no survivor reduction)
+        fireEvent.click(screen.getByText(/Option A/i))
+
+        act(() => {
+            jest.advanceTimersByTime(2000)
+        })
+
         // Check Results
         await waitFor(() => {
             expect(screen.getByText(/Monthly Benefit/i)).toBeInTheDocument()

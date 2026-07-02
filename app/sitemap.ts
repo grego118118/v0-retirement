@@ -219,7 +219,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })
 
     if (dbPosts.length > 0) {
-      blogPostUrls = dbPosts.map((post) => ({
+      blogPostUrls = dbPosts.map((post: { slug: string; publishedAt: Date | null }) => ({
         url: `${baseUrl}/blog/${post.slug}`,
         lastModified: post.publishedAt || lastModified,
         changeFrequency: "monthly" as const,
