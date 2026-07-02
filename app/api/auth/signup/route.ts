@@ -1,14 +1,45 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import bcrypt from "bcryptjs" // Changed from bcrypt to bcryptjs
 import { v4 as uuidv4 } from "uuid"
 import { query } from "@/lib/db/postgres"
+import { rateLimit } from "@/lib/utils/rate-limit"
 
-export async function POST(request: Request) {
+// Rate limiting: 5 signup attempts per hour per IP to slow down account-creation abuse
+const signupRateLimit = rateLimit({
+  interval: 60 * 60 * 1000,
+  uniqueTokenPerInterval: 1000,
+})
+
+// Linear-time email check: character classes exclude the delimiters that
+// follow them ('@' and '.'), so the regex cannot backtrack polynomially on
+// attacker-controlled input (CodeQL js/polynomial-redos).
+const EMAIL_REGEX = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/
+const MAX_EMAIL_LENGTH = 254 // RFC 5321
+const MAX_PASSWORD_LENGTH = 128 // bcrypt only uses the first 72 bytes anyway
+
+export async function POST(request: NextRequest) {
   try {
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
+      || request.headers.get("x-real-ip")?.trim()
+      || "unknown"
+    try {
+      await signupRateLimit.check(5, ip)
+    } catch {
+      return NextResponse.json({ message: "Too many signup attempts. Please try again later." }, { status: 429 })
+    }
+
     const { email, password } = await request.json()
 
-    if (!email || !password) {
+    if (!email || !password || typeof email !== "string" || typeof password !== "string") {
       return NextResponse.json({ message: "Email and password are required" }, { status: 400 })
+    }
+
+    if (email.length > MAX_EMAIL_LENGTH || !EMAIL_REGEX.test(email)) {
+      return NextResponse.json({ message: "Please provide a valid email address" }, { status: 400 })
+    }
+
+    if (password.length < 8 || password.length > MAX_PASSWORD_LENGTH) {
+      return NextResponse.json({ message: "Password must be between 8 and 128 characters" }, { status: 400 })
     }
 
     // Check if user already exists

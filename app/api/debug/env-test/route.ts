@@ -4,8 +4,12 @@
  */
 
 import { NextResponse } from 'next/server'
+import { blockInProduction } from '@/lib/api/debug-guard'
 
 export async function GET() {
+  const blocked = blockInProduction()
+  if (blocked) return blocked
+
   try {
     // Check critical environment variables
     const databaseUrl = process.env.DATABASE_URL

@@ -5,13 +5,17 @@
 
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
+import { blockInProduction } from '@/lib/api/debug-guard'
 
 // Force dynamic rendering to prevent static generation issues with Prisma
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
+  const blocked = blockInProduction()
+  if (blocked) return blocked
+
   const startTime = Date.now()
-  
+
   try {
     console.log('🔍 Starting database diagnostic test...')
     

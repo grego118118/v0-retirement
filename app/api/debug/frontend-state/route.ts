@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server"
+import { blockInProduction } from '@/lib/api/debug-guard'
 
 export async function POST(request: NextRequest) {
+  const blocked = blockInProduction()
+  if (blocked) return blocked
+
   try {
     const debugInfo = await request.json()
     

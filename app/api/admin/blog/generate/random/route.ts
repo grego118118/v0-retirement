@@ -18,8 +18,9 @@ export async function POST(request: NextRequest) {
     const authHeader = request.headers.get('authorization')
     const cronSecret = process.env.CRON_SECRET
     const isAuthorizedCron = cronSecret && authHeader === `Bearer ${cronSecret}`
-    
-    if (!isAuthorizedCron && !session?.user) {
+    const isAdmin = (session?.user as any)?.role === 'admin'
+
+    if (!isAuthorizedCron && !isAdmin) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 

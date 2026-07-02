@@ -22,13 +22,16 @@ export const dynamic = 'force-dynamic'
  */
 export async function POST(request: NextRequest) {
   try {
-    // Check authentication - either admin session or CRON secret
+    // Check authentication - either an admin session or the CRON secret.
+    // This triggers billed AI content generation and can auto-publish, so it
+    // must not be reachable by regular signed-in users.
     const session = await getServerSession(authOptions)
     const authHeader = request.headers.get('authorization')
     const cronSecret = process.env.CRON_SECRET
     const isAuthorizedCron = cronSecret && authHeader === `Bearer ${cronSecret}`
+    const isAdmin = (session?.user as any)?.role === 'admin'
 
-    if (!isAuthorizedCron && !session?.user) {
+    if (!isAuthorizedCron && !isAdmin) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 

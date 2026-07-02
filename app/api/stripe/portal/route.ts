@@ -13,12 +13,12 @@ import { isStripeConfigured, handleStripeDevError } from '@/lib/stripe/developme
 // Force dynamic rendering to prevent static generation issues with Prisma
 export const dynamic = 'force-dynamic'
 
-// Development fallback premium users (when Stripe is not configured)
-const FALLBACK_PREMIUM_USERS = [
-  'premium@example.com',
-  'test@premium.com',
-  'grego118@gmail.com'
-]
+// Development fallback premium users (when Stripe is not configured).
+// Only affects the error message shown when Stripe is missing; never
+// populated in production for consistency with the other premium checks.
+const FALLBACK_PREMIUM_USERS = process.env.NODE_ENV === 'production'
+  ? []
+  : ['premium@example.com', 'test@premium.com']
 
 export async function POST(request: NextRequest) {
   try {

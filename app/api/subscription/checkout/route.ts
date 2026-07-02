@@ -88,8 +88,17 @@ export async function POST(request: Request) {
         planType,
         isRealStripe: true
       })
+    } else if (process.env.NODE_ENV === 'production') {
+      // Never grant free premium access in production just because Stripe is
+      // misconfigured - fail loudly instead of falling back to the no-payment
+      // demo flow.
+      console.error('Stripe is not configured in production; refusing checkout request')
+      return NextResponse.json(
+        { error: 'Checkout is temporarily unavailable. Please try again shortly.' },
+        { status: 503 }
+      )
     } else {
-      // Demo mode - redirect to demo checkout
+      // Demo mode (development only) - redirect to demo checkout
       console.log(`⚠️ Stripe not configured, using demo checkout for ${userEmail}`)
 
       const checkoutUrl = `/subscribe/demo-checkout?plan=${planType}&email=${encodeURIComponent(userEmail)}`
