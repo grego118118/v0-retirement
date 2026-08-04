@@ -20,6 +20,9 @@ export const blogPosts = [
     ],
     image: "/images/blog/prit-fund-cola.jpg",
     content: `
+      <video controls preload="metadata" playsinline poster="/images/blog/prit-video-poster.jpg" style="width:100%;border-radius:12px;margin:0 0 0.5rem;display:block;" src="/videos/prit-cola-explainer.mp4"></video>
+      <p style="text-align:center;font-size:0.85rem;color:#64748b;margin:0 0 1.5rem;"><em>Prefer to watch? The whole story in 83 seconds.</em></p>
+
       <p><strong>Quick answer:</strong> The PRIT Fund (about <strong>$116 billion</strong> as of mid-2026) is the invested pool that pays Massachusetts state and teacher pension benefits &mdash; it is retirees' money in that sense, but it is not surplus cash. The systems it backs are only <strong>60&ndash;70% funded</strong> against promised benefits, on a schedule to reach full funding by 2036. That said, the Special COLA Commission has recommended raising the COLA base from <strong>$13,000 to $18,000</strong> &mdash; funded by a share of the fund's investment gains &mdash; and that proposal is now in the Legislature's hands.</p>
 
       <h2>The question a reader asked us</h2>
