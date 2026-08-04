@@ -14,6 +14,14 @@
     {
       "path": "/api/cron/auto-blog",
       "schedule": "0 14 * * 1"
+    },
+    {
+      "path": "/api/cron/publish-scheduled",
+      "schedule": "10 14 * * *"
+    },
+    {
+      "path": "/api/cron/nurture-drip",
+      "schedule": "0 15 * * *"
     }
   ]
 }

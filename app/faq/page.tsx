@@ -8,7 +8,7 @@ import { Breadcrumbs } from "@/components/seo/breadcrumbs"
 
 // AI-optimized metadata for better search engine understanding
 export const metadata: Metadata = {
-  title: "Massachusetts State Employee Retirement FAQ - Pension Calculator Questions Answered",
+  title: "Massachusetts Pension FAQ — Groups, COLA & Options A/B/C",
   description: "Frequently asked questions about Massachusetts state employee retirement benefits, pension calculations, COLA adjustments, and retirement options A, B, C. Get answers to common MSRB questions with official calculation methods.",
   keywords: "Massachusetts retirement FAQ, state employee pension questions, MSRB calculator help, retirement benefits explained, pension calculation formula, COLA Massachusetts",
   openGraph: {

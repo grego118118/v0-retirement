@@ -59,7 +59,7 @@ function DashboardContent() {
   const router = useRouter()
   const { isPremium } = useSubscriptionStatus()
   const { calculations, loading: calculationsLoading, fetchCalculations } = useRetirementDataContext()
-  
+
   const [userProfile, setUserProfile] = useState<UserProfile>({})
   const [profileLoading, setProfileLoading] = useState(true)
   const [profileError, setProfileError] = useState<string | null>(null)
@@ -132,7 +132,7 @@ function DashboardContent() {
     sessionStatus: status,
     sessionUser: session?.user?.email
   })
-  
+
   // Mock pension projection data (replace with real data from API)
   const pensionProjection: PensionProjection = {
     currentAge: 45,
@@ -191,7 +191,7 @@ function DashboardContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20">
+    <div className="min-h-screen bg-slate-50">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl">
         <style jsx>{`
           .dashboard-card {
@@ -219,7 +219,7 @@ function DashboardContent() {
                 Your Massachusetts retirement planning dashboard
               </p>
             </div>
-            
+
             {isPremium && (
               <div className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-amber-100 to-yellow-100 border border-amber-200 rounded-full">
                 <Crown className="h-4 w-4 text-amber-600" />
@@ -640,7 +640,7 @@ function DashboardContent() {
 // Loading skeleton component
 function DashboardSkeleton() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20">
+    <div className="min-h-screen bg-slate-50">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl">
         {/* Header Skeleton */}
         <div className="mb-8">

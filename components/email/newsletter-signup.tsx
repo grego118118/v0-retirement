@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Mail, CheckCircle, AlertCircle } from "lucide-react"
 import { toast } from "sonner"
+import { track } from "@vercel/analytics"
 
 interface NewsletterSignupProps {
   variant?: "default" | "compact" | "inline"
@@ -41,6 +42,7 @@ export function NewsletterSignup({ variant = "default", className = "", dark = f
       if (response.ok) {
         setIsSubscribed(true)
         setEmail("")
+        track("email_captured", { source: "newsletter" })
         toast.success("Successfully subscribed to our newsletter!")
       } else {
         const error = await response.json()

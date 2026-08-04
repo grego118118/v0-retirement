@@ -40,7 +40,7 @@ export default function ProfilePage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const { calculations, loading: calculationsLoading, fetchCalculations } = useRetirementData()
-  
+
   const [userProfile, setUserProfile] = useState<UserProfile>({})
   const [profileLoading, setProfileLoading] = useState(true)
   const [profileError, setProfileError] = useState<string | null>(null)
@@ -110,7 +110,7 @@ export default function ProfilePage() {
   const hasEmploymentInfo = userProfile.currentSalary || userProfile.retirementGroup
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20">
+    <div className="min-h-screen bg-slate-50">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-6xl">
         {/* Header Section */}
         <div className="mb-8">
@@ -256,7 +256,7 @@ export default function ProfilePage() {
 
 function ProfileSkeleton() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20">
+    <div className="min-h-screen bg-slate-50">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-6xl">
         <div className="mb-8">
           <Skeleton className="h-8 w-64 mb-2" />

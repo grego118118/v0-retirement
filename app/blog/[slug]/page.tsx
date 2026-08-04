@@ -1,4 +1,3 @@
-import { Input } from "@/components/ui/input"
 import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
@@ -13,6 +12,7 @@ import { WepGpoTimeline } from "@/components/blog/wep-gpo-timeline"
 import { generateSEOMetadata } from "@/components/seo/metadata"
 import { BlogHeroImage, RelatedPostImage } from "@/components/blog/blog-image"
 import { CalculatorCTA } from "@/components/blog/calculator-cta"
+import { NewsletterSignup } from "@/components/email/newsletter-signup"
 import { ResponsiveAd, PremiumAlternative } from "@/components/ads/adsense"
 import { BreadcrumbStructuredData, BlogPostingStructuredData } from "@/components/seo/structured-data"
 import { Breadcrumbs } from "@/components/seo/breadcrumbs"
@@ -302,10 +302,7 @@ export default async function BlogPostPage({ params }: PageProps) {
               Get the latest updates on Massachusetts state pension benefits, policy changes, and retirement planning
               tips delivered to your inbox.
             </p>
-            <div className="flex gap-2">
-              <Input type="email" placeholder="Enter your email" className="flex-1" />
-              <Button>Subscribe</Button>
-            </div>
+            <NewsletterSignup variant="inline" />
             <p className="text-xs text-muted-foreground mt-2">
               We respect your privacy. Unsubscribe at any time.
             </p>

@@ -8,7 +8,10 @@ import { headers } from 'next/headers'
 import { stripe, STRIPE_CONFIG, STRIPE_WEBHOOK_EVENTS, getSubscriptionPlan } from '@/lib/stripe/config'
 import { prisma } from '@/lib/prisma'
 import { emailService } from '@/lib/email/email-service'
+import { isReportSession } from '@/lib/stripe/report-metadata'
 import type Stripe from 'stripe'
+
+const BASE_URL = process.env.NEXTAUTH_URL || 'https://www.masspension.com'
 
 // Force dynamic rendering to prevent static generation issues with Prisma
 export const dynamic = 'force-dynamic'
@@ -414,11 +417,80 @@ async function handleCustomerUpdated(customer: Stripe.Customer) {
 }
 
 /**
+ * Handle a one-time report purchase. Emails a secure download link (the PDF is
+ * generated on demand at that link, so the webhook stays fast and reliable).
+ * Deliberately does not alter any subscription state.
+ */
+async function handleReportPurchase(session: Stripe.Checkout.Session) {
+  try {
+    const email = session.customer_details?.email || session.customer_email
+    console.log(`Report purchase completed: ${session.id} for ${email}`)
+
+    if (!email) {
+      console.error('Report purchase has no email; cannot deliver')
+      return
+    }
+
+    const downloadUrl = `${BASE_URL}/report/success?session_id=${session.id}`
+
+    // Best-effort marketing capture (buyers are strong future subscription leads).
+    try {
+      const existing = await prisma.newsletterSubscriber.findUnique({ where: { email } })
+      if (!existing) {
+        await prisma.newsletterSubscriber.create({
+          data: { email, isActive: true, source: 'report-customer', preferences: ['report-customer'] },
+        })
+      }
+    } catch (dbError) {
+      console.error('Report purchase: subscriber capture failed', dbError)
+    }
+
+    const html = `
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
+        <h1 style="color:#0f172a;">Your Complete Retirement Report is ready</h1>
+        <p style="line-height:1.6;color:#374151;">Thank you for your purchase. Your personalized Massachusetts
+        retirement report — with your pension breakdown, Options A/B/C comparison, and COLA projection — is ready to
+        download:</p>
+        <p style="margin:28px 0;">
+          <a href="${downloadUrl}" style="background:#2563eb;color:#fff;padding:14px 28px;text-decoration:none;border-radius:6px;font-weight:600;display:inline-block;">Download My Report</a>
+        </p>
+        <p style="font-size:13px;color:#6b7280;line-height:1.6;">Keep this email — you can re-download your report from
+        the link above anytime. Questions? Just reply to this email.</p>
+        <hr style="border:none;border-top:1px solid #e5e7eb;margin:28px 0;">
+        <p style="font-size:12px;color:#9ca3af;">Mass Pension · Independent Massachusetts retirement planning ·
+        <a href="${BASE_URL}" style="color:#2563eb;">masspension.com</a></p>
+      </div>`
+
+    const result = await emailService.sendEmail({
+      to: email,
+      subject: 'Your Complete Retirement Report is ready to download',
+      html,
+    })
+
+    if (!result.success) {
+      console.error(`Report delivery email failed for ${email}: ${result.error}`)
+    } else {
+      console.log(`✅ Report download link emailed to ${email}`)
+    }
+  } catch (error) {
+    console.error('Error handling report purchase:', error)
+    // Swallow — the success page still delivers the PDF regardless of email.
+  }
+}
+
+/**
  * Handle checkout session completed
  */
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   try {
-    console.log(`Checkout session completed: ${session.id}`)
+    console.log(`Checkout session completed: ${session.id} (mode: ${session.mode})`)
+
+    // One-time payments (e.g. the report product) must NOT be treated as
+    // subscriptions — that would wrongly grant premium access.
+    if (session.mode === 'payment' || isReportSession(session.metadata as Record<string, string> | null)) {
+      await handleReportPurchase(session)
+      return
+    }
 
     const customerId = session.customer as string
     const subscriptionId = session.subscription as string

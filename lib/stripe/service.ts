@@ -112,6 +112,49 @@ export class StripeService {
   }
 
   /**
+   * Create a one-time (payment mode) checkout session for the report product.
+   * No account required — Stripe collects the email and creates a guest customer.
+   */
+  static async createReportCheckoutSession(params: {
+    priceId: string
+    email?: string
+    metadata: Record<string, string>
+    successUrl: string
+    cancelUrl: string
+  }): Promise<string> {
+    if (!stripe) {
+      throw new StripeError('Stripe is not configured. Please add STRIPE_SECRET_KEY to environment variables.')
+    }
+
+    try {
+      const session = await stripe.checkout.sessions.create({
+        mode: 'payment',
+        payment_method_types: ['card'],
+        line_items: [{ price: params.priceId, quantity: 1 }],
+        success_url: params.successUrl,
+        cancel_url: params.cancelUrl,
+        customer_email: params.email || undefined,
+        customer_creation: 'always',
+        allow_promotion_codes: true,
+        billing_address_collection: 'auto',
+        metadata: params.metadata,
+      })
+
+      if (!session.url) {
+        throw new StripeError('Failed to create checkout session URL')
+      }
+
+      return session.url
+    } catch (error: any) {
+      throw new StripeError(
+        `Failed to create report checkout session: ${error.message}`,
+        error.code,
+        error.type
+      )
+    }
+  }
+
+  /**
    * Create customer portal session
    */
   static async createPortalSession(customerId: string): Promise<string> {

@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Check, X, Crown, Loader2, Star, Shield, Lock, Award } from "lucide-react"
 import Link from "next/link"
 import { SUBSCRIPTION_PLANS } from "@/lib/stripe/config"
+import { track } from "@vercel/analytics"
 
 interface SubscriptionData {
   isPremium: boolean
@@ -84,6 +85,7 @@ export function PricingSection() {
   }, [status])
 
   const handleUpgrade = async (plan: 'monthly' | 'annual') => {
+    track("checkout_started", { plan, source: "pricing_page" })
     if (!session?.user?.email) {
       window.location.href = '/auth/signin'
       return

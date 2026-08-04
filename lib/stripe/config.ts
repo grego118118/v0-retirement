@@ -7,9 +7,9 @@ import Stripe from 'stripe'
 // Initialize Stripe with secret key (only if available)
 export const stripe = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY, {
-      apiVersion: '2025-05-28.basil',
-      typescript: true,
-    })
+    apiVersion: '2025-05-28.basil',
+    typescript: true,
+  })
   : null
 
 // Stripe configuration
@@ -24,8 +24,8 @@ export const STRIPE_CONFIG = {
 // Subscription Plans
 export const SUBSCRIPTION_PLANS = {
   monthly: {
-    // Price ID from Stripe account (updated Dec 30, 2025)
-    priceId: process.env.STRIPE_MONTHLY_PRICE_ID || 'price_1Sk3isGAdpLX0D4NcwzoqdP2',
+    // Price ID from Stripe account (updated Jan 21, 2026)
+    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_MONTHLY || 'price_1Sk3isGAdpLX0D4NcwzoqdP2',
     name: 'Premium Monthly',
     price: 6.99,
     interval: 'month' as const,
@@ -41,8 +41,8 @@ export const SUBSCRIPTION_PLANS = {
     ]
   },
   annual: {
-    // Price ID from Stripe account (updated Dec 30, 2025)
-    priceId: process.env.STRIPE_ANNUAL_PRICE_ID || 'price_1Sk3iuGAdpLX0D4NuAXsBEp7',
+    // Price ID from Stripe account (updated Jan 21, 2026)
+    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ANNUAL || 'price_1Sk3iuGAdpLX0D4NuAXsBEp7',
     name: 'Premium Annual',
     price: 69.99,
     interval: 'year' as const,
@@ -56,7 +56,33 @@ export const SUBSCRIPTION_PLANS = {
       'Custom retirement scenarios',
       'Priority feature requests'
     ]
+  },
+  free: {
+    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_FREE || 'price_1SsDB0GAdpLX0D4NjwWBOaGG',
+    name: 'Free Calculator',
+    price: 0,
+    interval: 'month' as const,
+    features: []
   }
+} as const
+
+// One-time (non-subscription) products. The report is a single professional PDF
+// analysis a user can buy once — matches the episodic, near-retirement mindset of
+// buyers who won't subscribe. Requires a Stripe one-time Price; set its id in
+// NEXT_PUBLIC_STRIPE_PRICE_REPORT.
+export const ONE_TIME_PRODUCTS = {
+  report: {
+    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_REPORT || '',
+    name: 'Complete Retirement Report',
+    price: 39,
+    currency: 'usd' as const,
+    features: [
+      'Full pension breakdown for your exact numbers',
+      'Options A, B & C side-by-side with survivor benefits',
+      '10-year COLA projection',
+      'Professional PDF to keep or share with an advisor',
+    ],
+  },
 } as const
 
 // Free tier limitations (defined first to avoid hoisting issues)
@@ -171,7 +197,7 @@ export const USER_TYPES = {
 } as const
 
 // Subscription status types
-export type SubscriptionStatus = 
+export type SubscriptionStatus =
   | 'active'
   | 'canceled'
   | 'incomplete'
@@ -401,7 +427,7 @@ export function getSubscriptionDisplayStatus(subscription: StripeSubscription): 
   if (isSubscriptionCanceling(subscription)) {
     return `Canceling (ends ${subscription.currentPeriodEnd.toLocaleDateString()})`
   }
-  
+
   switch (subscription.status) {
     case 'active':
       return 'Active'
@@ -426,16 +452,16 @@ export function calculateProration(
   daysRemaining: number
 ): number {
   if (currentPlan === newPlan) return 0
-  
+
   const currentPrice = currentPlan === 'monthly' ? SUBSCRIPTION_PLANS.monthly.price : SUBSCRIPTION_PLANS.annual.price
   const newPrice = newPlan === 'monthly' ? SUBSCRIPTION_PLANS.monthly.price : SUBSCRIPTION_PLANS.annual.price
-  
+
   const dailyCurrentRate = currentPlan === 'monthly' ? currentPrice / 30 : currentPrice / 365
   const dailyNewRate = newPlan === 'monthly' ? newPrice / 30 : newPrice / 365
-  
+
   const refund = dailyCurrentRate * daysRemaining
   const charge = dailyNewRate * daysRemaining
-  
+
   return Math.max(0, charge - refund)
 }
 
@@ -445,9 +471,9 @@ export const TRIAL_PERIOD_DAYS = 14
 
 export function isInGracePeriod(subscription: StripeSubscription): boolean {
   if (subscription.status !== 'past_due') return false
-  
+
   const gracePeriodEnd = new Date(subscription.currentPeriodEnd)
   gracePeriodEnd.setDate(gracePeriodEnd.getDate() + GRACE_PERIOD_DAYS)
-  
+
   return new Date() <= gracePeriodEnd
 }

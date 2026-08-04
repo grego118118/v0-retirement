@@ -8,6 +8,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth/auth-config'
 import { prisma } from '@/lib/prisma'
 import { BlogPost, ContentReview } from '@/types/ai-blog'
+import { nextOpenSlot } from '@/lib/blog/publish-schedule'
 
 // Force dynamic rendering to prevent static generation issues with Prisma
 export const dynamic = 'force-dynamic'
@@ -120,7 +121,10 @@ export async function POST(request: NextRequest) {
       content_quality_rating,
       fact_check_completed = false,
       seo_check_completed = false,
-      suggested_changes
+      suggested_changes,
+      // 'scheduled' (default) queues the post for the next open Monday slot;
+      // 'immediate' publishes right away.
+      publish_mode = 'scheduled'
     } = body
 
     // Validate required fields
@@ -163,15 +167,34 @@ export async function POST(request: NextRequest) {
         updatedAt: new Date()
       }
 
-      // If approved, prepare for publishing
-      if (review_status === 'approved') {
-        updateData.status = 'published'
-        updateData.publishedAt = new Date()
+      let scheduledFor: Date | null = null
 
-        // Mark as fact-checked and SEO optimized if not already
-        if (fact_check_completed) {
-          updateData.factCheckStatus = 'approved'
+      // If approved, publish immediately or queue for the next open weekly slot
+      if (review_status === 'approved') {
+        if (publish_mode === 'immediate') {
+          updateData.status = 'published'
+          updateData.publishedAt = new Date()
+          updateData.scheduledPublishAt = null
+        } else {
+          // Staggered publishing: claim the first Monday slot no other post holds.
+          const futureScheduled = await tx.blogPost.findMany({
+            where: {
+              status: 'draft',
+              scheduledPublishAt: { gt: new Date() },
+              id: { not: post_id }
+            },
+            select: { scheduledPublishAt: true }
+          })
+          scheduledFor = nextOpenSlot(
+            futureScheduled
+              .map((p: { scheduledPublishAt: Date | null }) => p.scheduledPublishAt)
+              .filter((d: Date | null): d is Date => d !== null)
+          )
+          updateData.status = 'draft' // stays draft until the publish cron fires
+          updateData.scheduledPublishAt = scheduledFor
         }
+
+        updateData.factCheckStatus = 'approved'
         if (seo_check_completed) {
           updateData.seoOptimized = true
         }
@@ -187,7 +210,7 @@ export async function POST(request: NextRequest) {
         data: updateData
       })
 
-      return { review, updatedPost }
+      return { review, updatedPost, scheduledFor }
     })
 
     // Log the review action
@@ -224,10 +247,15 @@ export async function POST(request: NextRequest) {
       // Don't fail the review if webhook fails
     }
 
+    const approvedMessage = result.scheduledFor
+      ? `approved — scheduled to publish ${result.scheduledFor.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} at 10 AM ET`
+      : 'approved and published'
+
     return NextResponse.json({
       success: true,
       review: result.review,
-      message: `Post ${review_status === 'approved' ? 'approved and published' : review_status}`
+      scheduled_publish_at: result.scheduledFor?.toISOString() || null,
+      message: `Post ${review_status === 'approved' ? approvedMessage : review_status}`
     })
 
   } catch (error) {

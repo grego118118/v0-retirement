@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Crown, Lock, Star, ArrowRight, CheckCircle, AlertTriangle, Calendar, CreditCard } from "lucide-react"
 import Link from "next/link"
+import { track } from "@vercel/analytics"
 import { PREMIUM_FEATURES, FREE_TIER_LIMITS, getSubscriptionDisplayStatus, SUBSCRIPTION_PLANS } from "@/lib/stripe/config"
 import { triggerSubscriptionRefresh, forceRefreshSubscriptionStatus } from "@/lib/subscription-refresh"
 import type { SubscriptionStatus, SubscriptionPlan } from "@/lib/stripe/config"
@@ -102,6 +103,7 @@ export function EnhancedPremiumGate({
   }, [status, feature])
 
   const handleUpgradeClick = async (plan: 'monthly' | 'annual') => {
+    track("upgrade_clicked", { plan, source: "premium_gate" })
     if (!session?.user?.email) {
       window.location.href = '/auth/signin'
       return
@@ -355,7 +357,7 @@ export function EnhancedPremiumGate({
             <div className="grid md:grid-cols-2 gap-4">
               <div className="text-center p-4 border rounded-lg bg-white">
                 <h5 className="font-semibold mb-2">Monthly Plan</h5>
-                <div className="text-2xl font-bold text-blue-600 mb-1">$19.99</div>
+                <div className="text-2xl font-bold text-blue-600 mb-1">${SUBSCRIPTION_PLANS.monthly.price}</div>
                 <div className="text-sm text-gray-600 mb-3">per month</div>
                 <Button 
                   onClick={() => handleUpgradeClick('monthly')}
@@ -371,9 +373,9 @@ export function EnhancedPremiumGate({
                   Best Value
                 </Badge>
                 <h5 className="font-semibold mb-2">Annual Plan</h5>
-                <div className="text-2xl font-bold text-amber-600 mb-1">$199.99</div>
+                <div className="text-2xl font-bold text-amber-600 mb-1">${SUBSCRIPTION_PLANS.annual.price}</div>
                 <div className="text-sm text-gray-600 mb-1">per year</div>
-                <div className="text-xs text-green-600 font-medium mb-3">Save $39.89 (17% off)</div>
+                <div className="text-xs text-green-600 font-medium mb-3">{SUBSCRIPTION_PLANS.annual.savings}</div>
                 <Button 
                   onClick={() => handleUpgradeClick('annual')}
                   disabled={checkoutLoading}
