@@ -1,6 +1,79 @@
 // This would typically come from a CMS or database
 export const blogPosts = [
   {
+    id: "prit-fund-cola-base-massachusetts-retirees",
+    title: "The $116 Billion PRIT Fund and Your COLA: What Massachusetts Retirees Should Know",
+    description:
+      "A retired state employee asked us: with $116 billion in the PRIT Fund, why can't Massachusetts raise the $13,000 COLA base? What the fund is actually for, what the COLA Commission recommended, and what has to happen next.",
+    date: "August 4, 2026",
+    readTime: "7 min read",
+    author: "Greg O",
+    authorTitle: "Retirement Specialist",
+    category: "COLA",
+    tags: [
+      "PRIT fund",
+      "PRIM",
+      "COLA base",
+      "COLA Commission",
+      "Massachusetts retirees",
+      "pension funding",
+    ],
+    image: "/images/blog/prit-fund-cola.jpg",
+    content: `
+      <p><strong>Quick answer:</strong> The PRIT Fund (about <strong>$116 billion</strong> as of mid-2026) is the invested pool that pays Massachusetts state and teacher pension benefits &mdash; it is retirees' money in that sense, but it is not surplus cash. The systems it backs are only <strong>60&ndash;70% funded</strong> against promised benefits, on a schedule to reach full funding by 2036. That said, the Special COLA Commission has recommended raising the COLA base from <strong>$13,000 to $18,000</strong> &mdash; funded by a share of the fund's investment gains &mdash; and that proposal is now in the Legislature's hands.</p>
+
+      <h2>The question a reader asked us</h2>
+      <p>A retired state employee recently wrote in with a question we suspect many retirees share. Paraphrasing: <em>&ldquo;After years of pitiful raises, I want to know what the billions in the PRIT Fund are supposed to be used for. The COLA Commission recommended raising the COLA base &mdash; if there's that much money in the fund, isn't there money that belongs to retirees to fund a new COLA base?&rdquo;</em></p>
+      <p>It's a fair question, and the honest answer has two halves: what the fund is legally for, and why the reader's instinct &mdash; that investment gains could fund a better COLA &mdash; is actually closer to becoming policy than most people realize.</p>
+
+      <h2>What the PRIT Fund is</h2>
+      <p>The <strong>Pension Reserves Investment Trust (PRIT) Fund</strong> is the pooled investment fund for the Massachusetts State Employees' Retirement System, the Massachusetts Teachers' Retirement System, the Boston Teachers' fund, and dozens of local retirement systems that choose to invest in it. It's managed by the <strong>Pension Reserves Investment Management (PRIM) Board</strong>, a public board whose job is strictly investment management &mdash; PRIM does not set benefit levels, COLAs, or contribution rates. As of mid-2026 the fund holds roughly <strong>$116 billion</strong>.</p>
+      <p>What is it &ldquo;supposed to be used for&rdquo;? Exactly one thing: <strong>paying the pension benefits already promised</strong> to current and future retirees, by investing contributions so that investment earnings &mdash; not just taxpayer appropriations &mdash; cover those benefits over time.</p>
+
+      <h2>Why $116 billion isn't &ldquo;spare&rdquo; money</h2>
+      <p>Here's the part that explains the Legislature's historical caution. The $116 billion is measured against the value of <em>all</em> benefits the systems owe &mdash; every current pension check plus every benefit earned by active employees to date. On that measure the systems are substantially short:</p>
+      <ul>
+        <li>The <strong>Teachers' Retirement System</strong> was recently about <strong>60% funded</strong>, with an unfunded liability around <strong>$25 billion</strong>.</li>
+        <li>Both the State and Teachers' systems are on a legislated schedule to reach <strong>full funding by fiscal year 2036</strong>.</li>
+        <li>The Commonwealth is appropriating nearly <strong>$5 billion per year</strong> (FY2026) to close that gap on schedule.</li>
+      </ul>
+      <p>Any permanent benefit increase &mdash; including a higher COLA base &mdash; increases the total owed, which either extends that schedule or raises the annual appropriation. That's the standard argument you'll hear against tapping the fund. It's not that the money isn't retirees' money; it's that it's already spoken for against benefits promised under current law.</p>
+
+      <h2>The COLA problem is real &mdash; and officially acknowledged</h2>
+      <p>None of that changes the arithmetic our reader is living with. The state COLA applies only to the <strong>first $13,000</strong> of an annual pension, a base unchanged <strong>since 2012</strong>. At the usual 3%, the maximum increase is <strong>$390 a year</strong> &mdash; regardless of inflation, and regardless of the size of your pension. Over the high-inflation years since 2021, that structure has meant a significant loss of purchasing power for anyone whose pension is their primary income. See our <a href="/blog/massachusetts-cola-13000-cap-annual-adjustments">deep dive on the $13,000 cap</a> for how the math compounds.</p>
+
+      <h2>What the COLA Commission actually recommended</h2>
+      <p>This is where our reader's information was out of date &mdash; in a good way. The Special COLA Commission's recommendations go <em>further</em> than the &ldquo;maybe $16,000&rdquo; figure that circulated earlier. The Commission recommended:</p>
+      <ul>
+        <li><strong>An immediate increase in the COLA base from $13,000 to $18,000</strong> for state and teacher retirees;</li>
+        <li><strong>Raising the base over time</strong> toward alignment with Social Security's maximum individual benefit at full retirement age (over $48,000 in 2025);</li>
+        <li>A new <strong>&ldquo;Enhanced COLA&rdquo;</strong> for long-term retirees, who have seen the deepest erosion of purchasing power;</li>
+        <li>Funding the change using <strong>a share (about 15%) of the fund's strong 2025 investment gains</strong> &mdash; structured, in the Commission's words, so the proposals do not require additional Commonwealth contributions to the ongoing pension funding schedule.</li>
+      </ul>
+      <p>In other words: the mechanism our reader proposed &mdash; using the fund's investment performance to finance a better COLA &mdash; is essentially what the Commission put on the table. The debate is no longer <em>whether</em> the money could come from investment gains, but whether the Legislature will enact it.</p>
+
+      <h2>What has to happen next</h2>
+      <p>Commission recommendations are not law. To change your COLA, the Legislature must pass a bill and the Governor must sign it; legislation reflecting the COLA base increase has been filed in the current session (retiree organizations are tracking bills H.2812 and S.1817). If you want to follow or weigh in:</p>
+      <ul>
+        <li><strong>Mass Retirees Association</strong> (massretirees.com) tracks the COLA legislation closely and organizes member advocacy;</li>
+        <li>The <strong>MTA</strong> publishes fact sheets on the COLA bills for educator retirees;</li>
+        <li>Your own state representative and senator are the people who will actually vote on it.</li>
+      </ul>
+
+      <h2>The bottom line for your planning</h2>
+      <p>Until a bill is signed, the prudent move is to plan on current law: COLA on the first $13,000 only, a maximum of $390 a year. Our <a href="/calculator">pension calculator</a> projects your benefit under today's rules, so any base increase that passes would be upside, not something your plan depends on. If the $18,000 base becomes law, a 3% COLA year would mean up to <strong>$540</strong> &mdash; a meaningful improvement, though still far from full inflation protection on a typical pension.</p>
+      <p>And to our reader: thank you for the question. You were right about the important part &mdash; the fund's gains are the leading proposal for how a better COLA gets paid for. The place that decision gets made, though, is the State House, not PRIM.</p>
+
+      <p><em>Sources: PRIM Board (mapension.com) fund and governance information; Special COLA Commission draft principles and recommendations (mass.gov); Mass Retirees Association coverage of the Commission's recommendations (massretirees.com, March 2026); MTA COLA legislation fact sheet (H.2812/S.1817); public funded-status reporting for the State and Teachers' systems. Figures as of mid-2026 &mdash; fund value, funded ratios, and legislative status change; confirm current numbers with official sources.</em></p>
+    `,
+    relatedPosts: [
+      "massachusetts-cola-2026-complete-guide",
+      "massachusetts-cola-13000-cap-annual-adjustments",
+      "massachusetts-state-retirement-pay-dates-2026",
+    ],
+  },
+
+  {
     id: "massachusetts-sick-leave-buyback-retirement",
     title: "Massachusetts Sick Leave Buyback at Retirement: How the 20% Payout Works",
     description:
