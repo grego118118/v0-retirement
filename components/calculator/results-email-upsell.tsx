@@ -36,6 +36,7 @@ const REPORT_PRICE = 39
  */
 function ResultsEmailCapture({ data }: { data: ResultsUpsellData }) {
   const [email, setEmail] = useState("")
+  const [colaAlerts, setColaAlerts] = useState(true)
   const [isLoading, setIsLoading] = useState(false)
   const [isSent, setIsSent] = useState(false)
 
@@ -52,6 +53,7 @@ function ResultsEmailCapture({ data }: { data: ResultsUpsellData }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email,
+          colaAlerts,
           calculationType: "pension",
           results: {
             annualPension: data.annualPension,
@@ -64,7 +66,7 @@ function ResultsEmailCapture({ data }: { data: ResultsUpsellData }) {
       })
       if (res.ok) {
         setIsSent(true)
-        track("email_captured", { source: "results" })
+        track("email_captured", { source: "results", cola_alerts: colaAlerts })
         toast.success("Sent! Check your inbox for your pension estimate.")
       } else {
         const err = await res.json().catch(() => ({}))
@@ -85,7 +87,9 @@ function ResultsEmailCapture({ data }: { data: ResultsUpsellData }) {
           <div>
             <p className="font-semibold text-green-800 dark:text-green-300">Your estimate is on its way.</p>
             <p className="text-sm text-green-700 dark:text-green-400">
-              We&rsquo;ll also send occasional Massachusetts retirement tips. Unsubscribe anytime.
+              {colaAlerts
+                ? "You're also on the COLA bill alert list — we'll email you when the Legislature moves. Unsubscribe anytime."
+                : "We'll also send occasional Massachusetts retirement tips. Unsubscribe anytime."}
             </p>
           </div>
         </CardContent>
@@ -122,6 +126,21 @@ function ResultsEmailCapture({ data }: { data: ResultsUpsellData }) {
             {isLoading ? "Sending..." : "Email My Results"}
           </Button>
         </form>
+        <label className="mt-3 flex items-start gap-2 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={colaAlerts}
+            onChange={(e) => setColaAlerts(e.target.checked)}
+            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-mrs-blue-600 focus:ring-mrs-blue-500"
+          />
+          <span className="text-sm text-slate-700 dark:text-slate-300">
+            <strong>Email me when the COLA bill moves.</strong>{" "}
+            <span className="text-slate-500 dark:text-slate-400">
+              The Legislature is weighing a COLA base increase from $13,000 to $18,000 (H.2812 / S.1817) — we&rsquo;ll
+              alert you on real developments only.
+            </span>
+          </span>
+        </label>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 flex items-center gap-1">
           <ShieldCheck className="h-3 w-3" /> No spam. We never share your email. Unsubscribe anytime.
         </p>

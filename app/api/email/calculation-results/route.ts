@@ -10,6 +10,7 @@ const BASE_URL = "https://www.masspension.com"
 interface ResultsPayload {
   email: string
   name?: string
+  colaAlerts?: boolean
   calculationType?: "pension" | "social-security" | "combined"
   results?: {
     annualPension?: number
@@ -26,7 +27,7 @@ interface ResultsPayload {
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as ResultsPayload
-    const { email, name, calculationType = "pension", results = {} } = body
+    const { email, name, colaAlerts = false, calculationType = "pension", results = {} } = body
 
     if (!email || !email.includes("@")) {
       return NextResponse.json({ error: "A valid email address is required." }, { status: 400 })
@@ -43,15 +44,24 @@ export async function POST(request: NextRequest) {
             subscribedAt: new Date(),
             isActive: true,
             source: "calculator-results",
-            preferences: ["calculator-results", "nurture"],
+            preferences: colaAlerts
+              ? ["calculator-results", "nurture", "cola-alerts"]
+              : ["calculator-results", "nurture"],
           },
         })
-      } else if (existing.preferences && !existing.preferences.includes("nurture")) {
-        // Re-engage a previously captured contact into the nurture sequence.
-        await prisma.newsletterSubscriber.update({
-          where: { email },
-          data: { isActive: true, preferences: { set: [...existing.preferences, "nurture"] } },
-        })
+      } else {
+        // Re-engage into nurture and/or add the COLA-bill alert tag if newly requested.
+        const prefs = existing.preferences ?? []
+        const wanted = [
+          ...(!prefs.includes("nurture") ? ["nurture"] : []),
+          ...(colaAlerts && !prefs.includes("cola-alerts") ? ["cola-alerts"] : []),
+        ]
+        if (wanted.length > 0 || !existing.isActive) {
+          await prisma.newsletterSubscriber.update({
+            where: { email },
+            data: { isActive: true, preferences: { set: [...prefs, ...wanted] } },
+          })
+        }
       }
     } catch (dbError) {
       // Don't block sending the user their results if the lead write fails.
