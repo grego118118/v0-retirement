@@ -56,7 +56,12 @@ export const blogPosts = [
       <p>In other words: the mechanism our reader proposed &mdash; using the fund's investment performance to finance a better COLA &mdash; is essentially what the Commission put on the table. The debate is no longer <em>whether</em> the money could come from investment gains, but whether the Legislature will enact it.</p>
 
       <h2>What has to happen next</h2>
-      <p>Commission recommendations are not law. To change your COLA, the Legislature must pass a bill and the Governor must sign it; legislation reflecting the COLA base increase has been filed in the current session (retiree organizations are tracking bills H.2812 and S.1817). If you want to follow or weigh in:</p>
+      <p>Commission recommendations are not law. To change your COLA, the Legislature must pass a bill and the Governor must sign it. Here is where the legislation actually stands as of early August 2026:</p>
+      <ul>
+        <li><strong>S.1817</strong> (Sen. Cyr) is the live vehicle: the Public Service Committee reported it <strong>favorably on April 8, 2026</strong>, and it now sits with the <strong>Senate Committee on Ways and Means</strong> &mdash; the step where proposals either get funded or quietly stall.</li>
+        <li><strong>H.2812</strong>, the House companion, was sent to a <strong>study order on March 30, 2026</strong> &mdash; the Legislature's customary way of shelving a bill for the session. The Senate bill carries the effort from here.</li>
+      </ul>
+      <p>If you want to follow or weigh in:</p>
       <ul>
         <li><strong>Mass Retirees Association</strong> (massretirees.com) tracks the COLA legislation closely and organizes member advocacy;</li>
         <li>The <strong>MTA</strong> publishes fact sheets on the COLA bills for educator retirees;</li>
@@ -67,7 +72,7 @@ export const blogPosts = [
       <p>Until a bill is signed, the prudent move is to plan on current law: COLA on the first $13,000 only, a maximum of $390 a year. Our <a href="/calculator">pension calculator</a> projects your benefit under today's rules, so any base increase that passes would be upside, not something your plan depends on. If the $18,000 base becomes law, a 3% COLA year would mean up to <strong>$540</strong> &mdash; a meaningful improvement, though still far from full inflation protection on a typical pension.</p>
       <p>And to our reader: thank you for the question. You were right about the important part &mdash; the fund's gains are the leading proposal for how a better COLA gets paid for. The place that decision gets made, though, is the State House, not PRIM.</p>
 
-      <p><em>Sources: PRIM Board (mapension.com) fund and governance information; Special COLA Commission draft principles and recommendations (mass.gov); Mass Retirees Association coverage of the Commission's recommendations (massretirees.com, March 2026); MTA COLA legislation fact sheet (H.2812/S.1817); public funded-status reporting for the State and Teachers' systems. Figures as of mid-2026 &mdash; fund value, funded ratios, and legislative status change; confirm current numbers with official sources.</em></p>
+      <p><em>Sources: PRIM Board (mapension.com) fund and governance information; Special COLA Commission draft principles and recommendations (mass.gov); Mass Retirees Association coverage of the Commission's recommendations (massretirees.com, March 2026); MTA COLA legislation fact sheet (H.2812/S.1817); bill status and history via malegislature.gov (S.1817, H.2812); public funded-status reporting for the State and Teachers' systems. Figures as of mid-2026 &mdash; fund value, funded ratios, and legislative status change; confirm current numbers with official sources.</em></p>
     `,
     relatedPosts: [
       "massachusetts-cola-2026-complete-guide",
