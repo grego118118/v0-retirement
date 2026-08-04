@@ -90,7 +90,7 @@ export const blogPosts = [
       "retirement payout",
       "1000 hour cap",
     ],
-    image: "/images/blog/default-blog-image.svg",
+    image: "/images/blog/sick-leave-buyback.jpg",
     content: `
       <p><strong>Quick answer:</strong> When you retire directly from Massachusetts state service, you're paid a lump sum equal to <strong>20% of the value of your unused sick leave</strong> — your accrued sick days multiplied by your daily pay rate at retirement, times 20%. The payment does <strong>not</strong> increase your pension, and for executive branch and higher-education employees, sick leave accrual is capped at <strong>1,000 hours</strong>.</p>
 
@@ -165,7 +165,7 @@ export const blogPosts = [
       "direct deposit",
       "Massachusetts retirement",
     ],
-    image: "/images/blog/default-blog-image.svg",
+    image: "/images/blog/pay-dates-2026.jpg",
     content: `
       <p><strong>Quick answer:</strong> Massachusetts public pension payments arrive by direct deposit on the <strong>last business day of each month</strong>. Paper checks are mailed about two business days earlier and are payable on the deposit date. The full 2026 schedule is below.</p>
 
