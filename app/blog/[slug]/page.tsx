@@ -12,6 +12,7 @@ import { WepGpoTimeline } from "@/components/blog/wep-gpo-timeline"
 import { generateSEOMetadata } from "@/components/seo/metadata"
 import { BlogHeroImage, RelatedPostImage } from "@/components/blog/blog-image"
 import { CalculatorCTA } from "@/components/blog/calculator-cta"
+import { ReportCTA } from "@/components/blog/report-cta"
 import { NewsletterSignup } from "@/components/email/newsletter-signup"
 import { ResponsiveAd, PremiumAlternative } from "@/components/ads/adsense"
 import { BreadcrumbStructuredData, BlogPostingStructuredData } from "@/components/seo/structured-data"
@@ -222,9 +223,9 @@ export default async function BlogPostPage({ params }: PageProps) {
             <TableOfContents />
           </div>
 
-          {/* Calculator CTA */}
+          {/* $39 report CTA (routes through the free calculator) */}
           <div className="mb-12">
-            <CalculatorCTA variant="default" />
+            <ReportCTA />
           </div>
 
           {/* AdSense Ad for Free Users */}
