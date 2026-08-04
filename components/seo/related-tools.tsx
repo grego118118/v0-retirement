@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
-import { Calculator, ShieldAlert, Shield, DollarSign, ArrowRight } from "lucide-react"
+import { Calculator, ShieldAlert, Shield, DollarSign, ArrowRight, GraduationCap } from "lucide-react"
 
 const tools = [
   {
@@ -10,6 +10,14 @@ const tools = [
     href: "/calculator",
     icon: Calculator,
     color: "bg-blue-100 text-blue-600",
+  },
+  {
+    slug: "teachers",
+    title: "Teacher Retirement Calculator",
+    description: "MTRS pension estimates for Massachusetts teachers, including RetirementPlus.",
+    href: "/teachers",
+    icon: GraduationCap,
+    color: "bg-amber-100 text-amber-600",
   },
   {
     slug: "tax-bomb",

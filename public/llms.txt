@@ -1,0 +1,44 @@
+# Mass Pension — Massachusetts Retirement Calculator
+
+> Free, independent calculator and reference for Massachusetts state and municipal
+> employees estimating their public pension. Uses the official Massachusetts State
+> Retirement Board (MSRB) benefit formula: Average Salary × Years of Service ×
+> Benefit Factor, capped at 80% of average salary. Covers Groups 1–4, Options
+> A/B/C, COLA, and the Social Security Fairness Act (WEP/GPO repeal).
+>
+> Independent tool. Not affiliated with or endorsed by the Commonwealth of
+> Massachusetts or the MSRB. Estimates only; official benefits are determined by
+> the MSRB at retirement.
+
+## Tools
+- [Pension Calculator](https://www.masspension.com/calculator): Estimate your monthly and annual MA pension for Groups 1–4 in about 60 seconds.
+- [Teacher Retirement Calculator (MTRS)](https://www.masspension.com/teachers): MTRS pension estimates for Massachusetts teachers, including the RetirementPlus 2%-per-year bonus for 30+ years of service.
+- [Retirement Wizard](https://www.masspension.com/wizard): Guided pension + Social Security planning, step by step.
+- [Social Security Calculator](https://www.masspension.com/social-security): WEP/GPO repeal impact under the Social Security Fairness Act.
+- [Tax Bomb Defuser](https://www.masspension.com/tax-bomb): Check whether restored Social Security benefits push you into a higher tax bracket.
+- [SSFA Back-Pay Auditor](https://www.masspension.com/ssfa-auditor): Estimate retroactive Social Security back-pay from the WEP/GPO repeal.
+
+## Key reference pages
+- [Benefit Factor Chart (Groups 1–4 by age)](https://www.masspension.com/resources/benefit-factors): Exact age factors (1.45%–2.5%) for pre- and post-April 2, 2012 hires.
+- [Retirement Groups 1–4 Explained](https://www.masspension.com/resources/groups): Eligibility ages and classifications for each group.
+- [COLA Explained](https://www.masspension.com/resources/cola): 3% COLA on the first $13,000 of pension ($390/year max).
+- [Options A, B, C Explained](https://www.masspension.com/resources/options): Full allowance vs. annuity protection vs. joint survivor.
+- [WEP / GPO Repeal](https://www.masspension.com/resources/wep-gpo): How the Social Security Fairness Act affects MA public retirees.
+- [FAQ](https://www.masspension.com/faq): Common questions about MA pension calculations.
+- [Methodology](https://www.masspension.com/methodology): How the calculator's formulas are validated against MSRB examples.
+
+## Key facts
+- Benefit formula: Average of highest 3 consecutive years' salary × years of creditable service × age-based benefit factor.
+- Maximum pension: 80% of average salary.
+- Benefit factors: 1.45%–2.5% depending on group, retirement age, and hire date (before vs. on/after April 2, 2012).
+- Groups: Group 1 = general employees (min age 60, 65 for max factor); Group 2 = certain public safety/court (min 55); Group 3 = State Police (flat 2.5%); Group 4 = police, fire, corrections (min 50).
+- COLA: 3% applied to the first $13,000 of the annual pension, a maximum increase of $390/year.
+- Teachers (MTRS) are Group 1 members; RetirementPlus participants retiring with 30+ years of creditable service add 2% of average salary per full year of service beyond 24, still capped at 80%.
+
+## Guides
+- [Blog: Massachusetts retirement guides](https://www.masspension.com/blog)
+- [Massachusetts State Retirement Pay Dates 2026](https://www.masspension.com/blog/massachusetts-state-retirement-pay-dates-2026): Full 2026 direct-deposit and check-mailing schedule for MSRB and MTRS pensions (last business day of each month).
+- [Massachusetts Sick Leave Buyback at Retirement](https://www.masspension.com/blog/massachusetts-sick-leave-buyback-retirement): State employees receive 20% of unused sick leave value at retirement (days × daily rate × 20%, 1,000-hour accrual cap); the payout does not increase the pension.
+- [Massachusetts COLA 2026 Complete Guide](https://www.masspension.com/blog/massachusetts-cola-2026-complete-guide)
+- [Social Security Fairness Act for MA Employees](https://www.masspension.com/blog/social-security-fairness-act-what-massachusetts-state-employees-need-to-know)
+- [Understanding Massachusetts Pension Options](https://www.masspension.com/blog/understanding-massachusetts-pension-options)

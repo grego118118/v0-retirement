@@ -6,7 +6,6 @@ import Script from "next/script"
 import PensionCalculatorWrapper from "@/components/pension-calculator-wrapper"
 import { Skeleton } from "@/components/ui/skeleton"
 import { AuthDisabledNotice } from "@/components/auth-disabled-notice"
-import { BannerAd, ResponsiveAd, PremiumAlternative } from "@/components/ads/adsense"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { ArrowRight, BookOpen, Users, DollarSign, Calculator, TrendingUp, FileText, Clock, Shield } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
@@ -15,9 +14,9 @@ import { RelatedTools } from "@/components/seo/related-tools"
 import { ExitIntentModal } from "@/components/premium/exit-intent-modal"
 
 export const metadata = generateSEOMetadata({
-  title: "MA State Pension Calculator 2025 | Free MSRB Tool - Results in 60 Seconds",
+  title: `MA State Pension Calculator ${new Date().getFullYear()} | Free MSRB-Formula Tool`,
   description:
-    "Calculate your exact Massachusetts pension in 60 seconds. Free calculator using official MSRB formulas for Groups 1-4. See your monthly benefit, COLA projections & Options A/B/C comparison instantly.",
+    "Estimate your Massachusetts pension in 60 seconds. Free calculator using official MSRB formulas for Groups 1-4. See your monthly benefit, COLA projections & Options A/B/C comparison instantly.",
   path: "/calculator",
   keywords: [
     "Massachusetts pension calculator",
@@ -63,20 +62,18 @@ export default function CalculatorPage() {
           </div>
           <AuthDisabledNotice className="mb-6" />
 
-          {/* Top Banner Ad */}
-          <div className="mb-8">
-            <BannerAd className="flex justify-center" />
+          {/* Route MTRS members to the teacher calculator */}
+          <div className="mb-8 rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-900/40 px-4 py-3 text-sm text-amber-900 dark:text-amber-200 text-center">
+            Are you a public school teacher?{" "}
+            <Link href="/teachers" className="font-semibold underline underline-offset-2 hover:text-amber-700 dark:hover:text-amber-100">
+              Use the MTRS Teacher Retirement Calculator
+            </Link>{" "}
+            — it includes the RetirementPlus bonus.
           </div>
 
           <Suspense fallback={<CalculatorSkeleton />}>
             <PensionCalculatorWrapper />
           </Suspense>
-
-          {/* Bottom Responsive Ad */}
-          <div className="mt-8">
-            <ResponsiveAd className="flex justify-center" />
-            <PremiumAlternative />
-          </div>
 
           {/* Group-Specific Calculators for SEO */}
           <div className="mt-16 border-t border-slate-200 pt-12">
@@ -88,7 +85,7 @@ export default function CalculatorPage() {
                   <CardContent className="pt-8 text-center">
                     <div className="w-14 h-14 rounded-full bg-slate-100 text-mrs-navy-900 flex items-center justify-center mx-auto mb-4 font-bold text-xl border border-slate-200 group-hover:bg-mrs-gold-500 group-hover:text-white transition-colors">1</div>
                     <p className="text-lg font-bold text-mrs-navy-900 dark:text-white mb-1">Group 1</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wide">Teachers, General</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wide">General Employees</p>
                   </CardContent>
                 </Card>
               </Link>

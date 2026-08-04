@@ -9,8 +9,6 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Crown, Calculator, Users, Building, FileText, Download } from "lucide-react"
 import Link from "next/link"
-import { ResponsiveAd, PremiumAlternative } from "@/components/ads/adsense"
-import { AutoAds, SmartAds } from "@/components/ads/auto-ads"
 import { Breadcrumbs } from "@/components/seo/breadcrumbs"
 import { ExitIntentModal } from "@/components/premium/exit-intent-modal"
 
@@ -98,19 +96,47 @@ function PricingPageContent() {
           {/* Main Pricing Section */}
           <PricingSection />
 
-          {/* AdSense Ads for Free Users */}
-          <div className="my-16">
-            {/* Auto Ads - Primary solution */}
-            <AutoAds />
-
-            {/* Smart Ads - Combines Auto + Manual */}
-            <SmartAds
-              className="flex justify-center mb-8"
-              fallbackSlot={process.env.NEXT_PUBLIC_ADSENSE_RESPONSIVE_SLOT}
-            />
-
-            {/* Premium Alternative for premium users */}
-            <PremiumAlternative />
+          {/* One-time report — for buyers who won't subscribe */}
+          <div className="mt-16 max-w-4xl mx-auto">
+            <Card className="relative overflow-hidden border-mrs-gold-300 dark:border-mrs-gold-500/40">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-mrs-gold-400 to-mrs-gold-600" />
+              <CardHeader>
+                <div className="flex items-center gap-2 mb-1">
+                  <FileText className="h-5 w-5 text-mrs-gold-600" />
+                  <Badge className="bg-mrs-gold-100 text-mrs-gold-800 dark:bg-mrs-gold-500/20 dark:text-mrs-gold-300">One-time · No subscription</Badge>
+                </div>
+                <CardTitle className="text-2xl">Complete Retirement Report — $39</CardTitle>
+                <CardDescription>
+                  Not ready to subscribe? Buy a single, professional PDF analysis of your pension — pay once, no recurring charge.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid sm:grid-cols-2 gap-3 mb-6">
+                  {[
+                    "Full pension breakdown for your exact numbers",
+                    "Options A, B & C with survivor benefits",
+                    "10-year COLA projection",
+                    "Professional PDF to keep or share with an advisor",
+                  ].map((f, i) => (
+                    <div key={i} className="flex items-center gap-2 text-sm">
+                      <Download className="h-4 w-4 text-mrs-gold-600 flex-shrink-0" />
+                      <span>{f}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                  <Button className="bg-gradient-to-r from-mrs-gold-500 to-mrs-gold-600 hover:from-mrs-gold-400 hover:to-mrs-gold-500 text-white font-bold" asChild>
+                    <Link href="/calculator">
+                      <Calculator className="mr-2 h-4 w-4" />
+                      Run your numbers to get the report
+                    </Link>
+                  </Button>
+                  <span className="text-xs text-muted-foreground">
+                    Enter your details in the free calculator, then buy your report on the results page.
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Enterprise Section */}

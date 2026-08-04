@@ -1,6 +1,6 @@
 import type React from "react"
 import type { Metadata, Viewport } from "next"
-import { Inter } from "next/font/google"
+import { Lexend, Source_Sans_3 } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { LayoutWrapper } from "@/components/layout/layout-wrapper"
@@ -14,8 +14,19 @@ import { AdSenseInitializer } from "@/components/ads/adsense-initializer"
 import { TrustedTypesSetup } from "@/components/layout/trusted-types-setup"
 import { Analytics } from "@vercel/analytics/next"
 import { FloatingChatbot } from "@/components/pension-chatbot/FloatingChatbot"
+import { GoogleAnalytics } from "@/components/layout/google-analytics"
 
-const inter = Inter({ subsets: ["latin"] })
+const lexend = Lexend({
+  subsets: ["latin"],
+  variable: "--font-lexend",
+  display: "swap",
+})
+
+const sourceSans = Source_Sans_3({
+  subsets: ["latin"],
+  variable: "--font-source-sans",
+  display: "swap",
+})
 
 // Viewport configuration - separate export as required by Next.js 14+
 export const viewport: Viewport = {
@@ -31,7 +42,7 @@ export const metadata: Metadata = {
   },
   description: "Calculate your Massachusetts state employee pension benefits with official MSRB formulas. Comprehensive retirement planning for Groups 1-4 with COLA projections.",
   generator: 'v0.dev',
-  metadataBase: new URL(process.env.NEXTAUTH_URL || 'https://www.masspension.com'),
+  metadataBase: new URL('https://www.masspension.com'),
   robots: {
     index: true,
     follow: true,
@@ -59,7 +70,7 @@ export const metadata: Metadata = {
     siteName: 'Mass Pension',
     images: [
       {
-        url: '/images/og-image.svg',
+        url: '/images/og-image.jpg',
         width: 1200,
         height: 630,
         alt: 'Mass Pension - Massachusetts Retirement Calculator',
@@ -72,7 +83,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Mass Pension - Massachusetts Retirement Calculator',
     description: 'Calculate your Massachusetts state employee pension benefits with official MSRB formulas.',
-    images: ['/images/og-image.svg'],
+    images: ['/images/og-image.jpg'],
   },
 }
 
@@ -108,7 +119,7 @@ export default function RootLayout({
           strategy="beforeInteractive"
         />
       </head>
-      <body className={inter.className}>
+      <body className={`${lexend.variable} ${sourceSans.variable} font-sans`}>
         <SessionProvider>
           <ProfileProvider>
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
@@ -122,6 +133,7 @@ export default function RootLayout({
               <Toaster />
               <FloatingChatbot />
               <Analytics />
+              <GoogleAnalytics />
             </ThemeProvider>
           </ProfileProvider>
         </SessionProvider>

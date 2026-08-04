@@ -18,12 +18,12 @@ import {
 } from "@/lib/pension/ma-cola-calculator"
 import { formatCurrency } from "@/lib/utils"
 import Link from "next/link"
-import { ResponsiveAd, PremiumAlternative } from "@/components/ads/adsense"
 import { calculateRetirementBenefitsProjection, ProjectionParameters } from "@/lib/retirement-benefits-projection"
 import { RetirementBenefitsProjection } from "@/components/retirement-benefits-projection"
 import { PDFExportButton, PDFExportSection } from "@/components/pdf/pdf-export-button"
 import { PensionCalculationData } from "@/lib/pdf/puppeteer-pdf-generator"
 import { RetirementAgeComparison } from "./calculator/retirement-age-comparison"
+import { ResultsUpsellSection } from "./calculator/results-email-upsell"
 
 interface PensionResultsProps {
   result: {
@@ -534,11 +534,53 @@ export default function PensionResults({ result }: PensionResultsProps) {
         />
       </div>
 
-      {/* AdSense Ad for Free Users / Premium Alternative */}
-      <div className="mt-8">
-        <ResponsiveAd className="flex justify-center" />
-        <PremiumAlternative />
-      </div>
+      {/* Email capture + report/premium upsell at point of highest intent */}
+      <ResultsUpsellSection
+        data={{
+          annualPension: result.annualPension,
+          monthlyPension: result.monthlyPension,
+          averageSalary: result.details.averageSalary,
+          group: result.details.group,
+          age: result.details.age,
+          yearsOfService: result.details.yearsOfService,
+          selectedOption: result.selectedOption,
+        }}
+        reportData={{
+          currentAge: result.details.age,
+          plannedRetirementAge: result.details.age,
+          retirementGroup: result.details.group,
+          serviceEntry: "before_2012",
+          averageSalary: result.details.averageSalary,
+          yearsOfService: result.details.yearsOfService,
+          projectedYearsAtRetirement: result.details.yearsOfService,
+          basePension: result.details.baseAnnualPension,
+          benefitFactor: result.details.basePercentage / result.details.yearsOfService,
+          totalBenefitPercentage: result.details.basePercentage,
+          cappedAt80Percent: result.details.cappedBase,
+          options: {
+            A: {
+              annual: result.annualPension,
+              monthly: result.monthlyPension,
+              description: "Option A: Full Allowance (100%)",
+            },
+            B: {
+              annual: result.annualPension * 0.99,
+              monthly: result.monthlyPension * 0.99,
+              description: "Option B: Annuity Protection (1% reduction)",
+              reduction: 0.01,
+            },
+            C: {
+              annual: result.annualPension * 0.9295,
+              monthly: result.monthlyPension * 0.9295,
+              description: "Option C: Joint & Survivor (66.67%)",
+              reduction: 0.0705,
+              survivorAnnual: result.survivorAnnualPension || result.annualPension * 0.9295 * 0.6667,
+              survivorMonthly: result.survivorMonthlyPension || result.monthlyPension * 0.9295 * 0.6667,
+            },
+          },
+          calculationDate: new Date().toISOString(),
+        }}
+      />
     </motion.div>
   )
 }

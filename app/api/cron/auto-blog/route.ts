@@ -6,13 +6,19 @@ export const dynamic = 'force-dynamic'
  * Generates one high-quality Massachusetts retirement blog post per week
  * - Uses Gemini AI for long-form, factual content (1500+ words)
  * - Generates an AI image via Pollinations.ai
- * - Auto-publishes if quality checks pass
+ * - ALWAYS saves as a draft pending human review (YMYL content: a factual
+ *   error about pension rules costs more trust than any post earns, and the
+ *   heuristic quality score can't catch factual errors)
+ * - Emails the site owner a review notification with a link to approve
  *
  * Cron: Every Monday at 10 AM ET (14:00 UTC)
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
+import { emailService } from '@/lib/email/email-service'
+
+const BASE_URL = process.env.NEXTAUTH_URL || 'https://www.masspension.com'
 
 // Lazy Supabase client — do NOT instantiate at module load (breaks `next build`
 // "Collecting page data" when env vars aren't injected).
@@ -87,11 +93,10 @@ export async function GET(request: NextRequest) {
     // 3. Generate an AI image for the post
     const imageUrl = generateImageUrl(content.title, topic.category)
 
-    // 4. Run quality checks
+    // 4. Run quality checks (stored for the reviewer; never used to auto-publish)
     const qualityScore = assessQuality(content)
-    const shouldPublish = qualityScore >= 70
 
-    // 5. Save to database
+    // 5. Save to database — always a draft pending human review
     const slug = generateSlug(content.title)
     const now = new Date().toISOString()
 
@@ -101,18 +106,20 @@ export async function GET(request: NextRequest) {
       slug: slug,
       content: content.body,
       excerpt: content.excerpt,
-      status: shouldPublish ? 'published' : 'draft',
+      status: 'draft',
       is_ai_generated: true,
       ai_model: 'gemini-2.0-flash',
-      fact_check_status: shouldPublish ? 'approved' : 'pending',
+      fact_check_status: 'pending',
       seo_description: content.metaDescription,
       seo_keywords: content.keywords,
       featured_image_url: imageUrl,
       content_quality_score: qualityScore,
-      published_at: shouldPublish ? now : null,
+      published_at: null,
       created_at: now,
       updated_at: now,
     }).select().single()
+
+    let savedId = data?.id
 
     if (error) {
       console.error('Database error:', error)
@@ -123,15 +130,15 @@ export async function GET(request: NextRequest) {
         slug: slug,
         content: content.body,
         excerpt: content.excerpt,
-        status: shouldPublish ? 'published' : 'draft',
+        status: 'draft',
         isAiGenerated: true,
         aiModelUsed: 'gemini-2.0-flash',
-        factCheckStatus: shouldPublish ? 'approved' : 'pending',
+        factCheckStatus: 'pending',
         seoDescription: content.metaDescription,
         seoKeywords: content.keywords,
         featuredImageUrl: imageUrl,
         contentQualityScore: qualityScore,
-        publishedAt: shouldPublish ? now : null,
+        publishedAt: null,
         createdAt: now,
         updatedAt: now,
       }).select().single()
@@ -140,18 +147,16 @@ export async function GET(request: NextRequest) {
         console.error('Database error (retry):', error2)
         return NextResponse.json({ error: 'Failed to save post', details: error2.message }, { status: 500 })
       }
-
-      return NextResponse.json({
-        success: true,
-        message: `Blog post ${shouldPublish ? 'published' : 'saved as draft'}`,
-        post: { id: data2?.id, title: content.title, status: shouldPublish ? 'published' : 'draft', qualityScore, imageUrl }
-      })
+      savedId = data2?.id
     }
+
+    // 6. Notify the owner that a draft is waiting for review
+    await notifyOwnerOfDraft(content.title, content.excerpt, qualityScore, slug)
 
     return NextResponse.json({
       success: true,
-      message: `Blog post ${shouldPublish ? 'published' : 'saved as draft'}`,
-      post: { id: data?.id, title: content.title, status: shouldPublish ? 'published' : 'draft', qualityScore, imageUrl }
+      message: 'Blog post saved as draft pending review',
+      post: { id: savedId, title: content.title, status: 'draft', qualityScore, imageUrl }
     })
 
   } catch (error) {
@@ -160,6 +165,38 @@ export async function GET(request: NextRequest) {
       error: 'Generation failed',
       details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 })
+  }
+}
+
+// ─── Owner Notification ────────────────────────────────────────────────────────
+async function notifyOwnerOfDraft(title: string, excerpt: string, qualityScore: number, slug: string) {
+  try {
+    const ownerEmail = process.env.LEAD_NOTIFICATION_EMAIL || process.env.EMAIL_FROM || 'greg@gowebautomations.com'
+    const reviewUrl = `${BASE_URL}/admin/blog/review`
+    const previewUrl = `${BASE_URL}/blog/${slug}?showDrafts=true`
+
+    const result = await emailService.sendEmail({
+      to: ownerEmail,
+      subject: `📝 New blog draft ready for review: ${title}`,
+      html: `
+        <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
+          <h2 style="color:#0f172a;">A new AI draft is waiting for your review</h2>
+          <p style="font-size:16px;color:#374151;"><strong>${title}</strong></p>
+          <p style="color:#6b7280;line-height:1.6;">${excerpt}</p>
+          <p style="color:#374151;">Heuristic quality score: <strong>${qualityScore}/100</strong> (structure/length only — please fact-check pension numbers before approving).</p>
+          <p style="margin:24px 0;">
+            <a href="${reviewUrl}" style="background:#2563eb;color:#fff;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:600;display:inline-block;">Review &amp; approve</a>
+          </p>
+          <p style="font-size:13px;color:#6b7280;">Approving schedules it for the next open Monday publishing slot. It will not go live until you approve it.</p>
+        </div>`,
+    })
+
+    if (!result.success) {
+      console.error('auto-blog: owner notification failed', result.error)
+    }
+  } catch (e) {
+    // Never fail the generation run because the notification failed.
+    console.error('auto-blog: owner notification error', e)
   }
 }
 

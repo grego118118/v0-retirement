@@ -31,7 +31,7 @@ export function useSubscription() {
 }
 
 export function useSubscriptionStatus() {
-  const { data: session } = useSession()
+  const { data: session, status: sessionStatus } = useSession()
   const [subscriptionData, setSubscriptionData] = useState({
     isPremium: false,
     subscriptionStatus: 'loading' as SubscriptionStatus,
@@ -141,6 +141,20 @@ export function useSubscriptionStatus() {
       checkSubscription()
     }
   }, [session?.user?.id]) // Use user ID instead of email to prevent unnecessary re-renders
+
+  // Anonymous visitors have no subscription to check — resolve them to 'free'
+  // instead of leaving the status stuck at 'loading' forever. Without this,
+  // anything gated on `subscriptionStatus !== 'loading'` never renders for
+  // logged-out users.
+  useEffect(() => {
+    if (sessionStatus === 'unauthenticated') {
+      setSubscriptionData({
+        isPremium: false,
+        subscriptionStatus: 'free',
+        savedCalculationsCount: 0
+      })
+    }
+  }, [sessionStatus])
 
   useEffect(() => {
     // Listen for subscription updates

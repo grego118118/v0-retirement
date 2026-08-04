@@ -3,36 +3,27 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
   ArrowRight,
   Calculator,
   Clock,
-  DollarSign,
   TrendingUp,
-  Crown,
   CheckCircle,
-  Users,
   Shield,
   FileText,
-  Zap,
-  Star,
-  Timer,
-  Target,
+  Lock,
   BookOpen
 } from "lucide-react"
 import { generateSEOMetadata } from "@/components/seo/metadata"
 import { OrganizationStructuredData, FAQStructuredData, HowToStructuredData, LocalBusinessStructuredData, RETIREMENT_FAQS, PENSION_CALCULATION_STEPS } from "@/components/seo/structured-data"
 import { CalculatorSchema, FAQSchema } from "@/components/seo/schema-markup"
 import { NewsletterSignup } from "@/components/email/newsletter-signup"
-import { ResponsiveAd, PremiumAlternative } from "@/components/ads/adsense"
-import { AutoAds } from "@/components/ads/auto-ads"
 import { AnimateOnScroll, StaggerChildren, StaggerItem } from "@/components/ui/animate-on-scroll"
 
 export const metadata = generateSEOMetadata({
-  title: "Massachusetts Pension Calculator 2026 | Official MSRB Estimator",
+  title: "Massachusetts Pension Calculator 2026 | Free MSRB-Formula Estimator",
   description:
-    "Calculate your Massachusetts state pension in 60 seconds. See your exact monthly payout for Groups 1-4, compare Options A/B/C, and master the Tax Bomb using 2026 COLA rates.",
+    "Estimate your Massachusetts state pension in 60 seconds. See your monthly payout for Groups 1-4, compare Options A/B/C, and plan around COLA and the Tax Bomb. Free, no login required.",
   path: "/",
   keywords: [
     "Massachusetts pension calculator 2026",
@@ -60,7 +51,7 @@ export default function Home() {
         steps={PENSION_CALCULATION_STEPS}
       />
 
-      {/* Hero Section - Conversion Optimized */}
+      {/* Hero Section - Free-calculator-first, trust-led */}
       <section className="bg-mrs-navy-900 text-white py-20 md:py-28 relative overflow-hidden">
         {/* Background Elements */}
         <div className="absolute inset-0 bg-slate-900/50"></div>
@@ -78,55 +69,56 @@ export default function Home() {
 
               {/* Headline */}
               <h1 className="text-4xl font-heading font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
-                Maximize Your
+                Estimate Your MA Pension
                 <span className="block text-transparent bg-clip-text bg-gradient-to-r from-mrs-gold-400 to-mrs-gold-600">
-                  Retirement Income
+                  in 60 Seconds
                 </span>
               </h1>
 
               {/* Value Proposition */}
               <p className="text-xl md:text-2xl text-blue-100 leading-relaxed font-sans">
-                The only tool that combines your <strong>Massachusetts pension</strong> with <strong>Social Security optimization</strong> to maximize your retirement income by up to <strong className="text-mrs-gold-400">$50,000+ annually</strong>.
+                Free calculator for <strong>Massachusetts state employees</strong>. See your estimated monthly benefit for <strong>Groups 1–4</strong>, compare <strong>Options A, B &amp; C</strong>, and project your COLA — using the official MSRB formulas.
               </p>
 
-              {/* Social Proof */}
-              <div className="flex items-center gap-4 text-blue-200">
-                <div className="flex items-center gap-1">
-                  <Shield className="w-4 h-4" />
-                  <span className="text-sm">Bank-level security</span>
+              {/* Social Proof - verifiable only */}
+              <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-blue-200">
+                <div className="flex items-center gap-1.5">
+                  <Calculator className="w-4 h-4 text-mrs-gold-400" />
+                  <span className="text-sm">Official MSRB formulas</span>
                 </div>
-                <div className="flex items-center gap-1">
-                  <Calculator className="w-4 h-4" />
-                  <span className="text-sm">MSRB-accurate calculations</span>
+                <div className="flex items-center gap-1.5">
+                  <Lock className="w-4 h-4 text-mrs-gold-400" />
+                  <span className="text-sm">No login required</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <CheckCircle className="w-4 h-4 text-mrs-gold-400" />
+                  <span className="text-sm">100% free to estimate</span>
                 </div>
               </div>
 
-              {/* Primary CTAs */}
+              {/* Primary CTAs - free calculator first */}
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <Button size="lg" className="bg-gradient-to-r from-mrs-gold-500 to-mrs-gold-600 text-white font-bold hover:from-mrs-gold-400 hover:to-mrs-gold-500 shadow-xl transform hover:scale-105 transition-all duration-200" asChild>
-                  <Link href="/pricing">
-                    <Crown className="mr-2 h-5 w-5" />
-                    Start Premium Analysis
+                  <Link href="/calculator">
+                    <Calculator className="mr-2 h-5 w-5" />
+                    Calculate My Pension — Free
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
                 <Button size="lg" variant="outline" className="border-mrs-blue-600/30 bg-white/95 text-mrs-blue-600 hover:bg-blue-50 hover:text-mrs-navy-800 backdrop-blur-sm shadow-lg" asChild>
-                  <Link href="/calculator">
-                    Try Free Calculator
+                  <Link href="/wizard">
+                    See the Full Wizard
                   </Link>
                 </Button>
               </div>
 
-              {/* Urgency Element */}
-              <Alert className="bg-red-50 border-red-100 text-red-800 bg-white/95 backdrop-blur-md shadow-lg">
-                <Timer className="h-4 w-4" />
-                <AlertDescription>
-                  <strong>Limited Time:</strong> Save 17% on annual plans. Every day you wait costs you potential retirement income.
-                </AlertDescription>
-              </Alert>
+              {/* Independence disclaimer */}
+              <p className="text-xs text-blue-300/80 max-w-xl">
+                Independent planning tool. Not affiliated with, endorsed by, or operated by the Commonwealth of Massachusetts or the Massachusetts State Retirement Board (MSRB). Estimates only — your official benefit is determined by the MSRB at retirement.
+              </p>
             </div>
 
-            {/* Hero Visual - Income Comparison */}
+            {/* Hero Visual - Honest example estimate */}
             <div className="mx-auto lg:mx-0 relative">
               <div className="absolute inset-0 bg-gradient-to-r from-mrs-gold-400/20 to-mrs-gold-600/20 rounded-3xl blur-3xl"></div>
               <div className="relative bg-white/95 backdrop-blur-sm border border-white/20 rounded-3xl shadow-2xl overflow-hidden">
@@ -134,82 +126,56 @@ export default function Home() {
                   {/* Header */}
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-2">
-                      <Crown className="h-5 w-5 text-mrs-gold-600" />
-                      <span className="font-semibold text-mrs-navy-900">Premium Analysis</span>
+                      <Calculator className="h-5 w-5 text-mrs-blue-600" />
+                      <span className="font-semibold text-mrs-navy-900">Example Estimate</span>
                     </div>
-                    <Badge className="bg-yellow-50 text-yellow-700 border border-yellow-200 font-bold">
-                      +$52,000/year
+                    <Badge className="bg-slate-100 text-slate-600 border border-slate-200 font-medium">
+                      Illustration
                     </Badge>
                   </div>
 
-                  {/* Income Comparison */}
-                  <div className="space-y-4">
-                    <div className="text-center mb-4">
-                      <h3 className="font-bold text-gray-900 text-lg">Your Optimized Retirement Income</h3>
-                      <p className="text-sm text-gray-600">vs. Basic Planning</p>
+                  {/* Sample inputs */}
+                  <div className="space-y-3 mb-5">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-500">Group</span>
+                      <span className="font-semibold text-mrs-navy-900">Group 1 · Age 65</span>
                     </div>
-
-                    {/* Basic vs Premium Comparison */}
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-gray-100 rounded-lg p-4 text-center">
-                        <div className="text-xs text-gray-600 mb-1">Basic Planning</div>
-                        <div className="text-lg font-bold text-gray-700">$4,200/mo</div>
-                        <div className="text-xs text-red-600">Missing $1,500/mo</div>
-                      </div>
-                      <div className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-lg p-4 text-center border-2 border-mrs-gold-500">
-                        <div className="text-xs text-yellow-800 font-bold mb-1 uppercase tracking-wider">Premium Optimized</div>
-                        <div className="text-lg font-bold text-mrs-navy-900">$7,650/mo</div>
-                        <div className="text-xs text-green-700 font-bold">+82% more income</div>
-                      </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-500">Avg. highest 3-yr salary</span>
+                      <span className="font-semibold text-mrs-navy-900">$95,000</span>
                     </div>
-
-                    {/* Features Unlocked */}
-                    <div className="bg-gradient-to-r from-mrs-navy-900/5 to-mrs-blue-600/5 rounded-lg p-4">
-                      <div className="text-xs font-medium text-gray-700 mb-2">Premium Features Included:</div>
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-xs">
-                          <CheckCircle className="h-3 w-3 text-mrs-gold-600" />
-                          <span className="text-gray-700">Social Security optimization</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs">
-                          <CheckCircle className="h-3 w-3 text-mrs-gold-600" />
-                          <span className="text-gray-700">Tax-efficient withdrawal strategy</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs">
-                          <CheckCircle className="h-3 w-3 text-mrs-gold-600" />
-                          <span className="text-gray-700">Professional PDF reports</span>
-                        </div>
-                      </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-500">Years of service</span>
+                      <span className="font-semibold text-mrs-navy-900">30 years</span>
                     </div>
-
-                    {/* CTA Button */}
-                    <Button className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium" asChild>
-                      <Link href="/pricing">
-                        <Target className="mr-2 h-4 w-4" />
-                        Get My Analysis
-                      </Link>
-                    </Button>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-500">Benefit factor</span>
+                      <span className="font-semibold text-mrs-navy-900">2.5%</span>
+                    </div>
                   </div>
+
+                  {/* Estimated result */}
+                  <div className="bg-gradient-to-br from-mrs-navy-900/5 to-mrs-blue-600/5 rounded-xl p-4 border border-slate-100 text-center mb-4">
+                    <div className="text-xs text-gray-500 mb-1 uppercase tracking-wider">Estimated Option A pension</div>
+                    <div className="text-3xl font-bold text-mrs-navy-900">$71,250<span className="text-base font-medium text-gray-500">/yr</span></div>
+                    <div className="text-sm text-gray-600 mt-1">≈ $5,937/mo before COLA</div>
+                  </div>
+
+                  <div className="text-[11px] text-gray-400 text-center mb-4">
+                    $95,000 × 30 yrs × 2.5% = $71,250 · Sample figures for illustration only.
+                  </div>
+
+                  {/* CTA Button */}
+                  <Button className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium" asChild>
+                    <Link href="/calculator">
+                      <Calculator className="mr-2 h-4 w-4" />
+                      Run My Own Numbers
+                    </Link>
+                  </Button>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* AdSense Ads Section for Free Users */}
-      <section className="py-8 bg-mrs-navy-800 border-b border-mrs-navy-700">
-        <div className="container mx-auto px-4">
-          {/* Auto Ads - Primary solution */}
-          <AutoAds />
-
-          {/* Manual Ad Fallback */}
-          <div className="flex justify-center mb-8">
-            <ResponsiveAd className="max-w-4xl" />
-          </div>
-
-          {/* Premium Alternative for premium users */}
-          <PremiumAlternative />
         </div>
       </section>
 

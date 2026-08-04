@@ -181,8 +181,56 @@ export function EnhancedBlogGrid({
         setDisplayPosts(filteredPosts)
         setError(null)
       } else {
-        // Sort API results by date (newest first)
-        const sortedPosts = [...data.posts].sort((a: BlogPost, b: BlogPost) =>
+        // Merge DB posts with bundled static posts (deduped by slug) so posts
+        // that only exist in lib/blog-data.ts still appear on the index.
+        const dbSlugs = new Set(data.posts.map((p: BlogPost) => p.slug))
+        const staticAsBlogPosts = blogPosts
+          .filter(post => !dbSlugs.has(post.id))
+          .map(post => ({
+            id: post.id,
+            title: post.title,
+            slug: post.id,
+            content: post.content,
+            excerpt: post.description,
+            featured_image_url: post.image || '/images/blog/default-blog-image.svg',
+            status: 'published' as const,
+            published_at: new Date(post.date).toISOString(),
+            created_at: new Date(post.date).toISOString(),
+            updated_at: new Date(post.date).toISOString(),
+            view_count: 0,
+            is_ai_generated: false,
+            fact_check_status: 'approved' as const,
+            seo_optimized: true,
+            internal_links_added: true,
+            seo_title: post.title,
+            seo_description: post.description,
+            seo_keywords: post.tags
+          }))
+
+        let mergedPosts = [...data.posts, ...staticAsBlogPosts]
+
+        // Static additions must respect the active filters like DB results do
+        if (selectedCategory && selectedCategory !== 'all') {
+          mergedPosts = mergedPosts.filter(p => {
+            if (dbSlugs.has(p.slug)) return true // API already filtered these
+            const originalPost = blogPosts.find(bp => bp.id === p.id)
+            return originalPost?.category === selectedCategory
+          })
+        }
+        if (searchQuery) {
+          const query = searchQuery.toLowerCase()
+          mergedPosts = mergedPosts.filter(p => {
+            if (dbSlugs.has(p.slug)) return true // API already filtered these
+            return (
+              p.title.toLowerCase().includes(query) ||
+              p.excerpt?.toLowerCase().includes(query) ||
+              p.seo_keywords?.some((keyword: string) => keyword.toLowerCase().includes(query))
+            )
+          })
+        }
+
+        // Sort merged results by date (newest first)
+        const sortedPosts = mergedPosts.sort((a: BlogPost, b: BlogPost) =>
           new Date(b.published_at || b.created_at).getTime() - new Date(a.published_at || a.created_at).getTime()
         )
         setDisplayPosts(sortedPosts)

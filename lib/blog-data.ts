@@ -1,6 +1,157 @@
 // This would typically come from a CMS or database
 export const blogPosts = [
   {
+    id: "massachusetts-sick-leave-buyback-retirement",
+    title: "Massachusetts Sick Leave Buyback at Retirement: How the 20% Payout Works",
+    description:
+      "Massachusetts state employees are paid 20% of their unused sick leave value at retirement. How the buyback is calculated, the 1,000-hour cap, why it doesn't increase your pension, and how to soften the tax hit.",
+    date: "July 8, 2026",
+    readTime: "6 min read",
+    author: "Greg O",
+    authorTitle: "Retirement Specialist",
+    category: "Retirement Benefits",
+    tags: [
+      "sick leave buyback",
+      "unused sick time",
+      "Massachusetts state employees",
+      "retirement payout",
+      "1000 hour cap",
+    ],
+    image: "/images/blog/default-blog-image.svg",
+    content: `
+      <p><strong>Quick answer:</strong> When you retire directly from Massachusetts state service, you're paid a lump sum equal to <strong>20% of the value of your unused sick leave</strong> — your accrued sick days multiplied by your daily pay rate at retirement, times 20%. The payment does <strong>not</strong> increase your pension, and for executive branch and higher-education employees, sick leave accrual is capped at <strong>1,000 hours</strong>.</p>
+
+      <h2>How the sick leave buyback is calculated</h2>
+      <p>Under Massachusetts law (M.G.L. c. 29, &sect;31A), employees who retire with unused sick leave credits are paid 20% of their value:</p>
+      <p style="text-align:center;"><strong>Sick days remaining &times; daily rate of pay at retirement &times; 20% = your buyback check</strong></p>
+
+      <h3>A worked example</h3>
+      <table style="width:100%;border-collapse:collapse;margin:1rem 0;">
+        <tbody>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">Final salary</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;"><strong>$78,000/year</strong> (&asymp; $300/day)</td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">Unused sick leave</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;"><strong>120 days</strong></td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">Full value</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">120 &times; $300 = <strong>$36,000</strong></td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">Buyback payout (20%)</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;"><strong>$7,200 lump sum</strong></td></tr>
+        </tbody>
+      </table>
+      <p>Because the rate used is your pay <em>at retirement</em>, sick days you banked decades ago are valued at today's salary — one reason long-career employees often see a meaningful check.</p>
+
+      <h2>The 1,000-hour cap</h2>
+      <p>Executive branch and public higher-education employees can accrue a maximum of <strong>1,000 hours</strong> of sick leave (roughly 133 days for a standard 7.5-hour day). Hours beyond the cap simply stop accruing — they don't bank toward a bigger buyback. If you're near the cap and still years from retirement, that's a signal to use sick time when you legitimately need it rather than stockpiling past the limit.</p>
+
+      <h2>The part everyone gets wrong: it doesn't increase your pension</h2>
+      <p>Sick leave buyback is a one-time payment, <strong>not</strong> &ldquo;regular compensation&rdquo; under Chapter 32. That means it is <strong>excluded from your highest-3-year salary average</strong> and has zero effect on your monthly pension. Your pension is set by the standard formula — average salary &times; years of service &times; age factor. Run your own numbers in our <a href="/calculator">free pension calculator</a>.</p>
+      <p>One related benefit that surprises people: while unused sick time doesn't boost the pension formula, retiring with a strong sick bank means you were paid for time you never had to take unpaid — and the 20% payout is pure addition on top of your pension.</p>
+
+      <h2>Don't confuse it with a service &ldquo;buyback&rdquo;</h2>
+      <p>Massachusetts uses the word &ldquo;buyback&rdquo; for two completely different things:</p>
+      <ul>
+        <li><strong>Sick leave buyback</strong> (this article): the state pays <em>you</em> 20% of unused sick time at retirement.</li>
+        <li><strong>Creditable service buyback</strong>: <em>you</em> pay the retirement system to purchase past service (prior public employment, military time) so it counts toward your pension. That one <em>does</em> increase your pension — see our <a href="/blog/creditable-service-guide-for-ma-state-employees">creditable service guide</a>.</li>
+      </ul>
+
+      <h2>Teachers and municipal employees: check your contract</h2>
+      <p>The 20% statute covers state employees. If you work for a school district or municipality, sick leave payout terms live in your <strong>collective bargaining agreement</strong> — some districts pay a flat per-day rate, some use a percentage with dollar caps, and some pay nothing. MTRS members should check their district contract and our <a href="/teachers">teacher retirement calculator</a> for the pension side.</p>
+
+      <h2>The tax hit — and how to soften it</h2>
+      <p>Your buyback is <strong>taxable ordinary income in the year you receive it</strong>, stacked on top of your final months of salary and any vacation payout. For many retirees that inflates one tax year significantly.</p>
+      <p>Depending on your payroll rules and election deadlines, you may be able to <strong>defer some or all of the payout into the SMART Plan 457(b)</strong> instead of taking it as cash — typically the election must be made well before your final month of work, so ask your benefits office early. Deferring can keep the payment out of your top bracket and let it come out later at lower rates. To see whether your retirement income stacks into a higher bracket, run the <a href="/tax-bomb">Tax Bomb Defuser</a>.</p>
+
+      <h2>Checklist before you retire</h2>
+      <ul>
+        <li>Get your <strong>official sick leave balance</strong> from HR/payroll — don't rely on memory.</li>
+        <li>Confirm whether the <strong>1,000-hour cap</strong> applies to you.</li>
+        <li>Ask about <strong>457(b) deferral deadlines</strong> for lump-sum payouts.</li>
+        <li>Remember the buyback arrives <strong>separately from your first pension payment</strong> — plan cash flow for the gap months.</li>
+        <li>Estimate your pension itself with the <a href="/calculator">Massachusetts pension calculator</a>.</li>
+      </ul>
+
+      <p><em>Sources: M.G.L. c. 29, &sect;31A; Commonwealth of Massachusetts HR absence and leave policies (mass.gov). Payout terms for union-covered and municipal employees vary by collective bargaining agreement — always confirm with your HR office.</em></p>
+    `,
+    relatedPosts: [
+      "creditable-service-guide-for-ma-state-employees",
+      "massachusetts-state-retirement-pay-dates-2026",
+      "maximizing-your-state-pension-benefits",
+    ],
+  },
+
+  {
+    id: "massachusetts-state-retirement-pay-dates-2026",
+    title: "Massachusetts State Retirement Pay Dates 2026: Full Pension Payment Schedule",
+    description:
+      "Every 2026 Massachusetts pension payment date for MSRB and MTRS retirees — direct deposit dates, check mailing dates, and how the last-business-day rule works.",
+    date: "July 8, 2026",
+    readTime: "4 min read",
+    author: "Greg O",
+    authorTitle: "Retirement Specialist",
+    category: "Pension Payments",
+    tags: [
+      "pension pay dates 2026",
+      "MSRB payment schedule",
+      "MTRS payment schedule",
+      "direct deposit",
+      "Massachusetts retirement",
+    ],
+    image: "/images/blog/default-blog-image.svg",
+    content: `
+      <p><strong>Quick answer:</strong> Massachusetts public pension payments arrive by direct deposit on the <strong>last business day of each month</strong>. Paper checks are mailed about two business days earlier and are payable on the deposit date. The full 2026 schedule is below.</p>
+
+      <h2>2026 Massachusetts Pension Payment Schedule</h2>
+      <p>These dates apply to Massachusetts State Retirement Board (MSRB) and Massachusetts Teachers' Retirement System (MTRS) benefit recipients. Direct deposits post on the last business day of the month; when the month ends on a weekend or holiday, the deposit moves to the preceding business day.</p>
+
+      <table style="width:100%;border-collapse:collapse;margin:1rem 0;">
+        <thead>
+          <tr>
+            <th style="text-align:left;padding:8px 12px;border-bottom:2px solid #cbd5e1;">Month</th>
+            <th style="text-align:left;padding:8px 12px;border-bottom:2px solid #cbd5e1;">Check mailed</th>
+            <th style="text-align:left;padding:8px 12px;border-bottom:2px solid #cbd5e1;">Direct deposit</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">January</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">Wed, Jan 28</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;"><strong>Fri, Jan 30</strong></td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">February</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">Wed, Feb 25</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;"><strong>Fri, Feb 27</strong></td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">March</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">Fri, Mar 27</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;"><strong>Tue, Mar 31</strong></td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">April</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">Tue, Apr 28</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;"><strong>Thu, Apr 30</strong></td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">May</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">Wed, May 27</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;"><strong>Fri, May 29</strong></td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">June</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">Fri, Jun 26</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;"><strong>Tue, Jun 30</strong></td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">July</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">Wed, Jul 29</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;"><strong>Fri, Jul 31</strong></td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">August</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">Thu, Aug 27</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;"><strong>Mon, Aug 31</strong></td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">September</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">Mon, Sep 28</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;"><strong>Wed, Sep 30</strong></td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">October</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">Wed, Oct 28</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;"><strong>Fri, Oct 30</strong></td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">November</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">Wed, Nov 25</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;"><strong>Mon, Nov 30</strong></td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">December</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">Tue, Dec 29</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;"><strong>Thu, Dec 31</strong></td></tr>
+        </tbody>
+      </table>
+
+      <p><em>Source: MTRS 2026 pension payment schedule and the MSRB pension payment calendar (mass.gov). Always confirm against the official calendar if a date is critical for you.</em></p>
+
+      <h2>How Massachusetts pension payments work</h2>
+      <ul>
+        <li><strong>Direct deposit is the standard.</strong> Your benefit posts to your bank account on the last business day of the month — that payment covers the month just ending, not the month ahead.</li>
+        <li><strong>Paper checks are mailed roughly two business days before</strong> the deposit date and are payable on the deposit date. If you still receive a paper check, allow for mail time.</li>
+        <li><strong>Weekends and holidays shift dates earlier.</strong> For example, May 31, 2026 falls on a Sunday, so the May deposit lands Friday, May 29.</li>
+      </ul>
+
+      <h2>New retiree? Your first payment takes longer</h2>
+      <p>Your first benefit payment typically arrives one to two months after your retirement date while the board finalizes your calculation — and it's paid retroactively to your date of retirement. Your official amount is set by the retirement board; our <a href="/calculator">free pension calculator</a> gives you a close estimate ahead of time so you can plan the gap months.</p>
+
+      <h2>Check your payment details online</h2>
+      <p>MSRB retirees can view gross/net amounts, deductions, and payment history in the state's <strong>Retiree PayInfo</strong> portal (mass.gov). MTRS retirees can find the same schedule and pay information at mtrs.state.ma.us. If your deposit doesn't arrive on the scheduled date, contact your retirement board: MSRB at 617-367-7770, MTRS at 617-679-6877.</p>
+
+      <h2>Will your 2026 payments go up?</h2>
+      <p>Yes, if the annual COLA is approved: Massachusetts applies a 3% cost-of-living adjustment to the first $13,000 of your annual benefit (up to $390/year, about $32.50/month), effective with the July payment. See our <a href="/blog/massachusetts-cola-2026-complete-guide">complete 2026 COLA guide</a> for details.</p>
+
+      <h2>Plan beyond the pay dates</h2>
+      <p>Knowing when your pension arrives is step one — knowing whether it's enough is the real question. Run your numbers in the <a href="/calculator">Massachusetts pension calculator</a> (or the <a href="/teachers">MTRS teacher calculator</a>), then check what Social Security adds under the <a href="/blog/social-security-fairness-act-what-massachusetts-state-employees-need-to-know">Social Security Fairness Act</a>.</p>
+    `,
+    relatedPosts: [
+      "massachusetts-cola-2026-complete-guide",
+      "social-security-fairness-act-what-massachusetts-state-employees-need-to-know",
+      "retirement-planning-for-massachusetts-state-employees",
+    ],
+  },
+
+  {
     id: "ssfa-and-tax-bomb-tool-updates",
     title: "Major Updates to SSFA Auditor & Tax Bomb Defuser Tools",
     description:

@@ -3,7 +3,10 @@ import { blogPosts } from "@/lib/blog-data"
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://www.masspension.com"
-  const lastModified = new Date()
+  // Stable content-revision date for static pages. Bump this when static pages
+  // meaningfully change. Using a fixed date (rather than `new Date()`) keeps
+  // <lastmod> honest so search engines don't learn to ignore it.
+  const lastModified = new Date("2026-07-01")
 
   // Static high-priority pages
   const staticPages = [
@@ -30,6 +33,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified,
       changeFrequency: "monthly" as const,
       priority: 1.0,
+    },
+    {
+      url: `${baseUrl}/teachers`,
+      lastModified,
+      changeFrequency: "monthly" as const,
+      priority: 0.95,
     },
     {
       url: `${baseUrl}/wizard`,
@@ -167,6 +176,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly" as const,
       priority: 0.75,
     },
+    {
+      url: `${baseUrl}/resources/benefit-factors`,
+      lastModified,
+      changeFrequency: "monthly" as const,
+      priority: 0.8,
+    },
   ]
 
   // Blog index page
@@ -207,8 +222,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ]
 
-  // Dynamic blog posts - Try DB first, fallback to static
-  let blogPostUrls: MetadataRoute.Sitemap = []
+  // Blog posts: static posts are always included; DB posts are merged in
+  // (deduped by slug). Previously DB posts *replaced* the static list, which
+  // silently dropped any post that only exists in lib/blog-data.ts.
+  const blogPostUrls: MetadataRoute.Sitemap = blogPosts.map((post) => ({
+    url: `${baseUrl}/blog/${post.id}`,
+    lastModified: post.date ? new Date(post.date) : lastModified,
+    changeFrequency: "monthly" as const,
+    priority: 0.7,
+  }))
 
   try {
     // Dynamic import to avoid build-time static errors if DB not present
@@ -218,26 +240,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       select: { slug: true, publishedAt: true }
     })
 
-    if (dbPosts.length > 0) {
-      blogPostUrls = dbPosts.map((post) => ({
-        url: `${baseUrl}/blog/${post.slug}`,
-        lastModified: post.publishedAt || lastModified,
-        changeFrequency: "monthly" as const,
-        priority: 0.7,
-      }))
+    const staticIds = new Set(blogPosts.map((post) => post.id))
+    for (const post of dbPosts) {
+      if (!staticIds.has(post.slug)) {
+        blogPostUrls.push({
+          url: `${baseUrl}/blog/${post.slug}`,
+          lastModified: post.publishedAt || lastModified,
+          changeFrequency: "monthly" as const,
+          priority: 0.7,
+        })
+      }
     }
   } catch (e) {
-    console.warn("Sitemap: Failed to fetch from DB, using static fallback")
-  }
-
-  // Fallback to static if DB empty or failed
-  if (blogPostUrls.length === 0) {
-    blogPostUrls = blogPosts.map((post) => ({
-      url: `${baseUrl}/blog/${post.id}`,
-      lastModified: post.date ? new Date(post.date) : lastModified,
-      changeFrequency: "monthly" as const,
-      priority: 0.7,
-    }))
+    console.warn("Sitemap: DB unavailable, using static posts only")
   }
 
   return [...staticPages, ...resourcePages, ...blogPages, ...blogPostUrls, ...utilityPages]
