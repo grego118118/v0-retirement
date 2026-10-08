@@ -3,11 +3,15 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth/auth-config"
 import { addPremiumUser } from "@/lib/subscription-utils"
 import { prisma } from "@/lib/prisma"
+import { demoSubscriptionsEnabled } from "@/lib/demo-subscriptions"
 
 // Force dynamic rendering to prevent static generation issues with Prisma
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: Request) {
+  if (!demoSubscriptionsEnabled()) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 })
+  }
   try {
     const session = await getServerSession(authOptions)
     
@@ -65,4 +69,4 @@ export async function POST(request: Request) {
       { status: 500 }
     )
   }
-} 
+}

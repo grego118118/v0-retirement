@@ -1,3 +1,4 @@
+import { demoSubscriptionsEnabled } from '@/lib/demo-subscriptions'
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth/auth-config'
@@ -26,8 +27,7 @@ const safeToISOString = (date: Date | null | undefined): string | undefined => {
 // Fallback premium users for development (when Stripe is not configured)
 const FALLBACK_PREMIUM_USERS = [
   'premium@example.com',
-  'test@premium.com',
-  'grego118@gmail.com'
+  'test@premium.com'
 ]
 
 interface SubscriptionResponse {
@@ -182,9 +182,9 @@ function getDevelopmentSubscriptionData(userEmail: string, user: any, calculatio
   // 2. In-memory premium users store (for immediate demo access)
   // 3. Fallback premium users array (for development)
 
-  const inFallbackUsers = FALLBACK_PREMIUM_USERS.includes(userEmail)
+  const inFallbackUsers = demoSubscriptionsEnabled() && FALLBACK_PREMIUM_USERS.includes(userEmail)
   const inMemoryPremium = isPremiumUser(userEmail)
-  const dbSubscriptionActive = user?.subscriptionStatus === 'active'
+  const dbSubscriptionActive = ['active', 'trialing'].includes(user?.subscriptionStatus || '')
 
   const isPremium = dbSubscriptionActive || inMemoryPremium || inFallbackUsers
 

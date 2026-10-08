@@ -1,3 +1,4 @@
+import { demoSubscriptionsEnabled } from '@/lib/demo-subscriptions'
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth/auth-config"
@@ -89,6 +90,9 @@ export async function POST(request: Request) {
         isRealStripe: true
       })
     } else {
+      if (!demoSubscriptionsEnabled()) {
+        return NextResponse.json({ error: 'Checkout unavailable' }, { status: 503 })
+      }
       // Demo mode - redirect to demo checkout
       console.log(`⚠️ Stripe not configured, using demo checkout for ${userEmail}`)
 
