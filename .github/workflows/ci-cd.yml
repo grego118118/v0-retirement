@@ -36,6 +36,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Reject tracked credential files
+        run: node scripts/check-credential-files.cjs
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -44,6 +47,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
+
+      - name: Subscription security regression checks
+        run: npm run test:security
 
       - name: Setup test environment
         run: |

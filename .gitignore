@@ -8,11 +8,17 @@ dev-debug.log
 
 # Dependency directories
 node_modules/
+.npm-cache/
 
 # Next.js build output and cache
 .next/
 
 # Environment variables
+.1env*
+.[0-9]*env*
+env.local*
+*.env.temp
+*.env.local
 .env
 .env.local
 .env*.local

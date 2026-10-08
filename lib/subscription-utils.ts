@@ -1,3 +1,4 @@
+import { demoSubscriptionsEnabled } from '@/lib/demo-subscriptions'
 import { prisma } from '@/lib/prisma'
 import { StripeService } from '@/lib/stripe/service'
 import { isSubscriptionActive, getUserSubscriptionType, type UserSubscriptionType } from '@/lib/stripe/config'
@@ -6,8 +7,7 @@ import { isSubscriptionActive, getUserSubscriptionType, type UserSubscriptionTyp
 // In production, this would be in a database
 let premiumUsers = new Set<string>([
   'premium@example.com',
-  'test@premium.com',
-  'grego118@gmail.com' // Added the user's email manually to ensure premium access
+  'test@premium.com'
 ])
 
 // Simple in-memory store for canceled users (for demo)
@@ -16,12 +16,12 @@ let canceledUsers = new Set<string>()
 // Fallback premium users for development (when Stripe is not configured)
 const FALLBACK_PREMIUM_USERS = [
   'premium@example.com',
-  'test@premium.com',
-  'grego118@gmail.com'
+  'test@premium.com'
 ]
 
 // Function to add a user to premium (used by checkout)
 export function addPremiumUser(email: string) {
+  if (!demoSubscriptionsEnabled()) return
   console.log('Adding premium user:', email)
   premiumUsers.add(email)
   // Remove from canceled list if they were previously canceled
@@ -31,6 +31,7 @@ export function addPremiumUser(email: string) {
 
 // Function to remove a user from premium (used by cancellation)
 export function removePremiumUser(email: string) {
+  if (!demoSubscriptionsEnabled()) return
   console.log('Removing premium user:', email)
   premiumUsers.delete(email)
   canceledUsers.add(email)
@@ -40,6 +41,7 @@ export function removePremiumUser(email: string) {
 
 // Function to check if user is premium
 export function isPremiumUser(email: string) {
+  if (!demoSubscriptionsEnabled()) return false
   const isUserPremium = premiumUsers.has(email) && !canceledUsers.has(email)
   console.log(`Checking if ${email} is premium:`, isUserPremium)
   console.log('All premium users:', Array.from(premiumUsers))
@@ -117,9 +119,9 @@ export async function getUserSubscriptionInfo(userEmail: string): Promise<{
       // 1. Database subscription status (most authoritative)
       // 2. In-memory premium users store (for immediate demo access)
       // 3. Fallback premium users array (for development)
-      const inFallbackUsers = FALLBACK_PREMIUM_USERS.includes(userEmail)
+      const inFallbackUsers = demoSubscriptionsEnabled() && FALLBACK_PREMIUM_USERS.includes(userEmail)
       const inMemoryPremium = isPremiumUser(userEmail)
-      const dbSubscriptionActive = user?.subscriptionStatus === 'active'
+      const dbSubscriptionActive = ['active', 'trialing'].includes(user?.subscriptionStatus || '')
 
       const isPremium = dbSubscriptionActive || inMemoryPremium || inFallbackUsers
 
