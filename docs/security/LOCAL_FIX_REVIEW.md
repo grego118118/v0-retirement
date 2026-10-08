@@ -24,11 +24,19 @@ changes, cancellation fallback regression, or unrelated regex changes.
   the idempotent period-end update.
 - Read subscription period dates from Stripe Basil subscription items, with a
   fallback for older responses, preserving valid access-end dates.
+- Update Next.js from the locked 15.5.22 to 15.5.27 after the first PR CI run
+  identified critical dependency advisories. This stays on the Next.js 15 line.
 
 ## Verification
 
 Final checks: 20 offline regression checks passed; credential filename check
 passed; `npm run type-check` passed; staged `git diff --check` passed.
+
+The initial published commit passed GitHub's complete test and quality job and
+the Vercel preview build. Its dependency audit failed with critical Next.js
+findings; the compatible patch above addresses that failure. Other noncritical
+dependency findings still need a separate dependency-remediation review. No audit
+threshold was relaxed.
 
 `node scripts/test-subscription-security.cjs` runs offline with mocked authentication,
 database and Stripe dependencies. It tests blocked runtime/demo combinations,
